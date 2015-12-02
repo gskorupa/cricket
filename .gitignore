@@ -10,3 +10,9 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+/nbproject/jdk.xml
+/nbproject/nbjdk.xml
+/nbproject/project.xml
+/nbproject/nbjdk.properties
+/build/web/WEB-INF/classes/SimpleService.properties
+/nbproject/genfiles.properties

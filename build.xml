@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Cricket" default="all" basedir=".">
+    <description>Builds, tests, and runs the project MssTemplate2.</description>
+    <target name="all" depends="init,jar">
+        <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
+    </target>
+    <!-- set global properties for this build -->
+    <property name="src" location="src/java"/>
+    <property name="build" location="build/web/WEB-INF/classes"/>
+    <property name="dist" location="dist"/>
+    <property name="web" location="web"/>
+    <property name="lib" location="lib"/>   
+    <property name="tomcat-home" value="/home/greg/apache-tomcat-8.0.27" />
+
+    <path id="project-classpath">
+        <pathelement location="${lib}/gson-2.3.1.jar"/>
+        <fileset dir="${tomcat-home}/bin" includes="*.jar" />
+        <fileset dir="${tomcat-home}/lib" includes="*.jar" />
+    </path>
+
+    <target name="init">
+        <!-- Create the time stamp -->
+        <tstamp/>
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build}"/>
+    </target>
+
+    <target name="compile" depends="init" description="compile the source">
+        <!-- Compile the java code from ${src} into ${build} -->
+        <javac 
+            target="1.7" 
+            source="1.7" 
+            srcdir="${src}" 
+            destdir="${build}"
+            includeantruntime="false" 
+            classpathref="project-classpath">
+            <compilerarg value="-Xlint:-options"/>          
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile"
+            description="generate the distribution">
+        <!-- Create the distribution directory -->
+        <mkdir dir="${dist}"/>
+        <antcall inheritall="true" target="jar"/>
+    </target>
+
+    <target name="clean" description="clean up">
+        <!-- Delete the ${build} and ${dist} directory trees -->
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+    
+    <target name="jar" depends="compile">
+        <copy todir="${build}" overwrite="true">
+            <fileset dir="${src}" includes="*.properties">
+            </fileset>
+        </copy>
+        <jar basedir="${build}" 
+             includes="*/**" 
+             excludes=".netbeans*"
+             destfile="dist/Cricket.jar">
+            <manifest>
+                <attribute name="Main-Class" value="com.gskorupa.cricket.example.SimpleService"/>
+            </manifest>
+        </jar>
+    </target>
+</project>
