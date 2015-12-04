@@ -22,7 +22,7 @@ import java.util.Properties;
  *
  * @author greg
  */
-public class SimpleStorageStandard implements SimpleStorage, Adapter{
+public class SimpleStorageStandard implements SimpleStorageIface, Adapter{
     
     String myParam1=null;
     
@@ -31,7 +31,7 @@ public class SimpleStorageStandard implements SimpleStorage, Adapter{
     }
     
     public void loadProperties(Properties properties){
-        myParam1=properties.getProperty("SimpleStorage-param1");
+        myParam1=properties.getProperty("SimpleStorageIface-param1");
         System.out.println("param1="+myParam1);
     }
     

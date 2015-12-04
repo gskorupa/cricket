@@ -16,14 +16,18 @@
 package com.gskorupa.cricket;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class RequestObject {
-
-    public ArrayList<RequestArgument> arguments = new ArrayList();
-    public ArrayList<RequestParameter> parameters = new ArrayList();
+    
+    public String method=null;
+    public String pathExt=null;
+    public ArrayList<RequestHeader> headers = new ArrayList();
+    public Map<String, Object> parameters = new HashMap();
 
 }

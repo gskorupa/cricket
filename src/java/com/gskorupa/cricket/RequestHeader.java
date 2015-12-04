@@ -13,15 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket.example;
+package com.gskorupa.cricket;
 
 /**
  *
- * @author grzesk
+ * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public interface SimpleLogger {
-    
-    public void log(String level, int errorCode, Object c);
-    public void log(String level, int errorCode, Object c, String message);
-    
+public class RequestHeader {
+    public String name=null;
+    public String value=null;
 }

@@ -22,6 +22,11 @@ package com.gskorupa.cricket.example;
 public class SimpleData {
     private String param1;
     private String param2;
+    
+    public SimpleData(String param1, String param2){
+        this.param1=param1;
+        this.param2=param2;
+    }
 
     /**
      * @return the param1
@@ -49,5 +54,9 @@ public class SimpleData {
      */
     public void setParam2(String param2) {
         this.param2 = param2;
+    }
+    
+    public String toString(){
+        return param1+" "+param2;
     }
 }

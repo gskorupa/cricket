@@ -53,4 +53,8 @@ public class SimpleResult implements Result {
         this.data = (SimpleData)data;
     }
     
+    public String toString(){
+        return ""+getCode()+" "+getData().toString();
+    }
+    
 }

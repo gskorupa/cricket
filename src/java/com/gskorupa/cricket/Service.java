@@ -50,10 +50,10 @@ public abstract class Service {
 
     public abstract void getAdapters();
 
-    
-    public static Service getInstance(){
-        return (Service)instance;
+    public static Service getInstance() {
+        return (Service) instance;
     }
+
     /*
     public void setInstance(Object instance){
         this.instance=instance;
@@ -126,26 +126,34 @@ public abstract class Service {
     private void loadAdapters(Properties props, Object[] fields, Class[] adapters) throws Exception {
         setHttpHandlerLoaded(false);
         System.out.println("LOADING ADAPTERS");
-        for (int i = 0; i < adapters.length; i++) {
-            System.out.println("ADAPTER: " + adapters[i].getSimpleName());
-            Class c = Class.forName(props.getProperty(adapters[i].getSimpleName()));
-            if (adapters[i].isAssignableFrom(c)) {
-                fields[i] = adapters[i].cast(c.newInstance());
-                if (fields[i] instanceof com.sun.net.httpserver.HttpHandler) {
-                    setHttpHandlerLoaded(true);
-                }
-                java.lang.reflect.Method method = fields[i].getClass().getMethod("loadProperties", Properties.class);
-                method.invoke(fields[i], props);
-                System.out.println("LOADED");
-            } else {
-                logger.severe("Adapters initialization error. Configuration for: " + adapters[i].getSimpleName());
-            }
-        }
         setHost(props.getProperty("http-host"));
         try {
             setPort(Integer.parseInt(props.getProperty("http-port")));
         } catch (Exception e) {
         }
+        String adapterInterfaceName = null;
+        try {
+            for (int i = 0; i < adapters.length; i++) {
+                adapterInterfaceName = adapters[i].getSimpleName();
+                System.out.println("ADAPTER: " + adapterInterfaceName);
+                Class c = Class.forName(props.getProperty(adapterInterfaceName));
+                if (adapters[i].isAssignableFrom(c)) {
+                    fields[i] = adapters[i].cast(c.newInstance());
+                    if (fields[i] instanceof com.sun.net.httpserver.HttpHandler) {
+                        setHttpHandlerLoaded(true);
+                    }
+                    java.lang.reflect.Method method = fields[i].getClass().getMethod("loadProperties", Properties.class);
+                    method.invoke(fields[i], props);
+                    System.out.println("LOADED");
+                } else {
+                    logger.severe("Adapters initialization error. Configuration for: " + adapterInterfaceName);
+                }
+            }
+        } catch (Exception e) {
+            logger.severe("Adapters initialization error. Configuration for: " + adapterInterfaceName);
+            throw new Exception(e);
+        }
+
     }
 
     /**

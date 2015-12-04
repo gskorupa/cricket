@@ -16,11 +16,12 @@
 package com.gskorupa.cricket.example;
 
 import com.gskorupa.cricket.AdapterHook;
-import java.util.logging.Logger;
+import com.gskorupa.cricket.HttpAdapter;
 import com.gskorupa.cricket.Httpd;
+import java.util.logging.Logger;
 import com.gskorupa.cricket.RequestObject;
-import com.gskorupa.cricket.RequestParameter;
 import com.gskorupa.cricket.Service;
+import java.util.Map;
 
 /**
  * SimpleService
@@ -33,9 +34,9 @@ public class SimpleService extends Service {
     private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.example.SimpleService.class.getName());
 
     // adapters
-    SimpleStorage storage = null;
-    SimpleLogger log = null;
-    SimpleHttpAdapter handler = null;
+    SimpleStorageIface storage = null;
+    SimpleLoggerIface log = null;
+    SimpleHttpAdapterIface handler = null;
 
     public SimpleService() {
 
@@ -44,45 +45,30 @@ public class SimpleService extends Service {
         fields[1] = log;
         fields[2] = handler;
         adapters = new Class[3];
-        adapters[0] = SimpleStorage.class;
-        adapters[1] = SimpleLogger.class;
-        adapters[2] = SimpleHttpAdapter.class;
-        //super.fields=fields;
-        //super.adapters=adapters;
+        adapters[0] = SimpleStorageIface.class;
+        adapters[1] = SimpleLoggerIface.class;
+        adapters[2] = SimpleHttpAdapterIface.class;
 
     }
 
     public void getAdapters() {
-        storage = (SimpleStorage) super.fields[0];
-        log = (SimpleLogger) super.fields[1];
-        handler = (SimpleHttpAdapter) super.fields[2];
+        storage = (SimpleStorageIface) super.fields[0];
+        log = (SimpleLoggerIface) super.fields[1];
+        handler = (SimpleHttpAdapterIface) super.fields[2];
     }
 
-    /*
-    // abstract Service.getInstance ?
-    @Override
-    public SimpleService getInstance(){
-        return (SimpleService)super.getInstance();
-    }
-    
-    // abstract ... ?
-    @Override
-    public void setInstance(Object instance){
-        super.setInstance((SimpleService)instance);
-    }
-     */
     public SimpleResult getData() {
         storage.storeData();
         SimpleResult r = new SimpleResult();
         r.setCode(0);
-        r.setData(new SimpleData());
+        r.setData(new SimpleData("", ""));
         return r;
     }
 
     //TODO: jak sprawdzić na poziomie builda, że mamy zdublowane kody błedów
     public SimpleResult doSomething(String parameter) {
         log.log("INFO", 0, this, "hello from main");
-        SimpleData data = new SimpleData();
+        SimpleData data = new SimpleData("", "");
         SimpleResult r = new SimpleResult();
         data.setParam1(parameter);
         if (false) {
@@ -93,23 +79,41 @@ public class SimpleService extends Service {
         r.setData(data);
         return r;
     }
-    
-    @AdapterHook(handlerClassName="SimpleHttpAdapter")
-    public Object sayHello(RequestObject request){
-        String name="";
-        for(RequestParameter p: request.parameters){
-            if(p.name.equals("name")){
-                name=p.value;
+
+    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface")
+    public Object sayHello(RequestObject request) {
+        String name = "";
+        String surname = "";
+        System.out.println(this.getClass().getName());
+        System.out.println(request.method);
+        System.out.println(request.pathExt);
+        Map<String, Object> map = request.parameters;
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            System.out.println(entry.getKey() + "=" + entry.getValue());
+            if (entry.getKey().equalsIgnoreCase("name")) {
+                name = (String) entry.getValue();
+            }
+            if (entry.getKey().equalsIgnoreCase("surname")) {
+                surname = (String) entry.getValue();
             }
         }
-        return "Hello "+name+" from the service hook method";
+        SimpleResult r = new SimpleResult();
+        if ("error".equalsIgnoreCase(surname)) {
+            r.setCode(500);
+            r.setData(new SimpleData("error", "error forced by request"));
+        } else {
+            r.setCode(0);
+            r.setData(new SimpleData(name, surname));
+        }
+        //"Hello "+name+" from the service hook method";
+        return r;
     }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
+
         try {
             final SimpleService service;
             if (args.length > 0) {
@@ -118,11 +122,7 @@ public class SimpleService extends Service {
             } else {
                 service = (SimpleService) SimpleService.getInstanceUsingResources(SimpleService.class);
                 service.getAdapters();
-            }
-
-            SimpleResult r = service.doSomething("hello");
-            System.out.println(((SimpleData) r.getData()).getParam1());
-
+            }   
             if (service.isHttpHandlerLoaded()) {
                 System.out.println("Starting http server ...");
                 Runtime.getRuntime().addShutdownHook(
@@ -131,22 +131,23 @@ public class SimpleService extends Service {
                     public void run() {
                         try {
                             Thread.sleep(200);
-                            //some cleaning up code...
+                            //some cleaning up code could be added here ... if required
                             System.out.println("\nShutdown ...");
                             service.getHttpd().server.stop(MIN_PRIORITY);
                         } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
                             e.printStackTrace();
                         }
                     }
                 });
-
                 service.setHttpd(new Httpd(service));
                 service.getHttpd().run();
                 System.out.println("Started. Press Ctrl-C to stop");
                 while (true) {
                     Thread.sleep(100);
                 }
+            } else {
+                SimpleResult r = service.doSomething("hello");
+                System.out.println(((SimpleData) r.getData()).getParam1());
             }
         } catch (Exception e) {
             e.printStackTrace();

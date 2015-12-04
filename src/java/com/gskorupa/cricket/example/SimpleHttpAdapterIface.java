@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket;
+package com.gskorupa.cricket.example;
 
-import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 
@@ -23,18 +22,9 @@ import java.io.IOException;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class JsonFilter extends Filter{
+public interface SimpleHttpAdapterIface{
     
-    public String description(){
-        return "JsonFilter";
-    }
-    
-    public void doFilter(HttpExchange exchange, Filter.Chain chain)
-                       throws IOException{
-        Result r=(Result)exchange.getAttribute("resultObject");
-        //modify and write to response
-        exchange.getResponseBody().write(("modified "+r.toString()).getBytes());
-        chain.doFilter(exchange);
-    }
+    // IMPORTANT !!!
+    public void handle(HttpExchange exchange) throws IOException;
     
 }

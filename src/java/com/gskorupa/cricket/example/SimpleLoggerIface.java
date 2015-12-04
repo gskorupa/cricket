@@ -17,11 +17,11 @@ package com.gskorupa.cricket.example;
 
 /**
  *
- * @author greg
+ * @author grzesk
  */
-public interface SimpleStorage {
+public interface SimpleLoggerIface {
     
-    public void storeData();
+    public void log(String level, int errorCode, Object c);
+    public void log(String level, int errorCode, Object c, String message);
     
-    //public void loadProperties(Properties properties);
 }

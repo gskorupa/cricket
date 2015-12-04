@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket;
+package com.gskorupa.cricket.example;
 
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author greg
  */
-public class RequestArgument {
-    public String name=null;
-    public String value=null;
+public interface SimpleStorageIface {
+    
+    public void storeData();
+    
+    //public void loadProperties(Properties properties);
 }

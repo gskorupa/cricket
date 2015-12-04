@@ -26,7 +26,7 @@ import com.sun.net.httpserver.HttpHandler;
  *
  * @author grzesk
  */
-public class SimpleLoggerStandard implements SimpleLogger, Adapter {
+public class SimpleLoggerStandard implements SimpleLoggerIface, Adapter {
 
     private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.example.SimpleLoggerStandard.class.getName());
 
