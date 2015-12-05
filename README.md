@@ -15,7 +15,7 @@ Compile and build distribution package (Cricket.jar) with command:
 
 Run example service:
 
-`java -jar Cricket.jar`
+`java -jar cricket-1.0.0.jar --run`
 
 The http interface should be available at http://localhost:8080/
 
