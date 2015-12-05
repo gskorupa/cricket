@@ -16,11 +16,13 @@
 package com.gskorupa.cricket.example;
 
 import com.gskorupa.cricket.AdapterHook;
+import com.gskorupa.cricket.ArgumentParser;
 import com.gskorupa.cricket.HttpAdapter;
 import com.gskorupa.cricket.Httpd;
 import java.util.logging.Logger;
 import com.gskorupa.cricket.RequestObject;
 import com.gskorupa.cricket.Service;
+import static java.lang.Thread.MIN_PRIORITY;
 import java.util.Map;
 
 /**
@@ -114,41 +116,63 @@ public class SimpleService extends Service {
      */
     public static void main(String[] args) {
 
-        try {
-            final SimpleService service;
-            if (args.length > 0) {
-                service = (SimpleService) SimpleService.getInstance(SimpleService.class, args[0]);
-                service.getAdapters();
-            } else {
-                service = (SimpleService) SimpleService.getInstanceUsingResources(SimpleService.class);
-                service.getAdapters();
-            }   
-            if (service.isHttpHandlerLoaded()) {
-                System.out.println("Starting http server ...");
-                Runtime.getRuntime().addShutdownHook(
-                        new Thread() {
+        final SimpleService service;
+        Map<String, String> arguments = ArgumentParser.getArguments(args);
 
-                    public void run() {
-                        try {
-                            Thread.sleep(200);
-                            //some cleaning up code could be added here ... if required
-                            System.out.println("\nShutdown ...");
-                            service.getHttpd().server.stop(MIN_PRIORITY);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+        if (arguments.containsKey("error")) {
+            System.out.println(arguments.get("error"));
+            System.exit(-1);
+        }
+        if (arguments.containsKey("help")) {
+            SimpleService s=new SimpleService(); //creating instance this way is valid only for displaing help!
+            System.out.println(s.getHelp());
+            System.exit(-1);
+        }
+
+        try {
+            
+            if (arguments.containsKey("config")) {
+                
+                service = (SimpleService) SimpleService.getInstance(SimpleService.class, arguments.get("config"));
+            } else {
+                service = (SimpleService) SimpleService.getInstanceUsingResources(SimpleService.class);    
+            }
+            service.getAdapters();
+
+            if (arguments.containsKey("run")) {
+                if (service.isHttpHandlerLoaded()) {
+                    System.out.println("Starting http server ...");
+                    Runtime.getRuntime().addShutdownHook(
+                            new Thread() {
+
+                        public void run() {
+                            try {
+                                Thread.sleep(200);
+                                //some cleaning up code could be added here ... if required
+                                System.out.println("\nShutdown ...");
+                                service.getHttpd().server.stop(MIN_PRIORITY);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
+                    });
+                    service.setHttpd(new Httpd(service));
+                    service.getHttpd().run();
+                    System.out.println("Started. Press Ctrl-C to stop");
+                    while (true) {
+                        Thread.sleep(100);
                     }
-                });
-                service.setHttpd(new Httpd(service));
-                service.getHttpd().run();
-                System.out.println("Started. Press Ctrl-C to stop");
-                while (true) {
-                    Thread.sleep(100);
+                } else {
+                    System.out.println("Couldn't find any http request hook method. Exiting ...");
+                    System.exit(MIN_PRIORITY);
                 }
             } else {
+                //execute selected adapter
+                //todo - clean this or add commandline option
                 SimpleResult r = service.doSomething("hello");
                 System.out.println(((SimpleData) r.getData()).getParam1());
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -74,27 +74,27 @@ public abstract class HttpAdapter implements Adapter, HttpHandler {
             h.set("Content-Type","text/plain; charset=UTF-8");
         }
         */
-        Result response = createResponse(exchange);
+        Result result = createResponse(exchange);
         
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         String stringResponse;
         if (useJson) {
             headers.set("Content-Type","application/json; charset=UTF-8");
-            stringResponse=JsonFormatter.getInstance().format(true, response);
+            stringResponse=JsonFormatter.getInstance().format(true, result);
         } else {
-            headers.set("Content-Type","text/plain; charset=UTF-8");
-            stringResponse = response.toString();
+            headers.set("Content-Type","text/csv; charset=UTF-8");
+            stringResponse = result.toString();
         }
 
         //calculate error code from response object
         int errCode=200;
-        switch(response.getCode()){
+        switch(result.getCode()){
             case 0:
                 errCode=200;
                 break;
             default:
-                errCode=response.getCode();
+                errCode=result.getCode();
                 break;
         }
         
@@ -125,10 +125,10 @@ public abstract class HttpAdapter implements Adapter, HttpHandler {
         requestObject.parameters=parameters;
         requestObject.pathExt=pathExt;
 
-        Result response = null;
+        Result result = null;
         try {
             Method m = Service.getInstance().getClass().getMethod(getHookMethodName(), RequestObject.class);
-            response = (Result) m.invoke(Service.getInstance(), requestObject);
+            result = (Result) m.invoke(Service.getInstance(), requestObject);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException o) {
@@ -136,7 +136,7 @@ public abstract class HttpAdapter implements Adapter, HttpHandler {
         } catch (NoSuchMethodException x) {
             x.printStackTrace();
         }
-        return response;
+        return result;
     }
 
     /**

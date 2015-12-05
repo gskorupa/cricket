@@ -54,7 +54,17 @@ public class SimpleResult implements Result {
     }
     
     public String toString(){
-        return ""+getCode()+" "+getData().toString();
+        StringBuilder sb=new StringBuilder();
+        if(getCode()>0){
+            sb.append("error=");
+            sb.append(getCode());
+            sb.append("\r\n");
+            sb.append(getData().toString());
+        }else{
+            sb.append(getData().toString());
+        }
+        sb.append("\r\n");
+        return sb.toString();
     }
     
 }

@@ -35,4 +35,14 @@ public class JsonFormatter {
         }
         return gson.toJson(o);
     }
+    
+    /*public String format(boolean prettyPrint, Object o){
+        String result="";
+        try{
+            result=JSON.std.with(JSON.Feature.PRETTY_PRINT_OUTPUT).asString(o);
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        return result;
+    }*/
 }

@@ -17,3 +17,4 @@ hs_err_pid*
 /build/web/WEB-INF/classes/SimpleService.properties
 /nbproject/genfiles.properties
 /nbproject/private/
+/build/web/WEB-INF/classes/help.txt

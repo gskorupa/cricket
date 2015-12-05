@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Cricket" default="all" basedir=".">
-    <description>Builds, tests, and runs the project MssTemplate2.</description>
+<project name="MyMiscroservice" default="all" basedir=".">
+    <description>Builds, tests, and runs the project MyMicroservice.</description>
     <target name="all" depends="init,jar">
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
     <property name="src" location="src/java"/>
-    <property name="build" location="build/web/WEB-INF/classes"/>
+    <property name="build" location="build"/>
     <property name="dist" location="dist"/>
-    <property name="web" location="web"/>
-    <property name="lib" location="lib"/>
-    <property name="jar-name" value="cricket-1.0.0.jar"/>
-    <property name="standalone-lib" location="templates/standalone/lib"/>
+    <property name="lib" location="lib"/>   
     <property name="tomcat-home" value="/home/greg/apache-tomcat-8.0.27" />
 
     <path id="project-classpath">
-        <pathelement location="${lib}/gson-2.5.jar"/>
-        <pathelement location="${lib}/jackson-jr-objects-2.6.3.jar"/>
+        <pathelement location="${lib}/cricket-1.0.0.jar"/>
         <fileset dir="${tomcat-home}/bin" includes="*.jar" />
         <fileset dir="${tomcat-home}/lib" includes="*.jar" />
     </path>
@@ -46,7 +42,6 @@
         <!-- Create the distribution directory -->
         <mkdir dir="${dist}"/>
         <antcall inheritall="true" target="jar"/>
-        <copy file="${dist}/${jar-name}" todir="${standalone-lib}" overwrite="true"/>
     </target>
 
     <target name="clean" description="clean up">
@@ -57,16 +52,16 @@
     
     <target name="jar" depends="compile">
         <copy todir="${build}" overwrite="true">
-            <fileset dir="${src}" includes="*.properties"/>
-            <fileset dir="${src}" includes="*.txt"/>
+            <fileset dir="${src}" includes="*.properties">
+            </fileset>
         </copy>
         <jar  
-             destfile="${dist}/${jar-name}">
+             destfile="dist/mymicroservice.jar">
             <manifest>
                 <attribute name="Main-Class" value="com.gskorupa.cricket.example.SimpleService"/>
             </manifest>
             <fileset dir="${build}"/>
-            <zipfileset src="${lib}/gson-2.5.jar" includes="com/**/*"/>
+            <zipfileset src="lib/cricket-1.0.0.jar" includes="**/*"/>
         </jar>
     </target>
 </project>

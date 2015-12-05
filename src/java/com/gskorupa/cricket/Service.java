@@ -15,12 +15,17 @@
  */
 package com.gskorupa.cricket;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Logger;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * SimpleService
@@ -210,6 +215,25 @@ public abstract class Service {
      */
     public void setHttpHandlerLoaded(boolean httpHandlerLoaded) {
         this.httpHandlerLoaded = httpHandlerLoaded;
+    }
+
+    public String getHelp() {
+        String content = "Help file not found";
+        try {
+            BufferedReader reader = 
+                    new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/help.txt")));
+            StringBuilder out = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                out.append(line);
+                out.append("\r\n");
+            }
+            content=out.toString();
+            reader.close();
+        } catch (IOException e) {
+            //e.printStackTrace();
+        }
+        return content;
     }
 
 }

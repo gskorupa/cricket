@@ -1,0 +1,8 @@
+Cricket
+
+java -jar cricket.jar [options]
+
+options:
+--help, -h displays help
+--run [class_name] run selected service with embeded http server
+--config, -c [path_to_file] load config from file
