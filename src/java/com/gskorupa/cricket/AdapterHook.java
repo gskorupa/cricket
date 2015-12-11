@@ -30,4 +30,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface AdapterHook {
     public String handlerClassName();
+    public String requestMethod();
 }

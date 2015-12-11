@@ -17,9 +17,7 @@ package com.gskorupa.cricket.example;
 
 import com.gskorupa.cricket.Adapter;
 import com.gskorupa.cricket.HttpAdapter;
-import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import java.io.IOException;
 import java.util.Properties;
 
 /**
@@ -31,31 +29,7 @@ public class SimpleHttpAdapter extends HttpAdapter implements SimpleHttpAdapterI
     public void loadProperties(Properties properties) {
         setContext(properties.getProperty("SimpleHttpAdapterIface-context"));
         System.out.println("context=" + getContext());
-        getServiceHook();
-        System.out.println("service hook name: " + getHookMethodName());
+        getServiceHooks(); 
     }
-    
-    /*
-    String context;
-    String hookMethodName = null;
-
-    public void loadProperties(Properties properties) {
-        context = properties.getProperty("SimpleHttpAdapterIface-context");
-        System.out.println("context=" + context);
-        super.getServiceHook();
-        hookMethodName=super.getHookMethodName();
-        //context=super.getContext();
-        System.out.println("service hook name: " + hookMethodName);
-    }
-
-    // 
-    public void handle(HttpExchange exchange) throws IOException {
-        super.handle(exchange);
-    }
-    
-    public String getContext(){
-        return context;
-    }
-*/
     
 }

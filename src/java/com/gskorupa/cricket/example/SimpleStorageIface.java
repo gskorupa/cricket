@@ -23,5 +23,4 @@ public interface SimpleStorageIface {
     
     public void storeData();
     
-    //public void loadProperties(Properties properties);
 }

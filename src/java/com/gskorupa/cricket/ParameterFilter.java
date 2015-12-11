@@ -44,25 +44,17 @@ public class ParameterFilter extends Filter {
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
         String method=exchange.getRequestMethod().toUpperCase();
-        if("GET".equals(method)){
-            parseGetParameters(exchange);
-        }else if("POST".equals(method)){
-            parsePostParameters(exchange);
-        }
-        /*
+
         switch (exchange.getRequestMethod().toUpperCase()) {
             case "GET":
                 parseGetParameters(exchange);
                 break;
             case "POST":
-                parsePostParameters(exchange);
-                break;
             case "PUT":
             case "DELETE":
                 parsePostParameters(exchange);
                 break;
         }
-        */
         chain.doFilter(exchange);
     }
 
@@ -80,7 +72,6 @@ public class ParameterFilter extends Filter {
             throws IOException {
 
         @SuppressWarnings("unchecked")
-        /*Map<String, Object> parameters= (Map<String, Object>) exchange.getAttribute("parameters");*/
         Map<String, Object> parameters = new HashMap<String, Object>();
         InputStreamReader isr
                 = new InputStreamReader(exchange.getRequestBody(), "utf-8");

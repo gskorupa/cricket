@@ -23,6 +23,8 @@ import java.util.logging.Logger;
 import com.gskorupa.cricket.RequestObject;
 import com.gskorupa.cricket.Service;
 import static java.lang.Thread.MIN_PRIORITY;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -82,7 +84,7 @@ public class SimpleService extends Service {
         return r;
     }
 
-    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface")
+    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "POST")
     public Object sayHello(RequestObject request) {
         String name = "";
         String surname = "";
@@ -101,13 +103,26 @@ public class SimpleService extends Service {
         }
         SimpleResult r = new SimpleResult();
         if ("error".equalsIgnoreCase(surname)) {
-            r.setCode(500);
+            r.setCode(HttpAdapter.SC_INTERNAL_SERVER_ERROR);
             r.setData(new SimpleData("error", "error forced by request"));
         } else {
-            r.setCode(0);
+            r.setCode(HttpAdapter.SC_OK);
             r.setData(new SimpleData(name, surname));
         }
-        //"Hello "+name+" from the service hook method";
+        return r;
+    }
+    
+    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "GET")
+    public Object getTime(RequestObject request) {
+        String surname=(String)request.parameters.get("surname");
+        SimpleResult r = new SimpleResult();
+        if ("error".equalsIgnoreCase(surname)) {
+            r.setCode(HttpAdapter.SC_BAD_REQUEST);
+            r.setData(new SimpleData("error", "error forced by request"));
+        } else {
+            r.setCode(HttpAdapter.SC_OK);
+            r.setData(new SimpleData("time", SimpleDateFormat.getDateTimeInstance().format(new Date())));
+        }
         return r;
     }
 

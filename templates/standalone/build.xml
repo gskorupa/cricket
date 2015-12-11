@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="MyMiscroservice" default="all" basedir=".">
-    <description>Builds, tests, and runs the project MyMicroservice.</description>
+<project name="bookshelf" default="all" basedir=".">
+    <description></description>
+    
     <target name="all" depends="init,jar">
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
+    <property name="jar-name" value="bookshelf"/>
+    <property name="version" value="1.0.0"/>
+    
     <property name="src" location="src/java"/>
-    <property name="build" location="build"/>
+    <property name="build" location="build/web/WEB-INF/classes"/>
     <property name="dist" location="dist"/>
-    <property name="lib" location="lib"/>   
+    <property name="web" location="web"/>
+    <property name="lib" location="lib"/>
     <property name="tomcat-home" value="/home/greg/apache-tomcat-8.0.27" />
 
     <path id="project-classpath">
@@ -45,23 +50,22 @@
     </target>
 
     <target name="clean" description="clean up">
-        <!-- Delete the ${build} and ${dist} directory trees -->
         <delete dir="${build}"/>
         <delete dir="${dist}"/>
     </target>
     
     <target name="jar" depends="compile">
         <copy todir="${build}" overwrite="true">
-            <fileset dir="${src}" includes="*.properties">
-            </fileset>
+            <fileset dir="${src}" includes="*.properties"/>
+            <fileset dir="${src}" includes="*.txt"/>
         </copy>
         <jar  
-             destfile="dist/mymicroservice.jar">
+             destfile="${dist}/${jar-name}-${version}.jar">
             <manifest>
-                <attribute name="Main-Class" value="com.gskorupa.cricket.example.SimpleService"/>
+                <attribute name="Main-Class" value="com.mycompany.bookshelf.BookshelfService"/>
             </manifest>
             <fileset dir="${build}"/>
-            <zipfileset src="lib/cricket-1.0.0.jar" includes="**/*"/>
+            <zipfileset src="${lib}/cricket-1.0.0.jar" includes="**/*"/>
         </jar>
     </target>
 </project>

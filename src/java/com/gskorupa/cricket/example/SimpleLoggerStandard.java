@@ -16,11 +16,9 @@
 package com.gskorupa.cricket.example;
 
 import com.gskorupa.cricket.Adapter;
-import com.sun.net.httpserver.HttpExchange;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import com.sun.net.httpserver.HttpHandler;
 
 /**
  *

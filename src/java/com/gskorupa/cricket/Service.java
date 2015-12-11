@@ -23,9 +23,6 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * SimpleService
@@ -86,8 +83,6 @@ public abstract class Service {
         }
         try {
             instance = c.getClass().newInstance();
-            //((Service)instance).setAdapters();
-            //((Service)instance).loadAdapters(props, ((Service)instance).fields, ((Service)instance).adapters);
             ((Service) instance).loadAdapters(props, fields, adapters);
         } catch (Exception e) {
             instance = null;
@@ -103,9 +98,7 @@ public abstract class Service {
         }
         try {
             instance = c.newInstance();
-            //((Service)instance).setAdapters();
             Properties props = ((Service) instance).getProperties(c.getSimpleName());
-            //((Service)instance).loadAdapters(props, ((Service)instance).fields, ((Service)instance).adapters);
             ((Service) instance).loadAdapters(props, fields, adapters);
         } catch (Exception e) {
             e.printStackTrace();
@@ -219,21 +212,31 @@ public abstract class Service {
 
     public String getHelp() {
         String content = "Help file not found";
-        try {
-            BufferedReader reader = 
-                    new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/help.txt")));
-            StringBuilder out = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                out.append(line);
-                out.append("\r\n");
+        try{
+            content=readHelpFile("/localhelp.txt");
+        }catch(Exception e){
+            try{
+                content=readHelpFile("/help.txt");
+            }catch(Exception x){
+                e.printStackTrace();
             }
-            content=out.toString();
-            reader.close();
-        } catch (IOException e) {
-            //e.printStackTrace();
         }
         return content;
     }
 
+    public String readHelpFile(String fileName) throws Exception {
+        String content = null;
+        BufferedReader reader
+                = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(fileName)));
+        StringBuilder out = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            out.append(line);
+            out.append("\r\n");
+        }
+        content = out.toString();
+        reader.close();
+        return content;
+    }
+    
 }

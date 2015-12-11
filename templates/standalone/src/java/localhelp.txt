@@ -1,6 +1,6 @@
-Cricket
+Bookshelf
 
-java -jar cricket-1.0.0.jar [options]
+java -jar bookshelf-1.0.0.jar [options]
 
 options:
 --help, -h displays help
