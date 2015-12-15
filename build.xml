@@ -12,7 +12,7 @@
     <property name="lib" location="lib"/>
     <property name="jar-name" value="cricket-1.0.0.jar"/>
     <property name="standalone-lib" location="templates/standalone/lib"/>
-    <property name="tomcat-home" value="/home/greg/apache-tomcat-8.0.27" />
+    <property name="tomcat-home" value="/home/greg/apache-tomcat-7.0.67" />
 
     <path id="project-classpath">
         <pathelement location="${lib}/gson-2.5.jar"/>

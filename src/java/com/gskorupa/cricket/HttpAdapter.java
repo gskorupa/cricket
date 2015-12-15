@@ -102,7 +102,7 @@ public abstract class HttpAdapter implements Adapter, HttpHandler {
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         String stringResponse;
-        if (result.getCode() == 0) {
+        //if (result.getCode() == 0) {
             if ("json".equals(responseFormat)) {
                 headers.set("Content-Type", "application/json; charset=UTF-8");
                 stringResponse = JsonFormatter.getInstance().format(true, result);
@@ -114,10 +114,10 @@ public abstract class HttpAdapter implements Adapter, HttpHandler {
                 headers.set("Content-Type", "text/csv; charset=UTF-8");
                 stringResponse = result.toString();
             }
-        } else {
-            headers.set("Content-Type", "text/html; charset=UTF-8");
-            stringResponse = result.toString();
-        }
+        //} else {
+          //  headers.set("Content-Type", "text/html; charset=UTF-8");
+            //stringResponse = result.toString();
+        //}
 
         //calculate error code from response object
         int errCode = 200;
