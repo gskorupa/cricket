@@ -24,13 +24,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public abstract class HttpAdapter implements Adapter, HttpHandler {
+//public abstract class HttpAdapter implements Adapter, HttpHandler {
+public class HttpAdapter implements HttpHandler{
     
     public final static int SC_OK=200;
     public final static int SC_ACCEPTED=202;
@@ -51,11 +51,7 @@ public abstract class HttpAdapter implements Adapter, HttpHandler {
     private String hookMethodName = null;
     private HashMap<String, String> hookMethodNames = new HashMap();
 
-    public String getContext() {
-        return context;
-    }
-
-    public abstract void loadProperties(Properties properties);
+    //public abstract void loadProperties(Properties properties);
 
     protected void getServiceHooks() {
         AdapterHook ah;
@@ -177,7 +173,10 @@ public abstract class HttpAdapter implements Adapter, HttpHandler {
     public void setContext(String context) {
         this.context = context;
     }
-
+    
+    public String getContext() {
+        return context;
+    }
     public void addHookMethodNameForMethod(String requestMethod, String hookMethodName) {
         hookMethodNames.put(requestMethod, hookMethodName);
     }

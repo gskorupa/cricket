@@ -38,9 +38,11 @@ public class Httpd {
         }
         HttpContext context;
         for (int i = 0; i < service.fields.length; i++) {
-            if (service.fields[i] instanceof com.sun.net.httpserver.HttpHandler) {
-                System.out.println("creating context: "+((Adapter) service.fields[i]).getContext());
-                context=server.createContext(((Adapter) service.fields[i]).getContext(), (com.sun.net.httpserver.HttpHandler) service.fields[i]);
+            //if (service.fields[i] instanceof com.sun.net.httpserver.HttpHandler) {
+            if (service.fields[i] instanceof com.gskorupa.cricket.HttpAdapter) {
+                System.out.print("creating context: ");
+                System.out.println(((HttpAdapter) service.fields[i]).getContext());
+                context=server.createContext(((HttpAdapter) service.fields[i]).getContext(), (com.sun.net.httpserver.HttpHandler) service.fields[i]);
                 context.getFilters().add(new ParameterFilter());
             }
         }

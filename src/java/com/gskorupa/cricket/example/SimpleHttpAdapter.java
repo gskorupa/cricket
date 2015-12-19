@@ -17,14 +17,16 @@ package com.gskorupa.cricket.example;
 
 import com.gskorupa.cricket.Adapter;
 import com.gskorupa.cricket.HttpAdapter;
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import java.io.IOException;
 import java.util.Properties;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class SimpleHttpAdapter extends HttpAdapter implements SimpleHttpAdapterIface, Adapter, HttpHandler {
+public class SimpleHttpAdapter extends HttpAdapter implements SimpleHttpAdapterIface, Adapter {
 
     public void loadProperties(Properties properties) {
         setContext(properties.getProperty("SimpleHttpAdapterIface-context"));

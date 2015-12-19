@@ -25,6 +25,6 @@ public interface Adapter {
     
     public void loadProperties(Properties properties);
     
-    public String getContext();
+    //public String getContext();
     
 }

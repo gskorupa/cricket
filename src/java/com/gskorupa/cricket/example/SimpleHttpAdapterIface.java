@@ -25,6 +25,6 @@ import java.io.IOException;
 public interface SimpleHttpAdapterIface{
     
     // IMPORTANT !!!
-    public void handle(HttpExchange exchange) throws IOException;
+    //public void handle(HttpExchange exchange) throws IOException;
     
 }

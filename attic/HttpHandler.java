@@ -15,15 +15,18 @@
  */
 package com.gskorupa.cricket;
 
+import com.sun.net.httpserver.HttpExchange;
+import java.io.IOException;
+
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public interface HttpHandler {
     
-    public void handle();
+    public void handle(HttpExchange exchange) throws IOException;
     
     public String getContext();
     
-    public void getServiceHook();
+    //public void getServiceHook();
 }
