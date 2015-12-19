@@ -15,30 +15,24 @@
  */
 package com.gskorupa.cricket.example;
 
-import com.gskorupa.cricket.Result;
+import com.gskorupa.cricket.in.Result;
 
 /**
  *
  * @author greg
  */
 public class SimpleResult implements Result {
-    private int code;
     private SimpleData data;
+    private int code;
 
-    /**
-     * @return the code
-     */
-    public int getCode() {
+    public void setCode(int code){
+        this.code=code;
+    }
+    
+    public int getCode(){
         return code;
     }
-
-    /**
-     * @param code the code to set
-     */
-    public void setCode(int code) {
-        this.code = code;
-    }
-
+    
     /**
      * @return the data
      */

@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket;
+package com.gskorupa.cricket.in;
 
 /**
  *
  * @author greg
  */
 public interface Result {
-
+    
     /**
      * @return the error code
      */
@@ -30,12 +30,10 @@ public interface Result {
      * @param code the code to set
      */
     public void setCode(int code);
-
     /**
      * @return the data
      */
     public Object getData();
-
     /**
      * @param data the data to set
      */

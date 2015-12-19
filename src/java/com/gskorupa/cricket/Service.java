@@ -138,7 +138,7 @@ public abstract class Service {
                 if (adapters[i].isAssignableFrom(c)) {
                     fields[i] = adapters[i].cast(c.newInstance());
                     //if (fields[i] instanceof com.sun.net.httpserver.HttpHandler) {
-                    if (fields[i] instanceof com.gskorupa.cricket.HttpAdapter) {
+                    if (fields[i] instanceof com.gskorupa.cricket.in.HttpAdapter) {
                         setHttpHandlerLoaded(true);
                     }
                     java.lang.reflect.Method method = fields[i].getClass().getMethod("loadProperties", Properties.class);

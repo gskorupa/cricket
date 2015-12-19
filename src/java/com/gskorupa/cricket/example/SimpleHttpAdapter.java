@@ -16,10 +16,7 @@
 package com.gskorupa.cricket.example;
 
 import com.gskorupa.cricket.Adapter;
-import com.gskorupa.cricket.HttpAdapter;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import java.io.IOException;
+import com.gskorupa.cricket.in.HttpAdapter;
 import java.util.Properties;
 
 /**

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.gskorupa.cricket;
+package com.gskorupa.cricket.in;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

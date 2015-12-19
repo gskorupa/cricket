@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket;
+package com.gskorupa.cricket.in;
 
+import com.gskorupa.cricket.AdapterHook;
+import com.gskorupa.cricket.RequestObject;
+import com.gskorupa.cricket.Service;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -30,29 +33,28 @@ import java.util.Map;
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 //public abstract class HttpAdapter implements Adapter, HttpHandler {
-public class HttpAdapter implements HttpHandler{
-    
-    public final static int SC_OK=200;
-    public final static int SC_ACCEPTED=202;
-    public final static int SC_CREATED=201;
-    
-    public final static int SC_NOT_MODIFIED=304;
-    
-    public final static int SC_BAD_REQUEST=400;
-    public final static int SC_FORBIDDEN=403;
-    public final static int SC_NOT_FOUND=404;
-    public final static int SC_METHOD_NOT_ALLOWED=405;
-    public final static int SC_CONFLICT=409;
-    
-    public final static int SC_INTERNAL_SERVER_ERROR=500;
-    public final static int SC_NOT_IMPLEMENTED=501;
+public class HttpAdapter implements HttpHandler {
+
+    public final static int SC_OK = 200;
+    public final static int SC_ACCEPTED = 202;
+    public final static int SC_CREATED = 201;
+
+    public final static int SC_NOT_MODIFIED = 304;
+
+    public final static int SC_BAD_REQUEST = 400;
+    public final static int SC_FORBIDDEN = 403;
+    public final static int SC_NOT_FOUND = 404;
+    public final static int SC_METHOD_NOT_ALLOWED = 405;
+    public final static int SC_CONFLICT = 409;
+
+    public final static int SC_INTERNAL_SERVER_ERROR = 500;
+    public final static int SC_NOT_IMPLEMENTED = 501;
 
     private String context;
     private String hookMethodName = null;
     private HashMap<String, String> hookMethodNames = new HashMap();
 
     //public abstract void loadProperties(Properties properties);
-
     protected void getServiceHooks() {
         AdapterHook ah;
         String requestMethod;
@@ -82,14 +84,22 @@ public class HttpAdapter implements HttpHandler{
 
     // tu trzeba też przekazać Service
     public void handle(HttpExchange exchange) throws IOException {
-        String responseFormat = "text";
+
+        final int JSON = 0;
+        final int XML = 1;
+        final int CSV = 2;
+
+        int responseType = JSON; //default type
+
         for (String v : exchange.getRequestHeaders().get("Accept")) {
             if ("application/json".equalsIgnoreCase(v)) {
-                responseFormat = "json";
+                responseType = JSON;
             } else if ("text/xml".equalsIgnoreCase(v)) {
-                responseFormat = "xml";
-            } else {
-                responseFormat = "text";
+                responseType = XML;
+            } else if ("text/csv".equalsIgnoreCase(v)) {
+                responseType = CSV;
+            } else{
+                responseType=JSON;
             }
         }
 
@@ -97,23 +107,22 @@ public class HttpAdapter implements HttpHandler{
 
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
-        String stringResponse;
-        //if (result.getCode() == 0) {
-            if ("json".equals(responseFormat)) {
+        String stringResponse = "";
+
+        switch (responseType) {
+            case JSON:
                 headers.set("Content-Type", "application/json; charset=UTF-8");
                 stringResponse = JsonFormatter.getInstance().format(true, result);
-            } else if ("xml".equals(responseFormat)) {
+                break;
+            case XML:
                 headers.set("Content-Type", "text/xml; charset=UTF-8");
-                stringResponse = result.toString();
-                //stringResponse=XmlFormatter.getInstance().format(true, result);
-            } else {
+                stringResponse = XmlFormatter.getInstance().format(true, result);
+                break;
+            case CSV:
                 headers.set("Content-Type", "text/csv; charset=UTF-8");
-                stringResponse = result.toString();
-            }
-        //} else {
-          //  headers.set("Content-Type", "text/html; charset=UTF-8");
-            //stringResponse = result.toString();
-        //}
+                stringResponse = CsvFormatter.getInstance().format(result);
+                break;
+        }
 
         //calculate error code from response object
         int errCode = 200;
@@ -173,10 +182,11 @@ public class HttpAdapter implements HttpHandler{
     public void setContext(String context) {
         this.context = context;
     }
-    
+
     public String getContext() {
         return context;
     }
+
     public void addHookMethodNameForMethod(String requestMethod, String hookMethodName) {
         hookMethodNames.put(requestMethod, hookMethodName);
     }

@@ -17,7 +17,7 @@ package com.gskorupa.cricket.example;
 
 import com.gskorupa.cricket.AdapterHook;
 import com.gskorupa.cricket.ArgumentParser;
-import com.gskorupa.cricket.HttpAdapter;
+import com.gskorupa.cricket.in.HttpAdapter;
 import com.gskorupa.cricket.Httpd;
 import java.util.logging.Logger;
 import com.gskorupa.cricket.RequestObject;
@@ -114,6 +114,7 @@ public class SimpleService extends Service {
     
     @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "GET")
     public Object getTime(RequestObject request) {
+        System.out.println("getTime method");
         String surname=(String)request.parameters.get("surname");
         SimpleResult r = new SimpleResult();
         if ("error".equalsIgnoreCase(surname)) {
