@@ -1,6 +1,9 @@
 # Cricket
 Cricket is a tiny microservices framework for Java.
 
+Please check out the development guide at GitBook: 
+[https://www.gitbook.com/book/gskorupa/building-microservices-with-cricket/]
+
 ## Quick start
 
 You need:
