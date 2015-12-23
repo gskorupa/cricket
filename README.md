@@ -21,7 +21,8 @@ Run example service:
 `java -jar cricket-1.0.0.jar --run`
 
 The http interface will be available at http://localhost:8080/
-Try
+
+To request the build in example service you can use curl:
 
 `curl -i -H "Accept:application/json" "http://localhost:8080?name=John&surname=Smith"`
 
