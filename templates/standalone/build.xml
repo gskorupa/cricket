@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="bookshelf" default="all" basedir=".">
+    <!-- modify the project name above if you need -->
+    
     <description></description>
-    
-    <target name="all" depends="init,jar">
-        <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
-    </target>
-    <!-- set global properties for this build -->
-    <property name="jar-name" value="bookshelf"/>
+        
+    <!-- set your local properties for this build -->
     <property name="version" value="1.0.0"/>
+    <property name="tomcat-home" value="/home/greg/apache-tomcat-7.0.67" />
+    <property name="cricket-jar-location" value="lib/cricket-1.0.0.jar" />
     
+    <!-- do not modify properties below -->
     <property name="src" location="src/java"/>
     <property name="build" location="build/web/WEB-INF/classes"/>
     <property name="dist" location="dist"/>
     <property name="web" location="web"/>
     <property name="lib" location="lib"/>
-    <property name="tomcat-home" value="/home/greg/apache-tomcat-8.0.27" />
-
+    
     <path id="project-classpath">
-        <pathelement location="${lib}/cricket-1.0.0.jar"/>
+        <pathelement location="${cricket-jar-location}"/>
         <fileset dir="${tomcat-home}/bin" includes="*.jar" />
         <fileset dir="${tomcat-home}/lib" includes="*.jar" />
     </path>
 
     <target name="init">
-        <!-- Create the time stamp -->
+        <!-- Create the time stamp. For future use. -->
         <tstamp/>
         <!-- Create the build directory structure used by compile -->
         <mkdir dir="${build}"/>
@@ -59,13 +59,14 @@
             <fileset dir="${src}" includes="*.properties"/>
             <fileset dir="${src}" includes="*.txt"/>
         </copy>
-        <jar  
-             destfile="${dist}/${jar-name}-${version}.jar">
+        <jar destfile="${dist}/${ant.project.name}-${version}.jar">
             <manifest>
                 <attribute name="Main-Class" value="com.mycompany.bookshelf.BookshelfService"/>
             </manifest>
             <fileset dir="${build}"/>
-            <zipfileset src="${lib}/cricket-1.0.0.jar" includes="**/*"/>
+            <zipfileset src="${cricket-jar-location}" includes="**/*"/>
         </jar>
     </target>
+    
+    
 </project>
