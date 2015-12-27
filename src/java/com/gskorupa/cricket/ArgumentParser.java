@@ -13,6 +13,24 @@ import java.util.Map;
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class ArgumentParser {
+    
+    private Map<String, String> arguments;
+    
+    public ArgumentParser(String[] args){
+        arguments=getArguments(args);
+    }
+    
+    public boolean containsKey(String key){
+        return arguments.containsKey(key);
+    }
+    
+    public String get(String key){
+        return arguments.get(key);
+    }
+    
+    public boolean isProblem(){
+        return (get("error")!=null || get("help")!=null);
+    }
 
     public static Map<String, String> getArguments(String[] args) {
         HashMap<String, String> map = new HashMap();
@@ -38,7 +56,7 @@ public class ArgumentParser {
                         break;
                     case "--run":
                     case "-r":
-                        map.put("run", "");
+                        map.put("run", "*");
                         break;
                     case "--config":
                     case "-c":
@@ -51,7 +69,12 @@ public class ArgumentParser {
             }
         }
         if(confToRead){
-            map.put("error", "-c or --config option requires an argument");
+            switch(option){
+                case "config":
+                    map.put("error", "-c or --config option requires an argument");
+                    break;
+            }
+            
         }
         return map;
     }

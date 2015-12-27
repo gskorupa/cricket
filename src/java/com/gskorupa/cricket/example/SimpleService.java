@@ -55,10 +55,17 @@ public class SimpleService extends Service {
 
     }
 
+    @Override
     public void getAdapters() {
         storage = (SimpleStorageIface) super.fields[0];
         log = (SimpleLoggerIface) super.fields[1];
         handler = (SimpleHttpAdapterIface) super.fields[2];
+    }
+
+    @Override
+    public void runOnce() {
+        SimpleResult r = doSomething("hello");
+        System.out.println(((SimpleData) r.getData()).getParam1());
     }
 
     public SimpleResult getData() {
@@ -111,11 +118,11 @@ public class SimpleService extends Service {
         }
         return r;
     }
-    
+
     @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "GET")
     public Object getTime(RequestObject request) {
         System.out.println("getTime method");
-        String surname=(String)request.parameters.get("surname");
+        String surname = (String) request.parameters.get("surname");
         SimpleResult r = new SimpleResult();
         if ("error".equalsIgnoreCase(surname)) {
             r.setCode(HttpAdapter.SC_BAD_REQUEST);
@@ -133,25 +140,20 @@ public class SimpleService extends Service {
     public static void main(String[] args) {
 
         final SimpleService service;
-        Map<String, String> arguments = ArgumentParser.getArguments(args);
 
-        if (arguments.containsKey("error")) {
+        ArgumentParser arguments = new ArgumentParser(args);
+        if (arguments.isProblem()) {
             System.out.println(arguments.get("error"));
-            System.exit(-1);
-        }
-        if (arguments.containsKey("help")) {
-            SimpleService s=new SimpleService(); //creating instance this way is valid only for displaing help!
-            System.out.println(s.getHelp());
+            System.out.println(new SimpleService().getHelp());
             System.exit(-1);
         }
 
         try {
-            
+
             if (arguments.containsKey("config")) {
-                
                 service = (SimpleService) SimpleService.getInstance(SimpleService.class, arguments.get("config"));
             } else {
-                service = (SimpleService) SimpleService.getInstanceUsingResources(SimpleService.class);    
+                service = (SimpleService) SimpleService.getInstanceUsingResources(SimpleService.class);
             }
             service.getAdapters();
 
@@ -160,7 +162,6 @@ public class SimpleService extends Service {
                     System.out.println("Starting http server ...");
                     Runtime.getRuntime().addShutdownHook(
                             new Thread() {
-
                         public void run() {
                             try {
                                 Thread.sleep(200);
@@ -183,10 +184,8 @@ public class SimpleService extends Service {
                     System.exit(MIN_PRIORITY);
                 }
             } else {
-                //execute selected adapter
-                //todo - clean this or add commandline option
-                SimpleResult r = service.doSomething("hello");
-                System.out.println(((SimpleData) r.getData()).getParam1());
+                System.out.println("Executing runOnce method");
+                service.runOnce();
             }
 
         } catch (Exception e) {

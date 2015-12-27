@@ -23,6 +23,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
 
 /**
  * SimpleService
@@ -238,6 +239,13 @@ public abstract class Service {
         content = out.toString();
         reader.close();
         return content;
+    }
+    
+    /*
+    * This method will be invoked when Service is executed without --run option
+    */
+    public void runOnce(){
+        
     }
     
 }
