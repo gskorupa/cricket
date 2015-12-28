@@ -26,7 +26,7 @@ import java.util.Properties;
 public class HelloHttpAdapter extends HttpAdapter implements HelloHttpAdapterIface, Adapter {
 
     public void loadProperties(Properties properties) {
-        setContext(properties.getProperty("SimpleHttpAdapterIface-context"));
+        setContext(properties.getProperty("HelloHttpAdapterIface-context"));
         System.out.println("context=" + getContext());
         getServiceHooks(); 
     }

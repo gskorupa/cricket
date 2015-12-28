@@ -73,22 +73,22 @@ public class HelloService extends Kernel {
         return r;
     }
 
-    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "GET")
+    @AdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "GET")
     public Object doGet(RequestObject request) {
         return sendEcho(request);
     }
     
-    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "POST")
+    @AdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "POST")
     public Object doPost(RequestObject request) {
         return sendEcho(request);
     }
     
-    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "PUT")
+    @AdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "PUT")
     public Object doPut(RequestObject request) {
         return sendEcho(request);
     }
     
-    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "DELETE")
+    @AdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "DELETE")
     public Object doDelete(RequestObject request) {
         return sendEcho(request);
     }

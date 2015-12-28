@@ -28,12 +28,22 @@ import java.net.InetSocketAddress;
 public class Httpd {
 
     private Kernel service;
-    public HttpServer server=null;
+    public HttpServer server = null;
 
     public Httpd(Kernel service) {
         this.service = service;
+        String host = service.getHost();
+        if (null != host) {
+            if (host.isEmpty() || "0.0.0.0".equals(host) || "*".equals(host)) {
+                host = null;
+            }
+        }
         try {
-            server = HttpServer.create(new InetSocketAddress(service.getPort()), 0);
+            if (host == null) {
+                server = HttpServer.create(new InetSocketAddress(service.getPort()), 0);
+            } else {
+                server = HttpServer.create(new InetSocketAddress(host, service.getPort()), 0);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -43,7 +53,7 @@ public class Httpd {
             if (service.fields[i] instanceof com.gskorupa.cricket.in.HttpAdapter) {
                 System.out.print("creating context: ");
                 System.out.println(((HttpAdapter) service.fields[i]).getContext());
-                context=server.createContext(((HttpAdapter) service.fields[i]).getContext(), (com.sun.net.httpserver.HttpHandler) service.fields[i]);
+                context = server.createContext(((HttpAdapter) service.fields[i]).getContext(), (com.sun.net.httpserver.HttpHandler) service.fields[i]);
                 context.getFilters().add(new ParameterFilter());
             }
         }
