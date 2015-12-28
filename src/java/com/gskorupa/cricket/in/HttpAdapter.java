@@ -98,8 +98,8 @@ public class HttpAdapter implements HttpHandler {
                 responseType = XML;
             } else if ("text/csv".equalsIgnoreCase(v)) {
                 responseType = CSV;
-            } else{
-                responseType=JSON;
+            } else {
+                responseType = JSON;
             }
         }
 
@@ -134,11 +134,11 @@ public class HttpAdapter implements HttpHandler {
                 errCode = result.getCode();
                 break;
         }
-
         exchange.sendResponseHeaders(errCode, stringResponse.getBytes().length);
         OutputStream os = exchange.getResponseBody();
         os.write(stringResponse.getBytes());
         os.close();
+        exchange.close();
     }
 
     private Result createResponse(HttpExchange exchange) {

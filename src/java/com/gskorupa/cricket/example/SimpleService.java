@@ -143,7 +143,9 @@ public class SimpleService extends Service {
 
         ArgumentParser arguments = new ArgumentParser(args);
         if (arguments.isProblem()) {
-            System.out.println(arguments.get("error"));
+            if(arguments.containsKey("error")){
+                System.out.println(arguments.get("error"));
+            }
             System.out.println(new SimpleService().getHelp());
             System.exit(-1);
         }
