@@ -28,7 +28,7 @@ import com.gskorupa.cricket.ServiceError;
  *
  * @author greg
  */
-public class SimpleServlet extends HttpServlet {
+public class HelloServlet extends HttpServlet {
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -43,9 +43,9 @@ public class SimpleServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        SimpleService sService = (SimpleService) SimpleService.getInstanceUsingResources(SimpleService.class);
+        HelloService sService = (HelloService) HelloService.getInstanceUsingResources(HelloService.class);
         sService.getAdapters();
-        SimpleResult result = sService.getData();
+        HelloResult result = sService.getData();
 
         TreeMap<String, String> headers = new TreeMap();
         headers.put("service-name", "SimpleService");
@@ -75,7 +75,7 @@ public class SimpleServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        SimpleService sService = (SimpleService) SimpleService.getInstanceUsingResources(SimpleService.class);
+        HelloService sService = (HelloService) HelloService.getInstanceUsingResources(HelloService.class);
         ServiceError error = new ServiceError(sService, HttpServletResponse.SC_METHOD_NOT_ALLOWED, -1, "not implemented");
         error.sendResponse(request, response);
 
@@ -93,7 +93,7 @@ public class SimpleServlet extends HttpServlet {
     protected void doPut(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        SimpleService sService = (SimpleService) SimpleService.getInstanceUsingResources(SimpleService.class);
+        HelloService sService = (HelloService) HelloService.getInstanceUsingResources(HelloService.class);
         ServiceError error = new ServiceError(sService, HttpServletResponse.SC_METHOD_NOT_ALLOWED, -1, "not implemented");
         error.sendResponse(request, response);
 
@@ -111,7 +111,7 @@ public class SimpleServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        SimpleService sService = (SimpleService) SimpleService.getInstanceUsingResources(SimpleService.class);
+        HelloService sService = (HelloService) HelloService.getInstanceUsingResources(HelloService.class);
         ServiceError error = new ServiceError(sService, HttpServletResponse.SC_METHOD_NOT_ALLOWED, -1, "not implemented");
         error.sendResponse(request, response);
 

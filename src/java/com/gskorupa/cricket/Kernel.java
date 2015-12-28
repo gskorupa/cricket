@@ -23,17 +23,16 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
 
 /**
  * SimpleService
  *
  * @author greg
  */
-public abstract class Service {
+public abstract class Kernel {
 
     // emergency logger
-    private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.Service.class.getName());
+    private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.Kernel.class.getName());
 
     // singleton
     private static Object instance = null;
@@ -48,13 +47,13 @@ public abstract class Service {
     private Httpd httpd;
     private boolean httpHandlerLoaded = false;
 
-    public Service() {
+    public Kernel() {
     }
 
     public abstract void getAdapters();
 
-    public static Service getInstance() {
-        return (Service) instance;
+    public static Kernel getInstance() {
+        return (Kernel) instance;
     }
 
     /*
@@ -84,7 +83,7 @@ public abstract class Service {
         }
         try {
             instance = c.getClass().newInstance();
-            ((Service) instance).loadAdapters(props, fields, adapters);
+            ((Kernel) instance).loadAdapters(props, fields, adapters);
         } catch (Exception e) {
             instance = null;
             logger.severe(e.getStackTrace()[0].toString() + ":" + e.getStackTrace()[1].toString());
@@ -99,8 +98,8 @@ public abstract class Service {
         }
         try {
             instance = c.newInstance();
-            Properties props = ((Service) instance).getProperties(c.getSimpleName());
-            ((Service) instance).loadAdapters(props, fields, adapters);
+            Properties props = ((Kernel) instance).getProperties(c.getSimpleName());
+            ((Kernel) instance).loadAdapters(props, fields, adapters);
         } catch (Exception e) {
             e.printStackTrace();
             instance = null;
@@ -242,7 +241,7 @@ public abstract class Service {
     }
     
     /*
-    * This method will be invoked when Service is executed without --run option
+    * This method will be invoked when Kernel is executed without --run option
     */
     public void runOnce(){
         

@@ -15,48 +15,50 @@
  */
 package com.gskorupa.cricket.example;
 
+import com.gskorupa.cricket.in.Result;
+
 /**
- * Value Object
+ *
  * @author greg
  */
-public class SimpleData {
-    private String param1;
-    private String param2;
+public class HelloResult implements Result {
+    private HelloData data;
+    private int code;
+
+    public void setCode(int code){
+        this.code=code;
+    }
     
-    public SimpleData(String param1, String param2){
-        this.param1=param1;
-        this.param2=param2;
+    public int getCode(){
+        return code;
+    }
+    
+    /**
+     * @return the data
+     */
+    public Object getData() {
+        return data;
     }
 
     /**
-     * @return the param1
+     * @param data the data to set
      */
-    public String getParam1() {
-        return param1;
-    }
-
-    /**
-     * @param param1 the param1 to set
-     */
-    public void setParam1(String param1) {
-        this.param1 = param1;
-    }
-
-    /**
-     * @return the param2
-     */
-    public String getParam2() {
-        return param2;
-    }
-
-    /**
-     * @param param2 the param2 to set
-     */
-    public void setParam2(String param2) {
-        this.param2 = param2;
+    public void setData(Object data) {
+        this.data = (HelloData)data;
     }
     
     public String toString(){
-        return "param1="+param1+",param2="+param2;
+        StringBuilder sb=new StringBuilder();
+        if(getCode()>0){
+            sb.append("error=");
+            sb.append(getCode());
+            sb.append("\r\n");
+            sb.append(getData().toString());
+        }else{
+            sb.append(getData().toString());
+        }
+        sb.append("\r\n");
+        return sb.toString();
     }
+    
 }

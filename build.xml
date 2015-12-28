@@ -64,7 +64,7 @@
         <jar  
              destfile="${dist}/${jar-name}">
             <manifest>
-                <attribute name="Main-Class" value="com.gskorupa.cricket.example.SimpleService"/>
+                <attribute name="Main-Class" value="com.gskorupa.cricket.example.HelloService"/>
             </manifest>
             <fileset dir="${build}"/>
             <zipfileset src="${lib}/gson-2.5.jar" includes="com/**/*"/>

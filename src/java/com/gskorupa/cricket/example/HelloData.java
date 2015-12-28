@@ -15,13 +15,17 @@
  */
 package com.gskorupa.cricket.example;
 
+import java.util.HashMap;
+
 /**
- *
- * @author grzesk
+ * Value Object
+ * @author greg
  */
-public interface SimpleLoggerIface {
+public class HelloData {
+    public HashMap list;
     
-    public void log(String level, int errorCode, Object c);
-    public void log(String level, int errorCode, Object c, String message);
+    public HelloData(){
+        list = new HashMap();
+    }
     
 }

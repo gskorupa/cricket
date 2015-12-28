@@ -27,10 +27,10 @@ import java.net.InetSocketAddress;
  */
 public class Httpd {
 
-    private Service service;
+    private Kernel service;
     public HttpServer server=null;
 
-    public Httpd(Service service) {
+    public Httpd(Kernel service) {
         this.service = service;
         try {
             server = HttpServer.create(new InetSocketAddress(service.getPort()), 0);

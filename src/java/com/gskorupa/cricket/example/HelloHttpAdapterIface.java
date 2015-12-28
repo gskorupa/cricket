@@ -15,12 +15,16 @@
  */
 package com.gskorupa.cricket.example;
 
+import com.sun.net.httpserver.HttpExchange;
+import java.io.IOException;
+
 /**
  *
- * @author greg
+ * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public interface SimpleStorageIface {
+public interface HelloHttpAdapterIface{
     
-    public void storeData();
+    // IMPORTANT !!!
+    //public void handle(HttpExchange exchange) throws IOException;
     
 }

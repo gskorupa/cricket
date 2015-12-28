@@ -24,9 +24,9 @@ import java.util.logging.Logger;
  *
  * @author grzesk
  */
-public class SimpleLoggerStandard implements SimpleLoggerIface, Adapter {
+public class HelloLoggerStandard implements HelloLoggerIface, Adapter {
 
-    private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.example.SimpleLoggerStandard.class.getName());
+    private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.example.HelloLoggerStandard.class.getName());
 
     private String context=null;
     

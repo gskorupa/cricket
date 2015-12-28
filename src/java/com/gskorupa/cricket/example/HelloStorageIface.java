@@ -15,20 +15,12 @@
  */
 package com.gskorupa.cricket.example;
 
-import com.gskorupa.cricket.Adapter;
-import com.gskorupa.cricket.in.HttpAdapter;
-import java.util.Properties;
-
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author greg
  */
-public class SimpleHttpAdapter extends HttpAdapter implements SimpleHttpAdapterIface, Adapter {
-
-    public void loadProperties(Properties properties) {
-        setContext(properties.getProperty("SimpleHttpAdapterIface-context"));
-        System.out.println("context=" + getContext());
-        getServiceHooks(); 
-    }
+public interface HelloStorageIface {
+    
+    public void storeData();
     
 }

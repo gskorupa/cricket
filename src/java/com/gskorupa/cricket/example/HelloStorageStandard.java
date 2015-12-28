@@ -22,7 +22,7 @@ import java.util.Properties;
  *
  * @author greg
  */
-public class SimpleStorageStandard implements SimpleStorageIface, Adapter{
+public class HelloStorageStandard implements HelloStorageIface, Adapter{
     
     String myParam1=null;
     

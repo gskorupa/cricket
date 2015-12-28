@@ -17,7 +17,7 @@ package com.gskorupa.cricket.in;
 
 import com.gskorupa.cricket.AdapterHook;
 import com.gskorupa.cricket.RequestObject;
-import com.gskorupa.cricket.Service;
+import com.gskorupa.cricket.Kernel;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -58,8 +58,8 @@ public class HttpAdapter implements HttpHandler {
     protected void getServiceHooks() {
         AdapterHook ah;
         String requestMethod;
-        // for every method of a Service instance (our service class extending Service)
-        for (Method m : Service.getInstance().getClass().getMethods()) {
+        // for every method of a Kernel instance (our service class extending Kernel)
+        for (Method m : Kernel.getInstance().getClass().getMethods()) {
             ah = (AdapterHook) m.getAnnotation(AdapterHook.class);
             // we search for annotated method
             if (ah != null) {
@@ -82,7 +82,7 @@ public class HttpAdapter implements HttpHandler {
         }
     }
 
-    // tu trzeba też przekazać Service
+    // tu trzeba też przekazać Kernel
     public void handle(HttpExchange exchange) throws IOException {
 
         final int JSON = 0;
@@ -168,8 +168,8 @@ public class HttpAdapter implements HttpHandler {
 
         try {
             System.out.println("sending request to hook method " + getHookMethodNameForMethod(method));
-            Method m = Service.getInstance().getClass().getMethod(getHookMethodNameForMethod(method), RequestObject.class);
-            result = (Result) m.invoke(Service.getInstance(), requestObject);
+            Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForMethod(method), RequestObject.class);
+            result = (Result) m.invoke(Kernel.getInstance(), requestObject);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }

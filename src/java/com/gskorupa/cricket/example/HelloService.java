@@ -21,116 +21,95 @@ import com.gskorupa.cricket.in.HttpAdapter;
 import com.gskorupa.cricket.Httpd;
 import java.util.logging.Logger;
 import com.gskorupa.cricket.RequestObject;
-import com.gskorupa.cricket.Service;
+import com.gskorupa.cricket.Kernel;
 import static java.lang.Thread.MIN_PRIORITY;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 /**
- * SimpleService
+ * HelloService
  *
  * @author greg
  */
-public class SimpleService extends Service {
+public class HelloService extends Kernel {
 
     // emergency logger
-    private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.example.SimpleService.class.getName());
+    private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.example.HelloService.class.getName());
 
     // adapters
-    SimpleStorageIface storage = null;
-    SimpleLoggerIface log = null;
-    SimpleHttpAdapterIface handler = null;
+    HelloStorageIface storage = null;
+    HelloLoggerIface log = null;
+    HelloHttpAdapterIface handler = null;
 
-    public SimpleService() {
+    public HelloService() {
 
         fields = new Object[3];
         fields[0] = storage;
         fields[1] = log;
         fields[2] = handler;
         adapters = new Class[3];
-        adapters[0] = SimpleStorageIface.class;
-        adapters[1] = SimpleLoggerIface.class;
-        adapters[2] = SimpleHttpAdapterIface.class;
+        adapters[0] = HelloStorageIface.class;
+        adapters[1] = HelloLoggerIface.class;
+        adapters[2] = HelloHttpAdapterIface.class;
 
     }
 
     @Override
     public void getAdapters() {
-        storage = (SimpleStorageIface) super.fields[0];
-        log = (SimpleLoggerIface) super.fields[1];
-        handler = (SimpleHttpAdapterIface) super.fields[2];
+        storage = (HelloStorageIface) super.fields[0];
+        log = (HelloLoggerIface) super.fields[1];
+        handler = (HelloHttpAdapterIface) super.fields[2];
     }
 
     @Override
     public void runOnce() {
-        SimpleResult r = doSomething("hello");
-        System.out.println(((SimpleData) r.getData()).getParam1());
+        System.out.println("Hello from HelloService.runOnce()");
     }
 
-    public SimpleResult getData() {
+    public HelloResult getData() {
         storage.storeData();
-        SimpleResult r = new SimpleResult();
+        HelloResult r = new HelloResult();
         r.setCode(0);
-        r.setData(new SimpleData("", ""));
-        return r;
-    }
-
-    //TODO: jak sprawdzić na poziomie builda, że mamy zdublowane kody błedów
-    public SimpleResult doSomething(String parameter) {
-        log.log("INFO", 0, this, "hello from main");
-        SimpleData data = new SimpleData("", "");
-        SimpleResult r = new SimpleResult();
-        data.setParam1(parameter);
-        if (false) {
-            r.setCode(-1);
-        } else {
-            r.setCode(0);
-        }
-        r.setData(data);
-        return r;
-    }
-
-    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "POST")
-    public Object sayHello(RequestObject request) {
-        String name = "";
-        String surname = "";
-        System.out.println(this.getClass().getName());
-        System.out.println(request.method);
-        System.out.println(request.pathExt);
-        Map<String, Object> map = request.parameters;
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            System.out.println(entry.getKey() + "=" + entry.getValue());
-            if (entry.getKey().equalsIgnoreCase("name")) {
-                name = (String) entry.getValue();
-            }
-            if (entry.getKey().equalsIgnoreCase("surname")) {
-                surname = (String) entry.getValue();
-            }
-        }
-        SimpleResult r = new SimpleResult();
-        if ("error".equalsIgnoreCase(surname)) {
-            r.setCode(HttpAdapter.SC_INTERNAL_SERVER_ERROR);
-            r.setData(new SimpleData("error", "error forced by request"));
-        } else {
-            r.setCode(HttpAdapter.SC_OK);
-            r.setData(new SimpleData(name, surname));
-        }
+        r.setData(new HelloData());
         return r;
     }
 
     @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "GET")
-    public Object getTime(RequestObject request) {
-        System.out.println("getTime method");
-        String surname = (String) request.parameters.get("surname");
-        SimpleResult r = new SimpleResult();
-        if ("error".equalsIgnoreCase(surname)) {
-            r.setCode(HttpAdapter.SC_BAD_REQUEST);
-            r.setData(new SimpleData("error", "error forced by request"));
+    public Object doGet(RequestObject request) {
+        return sendEcho(request);
+    }
+    
+    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "POST")
+    public Object doPost(RequestObject request) {
+        return sendEcho(request);
+    }
+    
+    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "PUT")
+    public Object doPut(RequestObject request) {
+        return sendEcho(request);
+    }
+    
+    @AdapterHook(handlerClassName = "SimpleHttpAdapterIface", requestMethod = "DELETE")
+    public Object doDelete(RequestObject request) {
+        return sendEcho(request);
+    }
+    
+    public Object sendEcho(RequestObject request) {
+        HelloResult r = new HelloResult();
+        HelloData data=new HelloData();
+        Map<String, Object> map = request.parameters;
+        data.list.put("request.method",request.method);
+        data.list.put("request.pathExt",request.pathExt);
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            //System.out.println(entry.getKey() + "=" + entry.getValue());
+            data.list.put(entry.getKey(), entry.getValue());
+        }
+        if (data.list.containsKey("error")){
+            r.setCode(HttpAdapter.SC_INTERNAL_SERVER_ERROR);
+            data.list.put("error", "error forced by request");
         } else {
             r.setCode(HttpAdapter.SC_OK);
-            r.setData(new SimpleData("time", SimpleDateFormat.getDateTimeInstance().format(new Date())));
         }
+        r.setData(data);
         return r;
     }
 
@@ -139,23 +118,23 @@ public class SimpleService extends Service {
      */
     public static void main(String[] args) {
 
-        final SimpleService service;
+        final HelloService service;
 
         ArgumentParser arguments = new ArgumentParser(args);
         if (arguments.isProblem()) {
-            if(arguments.containsKey("error")){
+            if (arguments.containsKey("error")) {
                 System.out.println(arguments.get("error"));
             }
-            System.out.println(new SimpleService().getHelp());
+            System.out.println(new HelloService().getHelp());
             System.exit(-1);
         }
 
         try {
 
             if (arguments.containsKey("config")) {
-                service = (SimpleService) SimpleService.getInstance(SimpleService.class, arguments.get("config"));
+                service = (HelloService) HelloService.getInstance(HelloService.class, arguments.get("config"));
             } else {
-                service = (SimpleService) SimpleService.getInstanceUsingResources(SimpleService.class);
+                service = (HelloService) HelloService.getInstanceUsingResources(HelloService.class);
             }
             service.getAdapters();
 
