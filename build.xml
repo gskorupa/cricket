@@ -10,7 +10,7 @@
     <property name="dist" location="dist"/>
     <property name="web" location="web"/>
     <property name="lib" location="lib"/>
-    <property name="jar-name" value="cricket-1.0.0.jar"/>
+    <property name="jar-name" value="cricket-1.0-B1.jar"/>
     <property name="standalone-lib" location="templates/standalone/lib"/>
     <property name="tomcat-home" value="/home/greg/apache-tomcat-7.0.67" />
 

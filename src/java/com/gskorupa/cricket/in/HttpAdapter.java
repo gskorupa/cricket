@@ -32,8 +32,11 @@ import java.util.Map;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-//public abstract class HttpAdapter implements Adapter, HttpHandler {
 public class HttpAdapter implements HttpHandler {
+
+    final int JSON = 0;
+    final int XML = 1;
+    final int CSV = 2;
 
     public final static int SC_OK = 200;
     public final static int SC_ACCEPTED = 202;
@@ -82,25 +85,27 @@ public class HttpAdapter implements HttpHandler {
         }
     }
 
-    // tu trzeba też przekazać Kernel
+
     public void handle(HttpExchange exchange) throws IOException {
 
-        final int JSON = 0;
-        final int XML = 1;
-        final int CSV = 2;
-
-        int responseType = JSON; //default type
+        int responseType=JSON;
 
         for (String v : exchange.getRequestHeaders().get("Accept")) {
-            if ("application/json".equalsIgnoreCase(v)) {
-                responseType = JSON;
-            } else if ("text/xml".equalsIgnoreCase(v)) {
-                responseType = XML;
-            } else if ("text/csv".equalsIgnoreCase(v)) {
-                responseType = CSV;
-            } else {
-                responseType = JSON;
+            switch(v.toLowerCase()){
+                case "application/json":
+                    responseType = JSON;
+                    break;
+                case "text/xml":
+                    responseType = XML;
+                    break;
+                case "text/csv":
+                    responseType = CSV;
+                    break;
+                default:
+                    responseType = JSON;
+                    break;
             }
+
         }
 
         Result result = createResponse(exchange);
@@ -112,15 +117,15 @@ public class HttpAdapter implements HttpHandler {
         switch (responseType) {
             case JSON:
                 headers.set("Content-Type", "application/json; charset=UTF-8");
-                stringResponse = JsonFormatter.getInstance().format(true, result);
+                stringResponse = formatResponse(JSON, result);
                 break;
             case XML:
                 headers.set("Content-Type", "text/xml; charset=UTF-8");
-                stringResponse = XmlFormatter.getInstance().format(true, result);
+                stringResponse = formatResponse(XML, result);
                 break;
             case CSV:
                 headers.set("Content-Type", "text/csv; charset=UTF-8");
-                stringResponse = CsvFormatter.getInstance().format(result);
+                stringResponse = formatResponse(CSV, result);
                 break;
         }
 
@@ -139,6 +144,25 @@ public class HttpAdapter implements HttpHandler {
         os.write(stringResponse.getBytes());
         os.close();
         exchange.close();
+    }
+
+    public String formatResponse(int type, Result result) {
+        String formattedResponse;
+        switch (type) {
+            case JSON:
+                formattedResponse = JsonFormatter.getInstance().format(true, result);
+                break;
+            case XML:
+                formattedResponse = XmlFormatter.getInstance().format(true, result);
+                break;
+            case CSV:
+                formattedResponse = CsvFormatter.getInstance().format(result);
+                break;
+            default:
+                formattedResponse = JsonFormatter.getInstance().format(true, result);
+                break;
+        }
+        return formattedResponse;
     }
 
     private Result createResponse(HttpExchange exchange) {
