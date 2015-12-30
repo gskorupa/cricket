@@ -20,3 +20,5 @@ hs_err_pid*
 /build/web/WEB-INF/classes/help.txt
 !/templates/standalone/lib/cricket-1.0.0.jar
 !/templates/standalone/lib/cricket-1.0-B1.jar
+!/templates/standalone/lib/cricket-1.0-B2.jar
+!/templates/standalone/lib/cricket-lite-1.0-B2.jar

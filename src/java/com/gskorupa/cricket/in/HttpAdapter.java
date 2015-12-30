@@ -34,9 +34,9 @@ import java.util.Map;
  */
 public class HttpAdapter implements HttpHandler {
 
-    final int JSON = 0;
-    final int XML = 1;
-    final int CSV = 2;
+    public final static int JSON = 0;
+    public final static int XML = 1;
+    public final static int CSV = 2;
 
     public final static int SC_OK = 200;
     public final static int SC_ACCEPTED = 202;
