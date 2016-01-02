@@ -18,6 +18,9 @@ package com.gskorupa.cricket.in;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONStringer;
 
 /**
  *
@@ -42,7 +45,7 @@ public class EchoResult implements Result {
     }
 
     public String getMessage() {
-        return message;
+        return null!=message ? message : "";
     }
     
     /**
@@ -59,30 +62,20 @@ public class EchoResult implements Result {
         this.data = (HashMap) data;
     }
 
-    public String toJsonString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\n");
-        sb.append("  \"code\": ").append(getCode()).append(",\n");
-        sb.append("  \"message\": ").append(getMessage()).append(",\n");
-        sb.append("  \"data\": {\n");
-        
-        //generate data content
-        Iterator it = data.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry) it.next();
-            sb.append("    \"").append(pair.getKey()).append("\": ");
-            sb.append("\"").append(pair.getValue()).append("\"");
-            if(it.hasNext()){
-                sb.append(",");
-            }
-            sb.append("\n");
-        }
-        //end of data
-        sb.append("  }\n");
-        
-        // finish
-        sb.append("}\n");
-        return sb.toString();
+    public String toJsonString(){
+        String jst=
+                new JSONStringer()
+                        .object()
+                            .key("code")
+                            .value(getCode())
+                            .key("message")
+                            .value(getMessage())
+                            .key("data")
+                            .value(new JSONObject(data))
+                        .endObject()
+                        .toString()
+                +"\n";
+        return jst;
     }
 
     public String toXmlString() {

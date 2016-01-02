@@ -28,6 +28,7 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         System.out.println("logging level: " + getLoggingLevel());
         logger = Logger.getLogger(getName());
         logger.setLevel(level);
+        //System.out.println("logger level set to: " + logger.getLevel().getName());
     }
 
     public void log(Event event) {

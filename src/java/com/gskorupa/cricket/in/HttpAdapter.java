@@ -29,6 +29,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import com.gskorupa.cricket.HttpAdapterHook;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -109,13 +111,6 @@ public class HttpAdapter implements HttpHandler {
 
     public void handle(HttpExchange exchange) throws IOException {
 
-        sendLogEvent(
-                new Event(
-                        "HttpAdapter",
-                        Event.LOG_INFO,
-                        exchange.toString()
-                )
-        );
         int responseType=JSON;
 
         for (String v : exchange.getRequestHeaders().get("Accept")) {
@@ -137,7 +132,7 @@ public class HttpAdapter implements HttpHandler {
         }
 
         Result result = createResponse(exchange);
-
+        
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         String stringResponse = "";
@@ -168,6 +163,7 @@ public class HttpAdapter implements HttpHandler {
                 break;
         }
         exchange.sendResponseHeaders(errCode, stringResponse.getBytes().length);
+        sendLogEvent(exchange, stringResponse.getBytes().length);
         OutputStream os = exchange.getResponseBody();
         os.write(stringResponse.getBytes());
         os.close();
@@ -219,7 +215,7 @@ public class HttpAdapter implements HttpHandler {
         }
 
         try {
-            System.out.println("sending request to hook method " + getHookMethodNameForMethod(method));
+            sendLogEvent("sending request to hook method " + getHookMethodNameForMethod(method));
             Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForMethod(method), RequestObject.class);
             result = (Result) m.invoke(Kernel.getInstance(), requestObject);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -264,7 +260,48 @@ public class HttpAdapter implements HttpHandler {
         return result;
     }
     
-    protected void sendLogEvent(Event event){
+    protected void sendLogEvent(HttpExchange exchange, int length){
+        SimpleDateFormat sdf= new SimpleDateFormat("[dd/MMM/yyyy:kk:mm:ss Z]");
+        StringBuilder sb=new StringBuilder();
+        
+        sb.append(exchange.getRemoteAddress().getAddress().getHostAddress());
+        sb.append(" - ");
+        try{
+            sb.append(exchange.getPrincipal().getUsername());
+        }catch(Exception e){
+            sb.append("-");
+        }
+        sb.append(" ");
+        sb.append(sdf.format(new Date()));
+        sb.append(" ");
+        sb.append(exchange.getRequestMethod());
+        sb.append(" ");
+        sb.append(exchange.getProtocol());
+        sb.append(" ");
+        sb.append(exchange.getRequestURI());
+        sb.append(" ");
+        sb.append(exchange.getResponseCode());
+        sb.append(" ");
+        sb.append(length);
+      
+        Event event=new Event(
+                        "HttpAdapter",
+                        Event.LOG_INFO,
+                        sb.toString());
+        
+        try {
+            Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForEvent("LOGGING"),Event.class);
+            m.invoke(Kernel.getInstance(), event);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    protected void sendLogEvent(String message){
+        Event event=new Event(
+                        "HttpAdapter",
+                        Event.LOG_INFO,
+                        message);
         try {
             Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForEvent("LOGGING"),Event.class);
             m.invoke(Kernel.getInstance(), event);

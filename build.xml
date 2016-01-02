@@ -17,6 +17,7 @@
     <property name="tomcat-home" value="/home/greg/apache-tomcat-7.0.67" />
 
     <path id="project-classpath">
+        <pathelement location="${lib}/json.jar"/>
         <pathelement location="${lib}/gson-2.5.jar"/>
         <pathelement location="${lib}/jackson-jr-objects-2.6.3.jar"/>
         <pathelement location="${lib}/xstream-1.4.8.jar"/>
@@ -79,6 +80,7 @@
                 <attribute name="Main-Class" value="com.gskorupa.cricket.DummyService"/>
             </manifest>
             <fileset dir="${build}" excludes="**/example/**, HelloService.properties"/>
+            <zipfileset src="${lib}/json.jar" includes="org/**/*"/>
         </jar>
     </target>
 </project>

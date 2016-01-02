@@ -32,7 +32,8 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
     /**
      * Formats response sent back by this adapter
      * <p>
-     * This method should be ommited if standard HttpAdapter.format method is OK.
+     * This method could be ommited if standard HttpAdapter.format method is OK.
+     * If you prefer to use HttpAdapter.format then you should use the full Cricket distribution.
      * @param type      required response type: HttpAdapter.JSON, HttpAdapter.XML
      *                  or HttpAdapter.CSV
      * @param result    data to send as a response
