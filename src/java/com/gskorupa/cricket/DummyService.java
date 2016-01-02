@@ -19,6 +19,7 @@ import com.gskorupa.cricket.in.HttpAdapter;
 import java.util.logging.Logger;
 import com.gskorupa.cricket.in.EchoHttpAdapterIface;
 import com.gskorupa.cricket.in.EchoResult;
+import com.gskorupa.cricket.out.LoggerAdapterIface;
 import static java.lang.Thread.MIN_PRIORITY;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,43 +35,59 @@ public class DummyService extends Kernel {
     private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.DummyService.class.getName());
 
     // adapterClasses
-    EchoHttpAdapterIface handler = null;
+    LoggerAdapterIface logHandler = null;
+    EchoHttpAdapterIface httpHandler = null;
 
     public DummyService() {
-        adapters = new Object[1];
-        adapters[0] = handler;
-        adapterClasses = new Class[1];
-        adapterClasses[0] = EchoHttpAdapterIface.class;
+        adapters = new Object[2];
+        adapters[0] = logHandler;
+        adapters[1] = httpHandler;
+        adapterClasses = new Class[2];
+        adapterClasses[0] = LoggerAdapterIface.class;
+        adapterClasses[1] = EchoHttpAdapterIface.class;
     }
 
     @Override
     public void getAdapters() {
-        handler = (EchoHttpAdapterIface) super.adapters[0];
+        logHandler = (LoggerAdapterIface) super.adapters[0];
+        httpHandler = (EchoHttpAdapterIface) super.adapters[1];
     }
 
     @Override
     public void runOnce() {
+        Event e=new Event("runOnce()",Event.LOG_INFO, "executed");
+        logEvent(e);
         System.out.println("Hello from DummyService.runOnce()");
     }
 
-    @AdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
+    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
     public Object doGet(RequestObject request) {
         return sendEcho(request);
     }
     
-    @AdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "POST")
+    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "POST")
     public Object doPost(RequestObject request) {
         return sendEcho(request);
     }
     
-    @AdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "PUT")
+    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "PUT")
     public Object doPut(RequestObject request) {
         return sendEcho(request);
     }
     
-    @AdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "DELETE")
+    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "DELETE")
     public Object doDelete(RequestObject request) {
         return sendEcho(request);
+    }
+    
+    @EventHook(eventType = "LOGGING")
+    public void logEvent(Event event){
+        logHandler.log(event);
+    }
+    
+    @EventHook(eventType = "*")
+    public void processEvent(Event event){
+        //does nothing
     }
     
     public Object sendEcho(RequestObject request) {

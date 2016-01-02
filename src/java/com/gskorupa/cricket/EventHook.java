@@ -28,7 +28,6 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface AdapterHook {
-    public String handlerClassName();
-    public String requestMethod();
+public @interface EventHook {
+    public String eventType();
 }

@@ -15,14 +15,20 @@
  */
 package com.gskorupa.cricket;
 
-import java.util.Properties;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public interface Adapter {
-    
-    public void loadProperties(Properties properties);
-    
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface HttpAdapterHook {
+    public String handlerClassName();
+    public String requestMethod();
 }

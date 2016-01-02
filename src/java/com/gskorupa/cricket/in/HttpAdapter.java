@@ -15,7 +15,8 @@
  */
 package com.gskorupa.cricket.in;
 
-import com.gskorupa.cricket.AdapterHook;
+import com.gskorupa.cricket.Event;
+import com.gskorupa.cricket.EventHook;
 import com.gskorupa.cricket.RequestObject;
 import com.gskorupa.cricket.Kernel;
 import com.sun.net.httpserver.Headers;
@@ -27,6 +28,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import com.gskorupa.cricket.HttpAdapterHook;
 
 /**
  *
@@ -54,16 +56,21 @@ public class HttpAdapter implements HttpHandler {
     public final static int SC_NOT_IMPLEMENTED = 501;
 
     private String context;
-    private String hookMethodName = null;
+    //private String hookMethodName = null;
     private HashMap<String, String> hookMethodNames = new HashMap();
+    private HashMap<String, String> eventHookMethods =new HashMap();
+    
+    public HttpAdapter(){
+        getEventHooks();
+        getServiceHooks();
+    }
 
-    //public abstract void loadProperties(Properties properties);
     protected void getServiceHooks() {
-        AdapterHook ah;
+        HttpAdapterHook ah;
         String requestMethod;
         // for every method of a Kernel instance (our service class extending Kernel)
         for (Method m : Kernel.getInstance().getClass().getMethods()) {
-            ah = (AdapterHook) m.getAnnotation(AdapterHook.class);
+            ah = (HttpAdapterHook) m.getAnnotation(HttpAdapterHook.class);
             // we search for annotated method
             if (ah != null) {
                 requestMethod = ah.requestMethod();
@@ -77,7 +84,7 @@ public class HttpAdapter implements HttpHandler {
                         //System.out.println(ah.handlerClassName() + " " + c.getSimpleName());
                         //setHookMethodName(m.getName());
                         addHookMethodNameForMethod(requestMethod, m.getName());
-                        System.out.println("hook method for " + requestMethod + " : " + m.getName());
+                        System.out.println("hook method for http method " + requestMethod + " : " + m.getName());
                         break;
                     }
                 }
@@ -85,9 +92,30 @@ public class HttpAdapter implements HttpHandler {
         }
     }
 
+    protected void getEventHooks() {
+        EventHook ah;
+        String eventType;
+        // for every method of a Kernel instance (our service class extending Kernel)
+        for (Method m : Kernel.getInstance().getClass().getMethods()) {
+            ah = (EventHook) m.getAnnotation(EventHook.class);
+            // we search for annotated method
+            if (ah != null) {
+                eventType = ah.eventType();
+                addHookMethodNameForEvent(eventType, m.getName());
+                System.out.println("hook method for event type " + eventType + " : " + m.getName());
+            }
+        }
+    }
 
     public void handle(HttpExchange exchange) throws IOException {
 
+        sendLogEvent(
+                new Event(
+                        "HttpAdapter",
+                        Event.LOG_INFO,
+                        exchange.toString()
+                )
+        );
         int responseType=JSON;
 
         for (String v : exchange.getRequestHeaders().get("Accept")) {
@@ -214,6 +242,9 @@ public class HttpAdapter implements HttpHandler {
     public void addHookMethodNameForMethod(String requestMethod, String hookMethodName) {
         hookMethodNames.put(requestMethod, hookMethodName);
     }
+    public void addHookMethodNameForEvent(String eventType, String hookMethodName) {
+        eventHookMethods.put(eventType, hookMethodName);
+    }
 
     public String getHookMethodNameForMethod(String requestMethod) {
         String result = null;
@@ -222,6 +253,24 @@ public class HttpAdapter implements HttpHandler {
             result = hookMethodNames.get("*");
         }
         return result;
+    }
+    
+    public String getHookMethodNameForEvent(String eventType) {
+        String result = null;
+        result = eventHookMethods.get(eventType);
+        if (null == result) {
+            result = eventHookMethods.get("*");
+        }
+        return result;
+    }
+    
+    protected void sendLogEvent(Event event){
+        try {
+            Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForEvent("LOGGING"),Event.class);
+            m.invoke(Kernel.getInstance(), event);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
     }
 
 }

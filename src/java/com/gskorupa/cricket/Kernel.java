@@ -101,6 +101,7 @@ public abstract class Kernel {
             Properties props = ((Kernel) instance).getProperties(c.getSimpleName());
             ((Kernel) instance).loadAdapters(props, adapters, adapterClasses);
         } catch (Exception e) {
+            logger.severe(e.getStackTrace()[0].toString() + ":" + e.getStackTrace()[1].toString());
             e.printStackTrace();
             instance = null;
         }
@@ -116,6 +117,7 @@ public abstract class Kernel {
             props = new Properties();
             props.load(propertyFile);
         } catch (IOException e) {
+            logger.severe(e.getStackTrace()[0].toString() + ":" + e.getStackTrace()[1].toString());
             e.printStackTrace();
         }
         return props;
@@ -123,12 +125,15 @@ public abstract class Kernel {
 
     private void loadAdapters(Properties props, Object[] adapters, Class[] adapterClasses) throws Exception {
         setHttpHandlerLoaded(false);
-        System.out.println("LOADING ADAPTERS");
+        System.out.println("LOADING SERVICE PROPERTIES");
         setHost(props.getProperty("http-host"));
+        System.out.println("http-host="+getHost());
         try {
             setPort(Integer.parseInt(props.getProperty("http-port")));
         } catch (Exception e) {
         }
+        System.out.println("http-port="+getPort());
+        System.out.println("LOADING ADAPTERS");
         String adapterInterfaceName = null;
         try {
             for (int i = 0; i < adapterClasses.length; i++) {
@@ -137,13 +142,12 @@ public abstract class Kernel {
                 Class c = Class.forName(props.getProperty(adapterInterfaceName));
                 if (adapterClasses[i].isAssignableFrom(c)) {
                     adapters[i] = adapterClasses[i].cast(c.newInstance());
-                    //if (adapters[i] instanceof com.sun.net.httpserver.HttpHandler) {
                     if (adapters[i] instanceof com.gskorupa.cricket.in.HttpAdapter) {
                         setHttpHandlerLoaded(true);
                     }
-                    java.lang.reflect.Method method = adapters[i].getClass().getMethod("loadProperties", Properties.class);
-                    method.invoke(adapters[i], props);
-                    System.out.println("LOADED");
+                    // loading properties
+                    java.lang.reflect.Method loadPropsMethod = adapters[i].getClass().getMethod("loadProperties", Properties.class);
+                    loadPropsMethod.invoke(adapters[i], props);
                 } else {
                     logger.severe("Adapters initialization error. Configuration for: " + adapterInterfaceName);
                 }
@@ -219,6 +223,7 @@ public abstract class Kernel {
             try{
                 content=readHelpFile("/help.txt");
             }catch(Exception x){
+                logger.severe(x.getStackTrace()[0].toString() + ":" + x.getStackTrace()[1].toString());
                 e.printStackTrace();
             }
         }
@@ -244,7 +249,7 @@ public abstract class Kernel {
     * This method will be invoked when Kernel is executed without --run option
     */
     public void runOnce(){
-        
+        logger.warning("Method runOnce should be overriden");
     }
     
 }

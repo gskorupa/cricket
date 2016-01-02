@@ -15,7 +15,6 @@
  */
 package com.gskorupa.cricket.example;
 
-import com.gskorupa.cricket.AdapterHook;
 import com.gskorupa.cricket.ArgumentParser;
 import com.gskorupa.cricket.in.HttpAdapter;
 import com.gskorupa.cricket.Httpd;
@@ -24,6 +23,7 @@ import com.gskorupa.cricket.RequestObject;
 import com.gskorupa.cricket.Kernel;
 import static java.lang.Thread.MIN_PRIORITY;
 import java.util.Map;
+import com.gskorupa.cricket.HttpAdapterHook;
 
 /**
  * HelloService
@@ -73,22 +73,22 @@ public class HelloService extends Kernel {
         return r;
     }
 
-    @AdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "GET")
+    @HttpAdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "GET")
     public Object doGet(RequestObject request) {
         return sendEcho(request);
     }
     
-    @AdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "POST")
+    @HttpAdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "POST")
     public Object doPost(RequestObject request) {
         return sendEcho(request);
     }
     
-    @AdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "PUT")
+    @HttpAdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "PUT")
     public Object doPut(RequestObject request) {
         return sendEcho(request);
     }
     
-    @AdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "DELETE")
+    @HttpAdapterHook(handlerClassName = "HelloHttpAdapterIface", requestMethod = "DELETE")
     public Object doDelete(RequestObject request) {
         return sendEcho(request);
     }

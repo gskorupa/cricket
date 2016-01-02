@@ -27,7 +27,6 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
     public void loadProperties(Properties properties) {
         setContext(properties.getProperty("EchoHttpAdapterIface-context"));
         System.out.println("context=" + getContext());
-        getServiceHooks(); 
     }
     
     /**
