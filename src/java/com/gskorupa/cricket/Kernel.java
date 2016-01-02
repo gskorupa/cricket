@@ -38,8 +38,8 @@ public abstract class Kernel {
     private static Object instance = null;
 
     // adapters
-    public static Object[] fields = {};
-    public static Class[] adapters = {};
+    public static Object[] adapters = {};
+    public static Class[] adapterClasses = {};
 
     // http server
     private String host = null;
@@ -83,7 +83,7 @@ public abstract class Kernel {
         }
         try {
             instance = c.getClass().newInstance();
-            ((Kernel) instance).loadAdapters(props, fields, adapters);
+            ((Kernel) instance).loadAdapters(props, adapters, adapterClasses);
         } catch (Exception e) {
             instance = null;
             logger.severe(e.getStackTrace()[0].toString() + ":" + e.getStackTrace()[1].toString());
@@ -99,7 +99,7 @@ public abstract class Kernel {
         try {
             instance = c.newInstance();
             Properties props = ((Kernel) instance).getProperties(c.getSimpleName());
-            ((Kernel) instance).loadAdapters(props, fields, adapters);
+            ((Kernel) instance).loadAdapters(props, adapters, adapterClasses);
         } catch (Exception e) {
             e.printStackTrace();
             instance = null;
@@ -121,7 +121,7 @@ public abstract class Kernel {
         return props;
     }
 
-    private void loadAdapters(Properties props, Object[] fields, Class[] adapters) throws Exception {
+    private void loadAdapters(Properties props, Object[] adapters, Class[] adapterClasses) throws Exception {
         setHttpHandlerLoaded(false);
         System.out.println("LOADING ADAPTERS");
         setHost(props.getProperty("http-host"));
@@ -131,18 +131,18 @@ public abstract class Kernel {
         }
         String adapterInterfaceName = null;
         try {
-            for (int i = 0; i < adapters.length; i++) {
-                adapterInterfaceName = adapters[i].getSimpleName();
+            for (int i = 0; i < adapterClasses.length; i++) {
+                adapterInterfaceName = adapterClasses[i].getSimpleName();
                 System.out.println("ADAPTER: " + adapterInterfaceName);
                 Class c = Class.forName(props.getProperty(adapterInterfaceName));
-                if (adapters[i].isAssignableFrom(c)) {
-                    fields[i] = adapters[i].cast(c.newInstance());
-                    //if (fields[i] instanceof com.sun.net.httpserver.HttpHandler) {
-                    if (fields[i] instanceof com.gskorupa.cricket.in.HttpAdapter) {
+                if (adapterClasses[i].isAssignableFrom(c)) {
+                    adapters[i] = adapterClasses[i].cast(c.newInstance());
+                    //if (adapters[i] instanceof com.sun.net.httpserver.HttpHandler) {
+                    if (adapters[i] instanceof com.gskorupa.cricket.in.HttpAdapter) {
                         setHttpHandlerLoaded(true);
                     }
-                    java.lang.reflect.Method method = fields[i].getClass().getMethod("loadProperties", Properties.class);
-                    method.invoke(fields[i], props);
+                    java.lang.reflect.Method method = adapters[i].getClass().getMethod("loadProperties", Properties.class);
+                    method.invoke(adapters[i], props);
                     System.out.println("LOADED");
                 } else {
                     logger.severe("Adapters initialization error. Configuration for: " + adapterInterfaceName);

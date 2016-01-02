@@ -22,18 +22,30 @@ package com.gskorupa.cricket.in;
 public interface Result {
     
     /**
-     * @return the error code
+     * @return the status code
      */
     public int getCode();
-
+    
     /**
-     * @param code the code to set
+     * @param code the status code to set
      */
     public void setCode(int code);
+    
+    /**
+     * @return the status message
+     */
+    public String getMessage();
+    
+    /**
+     * @param message the message to set
+     */
+    public void setMessage(String message);
+    
     /**
      * @return the data
      */
     public Object getData();
+    
     /**
      * @param data the data to set
      */

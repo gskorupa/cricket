@@ -35,29 +35,29 @@ public class HelloService extends Kernel {
     // emergency logger
     private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.example.HelloService.class.getName());
 
-    // adapters
+    // adapterClasses
     HelloStorageIface storage = null;
     HelloLoggerIface log = null;
     HelloHttpAdapterIface handler = null;
 
     public HelloService() {
 
-        fields = new Object[3];
-        fields[0] = storage;
-        fields[1] = log;
-        fields[2] = handler;
-        adapters = new Class[3];
-        adapters[0] = HelloStorageIface.class;
-        adapters[1] = HelloLoggerIface.class;
-        adapters[2] = HelloHttpAdapterIface.class;
+        adapters = new Object[3];
+        adapters[0] = storage;
+        adapters[1] = log;
+        adapters[2] = handler;
+        adapterClasses = new Class[3];
+        adapterClasses[0] = HelloStorageIface.class;
+        adapterClasses[1] = HelloLoggerIface.class;
+        adapterClasses[2] = HelloHttpAdapterIface.class;
 
     }
 
     @Override
     public void getAdapters() {
-        storage = (HelloStorageIface) super.fields[0];
-        log = (HelloLoggerIface) super.fields[1];
-        handler = (HelloHttpAdapterIface) super.fields[2];
+        storage = (HelloStorageIface) super.adapters[0];
+        log = (HelloLoggerIface) super.adapters[1];
+        handler = (HelloHttpAdapterIface) super.adapters[2];
     }
 
     @Override

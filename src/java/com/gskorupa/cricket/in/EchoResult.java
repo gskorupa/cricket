@@ -27,6 +27,7 @@ public class EchoResult implements Result {
 
     private HashMap<String, String> data;
     private int code;
+    private String message;
 
     public void setCode(int code) {
         this.code = code;
@@ -36,6 +37,14 @@ public class EchoResult implements Result {
         return code;
     }
 
+    public void setMessage(String message) {
+        this.code = code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+    
     /**
      * @return the data
      */
@@ -53,29 +62,35 @@ public class EchoResult implements Result {
     public String toJsonString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{\n");
-        sb.append("\"code\": ").append(getCode()).append(",\n");
-        sb.append("\"data\": {\n");
+        sb.append("  \"code\": ").append(getCode()).append(",\n");
+        sb.append("  \"message\": ").append(getMessage()).append(",\n");
+        sb.append("  \"data\": {\n");
+        
+        //generate data content
         Iterator it = data.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry pair = (Map.Entry) it.next();
-            sb.append("\"").append(pair.getKey()).append("\": ");
+            sb.append("    \"").append(pair.getKey()).append("\": ");
             sb.append("\"").append(pair.getValue()).append("\"");
             if(it.hasNext()){
                 sb.append(",");
             }
             sb.append("\n");
         }
-        sb.append("}\n");
+        //end of data
+        sb.append("  }\n");
+        
+        // finish
         sb.append("}\n");
         return sb.toString();
     }
 
     public String toXmlString() {
-        return "";
+        return null;
     }
 
     public String toCsvString() {
-        return "";
+        return null;
     }
 
 }

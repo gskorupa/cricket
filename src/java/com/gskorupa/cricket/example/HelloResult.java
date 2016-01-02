@@ -24,13 +24,22 @@ import com.gskorupa.cricket.in.Result;
 public class HelloResult implements Result {
     private HelloData data;
     private int code;
-
+    private String message;
+    
     public void setCode(int code){
         this.code=code;
     }
     
     public int getCode(){
         return code;
+    }
+    
+    public void setMessage(String message) {
+        this.code = code;
+    }
+
+    public String getMessage() {
+        return message;
     }
     
     /**

@@ -33,19 +33,19 @@ public class DummyService extends Kernel {
     // emergency logger
     private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.DummyService.class.getName());
 
-    // adapters
+    // adapterClasses
     EchoHttpAdapterIface handler = null;
 
     public DummyService() {
-        fields = new Object[1];
-        fields[0] = handler;
-        adapters = new Class[1];
-        adapters[0] = EchoHttpAdapterIface.class;
+        adapters = new Object[1];
+        adapters[0] = handler;
+        adapterClasses = new Class[1];
+        adapterClasses[0] = EchoHttpAdapterIface.class;
     }
 
     @Override
     public void getAdapters() {
-        handler = (EchoHttpAdapterIface) super.fields[0];
+        handler = (EchoHttpAdapterIface) super.adapters[0];
     }
 
     @Override
