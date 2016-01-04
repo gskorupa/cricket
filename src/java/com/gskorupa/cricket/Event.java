@@ -18,19 +18,21 @@ public class Event {
     public static final String LOG_SEVERE = "LOG_SEVERE";
     
     private long id;
+    private String category;
     private String type;
     private String origin;
     private String payload;
     
-    public Event(String origin, String type, String payload){
+    public Event(String origin, String category, String type, String payload){
         this.origin=origin;
+        this.category=category;
         this.type=type;
         this.payload=payload;
     }
     
     public String toString(){
         StringBuilder sb=new StringBuilder();
-        sb.append(getOrigin()).append(":").append(getType()).append(":").append(getPayload());
+        sb.append(getOrigin()).append(getCategory()).append(":").append(":").append(getType()).append(":").append(getPayload());
         return sb.toString();
     }
 
@@ -52,7 +54,7 @@ public class Event {
      * @return the type
      */
     public String getType() {
-        return type;
+        return type!=null ? type : "";
     }
 
     /**
@@ -88,5 +90,19 @@ public class Event {
      */
     public void setPayload(String payload) {
         this.payload = payload;
+    }
+
+    /**
+     * @return the category
+     */
+    public String getCategory() {
+        return category!=null ? category : "";
+    }
+
+    /**
+     * @param subtype the category to set
+     */
+    public void setCategory(String subtype) {
+        this.category = subtype;
     }
 }

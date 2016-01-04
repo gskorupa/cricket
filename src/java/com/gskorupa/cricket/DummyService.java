@@ -55,7 +55,7 @@ public class DummyService extends Kernel {
 
     @Override
     public void runOnce() {
-        Event e=new Event("runOnce()",Event.LOG_INFO, "executed");
+        Event e=new Event("runOnce()","LOG",Event.LOG_INFO, "executed");
         logEvent(e);
         System.out.println("Hello from DummyService.runOnce()");
     }
@@ -80,12 +80,12 @@ public class DummyService extends Kernel {
         return sendEcho(request);
     }
     
-    @EventHook(eventType = "LOGGING")
+    @EventHook(eventCategory = "LOGGING")
     public void logEvent(Event event){
         logHandler.log(event);
     }
     
-    @EventHook(eventType = "*")
+    @EventHook(eventCategory = "*")
     public void processEvent(Event event){
         //does nothing
     }

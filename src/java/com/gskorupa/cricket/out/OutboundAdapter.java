@@ -15,8 +15,10 @@
  */
 package com.gskorupa.cricket.out;
 
+import com.gskorupa.cricket.Event;
 import com.gskorupa.cricket.EventHook;
 import com.gskorupa.cricket.Kernel;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
@@ -32,22 +34,41 @@ public class OutboundAdapter {
         getEventHooks();
     }
     
-    public void addHookMethodNameForEvent(String eventType, String hookMethodName) {
-        eventHookMethods.put(eventType, hookMethodName);
+    public void addHookMethodNameForEvent(String eventCategory, String hookMethodName) {
+        eventHookMethods.put(eventCategory, hookMethodName);
     }
 
     protected void getEventHooks() {
         EventHook ah;
-        String eventType;
+        String eventCategory;
         // for every method of a Kernel instance (our service class extending Kernel)
         for (Method m : Kernel.getInstance().getClass().getMethods()) {
             ah = (EventHook) m.getAnnotation(EventHook.class);
             // we search for annotated method
             if (ah != null) {
-                eventType = ah.eventType();
-                addHookMethodNameForEvent(eventType, m.getName());
-                System.out.println("hook method for event type " + eventType + " : " + m.getName());
+                eventCategory = ah.eventCategory();
+                addHookMethodNameForEvent(eventCategory, m.getName());
+                System.out.println("hook method for event category " + eventCategory + " : " + m.getName());
             }
+        }
+    }
+    
+    public String getHookMethodNameForEvent(String eventCategory) {
+        String result = null;
+        result = eventHookMethods.get(eventCategory);
+        if (null == result) {
+            result = eventHookMethods.get("*");
+        }
+        return result;
+    }
+    
+    protected void sendEvent(Event event){
+        try {
+            Method m = Kernel.getInstance().getClass()
+                    .getMethod(getHookMethodNameForEvent(event.getCategory()),Event.class);
+            m.invoke(Kernel.getInstance(), event);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
         }
     }
 
