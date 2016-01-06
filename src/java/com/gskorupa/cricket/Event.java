@@ -10,32 +10,34 @@ package com.gskorupa.cricket;
  * @author greg
  */
 public class Event {
+
+    public static final String CATEGORY_LOG = "LOG";
+    public static final String CATEGORY_GENERIC = "EVENT";
     
-    public static final String LOG_ALL = "LOG_ALL";
-    public static final String LOG_FINEST = "LOG_FINEST";
-    public static final String LOG_INFO = "LOG_INFO";
-    public static final String LOG_WARNING = "LOG_WARNING";
-    public static final String LOG_SEVERE = "LOG_SEVERE";
-    
+    public static final String LOG_ALL = "ALL";
+    public static final String LOG_FINEST = "FINEST";
+    public static final String LOG_INFO = "INFO";
+    public static final String LOG_WARNING = "WARNING";
+    public static final String LOG_SEVERE = "SEVERE";
+
     private long id;
     private String category;
     private String type;
     private String origin;
     private Object payload;
-    
-    public Event(String origin, String category, String type, String payload){
-        this.origin=origin;
-        this.category=category;
-        this.type=type;
-        this.payload=payload;
+
+    public Event(String origin, String category, String type, String payload) {
+        this.origin = origin;
+        this.category = category;
+        this.type = type;
+        this.payload = payload;
     }
-    
-    public String toString(){
-        StringBuilder sb=new StringBuilder();
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
         sb.append(getOrigin())
                 .append(":")
                 .append(getCategory())
-                .append(":")
                 .append(":")
                 .append(getType())
                 .append(":")
@@ -61,7 +63,7 @@ public class Event {
      * @return the type
      */
     public String getType() {
-        return type!=null ? type : "";
+        return type != null ? type : "";
     }
 
     /**
@@ -103,7 +105,7 @@ public class Event {
      * @return the category
      */
     public String getCategory() {
-        return category!=null ? category : "";
+        return category != null ? category : "";
     }
 
     /**

@@ -35,15 +35,19 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         String level=event.getType();
         switch(level){
             case "LOG_INFO":
+            case "INFO":
                 logger.log(Level.INFO, event.toString());
                 break;
             case "LOG_FINEST":
+            case "FINEST":
                 logger.log(Level.FINEST, event.toString());
                 break;
             case "LOG_WARNING":
+            case "WARNING":
                 logger.log(Level.WARNING, event.toString());
                 break;
             case "LOG_SEVERE":
+            case "SEVERE":
                 logger.log(Level.SEVERE, event.toString());
                 break;
             default:

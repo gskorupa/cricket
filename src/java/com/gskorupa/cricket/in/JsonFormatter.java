@@ -33,7 +33,7 @@ public class JsonFormatter {
         } else {
             gson = gsonBuilder.create();
         }
-        return gson.toJson(o);
+        return gson.toJson(o)+"\n";
     }
     
 }
