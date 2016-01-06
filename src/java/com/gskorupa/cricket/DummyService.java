@@ -20,7 +20,6 @@ import java.util.logging.Logger;
 import com.gskorupa.cricket.in.EchoHttpAdapterIface;
 import com.gskorupa.cricket.in.EchoResult;
 import com.gskorupa.cricket.out.LoggerAdapterIface;
-import static java.lang.Thread.MIN_PRIORITY;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,7 +54,7 @@ public class DummyService extends Kernel {
 
     @Override
     public void runOnce() {
-        Event e=new Event("runOnce()","LOG",Event.LOG_INFO, "executed");
+        Event e=new Event("DummyService.runOnce()","LOG",Event.LOG_INFO, "executed");
         logEvent(e);
         System.out.println("Hello from DummyService.runOnce()");
     }
@@ -80,7 +79,7 @@ public class DummyService extends Kernel {
         return sendEcho(request);
     }
     
-    @EventHook(eventCategory = "LOGGING")
+    @EventHook(eventCategory = "LOG")
     public void logEvent(Event event){
         logHandler.log(event);
     }
@@ -127,7 +126,6 @@ public class DummyService extends Kernel {
         }
 
         try {
-
             if (arguments.containsKey("config")) {
                 service = (DummyService) DummyService.getInstance(DummyService.class, arguments.get("config"));
             } else {
@@ -136,36 +134,11 @@ public class DummyService extends Kernel {
             service.getAdapters();
 
             if (arguments.containsKey("run")) {
-                if (service.isHttpHandlerLoaded()) {
-                    System.out.println("Starting http server ...");
-                    Runtime.getRuntime().addShutdownHook(
-                            new Thread() {
-                        public void run() {
-                            try {
-                                Thread.sleep(200);
-                                //some cleaning up code could be added here ... if required
-                                System.out.println("\nShutdown ...");
-                                service.getHttpd().server.stop(MIN_PRIORITY);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                    service.setHttpd(new Httpd(service));
-                    service.getHttpd().run();
-                    System.out.println("Started. Press Ctrl-C to stop");
-                    while (true) {
-                        Thread.sleep(100);
-                    }
-                } else {
-                    System.out.println("Couldn't find any http request hook method. Exiting ...");
-                    System.exit(MIN_PRIORITY);
-                }
+                service.start();
             } else {
                 System.out.println("Executing runOnce method");
                 service.runOnce();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -21,7 +21,7 @@ public class Event {
     private String category;
     private String type;
     private String origin;
-    private String payload;
+    private Object payload;
     
     public Event(String origin, String category, String type, String payload){
         this.origin=origin;
@@ -32,7 +32,14 @@ public class Event {
     
     public String toString(){
         StringBuilder sb=new StringBuilder();
-        sb.append(getOrigin()).append(getCategory()).append(":").append(":").append(getType()).append(":").append(getPayload());
+        sb.append(getOrigin())
+                .append(":")
+                .append(getCategory())
+                .append(":")
+                .append(":")
+                .append(getType())
+                .append(":")
+                .append(getPayload().toString());
         return sb.toString();
     }
 
@@ -81,14 +88,14 @@ public class Event {
     /**
      * @return the payload
      */
-    public String getPayload() {
+    public Object getPayload() {
         return payload;
     }
 
     /**
      * @param payload the payload to set
      */
-    public void setPayload(String payload) {
+    public void setPayload(Object payload) {
         this.payload = payload;
     }
 

@@ -36,7 +36,7 @@ import java.util.Date;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class HttpAdapter implements HttpHandler {
+public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
     public final static int JSON = 0;
     public final static int XML = 1;
@@ -58,15 +58,15 @@ public class HttpAdapter implements HttpHandler {
     public final static int SC_NOT_IMPLEMENTED = 501;
 
     private String context;
-    //private String hookMethodName = null;
+
     private HashMap<String, String> hookMethodNames = new HashMap();
-    private HashMap<String, String> eventHookMethods =new HashMap();
+    //private HashMap<String, String> eventHookMethods =new HashMap();
     
     public HttpAdapter(){
-        getEventHooks();
+        //getEventHooks();
         getServiceHooks();
     }
-
+    
     protected void getServiceHooks() {
         HttpAdapterHook ah;
         String requestMethod;
@@ -93,7 +93,8 @@ public class HttpAdapter implements HttpHandler {
             }
         }
     }
-
+    
+    /*
     protected void getEventHooks() {
         EventHook ah;
         String eventCategory;
@@ -108,7 +109,8 @@ public class HttpAdapter implements HttpHandler {
             }
         }
     }
-
+    */
+    
     public void handle(HttpExchange exchange) throws IOException {
 
         int responseType=JSON;
@@ -238,10 +240,12 @@ public class HttpAdapter implements HttpHandler {
     public void addHookMethodNameForMethod(String requestMethod, String hookMethodName) {
         hookMethodNames.put(requestMethod, hookMethodName);
     }
+    
+    /*
     public void addHookMethodNameForEvent(String eventCategory, String hookMethodName) {
         eventHookMethods.put(eventCategory, hookMethodName);
     }
-
+    */
     public String getHookMethodNameForMethod(String requestMethod) {
         String result = null;
         result = hookMethodNames.get(requestMethod);
@@ -251,6 +255,7 @@ public class HttpAdapter implements HttpHandler {
         return result;
     }
     
+    /*
     public String getHookMethodNameForEvent(String eventCategory) {
         String result = null;
         result = eventHookMethods.get(eventCategory);
@@ -259,7 +264,7 @@ public class HttpAdapter implements HttpHandler {
         }
         return result;
     }
-    
+    */
     protected void sendLogEvent(HttpExchange exchange, int length){
         SimpleDateFormat sdf= new SimpleDateFormat("[dd/MMM/yyyy:kk:mm:ss Z]");
         StringBuilder sb=new StringBuilder();
@@ -312,6 +317,7 @@ public class HttpAdapter implements HttpHandler {
         }
     }
 
+    /*
     protected void sendEvent(Event event){
         try {
             Method m = Kernel.getInstance().getClass()
@@ -321,4 +327,5 @@ public class HttpAdapter implements HttpHandler {
             e.printStackTrace();
         }
     }
+    */
 }

@@ -23,6 +23,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import static java.lang.Thread.MIN_PRIORITY;
 
 /**
  * SimpleService
@@ -127,12 +128,12 @@ public abstract class Kernel {
         setHttpHandlerLoaded(false);
         System.out.println("LOADING SERVICE PROPERTIES");
         setHost(props.getProperty("http-host"));
-        System.out.println("http-host="+getHost());
+        System.out.println("http-host=" + getHost());
         try {
             setPort(Integer.parseInt(props.getProperty("http-port")));
         } catch (Exception e) {
         }
-        System.out.println("http-port="+getPort());
+        System.out.println("http-port=" + getPort());
         System.out.println("LOADING ADAPTERS");
         String adapterInterfaceName = null;
         try {
@@ -217,12 +218,12 @@ public abstract class Kernel {
 
     public String getHelp() {
         String content = "Help file not found";
-        try{
-            content=readHelpFile("/localhelp.txt");
-        }catch(Exception e){
-            try{
-                content=readHelpFile("/help.txt");
-            }catch(Exception x){
+        try {
+            content = readHelpFile("/localhelp.txt");
+        } catch (Exception e) {
+            try {
+                content = readHelpFile("/help.txt");
+            } catch (Exception x) {
                 logger.severe(x.getStackTrace()[0].toString() + ":" + x.getStackTrace()[1].toString());
                 e.printStackTrace();
             }
@@ -244,12 +245,45 @@ public abstract class Kernel {
         reader.close();
         return content;
     }
-    
+
     /*
     * This method will be invoked when Kernel is executed without --run option
-    */
-    public void runOnce(){
+     */
+    public void runOnce() {
         logger.warning("Method runOnce should be overriden");
     }
-    
+
+    public void start() throws InterruptedException {
+        if (isHttpHandlerLoaded()) {
+            System.out.println("Starting http listener ...");
+            Runtime.getRuntime().addShutdownHook(
+                    new Thread() {
+                public void run() {
+                    try {
+                        Thread.sleep(200);
+                        shutdown();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            setHttpd(new Httpd(this));
+            getHttpd().run();
+            System.out.println("Started. Press Ctrl-C to stop");
+            while (true) {
+                Thread.sleep(100);
+            }
+        } else {
+            System.out.println("Couldn't find any http request hook method. Exiting ...");
+            System.exit(MIN_PRIORITY);
+        }
+    }
+
+    public void shutdown() {
+        //some cleaning up code could be added here ... if required
+        System.out.println("\nShutting down ...");
+        //service.getHttpd().server.stop(MIN_PRIORITY);
+        getHttpd().server.stop(MIN_PRIORITY);
+    }
+
 }
