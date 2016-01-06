@@ -16,51 +16,65 @@
 package com.mycompany.bookshelf;
 
 import com.gskorupa.cricket.ArgumentParser;
-import com.gskorupa.cricket.Httpd;
+import com.gskorupa.cricket.Event;
+import com.gskorupa.cricket.EventHook;
+import com.gskorupa.cricket.Kernel;
+import com.gskorupa.cricket.in.EchoHttpAdapterIface;
+import com.gskorupa.cricket.out.LoggerAdapterIface;
 import java.util.logging.Logger;
-import com.gskorupa.cricket.Service;
-import com.gskorupa.cricket.example.SimpleData;
-import com.gskorupa.cricket.example.SimpleResult;
-import static java.lang.Thread.MIN_PRIORITY;
-import java.util.Map;
 
 /**
  * SimpleService
  *
  * @author greg
  */
-public class BookshelfService extends Service {
+public class BookshelfService extends Kernel {
 
     // emergency logger
-    private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.example.SimpleService.class.getName());
+    private static final Logger logger = Logger.getLogger(com.mycompany.bookshelf.BookshelfService.class.getName());
 
     // adapters
-    //SimpleStorageIface storage = null;
-    //SimpleLoggerIface log = null;
-    //SimpleHttpAdapterIface handler = null;
+    LoggerAdapterIface logAdapter = null;
+    EchoHttpAdapterIface httpAdapter = null;
 
     public BookshelfService() {
 
-        fields = new Object[2];
-        //fields[0] = storage;
-        //fields[1] = log;
-        //fields[2] = handler;
-        //adapters = new Class[3];
-        //adapters[0] = SimpleStorageIface.class;
-        //adapters[1] = SimpleLoggerIface.class;
-        //adapters[2] = SimpleHttpAdapterIface.class;
-
+        adapters = new Object[2];
+        adapters[0] = logAdapter;
+        adapters[1] = httpAdapter;
+        adapterClasses = new Class[2];
+        adapterClasses[0] = LoggerAdapterIface.class;
+        adapterClasses[1] = EchoHttpAdapterIface.class;
     }
 
+    @Override
     public void getAdapters() {
-        //storage = (SimpleStorageIface) super.fields[0];
-        //log = (SimpleLoggerIface) super.fields[1];
-        //handler = (SimpleHttpAdapterIface) super.fields[2];
+        httpAdapter = (EchoHttpAdapterIface) super.adapters[1];
+        logAdapter = (LoggerAdapterIface) super.adapters[0];
     }
 
-    //
-    public String sayHello() {
-        return "Hi! I'm "+ this.getClass().getSimpleName();
+    @Override
+    public void runOnce() {
+        //write to logs
+        Event ev= new Event(
+                        this.getClass().getSimpleName(),
+                        Event.CATEGORY_LOG, // equals "LOG"
+                        Event.LOG_INFO,     // equals "INFO"
+                        null);
+        logEvent(ev);
+        //alternatively:
+        //logAdapter.log(ev);
+        System.out.println("Hi! I'm " + this.getClass().getSimpleName());
+    }
+
+    @EventHook(eventCategory = "LOG")
+    public void logEvent(com.gskorupa.cricket.Event event) {
+        logAdapter.log(event);
+    }
+
+    @EventHook(eventCategory = "*")
+    public void processEvent(com.gskorupa.cricket.Event event) {
+        //put your code here
     }
 
     /**
@@ -69,56 +83,26 @@ public class BookshelfService extends Service {
     public static void main(String[] args) {
 
         final BookshelfService service;
-        Map<String, String> arguments = ArgumentParser.getArguments(args);
-
-        if (arguments.containsKey("error")) {
-            System.out.println(arguments.get("error"));
+        ArgumentParser arguments = new ArgumentParser(args);
+        if (arguments.isProblem()) {
+            if (arguments.containsKey("error")) {
+                System.out.println(arguments.get("error"));
+            }
+            System.out.println(new BookshelfService().getHelp());
             System.exit(-1);
         }
-        if (arguments.containsKey("help")) {
-            BookshelfService s=new BookshelfService(); //creating instance this way is valid only for displaing help!
-            System.out.println(s.getHelp());
-            System.exit(-1);
-        }
-
         try {
-            
             if (arguments.containsKey("config")) {
                 service = (BookshelfService) BookshelfService.getInstance(BookshelfService.class, arguments.get("config"));
             } else {
-                service = (BookshelfService) BookshelfService.getInstanceUsingResources(BookshelfService.class);    
+                service = (BookshelfService) BookshelfService.getInstanceUsingResources(BookshelfService.class);
             }
             service.getAdapters();
 
             if (arguments.containsKey("run")) {
-                if (service.isHttpHandlerLoaded()) {
-                    System.out.println("Starting http server ...");
-                    Runtime.getRuntime().addShutdownHook(
-                            new Thread() {
-                        public void run() {
-                            try {
-                                Thread.sleep(200);
-                                //some cleaning up code could be added here ... if required
-                                System.out.println("\nShutdown ...");
-                                service.getHttpd().server.stop(MIN_PRIORITY);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                    service.setHttpd(new Httpd(service));
-                    service.getHttpd().run();
-                    System.out.println("Started. Press Ctrl-C to stop");
-                    while (true) {
-                        Thread.sleep(100);
-                    }
-                } else {
-                    System.out.println("Couldn't find any http request hook method. Exiting ...");
-                    System.exit(MIN_PRIORITY);
-                }
+                service.start();
             } else {
-                // say hello
-                System.out.println(service.sayHello());
+                service.runOnce();
             }
 
         } catch (Exception e) {

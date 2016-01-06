@@ -34,13 +34,13 @@ public class DummyService extends Kernel {
     private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.DummyService.class.getName());
 
     // adapterClasses
-    LoggerAdapterIface logHandler = null;
-    EchoHttpAdapterIface httpHandler = null;
+    LoggerAdapterIface logAdapter = null;
+    EchoHttpAdapterIface httpAdapter = null;
 
     public DummyService() {
         adapters = new Object[2];
-        adapters[0] = logHandler;
-        adapters[1] = httpHandler;
+        adapters[0] = logAdapter;
+        adapters[1] = httpAdapter;
         adapterClasses = new Class[2];
         adapterClasses[0] = LoggerAdapterIface.class;
         adapterClasses[1] = EchoHttpAdapterIface.class;
@@ -48,8 +48,8 @@ public class DummyService extends Kernel {
 
     @Override
     public void getAdapters() {
-        logHandler = (LoggerAdapterIface) super.adapters[0];
-        httpHandler = (EchoHttpAdapterIface) super.adapters[1];
+        logAdapter = (LoggerAdapterIface) super.adapters[0];
+        httpAdapter = (EchoHttpAdapterIface) super.adapters[1];
     }
 
     @Override
@@ -81,7 +81,7 @@ public class DummyService extends Kernel {
     
     @EventHook(eventCategory = "LOG")
     public void logEvent(Event event){
-        logHandler.log(event);
+        logAdapter.log(event);
     }
     
     @EventHook(eventCategory = "*")
