@@ -5,12 +5,10 @@
  */
 package com.gskorupa.cricket.in;
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.PrettyPrintWriter;
-import com.thoughtworks.xstream.io.xml.StaxDriver;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 /**
  *
@@ -30,6 +28,22 @@ public class XmlFormatter {
     }
 
     public String format(boolean prettyPrint, Result r) {
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(r.getClass());
+            Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
+            // output pretty printed
+            jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, prettyPrint);
+            StringWriter sw = new StringWriter();
+            jaxbMarshaller.marshal(r, sw);
+            return sw.toString();
+        } catch (JAXBException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    /*
+    public String format(boolean prettyPrint, Result r) {
         XStream xstream = new XStream(new StaxDriver());
         xstream.alias("result", r.getClass());
         String result = "";
@@ -42,5 +56,5 @@ public class XmlFormatter {
         }
         return result;
     }
-
+     */
 }

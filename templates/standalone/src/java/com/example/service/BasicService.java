@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mycompany.bookshelf;
+package com.example.service;
 
 import com.gskorupa.cricket.ArgumentParser;
 import com.gskorupa.cricket.Event;
@@ -28,16 +28,13 @@ import java.util.logging.Logger;
  *
  * @author greg
  */
-public class BookshelfService extends Kernel {
-
-    // emergency logger
-    private static final Logger logger = Logger.getLogger(com.mycompany.bookshelf.BookshelfService.class.getName());
+public class BasicService extends Kernel {
 
     // adapters
     LoggerAdapterIface logAdapter = null;
     EchoHttpAdapterIface httpAdapter = null;
 
-    public BookshelfService() {
+    public BasicService() {
 
         adapters = new Object[2];
         adapters[0] = logAdapter;
@@ -82,20 +79,20 @@ public class BookshelfService extends Kernel {
      */
     public static void main(String[] args) {
 
-        final BookshelfService service;
+        final BasicService service;
         ArgumentParser arguments = new ArgumentParser(args);
         if (arguments.isProblem()) {
             if (arguments.containsKey("error")) {
                 System.out.println(arguments.get("error"));
             }
-            System.out.println(new BookshelfService().getHelp());
+            System.out.println(new BasicService().getHelp());
             System.exit(-1);
         }
         try {
             if (arguments.containsKey("config")) {
-                service = (BookshelfService) BookshelfService.getInstance(BookshelfService.class, arguments.get("config"));
+                service = (BasicService) BasicService.getInstance(BasicService.class, arguments.get("config"));
             } else {
-                service = (BookshelfService) BookshelfService.getInstanceUsingResources(BookshelfService.class);
+                service = (BasicService) BasicService.getInstanceUsingResources(BasicService.class);
             }
             service.getAdapters();
 

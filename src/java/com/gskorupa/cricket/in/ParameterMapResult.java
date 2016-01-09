@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,25 @@
 package com.gskorupa.cricket.in;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONStringer;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author greg
  */
-public class EchoResult implements Result {
+@XmlRootElement (name = "result")
+@XmlAccessorType (XmlAccessType.FIELD)
+public class ParameterMapResult implements Result {
 
+    @XmlElement(name = "data")
     private HashMap<String, String> data;
+    
     private int code;
     private String message;
+    private String payload;
 
     public void setCode(int code) {
         this.code = code;
@@ -62,6 +66,7 @@ public class EchoResult implements Result {
         this.data = (HashMap) data;
     }
 
+    /*
     public String toJsonString(){
         String jst=
                 new JSONStringer()
@@ -84,6 +89,20 @@ public class EchoResult implements Result {
 
     public String toCsvString() {
         return null;
+    }
+*/
+    /**
+     * @return the payload
+     */
+    public String getPayload() {
+        return payload;
+    }
+
+    /**
+     * @param payload the payload to set
+     */
+    public void setPayload(String payload) {
+        this.payload = payload;
     }
 
 }

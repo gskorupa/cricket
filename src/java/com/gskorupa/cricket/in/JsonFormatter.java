@@ -5,8 +5,9 @@
  */
 package com.gskorupa.cricket.in;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.cedarsoftware.util.io.JsonWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -15,6 +16,11 @@ import com.google.gson.GsonBuilder;
 public class JsonFormatter {
 
     private static JsonFormatter instance = null;
+    private Map args;
+    
+    public JsonFormatter(){
+        args = new HashMap();
+    }
 
     public static JsonFormatter getInstance() {
         if (instance != null) {
@@ -26,6 +32,13 @@ public class JsonFormatter {
     }
 
     public String format(boolean prettyPrint, Object o) {
+        args.clear();
+        args.put(JsonWriter.PRETTY_PRINT, prettyPrint);
+        return JsonWriter.objectToJson(o, args)+"\n";
+    }
+
+    /*
+    public String format(boolean prettyPrint, Object o) {
         GsonBuilder gsonBuilder = new GsonBuilder();
         Gson gson;
         if (prettyPrint) {
@@ -35,5 +48,5 @@ public class JsonFormatter {
         }
         return gson.toJson(o)+"\n";
     }
-    
+     */
 }

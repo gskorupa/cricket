@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Properties;
  */
 public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface, Adapter {
 
+    @Override
     public void loadProperties(Properties properties) {
         setContext(properties.getProperty("EchoHttpAdapterIface-context"));
         System.out.println("context=" + getContext());
@@ -39,21 +40,25 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
      * @param result    data to send as a response
      * @return          String formatted according to required type
      */
+    
     @Override
     public String formatResponse(int type, Result result){
+        return super.formatResponse(type, result);
+        /*
         String response="";
         switch(type){
             case HttpAdapter.XML:
-                response=((EchoResult)result).toXmlString();
+                response=((ParameterMapResult)result).toXmlString();
                 break;
             case HttpAdapter.CSV:
-                response=((EchoResult)result).toJsonString();
+                response=((ParameterMapResult)result).toJsonString();
                 break;
             default:
-                response=((EchoResult)result).toJsonString();
+                response=((ParameterMapResult)result).toJsonString();
                 break;
         }
         return response;
+        */
     }
     
 }

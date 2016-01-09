@@ -13,31 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket;
+package com.gskorupa.cricket.services;
 
+import com.gskorupa.cricket.ArgumentParser;
+import com.gskorupa.cricket.Event;
+import com.gskorupa.cricket.EventHook;
+import com.gskorupa.cricket.HttpAdapterHook;
+import com.gskorupa.cricket.Kernel;
+import com.gskorupa.cricket.RequestObject;
 import com.gskorupa.cricket.in.HttpAdapter;
 import java.util.logging.Logger;
-import com.gskorupa.cricket.in.EchoHttpAdapterIface;
-import com.gskorupa.cricket.in.EchoResult;
+import com.gskorupa.cricket.in.ParameterMapResult;
 import com.gskorupa.cricket.out.LoggerAdapterIface;
 import java.util.HashMap;
 import java.util.Map;
+import com.gskorupa.cricket.in.EchoHttpAdapterIface;
 
 /**
- * DummyService
+ * EchoService
  *
  * @author greg
  */
-public class DummyService extends Kernel {
+public class EchoService extends Kernel {
 
     // emergency logger
-    private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.DummyService.class.getName());
+    private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.services.EchoService.class.getName());
 
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
     EchoHttpAdapterIface httpAdapter = null;
 
-    public DummyService() {
+    public EchoService() {
         adapters = new Object[2];
         adapters[0] = logAdapter;
         adapters[1] = httpAdapter;
@@ -90,7 +96,7 @@ public class DummyService extends Kernel {
     }
     
     public Object sendEcho(RequestObject request) {
-        EchoResult r = new EchoResult();
+        ParameterMapResult r = new ParameterMapResult();
         HashMap<String, String> data=new HashMap();
         Map<String, Object> map = request.parameters;
         data.put("request.method",request.method);
@@ -114,22 +120,22 @@ public class DummyService extends Kernel {
      */
     public static void main(String[] args) {
 
-        final DummyService service;
+        final EchoService service;
 
         ArgumentParser arguments = new ArgumentParser(args);
         if (arguments.isProblem()) {
             if (arguments.containsKey("error")) {
                 System.out.println(arguments.get("error"));
             }
-            System.out.println(new DummyService().getHelp());
+            System.out.println(new EchoService().getHelp());
             System.exit(-1);
         }
 
         try {
             if (arguments.containsKey("config")) {
-                service = (DummyService) DummyService.getInstance(DummyService.class, arguments.get("config"));
+                service = (EchoService) EchoService.getInstance(EchoService.class, arguments.get("config"));
             } else {
-                service = (DummyService) DummyService.getInstanceUsingResources(DummyService.class);
+                service = (EchoService) EchoService.getInstanceUsingResources(EchoService.class);
             }
             service.getAdapters();
 

@@ -24,6 +24,7 @@ import java.util.logging.Logger;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import static java.lang.Thread.MIN_PRIORITY;
+import java.util.logging.Level;
 
 /**
  * SimpleService
@@ -32,8 +33,8 @@ import static java.lang.Thread.MIN_PRIORITY;
  */
 public abstract class Kernel {
 
-    // emergency logger
-    private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.Kernel.class.getName());
+    // emergency LOGGER
+    private static final Logger LOGGER = Logger.getLogger(com.gskorupa.cricket.Kernel.class.getName());
 
     // singleton
     private static Object instance = null;
@@ -66,14 +67,14 @@ public abstract class Kernel {
         if (instance != null) {
             return instance;
         }
-        Properties props = null;
+        Properties props;
         try {
             InputStream propertyFile = new FileInputStream(new File(path));
             props = new Properties();
             props.load(propertyFile);
             return getInstanceWithProperties(c, props);
         } catch (Exception e) {
-            logger.severe("Adapters initialization error. Configuration: " + path);
+            LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration: {0}", path);
         }
         return null;
     }
@@ -87,7 +88,7 @@ public abstract class Kernel {
             ((Kernel) instance).loadAdapters(props, adapters, adapterClasses);
         } catch (Exception e) {
             instance = null;
-            logger.severe(e.getStackTrace()[0].toString() + ":" + e.getStackTrace()[1].toString());
+            LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
             e.printStackTrace();
         }
         return instance;
@@ -102,7 +103,7 @@ public abstract class Kernel {
             Properties props = ((Kernel) instance).getProperties(c.getSimpleName());
             ((Kernel) instance).loadAdapters(props, adapters, adapterClasses);
         } catch (Exception e) {
-            logger.severe(e.getStackTrace()[0].toString() + ":" + e.getStackTrace()[1].toString());
+            LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
             e.printStackTrace();
             instance = null;
         }
@@ -118,7 +119,7 @@ public abstract class Kernel {
             props = new Properties();
             props.load(propertyFile);
         } catch (IOException e) {
-            logger.severe(e.getStackTrace()[0].toString() + ":" + e.getStackTrace()[1].toString());
+            LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
             e.printStackTrace();
         }
         return props;
@@ -150,11 +151,11 @@ public abstract class Kernel {
                     java.lang.reflect.Method loadPropsMethod = adapters[i].getClass().getMethod("loadProperties", Properties.class);
                     loadPropsMethod.invoke(adapters[i], props);
                 } else {
-                    logger.severe("Adapters initialization error. Configuration for: " + adapterInterfaceName);
+                    LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterInterfaceName);
                 }
             }
         } catch (Exception e) {
-            logger.severe("Adapters initialization error. Configuration for: " + adapterInterfaceName);
+            LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterInterfaceName);
             throw new Exception(e);
         }
 
@@ -224,7 +225,7 @@ public abstract class Kernel {
             try {
                 content = readHelpFile("/help.txt");
             } catch (Exception x) {
-                logger.severe(x.getStackTrace()[0].toString() + ":" + x.getStackTrace()[1].toString());
+                LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{x.getStackTrace()[0].toString(), x.getStackTrace()[1].toString()});
                 e.printStackTrace();
             }
         }
@@ -233,16 +234,15 @@ public abstract class Kernel {
 
     public String readHelpFile(String fileName) throws Exception {
         String content = null;
-        BufferedReader reader
-                = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(fileName)));
-        StringBuilder out = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            out.append(line);
-            out.append("\r\n");
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(fileName)))) {
+            StringBuilder out = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                out.append(line);
+                out.append("\r\n");
+            }
+            content = out.toString();
         }
-        content = out.toString();
-        reader.close();
         return content;
     }
 
@@ -250,7 +250,7 @@ public abstract class Kernel {
     * This method will be invoked when Kernel is executed without --run option
      */
     public void runOnce() {
-        logger.warning("Method runOnce should be overriden");
+        LOGGER.warning("Method runOnce should be overriden");
     }
 
     public void start() throws InterruptedException {
@@ -271,7 +271,7 @@ public abstract class Kernel {
             getHttpd().run();
             System.out.println("Started. Press Ctrl-C to stop");
             while (true) {
-                Thread.sleep(100);
+                Thread.sleep(200);
             }
         } else {
             System.out.println("Couldn't find any http request hook method. Exiting ...");
@@ -282,7 +282,6 @@ public abstract class Kernel {
     public void shutdown() {
         //some cleaning up code could be added here ... if required
         System.out.println("\nShutting down ...");
-        //service.getHttpd().server.stop(MIN_PRIORITY);
         getHttpd().server.stop(MIN_PRIORITY);
     }
 
