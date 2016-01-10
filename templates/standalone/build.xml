@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="cricketstarter" default="all" basedir=".">
+<project name="basicservice" default="all" basedir=".">
     <!-- modify the project name above if you need -->
     
     <description>Cricket service template project. </description>
         
     <!-- set your local properties for this build -->
     <property name="version" value="1.0.0"/>
-    <property name="tomcat-home" value="/home/greg/apache-tomcat-7.0.67" />
-    <property name="cricket-jar-location" value="lib/cricket-1.0.0.jar" />
     
+    <!--  uncomment if you need Tomcat libraries to compile the project
+    <property name="tomcat-home" value="/home/greg/apache-tomcat-7.0.67" />
+    -->
+    <property name="cricket-jar-location" value="lib/cricket-1.0.0.jar" />
+        
     <!-- do not modify properties below -->
     <property name="src" location="src/java"/>
     <property name="build" location="build/web/WEB-INF/classes"/>
@@ -18,13 +21,13 @@
     
     <path id="project-classpath">
         <pathelement location="${cricket-jar-location}"/>
+        <!-- uncomment if you need Tomcat libraries to compile the project
         <fileset dir="${tomcat-home}/bin" includes="*.jar" />
         <fileset dir="${tomcat-home}/lib" includes="*.jar" />
+        -->
     </path>
 
     <target name="init">
-        <!-- Create the time stamp. For future use. -->
-        <tstamp/>
         <!-- Create the build directory structure used by compile -->
         <mkdir dir="${build}"/>
     </target>
@@ -61,12 +64,12 @@
         </copy>
         <jar destfile="${dist}/${ant.project.name}-${version}.jar">
             <manifest>
-                <attribute name="Main-Class" value="com.mycompany.bookshelf.BookshelfService"/>
+                <!-- change the main class declaration below -->
+                <attribute name="Main-Class" value="com.example.service.BasicService"/>
             </manifest>
             <fileset dir="${build}"/>
             <zipfileset src="${cricket-jar-location}" includes="**/*"/>
         </jar>
     </target>
-    
-    
+       
 </project>
