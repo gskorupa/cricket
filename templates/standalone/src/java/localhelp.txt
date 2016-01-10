@@ -1,7 +1,7 @@
 
-Usage: java -jar bookshelf-1.0.0.jar [options]
+Usage: java -jar basicservice-1.0.0.jar [options]
 
-Runs Bookshelf service in the standalone mode.
+Runs the BasicService in standalone mode.
 
 Options:
 --help | -h            Print this usage information and exit.
