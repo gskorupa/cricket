@@ -118,7 +118,11 @@ public class BasicService extends Kernel {
         return data;
     }
     
+<<<<<<< HEAD
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
+=======
+    @HttpAdapterHook(handlerClassName = "EchoAdapterIface", requestMethod = "GET")
+>>>>>>> 4b776bb7b1ba10f40a99a33758245855c532d0e4
     public Object processEchoRequest(RequestObject request){
         // rewrite parameters from request to response
         ParameterMapResult responseObect = new ParameterMapResult();
