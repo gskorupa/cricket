@@ -232,10 +232,12 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         }
         try {
             //sendLogEvent("sending request to hook method " + getHookMethodNameForMethod(method));
+            Event event=new Event("HttpAdapter", Event.CATEGORY_GENERIC, "HTTP", requestObject);
+            event.setPayload(requestObject);
             sendLogEvent(Event.LOG_INFO, "sending request to hook method " + hookMethodName);
             //Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForMethod(method), RequestObject.class);
-            Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, RequestObject.class);
-            result = (Result) m.invoke(Kernel.getInstance(), requestObject);
+            Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
+            result = (Result) m.invoke(Kernel.getInstance(), event);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }

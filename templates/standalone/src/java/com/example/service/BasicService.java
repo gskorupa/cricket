@@ -90,11 +90,12 @@ public class BasicService extends Kernel {
     }
     
     @HttpAdapterHook(handlerClassName = "HtmlGenAdapterIface", requestMethod = "GET")
-    public Object doGet(RequestObject request) {
-        String payload = "";
+    public Object doGet(Event requestEvent) {
+        String responsePayload = "";
+        RequestObject request = (RequestObject)requestEvent.getPayload();
         ParameterMapResult result = new ParameterMapResult();
         try {
-            payload = htmlReaderAdapter.readFile(request.pathExt);
+            responsePayload = htmlReaderAdapter.readFile(request.pathExt);
             result.setCode(HttpAdapter.SC_OK);
             result.setMessage("");
         } catch (Exception e) {
@@ -106,7 +107,7 @@ public class BasicService extends Kernel {
         HashMap<String, String> data = setResponseParameters(request.parameters);
         //
         result.setData(data);
-        result.setPayload(payload);
+        result.setPayload(responsePayload);
         return result;
     }
     
@@ -119,8 +120,9 @@ public class BasicService extends Kernel {
     }
     
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
-    public Object processEchoRequest(RequestObject request){
+    public Object processEchoRequest(Event requestEvent){
         // rewrite parameters from request to response
+        RequestObject request = (RequestObject)requestEvent.getPayload();
         ParameterMapResult responseObect = new ParameterMapResult();
         HashMap<String, String> data=new HashMap();
         Map<String, Object> map = request.parameters;

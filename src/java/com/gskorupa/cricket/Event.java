@@ -23,7 +23,7 @@ public class Event {
 
     public static final String CATEGORY_LOG = "LOG";
     public static final String CATEGORY_GENERIC = "EVENT";
-    
+
     public static final String LOG_ALL = "ALL";
     public static final String LOG_FINEST = "FINEST";
     public static final String LOG_INFO = "INFO";
@@ -36,7 +36,12 @@ public class Event {
     private String origin;
     private Object payload;
 
-    public Event(String origin, String category, String type, String payload) {
+    public Event() {
+        this.id = Kernel.getEventId();
+    }
+
+    public Event(String origin, String category, String type, Object payload) {
+        this.id = Kernel.getEventId();
         this.origin = origin;
         this.category = category;
         this.type = type;
@@ -45,13 +50,15 @@ public class Event {
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getOrigin())
+        sb.append(getId())
+                .append(":")
+                .append(getOrigin())
                 .append(":")
                 .append(getCategory())
                 .append(":")
                 .append(getType())
                 .append(":")
-                .append(getPayload()!=null ? getPayload().toString() : "");
+                .append(getPayload() != null ? getPayload().toString() : "");
         return sb.toString();
     }
 

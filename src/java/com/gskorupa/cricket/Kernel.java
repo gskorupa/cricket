@@ -48,8 +48,14 @@ public abstract class Kernel {
     private int port = 0;
     private Httpd httpd;
     private boolean httpHandlerLoaded = false;
+    
+    private static long eventSeed = System.currentTimeMillis();
 
     public Kernel() {
+    }
+    
+    public static long getEventId(){
+        return eventSeed +=1;
     }
 
     public abstract void getAdapters();

@@ -66,23 +66,23 @@ public class EchoService extends Kernel {
     }
 
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
-    public Object doGet(RequestObject request) {
-        return sendEcho(request);
+    public Object doGet(Event requestEvent) {
+        return sendEcho((RequestObject)requestEvent.getPayload());
     }
     
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "POST")
-    public Object doPost(RequestObject request) {
-        return sendEcho(request);
+    public Object doPost(Event requestEvent) {
+        return sendEcho((RequestObject)requestEvent.getPayload());
     }
     
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "PUT")
-    public Object doPut(RequestObject request) {
-        return sendEcho(request);
+    public Object doPut(Event requestEvent) {
+        return sendEcho((RequestObject)requestEvent.getPayload());
     }
     
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "DELETE")
-    public Object doDelete(RequestObject request) {
-        return sendEcho(request);
+    public Object doDelete(Event requestEvent) {
+        return sendEcho((RequestObject)requestEvent.getPayload());
     }
     
     @EventHook(eventCategory = "LOG")
