@@ -71,5 +71,9 @@ public class OutboundAdapter {
             e.printStackTrace();
         }
     }
+    
+    public void destroy(){
+        
+    }
 
 }

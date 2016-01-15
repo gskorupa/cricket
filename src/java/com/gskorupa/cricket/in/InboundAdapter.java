@@ -72,4 +72,7 @@ public class InboundAdapter {
         }
     }
 
+    public void destroy(){
+        
+    }
 }
