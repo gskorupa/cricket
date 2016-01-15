@@ -7,7 +7,7 @@ https://www.gitbook.com/book/gskorupa/building-microservices-with-cricket/
 ## Quick start
 
 You need:
-* Java 1.7
+* Java 1.8
 * Apache Ant
 * Apache Tomcat 7 or 8 (to build servlet part of a web application)
 

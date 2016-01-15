@@ -28,6 +28,7 @@ import com.gskorupa.cricket.out.LoggerAdapterIface;
 import java.util.HashMap;
 import java.util.Map;
 import com.gskorupa.cricket.in.EchoHttpAdapterIface;
+import com.gskorupa.cricket.out.KeyValueCacheAdapterIface;
 
 /**
  * EchoService
@@ -37,75 +38,88 @@ import com.gskorupa.cricket.in.EchoHttpAdapterIface;
 public class EchoService extends Kernel {
 
     // emergency logger
-    private static final Logger logger = Logger.getLogger(com.gskorupa.cricket.services.EchoService.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(com.gskorupa.cricket.services.EchoService.class.getName());
 
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
     EchoHttpAdapterIface httpAdapter = null;
+    KeyValueCacheAdapterIface cache = null;
 
     public EchoService() {
-        adapters = new Object[2];
+        adapters = new Object[3];
         adapters[0] = logAdapter;
         adapters[1] = httpAdapter;
-        adapterClasses = new Class[2];
+        adapters[2] = cache;
+        adapterClasses = new Class[3];
         adapterClasses[0] = LoggerAdapterIface.class;
         adapterClasses[1] = EchoHttpAdapterIface.class;
+        adapterClasses[2] = KeyValueCacheAdapterIface.class;
     }
 
     @Override
     public void getAdapters() {
         logAdapter = (LoggerAdapterIface) super.adapters[0];
         httpAdapter = (EchoHttpAdapterIface) super.adapters[1];
+        cache = (KeyValueCacheAdapterIface) super.adapters[2];
     }
 
     @Override
     public void runOnce() {
-        Event e=new Event("DummyService.runOnce()","LOG",Event.LOG_INFO, "executed");
+        super.runOnce();
+        Event e = new Event("DummyService.runOnce()", "LOG", Event.LOG_INFO, "executed");
         logEvent(e);
         System.out.println("Hello from DummyService.runOnce()");
     }
 
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
     public Object doGet(Event requestEvent) {
-        return sendEcho((RequestObject)requestEvent.getPayload());
+        return sendEcho((RequestObject) requestEvent.getPayload());
     }
-    
+
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "POST")
     public Object doPost(Event requestEvent) {
-        return sendEcho((RequestObject)requestEvent.getPayload());
+        return sendEcho((RequestObject) requestEvent.getPayload());
     }
-    
+
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "PUT")
     public Object doPut(Event requestEvent) {
-        return sendEcho((RequestObject)requestEvent.getPayload());
+        return sendEcho((RequestObject) requestEvent.getPayload());
     }
-    
+
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "DELETE")
     public Object doDelete(Event requestEvent) {
-        return sendEcho((RequestObject)requestEvent.getPayload());
+        return sendEcho((RequestObject) requestEvent.getPayload());
     }
-    
+
     @EventHook(eventCategory = "LOG")
-    public void logEvent(Event event){
+    public void logEvent(Event event) {
         logAdapter.log(event);
     }
-    
+
     @EventHook(eventCategory = "*")
-    public void processEvent(Event event){
+    public void processEvent(Event event) {
         //does nothing
     }
-    
+
     public Object sendEcho(RequestObject request) {
+        
+        //
+        Long counter;
+        counter = (Long) cache.get("counter", new Long(0));
+        counter++;
+        cache.put("counter", counter);
+
         ParameterMapResult r = new ParameterMapResult();
-        HashMap<String, String> data=new HashMap();
+        HashMap<String, Object> data = new HashMap();
         Map<String, Object> map = request.parameters;
-        data.put("request.method",request.method);
-        data.put("request.pathExt",request.pathExt);
+        data.put("request.method", request.method);
+        data.put("request.pathExt", request.pathExt);
+        data.put("echo counter", cache.get("counter"));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             //System.out.println(entry.getKey() + "=" + entry.getValue());
-            data.put(entry.getKey(), (String)entry.getValue());
+            data.put(entry.getKey(), (String) entry.getValue());
         }
-        if (data.containsKey("error")){
+        if (data.containsKey("error")) {
             r.setCode(HttpAdapter.SC_INTERNAL_SERVER_ERROR);
             data.put("error", "error forced by request");
         } else {
@@ -137,7 +151,6 @@ public class EchoService extends Kernel {
             } else {
                 service = (EchoService) EchoService.getInstanceUsingResources(EchoService.class);
             }
-            service.getAdapters();
 
             if (arguments.containsKey("run")) {
                 service.start();

@@ -15,6 +15,8 @@
  */
 package com.gskorupa.cricket;
 
+import com.gskorupa.cricket.in.InboundAdapter;
+import com.gskorupa.cricket.out.OutboundAdapter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -256,10 +258,12 @@ public abstract class Kernel {
     * This method will be invoked when Kernel is executed without --run option
      */
     public void runOnce() {
-        LOGGER.warning("Method runOnce should be overriden");
+        //LOGGER.warning("Method runOnce should be overriden");
+        getAdapters();
     }
 
     public void start() throws InterruptedException {
+        getAdapters();
         if (isHttpHandlerLoaded()) {
             System.out.println("Starting http listener ...");
             Runtime.getRuntime().addShutdownHook(
@@ -289,6 +293,15 @@ public abstract class Kernel {
         //some cleaning up code could be added here ... if required
         System.out.println("\nShutting down ...");
         getHttpd().server.stop(MIN_PRIORITY);
+        //todo: stop adapters
+        for(int i=0; i<adapters.length; i++){
+            if (adapters[i] instanceof com.gskorupa.cricket.in.InboundAdapter) {
+                ((InboundAdapter)adapters[i]).destroy();
+            }else if (adapters[i] instanceof com.gskorupa.cricket.out.OutboundAdapter) {
+                ((OutboundAdapter)adapters[i]).destroy();
+            }
+        }
+        System.out.println("Kernel stopped");
     }
 
 }
