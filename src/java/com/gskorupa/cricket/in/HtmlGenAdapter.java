@@ -28,8 +28,8 @@ import java.util.regex.Pattern;
 public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, Adapter {
 
     @Override
-    public void loadProperties(Properties properties) {
-        setContext(properties.getProperty("HtmlGenAdapterIface-context"));
+    public void loadProperties(HashMap<String,String> properties) {
+        setContext(properties.get("context"));
         System.out.println("context=" + getContext());
     }
 

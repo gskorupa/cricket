@@ -15,7 +15,7 @@
  */
 package com.gskorupa.cricket;
 
-import java.util.Properties;
+import java.util.HashMap;
 
 /**
  *
@@ -23,6 +23,6 @@ import java.util.Properties;
  */
 public interface Adapter {
     
-    public void loadProperties(Properties properties);
+    public void loadProperties(HashMap<String,String> properties);
     
 }

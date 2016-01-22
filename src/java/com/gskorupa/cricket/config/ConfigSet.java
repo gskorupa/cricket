@@ -1,0 +1,67 @@
+/*
+ * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.gskorupa.cricket.config;
+
+import java.util.ArrayList;
+
+/**
+ *
+ * @author greg
+ */
+public class ConfigSet {
+    
+    private String id = "new";
+    String description="This is sample configuration";
+    ArrayList<Configuration> services;
+    
+    public ConfigSet(){
+        services=new <Configuration>ArrayList();
+    }
+    
+    public void addConfiguration(Configuration c){
+        services.add(c);
+    }
+    
+    public Configuration getDefault(){
+        return services.get(0);
+    }
+    
+    public Configuration getConfiguration(String serviceName){
+        Configuration c;
+        for(int i=0; i<services.size(); i++){
+            c=services.get(i);
+            if(serviceName.equals(c.getService())){
+                return c;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @return the id
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
+    
+}

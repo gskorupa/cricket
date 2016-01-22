@@ -15,17 +15,16 @@
  */
 package com.gskorupa.cricket;
 
+import com.gskorupa.cricket.config.AdapterConfiguration;
+import com.gskorupa.cricket.config.ConfigSet;
+import com.gskorupa.cricket.config.Configuration;
 import com.gskorupa.cricket.in.InboundAdapter;
 import com.gskorupa.cricket.out.OutboundAdapter;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Properties;
 import java.util.logging.Logger;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import static java.lang.Thread.MIN_PRIORITY;
+import java.util.HashMap;
 import java.util.logging.Level;
 
 /**
@@ -50,14 +49,24 @@ public abstract class Kernel {
     private int port = 0;
     private Httpd httpd;
     private boolean httpHandlerLoaded = false;
-    
+
     private static long eventSeed = System.currentTimeMillis();
+
+    protected ConfigSet configSet = null;
 
     public Kernel() {
     }
-    
-    public static long getEventId(){
-        return eventSeed +=1;
+
+    public Configuration getConfiguration(String serviceName) {
+        if (configSet == null) {
+            configSet = new ConfigSet();
+        }
+
+        return configSet.getConfiguration(serviceName);
+    }
+
+    public static long getEventId() {
+        return eventSeed += 1;
     }
 
     public abstract void getAdapters();
@@ -65,99 +74,51 @@ public abstract class Kernel {
     public static Kernel getInstance() {
         return (Kernel) instance;
     }
-
-    /*
-    public void setInstance(Object instance){
-        this.instance=instance;
-    }
-     */
-    public static Object getInstance(Class c, String path) {
-        if (instance != null) {
-            return instance;
-        }
-        Properties props;
-        try {
-            InputStream propertyFile = new FileInputStream(new File(path));
-            props = new Properties();
-            props.load(propertyFile);
-            return getInstanceWithProperties(c, props);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration: {0}", path);
-        }
-        return null;
-    }
-
-    public static Object getInstanceWithProperties(Class c, Properties props) {
-        if (instance != null) {
-            return instance;
-        }
-        try {
-            instance = c.getClass().newInstance();
-            ((Kernel) instance).loadAdapters(props, adapters, adapterClasses);
-        } catch (Exception e) {
-            instance = null;
-            LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
-            e.printStackTrace();
-        }
-        return instance;
-    }
-
-    public static Object getInstanceUsingResources(Class c) {
+    
+    public static Object getInstanceWithProperties(Class c, Configuration config) {
+        //Configuration config = cs.getConfiguration(c.getSimpleName());
         if (instance != null) {
             return instance;
         }
         try {
             instance = c.newInstance();
-            Properties props = ((Kernel) instance).getProperties(c.getSimpleName());
-            ((Kernel) instance).loadAdapters(props, adapters, adapterClasses);
+            ((Kernel) instance).loadAdapters(config, adapters, adapterClasses);
+            //((Kernel) instance).configSet = cs;
         } catch (Exception e) {
+            instance = null;
             LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
             e.printStackTrace();
-            instance = null;
         }
         return instance;
     }
 
-    private Properties getProperties(String name) {
-        Properties props = null;
-        try {
-            String propsName = name + ".properties";
-            InputStream propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
-            System.out.println(propsName);
-            props = new Properties();
-            props.load(propertyFile);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
-            e.printStackTrace();
-        }
-        return props;
-    }
-
-    private void loadAdapters(Properties props, Object[] adapters, Class[] adapterClasses) throws Exception {
+    private void loadAdapters(Configuration config, Object[] adapters, Class[] adapterClasses) throws Exception {
         setHttpHandlerLoaded(false);
-        System.out.println("LOADING SERVICE PROPERTIES");
-        setHost(props.getProperty("http-host"));
+        System.out.println("LOADING SERVICE PROPERTIES FOR " + config.getService());
+        setHost(config.getHost());
         System.out.println("http-host=" + getHost());
         try {
-            setPort(Integer.parseInt(props.getProperty("http-port")));
+            setPort(Integer.parseInt(config.getPort()));
         } catch (Exception e) {
         }
         System.out.println("http-port=" + getPort());
         System.out.println("LOADING ADAPTERS");
         String adapterInterfaceName = null;
+        AdapterConfiguration ac = null;
         try {
             for (int i = 0; i < adapterClasses.length; i++) {
                 adapterInterfaceName = adapterClasses[i].getSimpleName();
+                ac = config.getAdapterConfiguration(adapterInterfaceName);
                 System.out.println("ADAPTER: " + adapterInterfaceName);
-                Class c = Class.forName(props.getProperty(adapterInterfaceName));
+                Class c = Class.forName(ac.getClassFullName());
                 if (adapterClasses[i].isAssignableFrom(c)) {
                     adapters[i] = adapterClasses[i].cast(c.newInstance());
                     if (adapters[i] instanceof com.gskorupa.cricket.in.HttpAdapter) {
                         setHttpHandlerLoaded(true);
                     }
                     // loading properties
-                    java.lang.reflect.Method loadPropsMethod = adapters[i].getClass().getMethod("loadProperties", Properties.class);
-                    loadPropsMethod.invoke(adapters[i], props);
+                    java.lang.reflect.Method loadPropsMethod = adapters[i].getClass().getMethod("loadProperties", HashMap.class);
+                    loadPropsMethod.invoke(adapters[i], ac.getProperties());
                 } else {
                     LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterInterfaceName);
                 }
@@ -294,14 +255,26 @@ public abstract class Kernel {
         System.out.println("\nShutting down ...");
         getHttpd().server.stop(MIN_PRIORITY);
         //todo: stop adapters
-        for(int i=0; i<adapters.length; i++){
+        for (int i = 0; i < adapters.length; i++) {
             if (adapters[i] instanceof com.gskorupa.cricket.in.InboundAdapter) {
-                ((InboundAdapter)adapters[i]).destroy();
-            }else if (adapters[i] instanceof com.gskorupa.cricket.out.OutboundAdapter) {
-                ((OutboundAdapter)adapters[i]).destroy();
+                ((InboundAdapter) adapters[i]).destroy();
+            } else if (adapters[i] instanceof com.gskorupa.cricket.out.OutboundAdapter) {
+                ((OutboundAdapter) adapters[i]).destroy();
             }
         }
         System.out.println("Kernel stopped");
+        /*
+        Map args = new HashMap();
+        args.put(JsonWriter.TYPE, false);
+        Map types = new HashMap();
+        types.put("java.utils.ArrayList","services");
+        types.put("java.utils.HashMap","adapters");
+        types.put("com.gskorupa.cricket.config.Configuration","items");
+        types.put("java.utils.HashMap","properties");
+        args.put(JsonWriter.TYPE_NAME_MAP, types);
+        args.put(JsonWriter.PRETTY_PRINT, true);
+        System.out.println(JsonWriter.objectToJson(configSet, args));
+         */
     }
 
 }

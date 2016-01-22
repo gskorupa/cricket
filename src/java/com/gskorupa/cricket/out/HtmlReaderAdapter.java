@@ -23,7 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Properties;
+import java.util.HashMap;
 
 /**
  *
@@ -38,8 +38,8 @@ public class HtmlReaderAdapter extends OutboundAdapter implements Adapter, HtmlR
      * @param properties 
      */
     @Override
-    public void loadProperties(Properties properties) {
-        setRootPath(properties.getProperty("HtmlReaderAdapterIface-root"));
+    public void loadProperties(HashMap<String,String> properties) {
+        setRootPath(properties.get("root"));
         System.out.println("root path: " + getRootPath());
     }
 

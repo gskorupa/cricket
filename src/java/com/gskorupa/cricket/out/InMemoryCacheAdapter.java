@@ -116,15 +116,15 @@ public class InMemoryCacheAdapter extends OutboundAdapter implements KeyValueCac
         return envVariable;
     }
 
-    public void loadProperties(Properties properties) {
-        setStoragePath(properties.getProperty("KeyValueCacheAdapterIface-path"));
+    public void loadProperties(HashMap<String,String> properties) {
+        setStoragePath(properties.get("path"));
         System.out.println("path: " + getStoragePath());
-        setEnvVariable(properties.getProperty("KeyValueCacheAdapterIface-envVariable"));
+        setEnvVariable(properties.get("envVariable"));
         System.out.println("envVAriable name: " + getEnvVariable());
         if (System.getenv(getEnvVariable()) != null) {
             setStoragePath(System.getenv(getEnvVariable()));
         }
-        setFileName(properties.getProperty("KeyValueCacheAdapterIface-file"));
+        setFileName(properties.get("file"));
         System.out.println("file: " + getFileName());
         String pathSeparator = System.getProperty("file.separator");
         setStoragePath(

@@ -39,7 +39,7 @@ public class ArgumentParser {
     }
     
     public boolean isProblem(){
-        return (get("error")!=null || get("help")!=null);
+        return (get("error")!=null);
     }
 
     public static Map<String, String> getArguments(String[] args) {
@@ -49,7 +49,7 @@ public class ArgumentParser {
         boolean confToRead = false;
 
         for (int i = 0; i < args.length; i++) {
-            name = args[i].toLowerCase();
+            name = args[i];
             if (confToRead) {
                 if(name.startsWith("-")){
                     map.put("error", "option "+option+" must be followed by value");
@@ -73,6 +73,11 @@ public class ArgumentParser {
                         confToRead = true;
                         option="config";
                         break;
+                    case "--service":
+                    case "-s":
+                        confToRead = true;
+                        option="service";
+                        break;
                     default:
                         map.put("error", "unknown option " + name);
                 }
@@ -82,6 +87,9 @@ public class ArgumentParser {
             switch(option){
                 case "config":
                     map.put("error", "-c or --config option requires an argument");
+                    break;
+                case "service":
+                    map.put("error", "-s or --service option requires an argument");
                     break;
             }
             

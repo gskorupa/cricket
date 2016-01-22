@@ -15,14 +15,12 @@
  */
 package com.gskorupa.cricket.services;
 
-import com.gskorupa.cricket.ArgumentParser;
 import com.gskorupa.cricket.Event;
 import com.gskorupa.cricket.EventHook;
 import com.gskorupa.cricket.HttpAdapterHook;
 import com.gskorupa.cricket.Kernel;
 import com.gskorupa.cricket.RequestObject;
 import com.gskorupa.cricket.in.HttpAdapter;
-import java.util.logging.Logger;
 import com.gskorupa.cricket.in.ParameterMapResult;
 import com.gskorupa.cricket.out.LoggerAdapterIface;
 import java.util.HashMap;
@@ -36,9 +34,6 @@ import com.gskorupa.cricket.out.KeyValueCacheAdapterIface;
  * @author greg
  */
 public class EchoService extends Kernel {
-
-    // emergency logger
-    private static final Logger LOGGER = Logger.getLogger(com.gskorupa.cricket.services.EchoService.class.getName());
 
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
@@ -66,9 +61,9 @@ public class EchoService extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
-        Event e = new Event("DummyService.runOnce()", "LOG", Event.LOG_INFO, "executed");
+        Event e = new Event("EchoService.runOnce()", "LOG", Event.LOG_INFO, "executed");
         logEvent(e);
-        System.out.println("Hello from DummyService.runOnce()");
+        System.out.println("Hello from EchoService.runOnce()");
     }
 
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
@@ -128,39 +123,5 @@ public class EchoService extends Kernel {
         r.setData(data);
         return r;
     }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-
-        final EchoService service;
-
-        ArgumentParser arguments = new ArgumentParser(args);
-        if (arguments.isProblem()) {
-            if (arguments.containsKey("error")) {
-                System.out.println(arguments.get("error"));
-            }
-            System.out.println(new EchoService().getHelp());
-            System.exit(-1);
-        }
-
-        try {
-            if (arguments.containsKey("config")) {
-                service = (EchoService) EchoService.getInstance(EchoService.class, arguments.get("config"));
-            } else {
-                service = (EchoService) EchoService.getInstanceUsingResources(EchoService.class);
-            }
-
-            if (arguments.containsKey("run")) {
-                service.start();
-            } else {
-                System.out.println("Executing runOnce method");
-                service.runOnce();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    
 }

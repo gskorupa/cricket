@@ -24,3 +24,5 @@ hs_err_pid*
 !/templates/standalone/lib/cricket-lite-1.0-B2.jar
 !/lib/json.jar
 !/templates/standalone/lib/cricket-1.0-B4.jar
+/cricket2.json
+!/templates/standalone/lib/cricket-1.0-B5.jar

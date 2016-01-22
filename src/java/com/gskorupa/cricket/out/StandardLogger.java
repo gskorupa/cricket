@@ -17,7 +17,7 @@ package com.gskorupa.cricket.out;
 
 import com.gskorupa.cricket.Adapter;
 import com.gskorupa.cricket.Event;
-import java.util.Properties;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,10 +31,10 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
     Level level=null;
     private String name;
 
-    public void loadProperties(Properties properties) {
-        setName(properties.getProperty("LoggerAdapterIface-name"));
+    public void loadProperties(HashMap<String,String> properties) {
+        setName(properties.get("name"));
         System.out.println("logger name: " + getName());
-        setLoggingLevel(properties.getProperty("LoggerAdapterIface-level"));
+        setLoggingLevel(properties.get("level"));
         System.out.println("logging level: " + getLoggingLevel());
         logger = Logger.getLogger(getName());
         logger.setLevel(level);

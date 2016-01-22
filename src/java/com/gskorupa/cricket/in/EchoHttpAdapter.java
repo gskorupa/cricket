@@ -16,7 +16,7 @@
 package com.gskorupa.cricket.in;
 
 import com.gskorupa.cricket.Adapter;
-import java.util.Properties;
+import java.util.HashMap;
 
 /**
  *
@@ -25,8 +25,8 @@ import java.util.Properties;
 public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface, Adapter {
 
     @Override
-    public void loadProperties(Properties properties) {
-        setContext(properties.getProperty("EchoHttpAdapterIface-context"));
+    public void loadProperties(HashMap<String,String> properties) {
+        setContext(properties.get("context"));
         System.out.println("context=" + getContext());
     }
     
