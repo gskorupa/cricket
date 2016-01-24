@@ -18,6 +18,7 @@ package com.gskorupa.cricket;
 import com.cedarsoftware.util.io.JsonReader;
 import com.gskorupa.cricket.config.ConfigSet;
 import com.gskorupa.cricket.config.Configuration;
+import com.gskorupa.cricket.in.Scheduler;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -91,8 +92,10 @@ public class Runner {
             if (arguments.containsKey("run")) {
                 service.start();
             } else {
+                //service.setScheduler(new Scheduler());
                 System.out.println("Executing runOnce method");
                 service.runOnce();
+                service.shutdown();
             }
         } catch (Exception e) {
             e.printStackTrace();

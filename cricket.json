@@ -33,6 +33,12 @@
               "envVariable":"ECHO_DB_PATH",
               "file":"echo.xml"
               }
+            },
+            "SchedulerIface":{
+            "interfaceName":"SchedulerIface",
+            "classFullName":"com.gskorupa.cricket.in.Scheduler",
+            "properties":{
+              }
             }
           }
         }

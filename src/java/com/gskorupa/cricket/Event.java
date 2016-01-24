@@ -35,17 +35,19 @@ public class Event {
     private String type;
     private String origin;
     private Object payload;
+    private String timePoint;
 
     public Event() {
         this.id = Kernel.getEventId();
     }
 
-    public Event(String origin, String category, String type, Object payload) {
+    public Event(String origin, String category, String type, String timePoint, Object payload) {
         this.id = Kernel.getEventId();
         this.origin = origin;
         this.category = category;
         this.type = type;
         this.payload = payload;
+        this.timePoint=timePoint;
     }
 
     public String toString() {
@@ -57,6 +59,8 @@ public class Event {
                 .append(getCategory())
                 .append(":")
                 .append(getType())
+                .append(":")
+                .append(getTimePoint())
                 .append(":")
                 .append(getPayload() != null ? getPayload().toString() : "");
         return sb.toString();
@@ -130,5 +134,19 @@ public class Event {
      */
     public void setCategory(String subtype) {
         this.category = subtype;
+    }
+
+    /**
+     * @return the timePoint
+     */
+    public String getTimePoint() {
+        return timePoint;
+    }
+
+    /**
+     * @param timePoint the timePoint to set
+     */
+    public void setTimePoint(String timePoint) {
+        this.timePoint = timePoint;
     }
 }

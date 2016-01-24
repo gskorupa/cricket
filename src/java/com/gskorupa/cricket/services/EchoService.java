@@ -26,6 +26,7 @@ import com.gskorupa.cricket.out.LoggerAdapterIface;
 import java.util.HashMap;
 import java.util.Map;
 import com.gskorupa.cricket.in.EchoHttpAdapterIface;
+import com.gskorupa.cricket.in.SchedulerIface;
 import com.gskorupa.cricket.out.KeyValueCacheAdapterIface;
 
 /**
@@ -39,16 +40,19 @@ public class EchoService extends Kernel {
     LoggerAdapterIface logAdapter = null;
     EchoHttpAdapterIface httpAdapter = null;
     KeyValueCacheAdapterIface cache = null;
+    SchedulerIface scheduler = null;
 
     public EchoService() {
-        adapters = new Object[3];
+        adapters = new Object[4];
         adapters[0] = logAdapter;
         adapters[1] = httpAdapter;
         adapters[2] = cache;
-        adapterClasses = new Class[3];
+        adapters[3] = scheduler;
+        adapterClasses = new Class[4];
         adapterClasses[0] = LoggerAdapterIface.class;
         adapterClasses[1] = EchoHttpAdapterIface.class;
         adapterClasses[2] = KeyValueCacheAdapterIface.class;
+        adapterClasses[3] = SchedulerIface.class;
     }
 
     @Override
@@ -56,14 +60,17 @@ public class EchoService extends Kernel {
         logAdapter = (LoggerAdapterIface) super.adapters[0];
         httpAdapter = (EchoHttpAdapterIface) super.adapters[1];
         cache = (KeyValueCacheAdapterIface) super.adapters[2];
+        scheduler = (SchedulerIface) super.adapters[3];
     }
 
     @Override
     public void runOnce() {
         super.runOnce();
-        Event e = new Event("EchoService.runOnce()", "LOG", Event.LOG_INFO, "executed");
+        Event e = new Event("EchoService.runOnce()", "LOG", Event.LOG_INFO, null, "executed");
         logEvent(e);
         System.out.println("Hello from EchoService.runOnce()");
+        e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from runOnce() processed by scheduler. Hello!");
+        processEvent(e);
     }
 
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
@@ -93,6 +100,11 @@ public class EchoService extends Kernel {
 
     @EventHook(eventCategory = "*")
     public void processEvent(Event event) {
+        if(event.getTimePoint()!=null){
+            scheduler.handleEvent(event);
+        }else{
+            System.out.println(event.getPayload().toString());
+        }
         //does nothing
     }
 

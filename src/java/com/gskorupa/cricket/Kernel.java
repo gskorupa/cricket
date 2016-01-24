@@ -20,6 +20,7 @@ import com.gskorupa.cricket.config.ConfigSet;
 import com.gskorupa.cricket.config.Configuration;
 import com.gskorupa.cricket.in.InboundAdapter;
 import com.gskorupa.cricket.out.OutboundAdapter;
+import com.gskorupa.cricket.in.Scheduler;
 import java.io.BufferedReader;
 import java.util.logging.Logger;
 import java.io.InputStreamReader;
@@ -54,6 +55,7 @@ public abstract class Kernel {
 
     protected ConfigSet configSet = null;
 
+    //private Scheduler scheduler;
     public Kernel() {
     }
 
@@ -74,7 +76,7 @@ public abstract class Kernel {
     public static Kernel getInstance() {
         return (Kernel) instance;
     }
-    
+
     public static Object getInstanceWithProperties(Class c, Configuration config) {
         //Configuration config = cs.getConfiguration(c.getSimpleName());
         if (instance != null) {
@@ -120,7 +122,7 @@ public abstract class Kernel {
                     java.lang.reflect.Method loadPropsMethod = adapters[i].getClass().getMethod("loadProperties", HashMap.class);
                     loadPropsMethod.invoke(adapters[i], ac.getProperties());
                 } else {
-                    LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterInterfaceName);
+                    LOGGER.log(Level.SEVERE, "Adapters initialization error. Adapter class must implement: {0}", adapterInterfaceName);
                 }
             }
         } catch (Exception e) {
@@ -224,6 +226,8 @@ public abstract class Kernel {
     }
 
     public void start() throws InterruptedException {
+
+        //setScheduler(new Scheduler());
         getAdapters();
         if (isHttpHandlerLoaded()) {
             System.out.println("Starting http listener ...");
@@ -251,9 +255,13 @@ public abstract class Kernel {
     }
 
     public void shutdown() {
+
+        //schedulerShutdown();
         //some cleaning up code could be added here ... if required
         System.out.println("\nShutting down ...");
-        getHttpd().server.stop(MIN_PRIORITY);
+        if (isHttpHandlerLoaded()) {
+            //getHttpd().server.stop(MIN_PRIORITY);
+        }
         //todo: stop adapters
         for (int i = 0; i < adapters.length; i++) {
             if (adapters[i] instanceof com.gskorupa.cricket.in.InboundAdapter) {
@@ -277,4 +285,20 @@ public abstract class Kernel {
          */
     }
 
+    /*
+    public Scheduler getScheduler() {
+        return scheduler;
+    }
+
+    public void setScheduler(Scheduler handler) {
+        this.scheduler = handler;
+    }
+     */
+
+ /*
+    protected void schedulerShutdown(){
+        //todo: clean and write database if needed
+        getScheduler().scheduler.shutdown();
+    }
+     */
 }

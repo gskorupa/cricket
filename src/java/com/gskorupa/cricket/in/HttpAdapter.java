@@ -232,7 +232,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         }
         try {
             //sendLogEvent("sending request to hook method " + getHookMethodNameForMethod(method));
-            Event event=new Event("HttpAdapter", Event.CATEGORY_GENERIC, "HTTP", requestObject);
+            Event event=new Event("HttpAdapter", Event.CATEGORY_GENERIC, "HTTP", null, requestObject);
             event.setPayload(requestObject);
             sendLogEvent(Event.LOG_INFO, "sending request to hook method " + hookMethodName);
             //Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForMethod(method), RequestObject.class);
@@ -296,6 +296,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 "HttpAdapter",
                 Event.CATEGORY_LOG,
                 Event.LOG_INFO,
+                null,
                 sb.toString());
 
         try {
@@ -311,6 +312,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 "HttpAdapter",
                 Event.CATEGORY_LOG,
                 type,
+                null,
                 message);
         try {
             Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForEvent("LOG"), Event.class);
