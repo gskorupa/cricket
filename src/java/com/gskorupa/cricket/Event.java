@@ -15,6 +15,10 @@
  */
 package com.gskorupa.cricket;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  *
  * @author greg
@@ -36,6 +40,7 @@ public class Event {
     private String origin;
     private Object payload;
     private String timePoint;
+    private long calculatedTimePoint=-1;
 
     public Event() {
         this.id = Kernel.getEventId();
@@ -47,7 +52,8 @@ public class Event {
         this.category = category;
         this.type = type;
         this.payload = payload;
-        this.timePoint=timePoint;
+        this.timePoint = timePoint;
+        if(timePoint!=null) calculateTimePoint();
     }
 
     public String toString() {
@@ -148,5 +154,66 @@ public class Event {
      */
     public void setTimePoint(String timePoint) {
         this.timePoint = timePoint;
+        calculateTimePoint();
+    }
+
+    private void calculateTimePoint() {
+        String dateDefinition = getTimePoint();
+        if(dateDefinition==null){
+            calculatedTimePoint=-1;
+            return;
+        }
+        long delay;
+        if (dateDefinition.startsWith("+")) {
+            try {
+                delay = Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1));
+            } catch (NumberFormatException e) {
+                setCalculatedTimePoint(-1);
+                return;
+            }
+            String unit = dateDefinition.substring(dateDefinition.length() - 1);
+            long multiplayer = 1;
+            switch (unit) {
+                case "d":
+                    multiplayer = 24 * 60 * 60000;
+                    break;
+                case "h":
+                    multiplayer = 60 * 60000;
+                    break;
+                case "m":
+                    multiplayer = 60000;
+                    break;
+                case "s":
+                    multiplayer = 1000;
+                    break;
+                default:
+                    setCalculatedTimePoint(-1);
+                    return;
+            }
+            setCalculatedTimePoint(multiplayer * delay);
+        } else {
+            //parse date and replace with delay from now
+            Date target;
+            try {
+                target = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss Z").parse(dateDefinition);
+                setCalculatedTimePoint(target.getTime());
+            } catch (ParseException e) {
+                setCalculatedTimePoint(-1);
+            }   
+        }
+    }
+
+    /**
+     * @return the calculatedTimePoint
+     */
+    public long getCalculatedTimePoint() {
+        return calculatedTimePoint;
+    }
+
+    /**
+     * @param calculatedTimePoint the calculatedTimePoint to set
+     */
+    public void setCalculatedTimePoint(long calculatedTimePoint) {
+        this.calculatedTimePoint = calculatedTimePoint;
     }
 }

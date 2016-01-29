@@ -75,6 +75,8 @@ public class EchoService extends Kernel {
 
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
     public Object doGet(Event requestEvent) {
+        Event e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from runOnce() processed by scheduler. Hello!");
+        processEvent(e);
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 

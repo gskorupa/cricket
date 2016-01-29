@@ -39,6 +39,7 @@
             "classFullName":"com.gskorupa.cricket.in.Scheduler",
             "properties":{
                 "path":"/home/greg",
+                "envVariable":"SCHEDULER_DB_PATH",
                 "file":"scheduler.xml"
               }
             }

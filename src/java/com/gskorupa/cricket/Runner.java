@@ -18,7 +18,6 @@ package com.gskorupa.cricket;
 import com.cedarsoftware.util.io.JsonReader;
 import com.gskorupa.cricket.config.ConfigSet;
 import com.gskorupa.cricket.config.Configuration;
-import com.gskorupa.cricket.in.Scheduler;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;

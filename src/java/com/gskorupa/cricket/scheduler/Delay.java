@@ -12,6 +12,40 @@ import java.util.concurrent.TimeUnit;
  * @author greg
  */
 public class Delay {
-    public TimeUnit unit;
-    public long delay;
+    private TimeUnit unit;
+    private long delay;
+    private long definedTimepoint;
+
+    /**
+     * @return the unit
+     */
+    public TimeUnit getUnit() {
+        return unit;
+    }
+
+    /**
+     * @param unit the unit to set
+     */
+    public void setUnit(TimeUnit unit) {
+        this.unit = unit;
+    }
+
+    /**
+     * @return the delay
+     */
+    public long getDelay() {
+        return delay;
+    }
+
+    /**
+     * @param delay the delay to set
+     */
+    public void setDelay(long delay) {
+        definedTimepoint=System.currentTimeMillis()+delay;
+        this.delay = delay;
+    }
+    
+    public long getDefinedTimepoint(){
+        return definedTimepoint;
+    }
 }

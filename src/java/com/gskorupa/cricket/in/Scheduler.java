@@ -8,6 +8,7 @@ package com.gskorupa.cricket.in;
 import com.gskorupa.cricket.Adapter;
 import com.gskorupa.cricket.Event;
 import com.gskorupa.cricket.Kernel;
+import com.gskorupa.cricket.db.KeyValueStore;
 import com.gskorupa.cricket.scheduler.Delay;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,7 +16,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -27,20 +30,64 @@ import java.util.concurrent.TimeUnit;
  */
 public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter {
 
+    private String storagePath;
+    private String envVariable;
+    private String fileName;
+    private KeyValueStore database;
+
     public final ScheduledExecutorService scheduler
             = Executors.newScheduledThreadPool(1);
 
     public void loadProperties(HashMap<String, String> properties) {
         //todo: persistance
+
+        setStoragePath(properties.get("path"));
+        System.out.println("path: " + getStoragePath());
+        setEnvVariable(properties.get("envVariable"));
+        System.out.println("envVAriable name: " + getEnvVariable());
+        if (System.getenv(getEnvVariable()) != null) {
+            setStoragePath(System.getenv(getEnvVariable()));
+        }
+        setFileName(properties.get("file"));
+        System.out.println("file: " + getFileName());
+        String pathSeparator = System.getProperty("file.separator");
+        setStoragePath(
+                getStoragePath().endsWith(pathSeparator)
+                ? getStoragePath() + getFileName()
+                : getStoragePath() + pathSeparator + getFileName()
+        );
+        System.out.println("scheduler database file location: " + getStoragePath());
+        database = new KeyValueStore(getStoragePath());
+        processDatabase();
+    }
+
+    private void setStoragePath(String storagePath) {
+        this.storagePath = storagePath;
+    }
+
+    private String getStoragePath() {
+        return storagePath;
+    }
+
+    private void setEnvVariable(String envVariable) {
+        this.envVariable = envVariable;
+    }
+
+    private String getEnvVariable() {
+        return envVariable;
     }
 
     public void handleEvent(Event event) {
+        handleEvent(event, false);
+    }
+
+    public void handleEvent(Event event, boolean restored) {
 
         if (event.getTimePoint() == null) {
             return;
         }
 
-        final Runnable worker = new Runnable() {
+        final Runnable runnable = new Runnable() {
             Event ev;
 
             public void run() {
@@ -49,7 +96,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
                 // get event handler of the Kernel
                 try {
                     Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForEvent(ev.getCategory()), Event.class);
-                    m.invoke(Kernel.getInstance(), event);
+                    m.invoke(Kernel.getInstance(), ev);
+                    database.remove("" + ev.getId());
                 } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     e.printStackTrace();
                 }
@@ -61,11 +109,18 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
             }
         }.init(event);
 
-        Delay delay = getDelayForEvent(event);
+        Delay delay = getDelayForEvent(event, restored);
 
-        if (delay.delay > 0) {
+        if (delay.getDelay() >= 0) {
+            // todo:
+            // an event stored in the database must have calculaatedTimePoint
+            // this is time of event execution calculated as number of milliseconds
+            // it will be used on reading events from the database on service start
+            if (!restored) {
+                database.put("" + event.getId(), event);
+            }
             final ScheduledFuture<?> workerHandle
-                    = scheduler.schedule(worker, delay.delay, delay.unit);
+                    = scheduler.schedule(runnable, delay.getDelay(), delay.getUnit());
         }
         /*
         scheduler.schedule(new Runnable() {
@@ -76,38 +131,57 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
          */
     }
 
-    private Delay getDelayForEvent(Event ev) {
+    private void processDatabase() {
+        Iterator it = database.getKeySet().iterator();
+        String key;
+        while (it.hasNext()) {
+            key = (String) it.next();
+            handleEvent((Event) database.get(key), true);
+            it.remove();
+        }
+    }
+
+    private Delay getDelayForEvent(Event ev, boolean restored) {
         Delay d = new Delay();
+        if(restored){
+            d.setUnit(TimeUnit.MILLISECONDS);
+            long delay=ev.getCalculatedTimePoint()-System.currentTimeMillis();
+            if(delay<0){
+                delay=0;
+            }
+            d.setDelay(delay);
+            return d;
+        }
 
         boolean wrongFormat = false;
         String dateDefinition = ev.getTimePoint();
         if (dateDefinition.startsWith("+")) {
             try {
-                d.delay = Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1));
+                d.setDelay(Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1)));
             } catch (NumberFormatException e) {
                 wrongFormat = true;
             }
             String unit = dateDefinition.substring(dateDefinition.length() - 1);
             switch (unit) {
                 case "d":
-                    d.unit = TimeUnit.DAYS;
+                    d.setUnit(TimeUnit.DAYS);
                     break;
                 case "h":
-                    d.unit = TimeUnit.HOURS;
+                    d.setUnit(TimeUnit.HOURS);
                     break;
                 case "m":
-                    d.unit = TimeUnit.MINUTES;
+                    d.setUnit(TimeUnit.MINUTES);
                     break;
                 case "s":
-                    d.unit = TimeUnit.SECONDS;
+                    d.setUnit(TimeUnit.SECONDS);
                     break;
                 default:
                     wrongFormat = true;
             }
         } else {
             //parse date and replace with delay from now
-            d.unit = TimeUnit.MILLISECONDS;
-            d.delay = getDelay(dateDefinition);
+            d.setUnit(TimeUnit.MILLISECONDS);
+            d.setDelay(getDelay(dateDefinition));
         }
         if (wrongFormat) {
             return null;
@@ -129,8 +203,22 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     public void destroy() {
         System.out.print("Stopping scheduler ... ");
         List<Runnable> activeEvents = scheduler.shutdownNow();
-        //todo: persistance
+        database.write();
         System.out.println("done");
+    }
+
+    /**
+     * @return the fileName
+     */
+    public String getFileName() {
+        return fileName;
+    }
+
+    /**
+     * @param fileName the fileName to set
+     */
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
 }

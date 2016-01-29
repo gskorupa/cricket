@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket.out;
+package com.gskorupa.cricket.db;
 
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
@@ -22,20 +22,18 @@ import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  *
  * @author greg
  */
-public class InMemoryCacheAdapter extends OutboundAdapter implements KeyValueCacheAdapterIface {
+public class KeyValueStore {
 
     private HashMap cache=null;
     private String storagePath;
-    private String envVariable;
-    private String fileName;
     
-    @Override
-    public void start() {
+    public void read() {
         try {
             try (XMLDecoder decoder = new XMLDecoder(
                     new BufferedInputStream(new FileInputStream(getStoragePath())
@@ -47,8 +45,7 @@ public class InMemoryCacheAdapter extends OutboundAdapter implements KeyValueCac
         }
     }
 
-    @Override
-    public void destroy() {
+    public void write() {
         try {
             try (XMLEncoder encoder = new XMLEncoder(
                     new BufferedOutputStream(
@@ -64,37 +61,30 @@ public class InMemoryCacheAdapter extends OutboundAdapter implements KeyValueCac
         return cache!=null ? cache : new HashMap();
     }
     
-    @Override
     public void put(String key, Object value) {
         getCache().put(key, value);
     }
 
-    @Override
     public Object get(String key) {
         return getCache().get(key);
     }
     
-    @Override
     public Object get(String key, Object defaultValue) {
         return getCache().containsKey(key) ? getCache().get(key) : defaultValue;
     }
     
-    @Override
     public boolean containsKey(String key) {
         return getCache().containsKey(key);
     }
     
-    @Override
     public boolean remove(String key){
         return getCache().remove(key)!=null ? true : false;
     }
     
-    @Override
     public void clear(){
         getCache().clear();
     }
     
-    @Override
     public long getSize(){
         return getCache().size();
     }
@@ -107,45 +97,13 @@ public class InMemoryCacheAdapter extends OutboundAdapter implements KeyValueCac
         return storagePath;
     }
 
-    private void setEnvVariable(String envVariable) {
-        this.envVariable = envVariable;
+    public KeyValueStore(String storagePath) {
+        setStoragePath(storagePath);
+        read();
     }
-
-    private String getEnvVariable() {
-        return envVariable;
+    
+    public Set getKeySet(){
+        return cache.keySet();
     }
-
-    public void loadProperties(HashMap<String,String> properties) {
-        setStoragePath(properties.get("path"));
-        System.out.println("path: " + getStoragePath());
-        setEnvVariable(properties.get("envVariable"));
-        System.out.println("envVAriable name: " + getEnvVariable());
-        if (System.getenv(getEnvVariable()) != null) {
-            setStoragePath(System.getenv(getEnvVariable()));
-        }
-        setFileName(properties.get("file"));
-        System.out.println("file: " + getFileName());
-        String pathSeparator = System.getProperty("file.separator");
-        setStoragePath(
-                getStoragePath().endsWith(pathSeparator)
-                ? getStoragePath() + getFileName()
-                : getStoragePath() + pathSeparator + getFileName()
-        );
-        System.out.println("cache file location: " + getStoragePath());
-        start();
-    }
-
-    /**
-     * @return the fileName
-     */
-    public String getFileName() {
-        return fileName;
-    }
-
-    /**
-     * @param fileName the fileName to set
-     */
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
+    
 }
