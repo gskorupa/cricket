@@ -15,163 +15,131 @@
  */
 package com.example.service;
 
-import com.gskorupa.cricket.ArgumentParser;
 import com.gskorupa.cricket.Event;
 import com.gskorupa.cricket.EventHook;
 import com.gskorupa.cricket.HttpAdapterHook;
 import com.gskorupa.cricket.Kernel;
 import com.gskorupa.cricket.RequestObject;
-import com.gskorupa.cricket.in.EchoHttpAdapterIface;
-import com.gskorupa.cricket.in.HtmlGenAdapterIface;
 import com.gskorupa.cricket.in.HttpAdapter;
 import com.gskorupa.cricket.in.ParameterMapResult;
-import com.gskorupa.cricket.out.HtmlReaderAdapterIface;
 import com.gskorupa.cricket.out.LoggerAdapterIface;
 import java.util.HashMap;
 import java.util.Map;
+import com.gskorupa.cricket.in.EchoHttpAdapterIface;
+import com.gskorupa.cricket.in.HtmlGenAdapterIface;
+import com.gskorupa.cricket.in.SchedulerIface;
+import com.gskorupa.cricket.out.HtmlReaderAdapterIface;
+import com.gskorupa.cricket.out.KeyValueCacheAdapterIface;
 
 /**
- * SimpleService
+ * EchoService
  *
  * @author greg
  */
 public class BasicService extends Kernel {
 
-    // adapters
+    // adapterClasses
     LoggerAdapterIface logAdapter = null;
-    EchoHttpAdapterIface echoAdapter = null;
+    EchoHttpAdapterIface httpAdapter = null;
+    KeyValueCacheAdapterIface cache = null;
+    SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
     HtmlReaderAdapterIface htmlReaderAdapter = null;
 
     public BasicService() {
-
-        adapters = new Object[4];
+        adapters = new Object[6];
         adapters[0] = logAdapter;
-        adapters[1] = echoAdapter;
-        adapters[2] = htmlAdapter;
-        adapters[3] = htmlReaderAdapter;
-        adapterClasses = new Class[4];
+        adapters[1] = httpAdapter;
+        adapters[2] = cache;
+        adapters[3] = scheduler;
+        adapters[4] = htmlAdapter;
+        adapters[5] = htmlReaderAdapter;
+        adapterClasses = new Class[6];
         adapterClasses[0] = LoggerAdapterIface.class;
         adapterClasses[1] = EchoHttpAdapterIface.class;
-        adapterClasses[2] = HtmlGenAdapterIface.class;
-        adapterClasses[3] = HtmlReaderAdapterIface.class;
+        adapterClasses[2] = KeyValueCacheAdapterIface.class;
+        adapterClasses[3] = SchedulerIface.class;
+        adapterClasses[4] = HtmlGenAdapterIface.class;
+        adapterClasses[5] = HtmlReaderAdapterIface.class;
     }
 
     @Override
     public void getAdapters() {
         logAdapter = (LoggerAdapterIface) super.adapters[0];
-        echoAdapter = (EchoHttpAdapterIface) super.adapters[1];
-        htmlAdapter = (HtmlGenAdapterIface) super.adapters[2];
-        htmlReaderAdapter = (HtmlReaderAdapterIface) super.adapters[3];
+        httpAdapter = (EchoHttpAdapterIface) super.adapters[1];
+        cache = (KeyValueCacheAdapterIface) super.adapters[2];
+        scheduler = (SchedulerIface) super.adapters[3];
+        htmlAdapter = (HtmlGenAdapterIface) super.adapters[4];
+        htmlReaderAdapter = (HtmlReaderAdapterIface) super.adapters[5];
     }
 
     @Override
     public void runOnce() {
-        //write to logs
-        Event ev= new Event(
-                        this.getClass().getSimpleName(),
-                        Event.CATEGORY_LOG, // equals "LOG"
-                        Event.LOG_INFO,     // equals "INFO"
-                        null);
-        logEvent(ev);
-        //alternatively:
-        //logAdapter.log(ev);
-        System.out.println("Hi! I'm " + this.getClass().getSimpleName());
+        super.runOnce();
+        System.out.println("Hello from EchoService.runOnce()");
+    }
+
+    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
+    public Object doGet(Event requestEvent) {
+        return sendEcho((RequestObject) requestEvent.getPayload());
+    }
+
+    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "POST")
+    public Object doPost(Event requestEvent) {
+        return sendEcho((RequestObject) requestEvent.getPayload());
+    }
+
+    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "PUT")
+    public Object doPut(Event requestEvent) {
+        return sendEcho((RequestObject) requestEvent.getPayload());
+    }
+
+    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "DELETE")
+    public Object doDelete(Event requestEvent) {
+        return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
     @EventHook(eventCategory = "LOG")
-    public void logEvent(com.gskorupa.cricket.Event event) {
+    public void logEvent(Event event) {
         logAdapter.log(event);
     }
 
     @EventHook(eventCategory = "*")
-    public void processEvent(com.gskorupa.cricket.Event event) {
-        //put your code here
-    }
-    
-    @HttpAdapterHook(handlerClassName = "HtmlGenAdapterIface", requestMethod = "GET")
-    public Object doGet(Event requestEvent) {
-        String responsePayload = "";
-        RequestObject request = (RequestObject)requestEvent.getPayload();
-        ParameterMapResult result = new ParameterMapResult();
-        try {
-            responsePayload = htmlReaderAdapter.readFile(request.pathExt);
-            result.setCode(HttpAdapter.SC_OK);
-            result.setMessage("");
-        } catch (Exception e) {
-            result.setCode(HttpAdapter.SC_NOT_FOUND);
-            result.setMessage("file not found");
+    public void processEvent(Event event) {
+        if(event.getTimePoint()!=null){
+            scheduler.handleEvent(event);
+        }else{
+            System.out.println(event.getPayload().toString());
         }
+        //does nothing
+    }
+
+    public Object sendEcho(RequestObject request) {
         
-        //copy parameters from request
-        HashMap<String, String> data = setResponseParameters(request.parameters);
         //
-        result.setData(data);
-        result.setPayload(responsePayload);
-        return result;
-    }
-    
-    private HashMap<String, String> setResponseParameters(Map<String, Object> requestParameters){
-        HashMap<String, String> data=new HashMap();
-        for (Map.Entry<String, Object> entry : requestParameters.entrySet()) {
-            data.put(entry.getKey(), (String)entry.getValue());
-        }
-        return data;
-    }
-    
-    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
-    public Object processEchoRequest(Event requestEvent){
-        // rewrite parameters from request to response
-        RequestObject request = (RequestObject)requestEvent.getPayload();
-        ParameterMapResult responseObect = new ParameterMapResult();
-        HashMap<String, String> data=new HashMap();
+        Long counter;
+        counter = (Long) cache.get("counter", new Long(0));
+        counter++;
+        cache.put("counter", counter);
+
+        ParameterMapResult r = new ParameterMapResult();
+        HashMap<String, Object> data = new HashMap();
         Map<String, Object> map = request.parameters;
-        data.put("request.method",request.method);
-        data.put("request.pathExt",request.pathExt);
+        data.put("request.method", request.method);
+        data.put("request.pathExt", request.pathExt);
+        data.put("echo counter", cache.get("counter"));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
-            data.put(entry.getKey(), (String)entry.getValue());
+            //System.out.println(entry.getKey() + "=" + entry.getValue());
+            data.put(entry.getKey(), (String) entry.getValue());
         }
-        if (data.containsKey("error")){
-            responseObect.setCode(HttpAdapter.SC_INTERNAL_SERVER_ERROR);
+        if (data.containsKey("error")) {
+            r.setCode(HttpAdapter.SC_INTERNAL_SERVER_ERROR);
             data.put("error", "error forced by request");
         } else {
-            responseObect.setCode(HttpAdapter.SC_OK);
+            r.setCode(HttpAdapter.SC_OK);
         }
-        responseObect.setData(data);
-        return responseObect;
+        r.setData(data);
+        return r;
     }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-
-        final BasicService service;
-        ArgumentParser arguments = new ArgumentParser(args);
-        if (arguments.isProblem()) {
-            if (arguments.containsKey("error")) {
-                System.out.println(arguments.get("error"));
-            }
-            System.out.println(new BasicService().getHelp());
-            System.exit(-1);
-        }
-        try {
-            if (arguments.containsKey("config")) {
-                service = (BasicService) BasicService.getInstance(BasicService.class, arguments.get("config"));
-            } else {
-                service = (BasicService) BasicService.getInstanceUsingResources(BasicService.class);
-            }
-            service.getAdapters();
-
-            if (arguments.containsKey("run")) {
-                service.start();
-            } else {
-                service.runOnce();
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    
 }

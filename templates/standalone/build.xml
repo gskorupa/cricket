@@ -35,8 +35,8 @@
     <target name="compile" depends="init" description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
         <javac 
-            target="1.7" 
-            source="1.7" 
+            target="1.8" 
+            source="1.8" 
             srcdir="${src}" 
             destdir="${build}"
             includeantruntime="false" 
@@ -59,7 +59,7 @@
     
     <target name="jar" depends="compile">
         <copy todir="${build}" overwrite="true">
-            <fileset dir="${src}" includes="*.properties"/>
+            <fileset dir="${src}" includes="*.json"/>
             <fileset dir="${src}" includes="*.txt"/>
         </copy>
         <jar destfile="${dist}/${ant.project.name}-${version}.jar">
