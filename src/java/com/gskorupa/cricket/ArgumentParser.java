@@ -26,6 +26,10 @@ public class ArgumentParser {
     
     private Map<String, String> arguments;
     
+    public ArgumentParser(){
+        arguments=new <String,String>HashMap();
+    }
+    
     public ArgumentParser(String[] args){
         arguments=getArguments(args);
     }
@@ -43,11 +47,13 @@ public class ArgumentParser {
     }
 
     public static Map<String, String> getArguments(String[] args) {
-        HashMap<String, String> map = new HashMap();
+        HashMap<String, String> map = new <String,String>HashMap();
         String name="";
         String option="";
         boolean confToRead = false;
-
+        if(args==null){
+            return map;
+        }
         for (int i = 0; i < args.length; i++) {
             name = args[i];
             if (confToRead) {

@@ -17,7 +17,6 @@ package com.gskorupa.cricket.in;
 
 import com.gskorupa.cricket.Adapter;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

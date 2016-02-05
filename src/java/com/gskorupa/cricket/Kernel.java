@@ -20,7 +20,6 @@ import com.gskorupa.cricket.config.ConfigSet;
 import com.gskorupa.cricket.config.Configuration;
 import com.gskorupa.cricket.in.InboundAdapter;
 import com.gskorupa.cricket.out.OutboundAdapter;
-import com.gskorupa.cricket.in.Scheduler;
 import java.io.BufferedReader;
 import java.util.logging.Logger;
 import java.io.InputStreamReader;
@@ -301,4 +300,18 @@ public abstract class Kernel {
         getScheduler().scheduler.shutdown();
     }
      */
+
+    /**
+     * @return the configSet
+     */
+    public ConfigSet getConfigSet() {
+        return configSet;
+    }
+
+    /**
+     * @param configSet the configSet to set
+     */
+    public void setConfigSet(ConfigSet configSet) {
+        this.configSet = configSet;
+    }
 }

@@ -76,7 +76,7 @@ public class BasicService extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
-        System.out.println("Hello from EchoService.runOnce()");
+        System.out.println("Hello from BasicService.runOnce()");
     }
 
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")

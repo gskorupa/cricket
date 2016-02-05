@@ -14,7 +14,7 @@
                     "interfaceName": "EchoHttpAdapterIface",
                     "classFullName": "com.gskorupa.cricket.in.EchoHttpAdapter",
                     "properties": {
-                        "context": "/"
+                        "context": "/echo"
                     }
                 },
                 "LoggerAdapterIface": {
