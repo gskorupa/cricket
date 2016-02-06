@@ -47,30 +47,22 @@ public class BasicService extends Kernel {
     HtmlReaderAdapterIface htmlReaderAdapter = null;
 
     public BasicService() {
-        adapters = new Object[6];
-        adapters[0] = logAdapter;
-        adapters[1] = httpAdapter;
-        adapters[2] = cache;
-        adapters[3] = scheduler;
-        adapters[4] = htmlAdapter;
-        adapters[5] = htmlReaderAdapter;
-        adapterClasses = new Class[6];
-        adapterClasses[0] = LoggerAdapterIface.class;
-        adapterClasses[1] = EchoHttpAdapterIface.class;
-        adapterClasses[2] = KeyValueCacheAdapterIface.class;
-        adapterClasses[3] = SchedulerIface.class;
-        adapterClasses[4] = HtmlGenAdapterIface.class;
-        adapterClasses[5] = HtmlReaderAdapterIface.class;
+        registerAdapter(logAdapter, LoggerAdapterIface.class);
+        registerAdapter(httpAdapter, EchoHttpAdapterIface.class);
+        registerAdapter(cache, KeyValueCacheAdapterIface.class);
+        registerAdapter(scheduler, SchedulerIface.class);
+        registerAdapter(htmlAdapter, HtmlGenAdapterIface.class);
+        registerAdapter(htmlReaderAdapter, HtmlReaderAdapterIface.class);
     }
 
     @Override
     public void getAdapters() {
-        logAdapter = (LoggerAdapterIface) super.adapters[0];
-        httpAdapter = (EchoHttpAdapterIface) super.adapters[1];
-        cache = (KeyValueCacheAdapterIface) super.adapters[2];
-        scheduler = (SchedulerIface) super.adapters[3];
-        htmlAdapter = (HtmlGenAdapterIface) super.adapters[4];
-        htmlReaderAdapter = (HtmlReaderAdapterIface) super.adapters[5];
+        logAdapter = (LoggerAdapterIface)getRegistered(LoggerAdapterIface.class);
+        httpAdapter = (EchoHttpAdapterIface)getRegistered(EchoHttpAdapterIface.class);
+        cache = (KeyValueCacheAdapterIface)getRegistered(KeyValueCacheAdapterIface.class);
+        scheduler = (SchedulerIface)getRegistered(SchedulerIface.class);
+        htmlAdapter = (HtmlGenAdapterIface)getRegistered(HtmlGenAdapterIface.class);
+        htmlReaderAdapter = (HtmlReaderAdapterIface)getRegistered(HtmlReaderAdapterIface.class);
     }
 
     @Override

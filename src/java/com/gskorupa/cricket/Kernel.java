@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.util.logging.Logger;
 import java.io.InputStreamReader;
 import static java.lang.Thread.MIN_PRIORITY;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
 
@@ -41,8 +42,8 @@ public abstract class Kernel {
     private static Object instance = null;
 
     // adapters
-    public static Object[] adapters = {};
-    public static Class[] adapterClasses = {};
+    public static ArrayList adapters = new ArrayList();
+    public static ArrayList adapterClasses = new ArrayList();
 
     // http server
     private String host = null;
@@ -58,6 +59,16 @@ public abstract class Kernel {
     public Kernel() {
     }
 
+    protected synchronized  void registerAdapter(Object adapter, Class adapterClass){
+        adapters.add(adapter);
+        adapterClasses.add(adapterClass);
+    }
+    
+    protected Object getRegistered(Class interfaceClass){
+        int index = adapterClasses.indexOf(interfaceClass);
+        return adapters.get(index);
+    }
+    
     public Configuration getConfiguration(String serviceName) {
         if (configSet == null) {
             configSet = new ConfigSet();
@@ -93,7 +104,7 @@ public abstract class Kernel {
         return instance;
     }
 
-    private void loadAdapters(Configuration config, Object[] adapters, Class[] adapterClasses) throws Exception {
+    private void loadAdapters(Configuration config, ArrayList adapters, ArrayList adapterClasses) throws Exception {
         setHttpHandlerLoaded(false);
         System.out.println("LOADING SERVICE PROPERTIES FOR " + config.getService());
         setHost(config.getHost());
@@ -107,19 +118,19 @@ public abstract class Kernel {
         String adapterInterfaceName = null;
         AdapterConfiguration ac = null;
         try {
-            for (int i = 0; i < adapterClasses.length; i++) {
-                adapterInterfaceName = adapterClasses[i].getSimpleName();
+            for (int i = 0; i < adapterClasses.size(); i++) {
+                adapterInterfaceName = ((Class)adapterClasses.get(i)).getSimpleName();
                 ac = config.getAdapterConfiguration(adapterInterfaceName);
                 System.out.println("ADAPTER: " + adapterInterfaceName);
                 Class c = Class.forName(ac.getClassFullName());
-                if (adapterClasses[i].isAssignableFrom(c)) {
-                    adapters[i] = adapterClasses[i].cast(c.newInstance());
-                    if (adapters[i] instanceof com.gskorupa.cricket.in.HttpAdapter) {
+                if (((Class)adapterClasses.get(i)).isAssignableFrom(c)) {
+                    adapters.add(i,((Class)adapterClasses.get(i)).cast(c.newInstance()));
+                    if (adapters.get(i) instanceof com.gskorupa.cricket.in.HttpAdapter) {
                         setHttpHandlerLoaded(true);
                     }
                     // loading properties
-                    java.lang.reflect.Method loadPropsMethod = adapters[i].getClass().getMethod("loadProperties", HashMap.class);
-                    loadPropsMethod.invoke(adapters[i], ac.getProperties());
+                    java.lang.reflect.Method loadPropsMethod = adapters.get(i).getClass().getMethod("loadProperties", HashMap.class);
+                    loadPropsMethod.invoke(adapters.get(i), ac.getProperties());
                 } else {
                     LOGGER.log(Level.SEVERE, "Adapters initialization error. Adapter class must implement: {0}", adapterInterfaceName);
                 }
@@ -262,11 +273,11 @@ public abstract class Kernel {
             //getHttpd().server.stop(MIN_PRIORITY);
         }
         //todo: stop adapters
-        for (int i = 0; i < adapters.length; i++) {
-            if (adapters[i] instanceof com.gskorupa.cricket.in.InboundAdapter) {
-                ((InboundAdapter) adapters[i]).destroy();
-            } else if (adapters[i] instanceof com.gskorupa.cricket.out.OutboundAdapter) {
-                ((OutboundAdapter) adapters[i]).destroy();
+        for (int i = 0; i < adapters.size(); i++) {
+            if (adapters.get(i) instanceof com.gskorupa.cricket.in.InboundAdapter) {
+                ((InboundAdapter) adapters.get(i)).destroy();
+            } else if (adapters.get(i) instanceof com.gskorupa.cricket.out.OutboundAdapter) {
+                ((OutboundAdapter) adapters.get(i)).destroy();
             }
         }
         System.out.println("Kernel stopped");

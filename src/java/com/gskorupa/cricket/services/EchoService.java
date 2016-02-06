@@ -43,24 +43,18 @@ public class EchoService extends Kernel {
     SchedulerIface scheduler = null;
 
     public EchoService() {
-        adapters = new Object[4];
-        adapters[0] = logAdapter;
-        adapters[1] = httpAdapter;
-        adapters[2] = cache;
-        adapters[3] = scheduler;
-        adapterClasses = new Class[4];
-        adapterClasses[0] = LoggerAdapterIface.class;
-        adapterClasses[1] = EchoHttpAdapterIface.class;
-        adapterClasses[2] = KeyValueCacheAdapterIface.class;
-        adapterClasses[3] = SchedulerIface.class;
+        registerAdapter(logAdapter, LoggerAdapterIface.class);
+        registerAdapter(httpAdapter, EchoHttpAdapterIface.class);
+        registerAdapter(cache, KeyValueCacheAdapterIface.class);
+        registerAdapter(scheduler, SchedulerIface.class);
     }
 
     @Override
     public void getAdapters() {
-        logAdapter = (LoggerAdapterIface) super.adapters[0];
-        httpAdapter = (EchoHttpAdapterIface) super.adapters[1];
-        cache = (KeyValueCacheAdapterIface) super.adapters[2];
-        scheduler = (SchedulerIface) super.adapters[3];
+        logAdapter = (LoggerAdapterIface)getRegistered(LoggerAdapterIface.class);
+        httpAdapter = (EchoHttpAdapterIface)getRegistered(EchoHttpAdapterIface.class);
+        cache = (KeyValueCacheAdapterIface)getRegistered(KeyValueCacheAdapterIface.class);
+        scheduler = (SchedulerIface)getRegistered(SchedulerIface.class);
     }
 
     @Override
