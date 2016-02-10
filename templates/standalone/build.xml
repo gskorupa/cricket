@@ -10,7 +10,7 @@
     <!--  uncomment if you need Tomcat libraries to compile the project
     <property name="tomcat-home" value="/home/greg/apache-tomcat-7.0.67" />
     -->
-    <property name="cricket-jar-location" value="lib/cricket-1.0.0.jar" />
+    <property name="cricket-jar-location" value="lib/cricket-1.0-B7.jar" />
         
     <!-- do not modify properties below -->
     <property name="src" location="src/java"/>

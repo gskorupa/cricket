@@ -1,49 +1,63 @@
 {
-  "@type":"com.gskorupa.cricket.config.ConfigSet",
-  "id":"new",
-  "description":"This is sample configuration",
-  "services":[
-      {
-        "@type":"com.gskorupa.cricket.config.Configuration",
-        "service":"com.gskorupa.cricket.services.EchoService",
-        "host":"0.0.0.0",
-        "port":"8080",
-        "threads":0,
-        "adapters":{
-          "EchoHttpAdapterIface":{
-            "interfaceName":"EchoHttpAdapterIface",
-            "classFullName":"com.gskorupa.cricket.in.EchoHttpAdapter",
-            "properties":{
-              "context":"/"
-              }
-            },
-            "LoggerAdapterIface":{
-            "interfaceName":"LoggerAdapterIface",
-            "classFullName":"com.gskorupa.cricket.out.StandardLogger",
-            "properties":{
-              "name":"EchoService",
-              "level":"ALL"
-              }
-            },
-            "KeyValueCacheAdapterIface":{
-            "interfaceName":"KeyValueCacheAdapterIface",
-            "classFullName":"com.gskorupa.cricket.out.InMemoryCacheAdapter",
-            "properties":{
-              "path":"/home/greg",
-              "envVariable":"ECHO_DB_PATH",
-              "file":"echo.xml"
-              }
-            },
-            "SchedulerIface":{
-            "interfaceName":"SchedulerIface",
-            "classFullName":"com.gskorupa.cricket.in.Scheduler",
-            "properties":{
-                "path":"/home/greg",
-                "envVariable":"SCHEDULER_DB_PATH",
-                "file":"scheduler.xml"
-              }
+    "@type": "com.gskorupa.cricket.config.ConfigSet",
+    "id": "new",
+    "description": "This is sample configuration",
+    "services": [
+        {
+            "@type": "com.gskorupa.cricket.config.Configuration",
+            "service": "com.gskorupa.cricket.services.EchoService",
+            "host": "0.0.0.0",
+            "port": "8080",
+            "threads": 0,
+            "adapters": {
+                "EchoHttpAdapterIface": {
+                    "interfaceName": "EchoHttpAdapterIface",
+                    "classFullName": "com.gskorupa.cricket.in.EchoHttpAdapter",
+                    "properties": {
+                        "context": "/echo"
+                    }
+                },
+                "LoggerAdapterIface": {
+                    "interfaceName": "LoggerAdapterIface",
+                    "classFullName": "com.gskorupa.cricket.out.StandardLogger",
+                    "properties": {
+                        "name": "EchoService",
+                        "level": "ALL"
+                    }
+                },
+                "KeyValueCacheAdapterIface": {
+                    "interfaceName": "KeyValueCacheAdapterIface",
+                    "classFullName": "com.gskorupa.cricket.out.InMemoryCacheAdapter",
+                    "properties": {
+                        "path": "./db",
+                        "envVariable": "ECHO_DB_PATH",
+                        "file": "echo.xml"
+                    }
+                },
+                "SchedulerIface": {
+                    "interfaceName": "SchedulerIface",
+                    "classFullName": "com.gskorupa.cricket.in.Scheduler",
+                    "properties": {
+                        "path": "./db",
+                        "envVariable": "SCHEDULER_DB_PATH",
+                        "file": "scheduler.xml"
+                    }
+                },
+                "HtmlGenAdapterIface": {
+                    "interfaceName": "HtmlGenAdapterIface",
+                    "classFullName": "com.gskorupa.cricket.in.HtmlGenAdapter",
+                    "properties": {
+                        "context": "/"
+                    }
+                },
+                "HtmlReaderAdapterIface": {
+                    "interfaceName": "HtmlReaderAdapterIface",
+                    "classFullName": "com.gskorupa.cricket.out.HtmlReaderAdapter",
+                    "properties": {
+                        "root": "./www/"
+                    }
+                }
             }
-          }
         }
     ]
 }

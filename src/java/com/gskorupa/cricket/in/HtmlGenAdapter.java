@@ -16,6 +16,9 @@
 package com.gskorupa.cricket.in;
 
 import com.gskorupa.cricket.Adapter;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +30,7 @@ import java.util.regex.Pattern;
 public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, Adapter {
 
     @Override
-    public void loadProperties(HashMap<String,String> properties) {
+    public void loadProperties(HashMap<String, String> properties) {
         setContext(properties.get("context"));
         System.out.println("context=" + getContext());
     }
@@ -40,16 +43,26 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
      * @return the payload field of the result modified with parameters
      */
     @Override
-    public String formatResponse(int type, Result result) {
-        return updateHtml((ParameterMapResult) result);
+    public byte[] formatResponse(int type, Result result) {
+        if (type == FILE) {
+            return result.getPayload();
+        } else {
+            return updateHtml((ParameterMapResult) result);
+        }
     }
 
     @Override
-    protected int setResponseType(int responseType) {
-        return HttpAdapter.HTML;
+    protected int setResponseType(int oryginalResponseType, String fileExt) {
+        switch (fileExt) {
+            case ".html":
+            case ".htm":
+                return HTML;
+            default:
+                return FILE;
+        }
     }
 
-    private String updateHtml(ParameterMapResult result) {
+    private byte[] updateHtml(ParameterMapResult result) {
 
         if (result.getData() != null) {
             HashMap map = (HashMap) result.getData();
@@ -57,18 +70,18 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
                 //output = result.getPayload();
                 // replace using regex
                 Pattern p = Pattern.compile("(\\$\\w+)");
-                Matcher m = p.matcher(result.getPayload());
+                Matcher m = p.matcher(new String(result.getPayload()));
 
                 StringBuffer res = new StringBuffer();
                 String paramName;
                 String replacement;
                 while (m.find()) {
                     paramName = m.group().substring(1);
-                    replacement=(String)map.getOrDefault(paramName, m.group());
+                    replacement = (String) map.getOrDefault(paramName, m.group());
                     m.appendReplacement(res, replacement);
                 }
                 m.appendTail(res);
-                return res.toString();
+                return res.toString().getBytes();
             }
         }
         return result.getPayload();

@@ -34,7 +34,8 @@ public class ParameterMapResult implements Result {
     
     private int code;
     private String message;
-    private String payload;
+    private byte[] payload;
+    private String fileExt;
 
     public void setCode(int code) {
         this.code = code;
@@ -94,15 +95,29 @@ public class ParameterMapResult implements Result {
     /**
      * @return the payload
      */
-    public String getPayload() {
+    public byte[] getPayload() {
         return payload;
     }
 
     /**
      * @param payload the payload to set
      */
-    public void setPayload(String payload) {
+    public void setPayload(byte[] payload) {
         this.payload = payload;
+    }
+
+    /**
+     * @return the fileExt
+     */
+    public String getFileExtension() {
+        return fileExt;
+    }
+
+    /**
+     * @param fileExt the fileExt to set
+     */
+    public void setFileExtension(String fileExt) {
+        this.fileExt = fileExt;
     }
 
 }

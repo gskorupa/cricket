@@ -24,6 +24,6 @@ import java.io.IOException;
  */
 public interface HtmlReaderAdapterIface {
     
-    public String readFile(String path) throws FileNotFoundException, IOException;
+    public byte[] readFile(String path) throws FileNotFoundException, IOException;
     
 }

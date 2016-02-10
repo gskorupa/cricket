@@ -14,5 +14,6 @@ import com.gskorupa.cricket.Event;
 public interface SchedulerIface {
     
     public void handleEvent(Event event);
+    public boolean isRestored();
     
 }

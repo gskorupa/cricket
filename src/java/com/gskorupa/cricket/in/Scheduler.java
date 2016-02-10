@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -34,12 +33,15 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     private String envVariable;
     private String fileName;
     private KeyValueStore database;
+    protected boolean restored = false;
 
+    private long MINIMAL_DELAY = 5000;
+    
     public final ScheduledExecutorService scheduler
             = Executors.newScheduledThreadPool(1);
 
+    @Override
     public void loadProperties(HashMap<String, String> properties) {
-        //todo: persistance
 
         setStoragePath(properties.get("path"));
         System.out.println("path: " + getStoragePath());
@@ -47,6 +49,10 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         System.out.println("envVAriable name: " + getEnvVariable());
         if (System.getenv(getEnvVariable()) != null) {
             setStoragePath(System.getenv(getEnvVariable()));
+        }
+        // fix to handle '.'
+        if (getStoragePath().startsWith(".")) {
+            setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
         }
         setFileName(properties.get("file"));
         System.out.println("file: " + getFileName());
@@ -58,6 +64,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         );
         System.out.println("scheduler database file location: " + getStoragePath());
         database = new KeyValueStore(getStoragePath());
+        setRestored(database.getSize()>0);
         processDatabase();
     }
 
@@ -110,12 +117,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         }.init(event);
 
         Delay delay = getDelayForEvent(event, restored);
-
         if (delay.getDelay() >= 0) {
-            // todo:
-            // an event stored in the database must have calculaatedTimePoint
-            // this is time of event execution calculated as number of milliseconds
-            // it will be used on reading events from the database on service start
             if (!restored) {
                 database.put("" + event.getId(), event);
             }
@@ -137,17 +139,16 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         while (it.hasNext()) {
             key = (String) it.next();
             handleEvent((Event) database.get(key), true);
-            it.remove();
         }
     }
 
     private Delay getDelayForEvent(Event ev, boolean restored) {
         Delay d = new Delay();
-        if(restored){
+        if (restored) {
             d.setUnit(TimeUnit.MILLISECONDS);
-            long delay=ev.getCalculatedTimePoint()-System.currentTimeMillis();
-            if(delay<0){
-                delay=0;
+            long delay = ev.getCalculatedTimePoint() - System.currentTimeMillis();
+            if (delay < MINIMAL_DELAY) {
+                delay = MINIMAL_DELAY;
             }
             d.setDelay(delay);
             return d;
@@ -184,6 +185,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
             d.setDelay(getDelay(dateDefinition));
         }
         if (wrongFormat) {
+            System.out.println("WARNING unsuported delay format: "+dateDefinition);
             return null;
         }
         return d;
@@ -219,6 +221,20 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
      */
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    /**
+     * @return the restored
+     */
+    public boolean isRestored() {
+        return restored;
+    }
+
+    /**
+     * @param restored the restored to set
+     */
+    public void setRestored(boolean restored) {
+        this.restored = restored;
     }
 
 }

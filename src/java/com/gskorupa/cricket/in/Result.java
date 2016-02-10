@@ -51,4 +51,12 @@ public interface Result {
      */
     public void setData(Object data);
     
+    public byte[] getPayload();
+    
+    public void setPayload(byte[] payload);
+    
+    public String getFileExtension();
+    
+    public void setFileExtension(String fileExt);
+    
 }

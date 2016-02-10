@@ -15,6 +15,7 @@
  */
 package com.gskorupa.cricket;
 
+import com.gskorupa.cricket.scheduler.Delay;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,20 +31,24 @@ public class Event {
 
     public static final String LOG_ALL = "ALL";
     public static final String LOG_FINEST = "FINEST";
+    public static final String LOG_FINE = "FINE";
+    public static final String LOG_FINER = "FINER";
     public static final String LOG_INFO = "INFO";
     public static final String LOG_WARNING = "WARNING";
     public static final String LOG_SEVERE = "SEVERE";
 
-    private long id;
+    private long id = -1;
     private String category;
     private String type;
     private String origin;
     private Object payload;
-    private String timePoint;
-    private long calculatedTimePoint=-1;
+    private String timePoint; // rename to timeDefinition
+    private long calculatedTimePoint = -1; // rename to timeMillis
 
     public Event() {
-        this.id = Kernel.getEventId();
+        if (id == -1) {
+            this.id = Kernel.getEventId();
+        }
     }
 
     public Event(String origin, String category, String type, String timePoint, Object payload) {
@@ -53,7 +58,7 @@ public class Event {
         this.type = type;
         this.payload = payload;
         this.timePoint = timePoint;
-        if(timePoint!=null) calculateTimePoint();
+        calculateTimePoint();
     }
 
     public String toString() {
@@ -67,6 +72,16 @@ public class Event {
                 .append(getType())
                 .append(":")
                 .append(getTimePoint())
+                .append(":")
+                .append(getPayload() != null ? getPayload().toString() : "");
+        return sb.toString();
+    }
+    
+    public String toLogString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(getId())
+                .append(":")
+                .append(getOrigin())
                 .append(":")
                 .append(getPayload() != null ? getPayload().toString() : "");
         return sb.toString();
@@ -154,17 +169,22 @@ public class Event {
      */
     public void setTimePoint(String timePoint) {
         this.timePoint = timePoint;
+        //calculateTimePoint();
+    }
+    
+    public void recalculate(){
         calculateTimePoint();
     }
 
     private void calculateTimePoint() {
         String dateDefinition = getTimePoint();
-        if(dateDefinition==null){
-            calculatedTimePoint=-1;
+        if (dateDefinition == null) {
+            calculatedTimePoint = -1;
             return;
         }
         long delay;
         if (dateDefinition.startsWith("+")) {
+            long now = System.currentTimeMillis();
             try {
                 delay = Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1));
             } catch (NumberFormatException e) {
@@ -172,25 +192,25 @@ public class Event {
                 return;
             }
             String unit = dateDefinition.substring(dateDefinition.length() - 1);
-            long multiplayer = 1;
+            long multiplicator = 1;
             switch (unit) {
                 case "d":
-                    multiplayer = 24 * 60 * 60000;
+                    multiplicator = 24 * 60 * 60000;
                     break;
                 case "h":
-                    multiplayer = 60 * 60000;
+                    multiplicator = 60 * 60000;
                     break;
                 case "m":
-                    multiplayer = 60000;
+                    multiplicator = 60000;
                     break;
                 case "s":
-                    multiplayer = 1000;
+                    multiplicator = 1000;
                     break;
                 default:
                     setCalculatedTimePoint(-1);
                     return;
             }
-            setCalculatedTimePoint(multiplayer * delay);
+            setCalculatedTimePoint(multiplicator * delay + now);
         } else {
             //parse date and replace with delay from now
             Date target;
@@ -199,7 +219,7 @@ public class Event {
                 setCalculatedTimePoint(target.getTime());
             } catch (ParseException e) {
                 setCalculatedTimePoint(-1);
-            }   
+            }
         }
     }
 
@@ -215,5 +235,29 @@ public class Event {
      */
     public void setCalculatedTimePoint(long calculatedTimePoint) {
         this.calculatedTimePoint = calculatedTimePoint;
+    }
+
+    public void setCalculatedTimePoint(Delay delay, long now) {
+        long time = now;
+        switch (delay.getUnit()) {
+            case DAYS:
+                time = time + delay.getDelay() * 3600000 * 24;
+                break;
+            case HOURS:
+                time = time + delay.getDelay() * 3600000;
+                break;
+            case MILLISECONDS:
+                time = time + delay.getDelay();
+                break;
+            case MINUTES:
+                time = time + delay.getDelay() * 60000;
+                break;
+            case SECONDS:
+                time = time + delay.getDelay() * 1000;
+                break;
+            default:
+                time = 0;
+        }
+        calculatedTimePoint = time;
     }
 }

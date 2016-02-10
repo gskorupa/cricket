@@ -29,7 +29,7 @@
                     "interfaceName": "KeyValueCacheAdapterIface",
                     "classFullName": "com.gskorupa.cricket.out.InMemoryCacheAdapter",
                     "properties": {
-                        "path": "./db/",
+                        "path": "./db",
                         "envVariable": "ECHO_DB_PATH",
                         "file": "echo.xml"
                     }
@@ -38,7 +38,7 @@
                     "interfaceName": "SchedulerIface",
                     "classFullName": "com.gskorupa.cricket.in.Scheduler",
                     "properties": {
-                        "path": "./db/",
+                        "path": "./db",
                         "envVariable": "SCHEDULER_DB_PATH",
                         "file": "scheduler.xml"
                     }

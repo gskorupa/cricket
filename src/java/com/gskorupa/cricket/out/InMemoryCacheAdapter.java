@@ -123,6 +123,10 @@ public class InMemoryCacheAdapter extends OutboundAdapter implements KeyValueCac
         if (System.getenv(getEnvVariable()) != null) {
             setStoragePath(System.getenv(getEnvVariable()));
         }
+        // fix to handle '.'
+        if(getStoragePath().startsWith(".")){
+            setStoragePath(System.getProperty("user.dir")+getStoragePath().substring(1));
+        }
         setFileName(properties.get("file"));
         System.out.println("file: " + getFileName());
         String pathSeparator = System.getProperty("file.separator");

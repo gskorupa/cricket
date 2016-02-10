@@ -26,8 +26,15 @@ import com.gskorupa.cricket.out.LoggerAdapterIface;
 import java.util.HashMap;
 import java.util.Map;
 import com.gskorupa.cricket.in.EchoHttpAdapterIface;
+import com.gskorupa.cricket.in.FileResult;
+import com.gskorupa.cricket.in.HtmlGenAdapterIface;
+import com.gskorupa.cricket.in.Result;
 import com.gskorupa.cricket.in.SchedulerIface;
+import com.gskorupa.cricket.out.HtmlReaderAdapterIface;
 import com.gskorupa.cricket.out.KeyValueCacheAdapterIface;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 
 /**
  * EchoService
@@ -41,20 +48,26 @@ public class EchoService extends Kernel {
     EchoHttpAdapterIface httpAdapter = null;
     KeyValueCacheAdapterIface cache = null;
     SchedulerIface scheduler = null;
+    HtmlGenAdapterIface htmlAdapter = null;
+    HtmlReaderAdapterIface htmlReader = null;
 
     public EchoService() {
         registerAdapter(logAdapter, LoggerAdapterIface.class);
         registerAdapter(httpAdapter, EchoHttpAdapterIface.class);
         registerAdapter(cache, KeyValueCacheAdapterIface.class);
         registerAdapter(scheduler, SchedulerIface.class);
+        registerAdapter(htmlAdapter, HtmlGenAdapterIface.class);
+        registerAdapter(htmlReader, HtmlReaderAdapterIface.class);
     }
 
     @Override
     public void getAdapters() {
-        logAdapter = (LoggerAdapterIface)getRegistered(LoggerAdapterIface.class);
-        httpAdapter = (EchoHttpAdapterIface)getRegistered(EchoHttpAdapterIface.class);
-        cache = (KeyValueCacheAdapterIface)getRegistered(KeyValueCacheAdapterIface.class);
-        scheduler = (SchedulerIface)getRegistered(SchedulerIface.class);
+        logAdapter = (LoggerAdapterIface) getRegistered(LoggerAdapterIface.class);
+        httpAdapter = (EchoHttpAdapterIface) getRegistered(EchoHttpAdapterIface.class);
+        cache = (KeyValueCacheAdapterIface) getRegistered(KeyValueCacheAdapterIface.class);
+        scheduler = (SchedulerIface) getRegistered(SchedulerIface.class);
+        htmlAdapter = (HtmlGenAdapterIface) getRegistered(HtmlGenAdapterIface.class);
+        htmlReader = (HtmlReaderAdapterIface) getRegistered(HtmlReaderAdapterIface.class);
     }
 
     @Override
@@ -67,8 +80,22 @@ public class EchoService extends Kernel {
         processEvent(e);
     }
 
+    @HttpAdapterHook(handlerClassName = "HtmlGenAdapterIface", requestMethod = "GET")
+    public Object doGet(Event event) {
+        RequestObject request = (RequestObject) event.getPayload();
+        Result result = getFile(request);
+        HashMap<String, String> data = new HashMap();
+        //copy parameters from request to response data without modification
+        Map<String, Object> map = request.parameters;
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            data.put(entry.getKey(), (String) entry.getValue());
+        }
+        result.setData(data);
+        return result;
+    }
+
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
-    public Object doGet(Event requestEvent) {
+    public Object doGetEcho(Event requestEvent) {
         Event e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from runOnce() processed by scheduler. Hello!");
         processEvent(e);
         return sendEcho((RequestObject) requestEvent.getPayload());
@@ -96,16 +123,15 @@ public class EchoService extends Kernel {
 
     @EventHook(eventCategory = "*")
     public void processEvent(Event event) {
-        if(event.getTimePoint()!=null){
+        if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
-        }else{
+        } else {
             System.out.println(event.getPayload().toString());
         }
-        //does nothing
     }
 
     public Object sendEcho(RequestObject request) {
-        
+
         //
         Long counter;
         counter = (Long) cache.get("counter", new Long(0));
@@ -131,5 +157,42 @@ public class EchoService extends Kernel {
         r.setData(data);
         return r;
     }
-    
+
+    private Result getFile(RequestObject request) {
+        logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_FINEST, "", "STEP1"));
+        byte[] fileContent = {};
+        String filePath = request.pathExt;
+        logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_FINEST, "", "pathExt=" + filePath));
+        String fileExt = "";
+        if (!(filePath.isEmpty() || filePath.endsWith("/")) && filePath.indexOf(".") > 0) {
+            fileExt = filePath.substring(filePath.lastIndexOf("."));
+        }
+        Result result;
+        switch (fileExt.toLowerCase()) {
+            case ".jpg":
+            case ".jpeg":
+            case ".gif":
+            case ".png":
+                result = new FileResult();
+                break;
+            default:
+                fileExt = ".html";
+                result = new ParameterMapResult();
+        }
+        try {
+            byte[] b = htmlReader.readFile(filePath);
+            result.setPayload(b);
+            result.setFileExtension(fileExt);
+            result.setCode(HttpAdapter.SC_OK);
+            result.setMessage("");
+        } catch (Exception e) {
+            logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_WARNING, "", e.getMessage()));
+            result.setPayload(fileContent);
+            result.setFileExtension(fileExt);
+            result.setCode(HttpAdapter.SC_NOT_FOUND);
+            result.setMessage("file not found");
+        }
+        return result;
+    }
+
 }

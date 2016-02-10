@@ -55,7 +55,6 @@ public abstract class Kernel {
 
     protected ConfigSet configSet = null;
 
-    //private Scheduler scheduler;
     public Kernel() {
     }
 
@@ -88,14 +87,12 @@ public abstract class Kernel {
     }
 
     public static Object getInstanceWithProperties(Class c, Configuration config) {
-        //Configuration config = cs.getConfiguration(c.getSimpleName());
         if (instance != null) {
             return instance;
         }
         try {
             instance = c.newInstance();
             ((Kernel) instance).loadAdapters(config, adapters, adapterClasses);
-            //((Kernel) instance).configSet = cs;
         } catch (Exception e) {
             instance = null;
             LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
@@ -198,6 +195,7 @@ public abstract class Kernel {
         this.httpHandlerLoaded = httpHandlerLoaded;
     }
 
+    /*
     public String getHelp() {
         String content = "Help file not found";
         try {
@@ -212,7 +210,8 @@ public abstract class Kernel {
         }
         return content;
     }
-
+*/
+    /*
     public String readHelpFile(String fileName) throws Exception {
         String content = null;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(fileName)))) {
@@ -226,7 +225,7 @@ public abstract class Kernel {
         }
         return content;
     }
-
+*/
     /*
     * This method will be invoked when Kernel is executed without --run option
      */
@@ -237,7 +236,6 @@ public abstract class Kernel {
 
     public void start() throws InterruptedException {
 
-        //setScheduler(new Scheduler());
         getAdapters();
         if (isHttpHandlerLoaded()) {
             System.out.println("Starting http listener ...");
@@ -254,6 +252,8 @@ public abstract class Kernel {
             });
             setHttpd(new Httpd(this));
             getHttpd().run();
+            System.out.println("Running initialization tasks");
+            runInitTasks();
             System.out.println("Started. Press Ctrl-C to stop");
             while (true) {
                 Thread.sleep(200);
@@ -263,15 +263,18 @@ public abstract class Kernel {
             System.exit(MIN_PRIORITY);
         }
     }
+    
+    protected void runInitTasks(){
+        
+    }
 
     public void shutdown() {
 
-        //schedulerShutdown();
         //some cleaning up code could be added here ... if required
         System.out.println("\nShutting down ...");
-        if (isHttpHandlerLoaded()) {
+        //if (isHttpHandlerLoaded()) {
             //getHttpd().server.stop(MIN_PRIORITY);
-        }
+        //}
         //todo: stop adapters
         for (int i = 0; i < adapters.size(); i++) {
             if (adapters.get(i) instanceof com.gskorupa.cricket.in.InboundAdapter) {
@@ -281,36 +284,7 @@ public abstract class Kernel {
             }
         }
         System.out.println("Kernel stopped");
-        /*
-        Map args = new HashMap();
-        args.put(JsonWriter.TYPE, false);
-        Map types = new HashMap();
-        types.put("java.utils.ArrayList","services");
-        types.put("java.utils.HashMap","adapters");
-        types.put("com.gskorupa.cricket.config.Configuration","items");
-        types.put("java.utils.HashMap","properties");
-        args.put(JsonWriter.TYPE_NAME_MAP, types);
-        args.put(JsonWriter.PRETTY_PRINT, true);
-        System.out.println(JsonWriter.objectToJson(configSet, args));
-         */
     }
-
-    /*
-    public Scheduler getScheduler() {
-        return scheduler;
-    }
-
-    public void setScheduler(Scheduler handler) {
-        this.scheduler = handler;
-    }
-     */
-
- /*
-    protected void schedulerShutdown(){
-        //todo: clean and write database if needed
-        getScheduler().scheduler.shutdown();
-    }
-     */
 
     /**
      * @return the configSet
@@ -325,4 +299,5 @@ public abstract class Kernel {
     public void setConfigSet(ConfigSet configSet) {
         this.configSet = configSet;
     }
+    
 }

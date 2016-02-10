@@ -16,13 +16,10 @@
 package com.gskorupa.cricket.out;
 
 import com.gskorupa.cricket.Adapter;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 
 /**
@@ -35,48 +32,43 @@ public class HtmlReaderAdapter extends OutboundAdapter implements Adapter, HtmlR
 
     /**
      * Configures the adapter
-     * @param properties 
+     *
+     * @param properties
      */
     @Override
-    public void loadProperties(HashMap<String,String> properties) {
+    public void loadProperties(HashMap<String, String> properties) {
         setRootPath(properties.get("root"));
         System.out.println("root path: " + getRootPath());
     }
 
     /**
-     * Reads the file content 
-     * @param path the file location (prepended with the rootPath)
+     * Reads the file content
+     *
+     * @param filePath the file location (prepended with the rootPath)
      * @return file content
      * @throws FileNotFoundException
-     * @throws IOException 
+     * @throws IOException
      */
     @Override
-    public String readFile(String path) throws FileNotFoundException, IOException {
-        String fileContent;
-        String filePath = getRootPath() + path;
-        if (!filePath.endsWith(".html")) {
-            if (filePath.endsWith("/")) {
-                filePath = filePath + "index.html";
-            } else {
-                filePath = filePath + "/index.html";
-            }
+    public byte[] readFile(String filePath) throws FileNotFoundException, IOException {
+        String path=getRootPath()+filePath;
+        if(path.endsWith("/")){
+            path=path+"index.html";
         }
-        StringBuilder sb = new StringBuilder();
-        InputStream fis = new FileInputStream(new File(filePath));
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(fis))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line).append("\n");
-            }
-        }
-        fileContent = sb.toString();
-        return fileContent;
+        byte[] result = {};
+        FileInputStream fileInputStream = null;
+        File file = new File(path);
+        result = new byte[(int) file.length()];
+        fileInputStream = new FileInputStream(file);
+        fileInputStream.read(result);
+        fileInputStream.close();
+        return result;
     }
 
     /**
      * Sets the root path
-     * 
-     * @param rootPath 
+     *
+     * @param rootPath
      */
     private void setRootPath(String rootPath) {
         this.rootPath = rootPath;
@@ -84,7 +76,7 @@ public class HtmlReaderAdapter extends OutboundAdapter implements Adapter, HtmlR
 
     /**
      * The root path is prepended to the file path while reading file content
-     * 
+     *
      * @return root path
      */
     private String getRootPath() {

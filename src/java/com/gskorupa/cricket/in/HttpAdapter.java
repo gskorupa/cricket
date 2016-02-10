@@ -41,6 +41,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     public final static int XML = 1;
     public final static int CSV = 2;
     public final static int HTML = 3;
+    public final static int FILE = 4;
+    public final static int TEXT = 5;
 
     public final static int SC_OK = 200;
     public final static int SC_ACCEPTED = 202;
@@ -60,10 +62,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     private String context;
 
     private HashMap<String, String> hookMethodNames = new HashMap();
-    //private HashMap<String, String> eventHookMethods =new HashMap();
 
     public HttpAdapter() {
-        //getEventHooks();
         getServiceHooks();
     }
 
@@ -81,10 +81,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 // we need to find all names of implemented interfaces because
                 // handler class is mapped by the interface name
                 for (Class c : this.getClass().getInterfaces()) {
-                    //
                     if (ah.handlerClassName().equals(c.getSimpleName())) {
-                        //System.out.println(ah.handlerClassName() + " " + c.getSimpleName());
-                        //setHookMethodName(m.getName());
                         addHookMethodNameForMethod(requestMethod, m.getName());
                         System.out.println("hook method for http method " + requestMethod + " : " + m.getName());
                         break;
@@ -122,32 +119,33 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
         Result result = createResponse(exchange);
 
-        responseType = setResponseType(responseType);
+        responseType = setResponseType(responseType, result.getFileExtension());
 
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
-        String stringResponse = "";
+        byte[] responseData = {};
 
         switch (responseType) {
             case JSON:
                 headers.set("Content-Type", "application/json; charset=UTF-8");
-                stringResponse = formatResponse(JSON, result);
+                responseData=formatResponse(JSON, result);
                 break;
             case XML:
                 headers.set("Content-Type", "text/xml; charset=UTF-8");
-                stringResponse = formatResponse(XML, result);
+                responseData=formatResponse(XML, result);
                 break;
             case HTML:
                 headers.set("Content-Type", "text/html; charset=UTF-8");
-                stringResponse = formatResponse(HTML, result);
+                responseData=formatResponse(HTML, result);
                 break;
             case CSV:
                 headers.set("Content-Type", "text/csv; charset=UTF-8");
-                stringResponse = formatResponse(CSV, result);
+                responseData=formatResponse(CSV, result);
                 break;
-        }
-        if (null == stringResponse) {
-            stringResponse = "";
+            default:
+                headers.set("Content-Type", getMimeType(result.getFileExtension()));
+                responseData=result.getPayload();
+                break;
         }
         //calculate error code from response object
         int errCode = 200;
@@ -156,8 +154,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 errCode = 200;
                 break;
             case 405:
-                if (stringResponse.isEmpty()) {
-                    stringResponse = result.getMessage();
+                if (responseData.length==0) {
+                    responseData = result.getMessage().getBytes();
                 }
                 errCode = 405;
                 break;
@@ -166,22 +164,41 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 break;
         }
         //System.out.println("RESPONSE: "+stringResponse);
-        exchange.sendResponseHeaders(errCode, stringResponse.getBytes().length);
-        sendLogEvent(exchange, stringResponse.getBytes().length);
+        exchange.sendResponseHeaders(errCode, responseData.length);
+        sendLogEvent(exchange, responseData.length);
         OutputStream os = exchange.getResponseBody();
-        os.write(stringResponse.getBytes());
+        os.write(responseData);
         os.close();
         exchange.close();
     }
 
+    private String getMimeType(String fileExt){
+        switch (fileExt) {
+            case ".jpg":
+                return "image/jpg";
+            case ".jpeg":
+                return "image/jpeg";
+            case ".gif":
+                return "image/gif";
+            case ".png":
+                return "image/png";
+            case ".css":
+                return "text/css";
+            case ".js":
+                return "text/javascript";
+            default:
+                return "text/plain";
+        }
+    }
+    
     /**
      *
      */
-    protected int setResponseType(int responseType) {
-        return responseType;
+    protected int setResponseType(int oryginalResponseType, String fileExt) {
+        return oryginalResponseType;
     }
 
-    public String formatResponse(int type, Result result) {
+    public byte[] formatResponse(int type, Result result) {
         String formattedResponse;
         switch (type) {
             case JSON:
@@ -197,7 +214,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 formattedResponse = JsonFormatter.getInstance().format(true, result);
                 break;
         }
-        return formattedResponse;
+        return formattedResponse.getBytes();
     }
 
     private Result createResponse(HttpExchange exchange) {
@@ -231,11 +248,9 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             return result;
         }
         try {
-            //sendLogEvent("sending request to hook method " + getHookMethodNameForMethod(method));
+            sendLogEvent(Event.LOG_FINE, "sending request to hook method " + hookMethodName);
             Event event=new Event("HttpAdapter", Event.CATEGORY_GENERIC, "HTTP", null, requestObject);
             event.setPayload(requestObject);
-            sendLogEvent(Event.LOG_INFO, "sending request to hook method " + hookMethodName);
-            //Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForMethod(method), RequestObject.class);
             Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
             result = (Result) m.invoke(Kernel.getInstance(), event);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {

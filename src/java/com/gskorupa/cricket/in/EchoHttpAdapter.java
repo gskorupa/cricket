@@ -42,7 +42,7 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
      */
     
     @Override
-    public String formatResponse(int type, Result result){
+    public byte[] formatResponse(int type, Result result){
         return super.formatResponse(type, result);
         /*
         String response="";

@@ -18,6 +18,8 @@ package com.gskorupa.cricket.out;
 import com.gskorupa.cricket.Adapter;
 import com.gskorupa.cricket.Event;
 import java.util.HashMap;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,41 +29,57 @@ import java.util.logging.Logger;
  */
 public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAdapterIface {
 
-    Logger logger;
-    Level level=null;
+    //Logger logger;
+    Level level = null;
     private String name;
 
-    public void loadProperties(HashMap<String,String> properties) {
+    public static final Logger logger = Logger.getGlobal();
+
+    public void loadProperties(HashMap<String, String> properties) {
         setName(properties.get("name"));
         System.out.println("logger name: " + getName());
         setLoggingLevel(properties.get("level"));
-        System.out.println("logging level: " + getLoggingLevel());
-        logger = Logger.getLogger(getName());
+
+        Handler systemOut = new ConsoleHandler();
+        systemOut.setLevel(level);
+        systemOut.setFormatter(new StandardLoggerFormatter());
+        logger.addHandler(systemOut);
         logger.setLevel(level);
-        //System.out.println("logger level set to: " + logger.getLevel().getName());
+        // Prevent logs from processed by default Console handler.
+        logger.setUseParentHandlers(false);
+
+        System.out.println("logging level: " + logger.getLevel().getName());
     }
 
     public void log(Event event) {
-        String level=event.getType();
-        switch(level){
+        String level = event.getType();
+        switch (level) {
             case "LOG_INFO":
             case "INFO":
-                logger.log(Level.INFO, event.toString());
+                logger.log(Level.INFO, event.toLogString());
                 break;
             case "LOG_FINEST":
             case "FINEST":
-                logger.log(Level.FINEST, event.toString());
+                logger.log(Level.FINEST, event.toLogString());
+                break;
+            case "LOG_FINER":
+            case "FINER":
+                logger.log(Level.FINER, event.toLogString());
+                break;
+            case "LOG_FINE":
+            case "FINE":
+                logger.log(Level.FINE, event.toLogString());
                 break;
             case "LOG_WARNING":
             case "WARNING":
-                logger.log(Level.WARNING, event.toString());
+                logger.log(Level.WARNING, event.toLogString());
                 break;
             case "LOG_SEVERE":
             case "SEVERE":
-                logger.log(Level.SEVERE, event.toString());
+                logger.log(Level.SEVERE, event.toLogString());
                 break;
             default:
-                logger.log(Level.FINEST, event.toString());
+                logger.log(Level.FINEST, event.toLogString());
                 break;
         }
     }
@@ -75,8 +93,8 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
     }
 
     private Level getLoggingLevel() {
-        if(level==null){
-            level=Level.ALL;
+        if (level == null) {
+            level = Level.ALL;
         }
         return level;
     }

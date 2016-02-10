@@ -48,4 +48,8 @@ public class Delay {
     public long getDefinedTimepoint(){
         return definedTimepoint;
     }
+    
+    public String toString(){
+        return "DELAY "+getDelay()+" "+getUnit();
+    }
 }
