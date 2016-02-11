@@ -27,11 +27,12 @@
                 },
                 "KeyValueCacheAdapterIface": {
                     "interfaceName": "KeyValueCacheAdapterIface",
-                    "classFullName": "com.gskorupa.cricket.out.InMemoryCacheAdapter",
+                    "classFullName": "com.gskorupa.cricket.db.KeyValueStore",
                     "properties": {
                         "path": "./db",
                         "envVariable": "ECHO_DB_PATH",
-                        "file": "echo.xml"
+                        "file": "echo.xml",
+                        "max-records": "10"
                     }
                 },
                 "SchedulerIface": {

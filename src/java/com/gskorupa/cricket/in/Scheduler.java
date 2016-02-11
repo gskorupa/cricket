@@ -63,7 +63,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
                 : getStoragePath() + pathSeparator + getFileName()
         );
         System.out.println("scheduler database file location: " + getStoragePath());
-        database = new KeyValueStore(getStoragePath());
+        database = new KeyValueStore();
+        database.setStoragePath(getStoragePath());
+        database.read();
         setRestored(database.getSize()>0);
         processDatabase();
     }

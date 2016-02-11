@@ -15,6 +15,8 @@
  */
 package com.gskorupa.cricket.db;
 
+import com.gskorupa.cricket.out.KeyValueCacheAdapterIface;
+import com.gskorupa.cricket.out.OutboundAdapter;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
@@ -28,21 +30,87 @@ import java.util.Set;
  *
  * @author greg
  */
-public class KeyValueStore {
+public class KeyValueStore  extends OutboundAdapter implements KeyValueCacheAdapterIface{
 
-    private HashMap cache=null;
+    private LimitedMap cache=null;
     private String storagePath;
+    private int capacity=0;
+    private String envVariable;
+    private String fileName;
+    
+    @Override
+    public void start() {
+        read();
+    }
+    
+    @Override
+    public void destroy() {
+        write();
+    }
+    
+    public void loadProperties(HashMap<String,String> properties) {
+        setStoragePath(properties.get("path"));
+        System.out.println("path: " + getStoragePath());
+        setEnvVariable(properties.get("envVariable"));
+        System.out.println("envVAriable name: " + getEnvVariable());
+        if (System.getenv(getEnvVariable()) != null) {
+            setStoragePath(System.getenv(getEnvVariable()));
+        }
+        // fix to handle '.'
+        if(getStoragePath().startsWith(".")){
+            setStoragePath(System.getProperty("user.dir")+getStoragePath().substring(1));
+        }
+        setFileName(properties.get("file"));
+        System.out.println("file: " + getFileName());
+        String pathSeparator = System.getProperty("file.separator");
+        setStoragePath(
+                getStoragePath().endsWith(pathSeparator)
+                ? getStoragePath() + getFileName()
+                : getStoragePath() + pathSeparator + getFileName()
+        );
+        System.out.println("cache file location: " + getStoragePath());
+        try{
+        setCapacity(Integer.parseInt(properties.get("capacity")));
+        }catch(NumberFormatException e){
+            e.printStackTrace();
+        }
+        System.out.println("max-records: "+getCapacity());
+        start();
+    }
+    
+    private void setEnvVariable(String envVariable) {
+        this.envVariable = envVariable;
+    }
+
+    private String getEnvVariable() {
+        return envVariable;
+    }
+    
+    /**
+     * @return the fileName
+     */
+    public String getFileName() {
+        return fileName;
+    }
+
+    /**
+     * @param fileName the fileName to set
+     */
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
     
     public void read() {
         try {
             try (XMLDecoder decoder = new XMLDecoder(
                     new BufferedInputStream(new FileInputStream(getStoragePath())
                     ))) {
-                cache = (HashMap) decoder.readObject();
+                cache = (LimitedMap) decoder.readObject();
             }
         } catch (Exception e) {
-            cache = new HashMap();
+            cache = new LimitedMap();
         }
+        cache.setMaxSize(capacity);
     }
 
     public void write() {
@@ -57,11 +125,17 @@ public class KeyValueStore {
         }
     }
 
-    private HashMap getCache(){
-        return cache!=null ? cache : new HashMap();
+    private LimitedMap getCache(){
+        if(cache!=null){
+            return cache;
+        }else{
+            cache = new LimitedMap();
+            cache.setMaxSize(capacity);
+            return cache;
+        }
     }
     
-    public void put(String key, Object value) {
+    public synchronized void put(String key, Object value) {
         getCache().put(key, value);
     }
 
@@ -77,11 +151,11 @@ public class KeyValueStore {
         return getCache().containsKey(key);
     }
     
-    public boolean remove(String key){
+    public synchronized boolean remove(String key){
         return getCache().remove(key)!=null ? true : false;
     }
     
-    public void clear(){
+    public synchronized void clear(){
         getCache().clear();
     }
     
@@ -89,7 +163,7 @@ public class KeyValueStore {
         return getCache().size();
     }
 
-    private void setStoragePath(String storagePath) {
+    public void setStoragePath(String storagePath) {
         this.storagePath = storagePath;
     }
 
@@ -97,13 +171,27 @@ public class KeyValueStore {
         return storagePath;
     }
 
-    public KeyValueStore(String storagePath) {
-        setStoragePath(storagePath);
-        read();
-    }
+    //public KeyValueStore(String storagePath) {
+    //    setStoragePath(storagePath);
+    //    read();
+    //}
     
     public Set getKeySet(){
         return cache.keySet();
+    }
+
+    /**
+     * @return the capacity
+     */
+    public int getCapacity() {
+        return capacity;
+    }
+
+    /**
+     * @param capacity the capacity to set
+     */
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
     
 }
