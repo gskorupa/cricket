@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.gskorupa.cricket.in;
+package com.gskorupa.cricket.in.scheduler;
 
 import com.gskorupa.cricket.Adapter;
 import com.gskorupa.cricket.Event;
 import com.gskorupa.cricket.Kernel;
-import com.gskorupa.cricket.db.KeyValueStore;
+import com.gskorupa.cricket.out.db.KeyValueStore;
+import com.gskorupa.cricket.in.InboundAdapter;
 import com.gskorupa.cricket.scheduler.Delay;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

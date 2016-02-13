@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2015 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket.out;
-
-import com.gskorupa.cricket.Event;
+package com.gskorupa.cricket.in.http;
 
 /**
  *
- * @author greg
+ * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public interface LoggerAdapterIface {
-    
-    public void log(Event event);
-    
+public interface EchoHttpAdapterIface {
+
 }

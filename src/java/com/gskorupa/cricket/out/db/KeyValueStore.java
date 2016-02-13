@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket.db;
+package com.gskorupa.cricket.out.db;
 
-import com.gskorupa.cricket.out.KeyValueCacheAdapterIface;
+import com.gskorupa.cricket.out.db.LimitedMap;
+import com.gskorupa.cricket.out.db.KeyValueCacheAdapterIface;
 import com.gskorupa.cricket.out.OutboundAdapter;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;

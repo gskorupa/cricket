@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket.in;
+package com.gskorupa.cricket.out.html;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author greg
  */
-public interface EchoHttpAdapterIface {
-
+public interface HtmlReaderAdapterIface {
+    
+    public byte[] readFile(String path) throws FileNotFoundException, IOException;
+    
 }

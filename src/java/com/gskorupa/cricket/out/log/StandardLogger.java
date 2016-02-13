@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket.out;
+package com.gskorupa.cricket.out.log;
 
+import com.gskorupa.cricket.out.log.LoggerAdapterIface;
 import com.gskorupa.cricket.Adapter;
 import com.gskorupa.cricket.Event;
+import com.gskorupa.cricket.out.OutboundAdapter;
 import java.util.HashMap;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Handler;

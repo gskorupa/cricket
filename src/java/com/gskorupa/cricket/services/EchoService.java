@@ -20,21 +20,18 @@ import com.gskorupa.cricket.EventHook;
 import com.gskorupa.cricket.HttpAdapterHook;
 import com.gskorupa.cricket.Kernel;
 import com.gskorupa.cricket.RequestObject;
-import com.gskorupa.cricket.in.HttpAdapter;
-import com.gskorupa.cricket.in.ParameterMapResult;
-import com.gskorupa.cricket.out.LoggerAdapterIface;
+import com.gskorupa.cricket.in.http.HttpAdapter;
+import com.gskorupa.cricket.in.http.ParameterMapResult;
+import com.gskorupa.cricket.out.log.LoggerAdapterIface;
 import java.util.HashMap;
 import java.util.Map;
-import com.gskorupa.cricket.in.EchoHttpAdapterIface;
-import com.gskorupa.cricket.in.FileResult;
-import com.gskorupa.cricket.in.HtmlGenAdapterIface;
-import com.gskorupa.cricket.in.Result;
-import com.gskorupa.cricket.in.SchedulerIface;
-import com.gskorupa.cricket.out.HtmlReaderAdapterIface;
-import com.gskorupa.cricket.out.KeyValueCacheAdapterIface;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import com.gskorupa.cricket.in.http.EchoHttpAdapterIface;
+import com.gskorupa.cricket.in.http.FileResult;
+import com.gskorupa.cricket.in.http.HtmlGenAdapterIface;
+import com.gskorupa.cricket.in.http.Result;
+import com.gskorupa.cricket.in.scheduler.SchedulerIface;
+import com.gskorupa.cricket.out.html.HtmlReaderAdapterIface;
+import com.gskorupa.cricket.out.db.KeyValueCacheAdapterIface;
 
 /**
  * EchoService

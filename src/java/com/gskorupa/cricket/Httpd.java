@@ -15,7 +15,7 @@
  */
 package com.gskorupa.cricket;
 
-import com.gskorupa.cricket.in.HttpAdapter;
+import com.gskorupa.cricket.in.http.HttpAdapter;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class Httpd {
         HttpContext context;
         for (int i = 0; i < service.adapters.size(); i++) {
             //if (service.adapters[i] instanceof com.sun.net.httpserver.HttpHandler) {
-            if (service.adapters.get(i) instanceof com.gskorupa.cricket.in.HttpAdapter) {
+            if (service.adapters.get(i) instanceof com.gskorupa.cricket.in.http.HttpAdapter) {
                 System.out.print("creating context: ");
                 System.out.println(((HttpAdapter) service.adapters.get(i)).getContext());
                 context = server.createContext(((HttpAdapter) service.adapters.get(i)).getContext(), (com.sun.net.httpserver.HttpHandler) service.adapters.get(i));

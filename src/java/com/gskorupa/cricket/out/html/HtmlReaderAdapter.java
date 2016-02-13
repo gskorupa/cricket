@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket.out;
+package com.gskorupa.cricket.out.html;
 
 import com.gskorupa.cricket.Adapter;
+import com.gskorupa.cricket.out.OutboundAdapter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

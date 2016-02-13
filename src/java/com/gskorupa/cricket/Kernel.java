@@ -122,7 +122,7 @@ public abstract class Kernel {
                 Class c = Class.forName(ac.getClassFullName());
                 if (((Class)adapterClasses.get(i)).isAssignableFrom(c)) {
                     adapters.add(i,((Class)adapterClasses.get(i)).cast(c.newInstance()));
-                    if (adapters.get(i) instanceof com.gskorupa.cricket.in.HttpAdapter) {
+                    if (adapters.get(i) instanceof com.gskorupa.cricket.in.http.HttpAdapter) {
                         setHttpHandlerLoaded(true);
                     }
                     // loading properties

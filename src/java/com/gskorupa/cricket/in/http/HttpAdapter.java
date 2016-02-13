@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket.in;
+package com.gskorupa.cricket.in.http;
 
+import com.gskorupa.cricket.in.http.CsvFormatter;
 import com.gskorupa.cricket.Event;
 import com.gskorupa.cricket.RequestObject;
 import com.gskorupa.cricket.Kernel;
@@ -28,6 +29,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import com.gskorupa.cricket.HttpAdapterHook;
+import com.gskorupa.cricket.in.InboundAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 

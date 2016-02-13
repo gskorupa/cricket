@@ -26,7 +26,9 @@ import com.gskorupa.cricket.out.LoggerAdapterIface;
 import java.util.HashMap;
 import java.util.Map;
 import com.gskorupa.cricket.in.EchoHttpAdapterIface;
+import com.gskorupa.cricket.in.FileResult;
 import com.gskorupa.cricket.in.HtmlGenAdapterIface;
+import com.gskorupa.cricket.in.Result;
 import com.gskorupa.cricket.in.SchedulerIface;
 import com.gskorupa.cricket.out.HtmlReaderAdapterIface;
 import com.gskorupa.cricket.out.KeyValueCacheAdapterIface;
@@ -71,8 +73,22 @@ public class BasicService extends Kernel {
         System.out.println("Hello from BasicService.runOnce()");
     }
 
+    @HttpAdapterHook(handlerClassName = "HtmlGenAdapterIface", requestMethod = "GET")
+    public Object doGet(Event event) {
+        RequestObject request = (RequestObject) event.getPayload();
+        Result result = getFile(request);
+        HashMap<String, String> data = new HashMap();
+        //copy parameters from request to response data without modification
+        Map<String, Object> map = request.parameters;
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            data.put(entry.getKey(), (String) entry.getValue());
+        }
+        result.setData(data);
+        return result;
+    }
+    
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
-    public Object doGet(Event requestEvent) {
+    public Object doGetEcho(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
@@ -133,5 +149,43 @@ public class BasicService extends Kernel {
         r.setData(data);
         return r;
     }
+    
+    private Result getFile(RequestObject request) {
+        logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_FINEST, "", "STEP1"));
+        byte[] fileContent = {};
+        String filePath = request.pathExt;
+        logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_FINEST, "", "pathExt=" + filePath));
+        String fileExt = "";
+        if (!(filePath.isEmpty() || filePath.endsWith("/")) && filePath.indexOf(".") > 0) {
+            fileExt = filePath.substring(filePath.lastIndexOf("."));
+        }
+        Result result;
+        switch (fileExt.toLowerCase()) {
+            case ".jpg":
+            case ".jpeg":
+            case ".gif":
+            case ".png":
+                result = new FileResult();
+                break;
+            default:
+                fileExt = ".html";
+                result = new ParameterMapResult();
+        }
+        try {
+            byte[] b = htmlReaderAdapter.readFile(filePath);
+            result.setPayload(b);
+            result.setFileExtension(fileExt);
+            result.setCode(HttpAdapter.SC_OK);
+            result.setMessage("");
+        } catch (Exception e) {
+            logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_WARNING, "", e.getMessage()));
+            result.setPayload(fileContent);
+            result.setFileExtension(fileExt);
+            result.setCode(HttpAdapter.SC_NOT_FOUND);
+            result.setMessage("file not found");
+        }
+        return result;
+    }
+
     
 }

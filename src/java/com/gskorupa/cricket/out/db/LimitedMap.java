@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.gskorupa.cricket.db;
+package com.gskorupa.cricket.out.db;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

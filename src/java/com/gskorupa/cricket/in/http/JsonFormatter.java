@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.gskorupa.cricket.in;
+package com.gskorupa.cricket.in.http;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import java.util.HashMap;
