@@ -13,32 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.service;
+package org.cricketmsf.services;
 
 import org.cricketmsf.Event;
 import org.cricketmsf.EventHook;
 import org.cricketmsf.HttpAdapterHook;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
+import org.cricketmsf.in.http.HttpAdapter;
+import org.cricketmsf.in.http.ParameterMapResult;
+import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.HashMap;
 import java.util.Map;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.FileResult;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
-import org.cricketmsf.in.http.HttpAdapter;
-import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.http.Result;
 import org.cricketmsf.in.scheduler.SchedulerIface;
-import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.html.HtmlReaderAdapterIface;
-import org.cricketmsf.out.log.LoggerAdapterIface;
+import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 
 /**
  * EchoService
  *
  * @author greg
  */
-public class BasicService extends Kernel {
+public class EchoService extends Kernel {
 
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
@@ -46,31 +46,35 @@ public class BasicService extends Kernel {
     KeyValueCacheAdapterIface cache = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
-    HtmlReaderAdapterIface htmlReaderAdapter = null;
+    HtmlReaderAdapterIface htmlReader = null;
 
-    public BasicService() {
+    public EchoService() {
         registerAdapter(logAdapter, LoggerAdapterIface.class);
         registerAdapter(httpAdapter, EchoHttpAdapterIface.class);
         registerAdapter(cache, KeyValueCacheAdapterIface.class);
         registerAdapter(scheduler, SchedulerIface.class);
         registerAdapter(htmlAdapter, HtmlGenAdapterIface.class);
-        registerAdapter(htmlReaderAdapter, HtmlReaderAdapterIface.class);
+        registerAdapter(htmlReader, HtmlReaderAdapterIface.class);
     }
 
     @Override
     public void getAdapters() {
-        logAdapter = (LoggerAdapterIface)getRegistered(LoggerAdapterIface.class);
-        httpAdapter = (EchoHttpAdapterIface)getRegistered(EchoHttpAdapterIface.class);
-        cache = (KeyValueCacheAdapterIface)getRegistered(KeyValueCacheAdapterIface.class);
-        scheduler = (SchedulerIface)getRegistered(SchedulerIface.class);
-        htmlAdapter = (HtmlGenAdapterIface)getRegistered(HtmlGenAdapterIface.class);
-        htmlReaderAdapter = (HtmlReaderAdapterIface)getRegistered(HtmlReaderAdapterIface.class);
+        logAdapter = (LoggerAdapterIface) getRegistered(LoggerAdapterIface.class);
+        httpAdapter = (EchoHttpAdapterIface) getRegistered(EchoHttpAdapterIface.class);
+        cache = (KeyValueCacheAdapterIface) getRegistered(KeyValueCacheAdapterIface.class);
+        scheduler = (SchedulerIface) getRegistered(SchedulerIface.class);
+        htmlAdapter = (HtmlGenAdapterIface) getRegistered(HtmlGenAdapterIface.class);
+        htmlReader = (HtmlReaderAdapterIface) getRegistered(HtmlReaderAdapterIface.class);
     }
 
     @Override
     public void runOnce() {
         super.runOnce();
-        System.out.println("Hello from BasicService.runOnce()");
+        Event e = new Event("EchoService.runOnce()", "LOG", Event.LOG_INFO, null, "executed");
+        logEvent(e);
+        System.out.println("Hello from EchoService.runOnce()");
+        e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from runOnce() processed by scheduler. Hello!");
+        processEvent(e);
     }
 
     @HttpAdapterHook(handlerClassName = "HtmlGenAdapterIface", requestMethod = "GET")
@@ -86,9 +90,11 @@ public class BasicService extends Kernel {
         result.setData(data);
         return result;
     }
-    
+
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
     public Object doGetEcho(Event requestEvent) {
+        Event e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from runOnce() processed by scheduler. Hello!");
+        processEvent(e);
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
@@ -114,16 +120,15 @@ public class BasicService extends Kernel {
 
     @EventHook(eventCategory = "*")
     public void processEvent(Event event) {
-        if(event.getTimePoint()!=null){
+        if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
-        }else{
+        } else {
             System.out.println(event.getPayload().toString());
         }
-        //does nothing
     }
 
     public Object sendEcho(RequestObject request) {
-        
+
         //
         Long counter;
         counter = (Long) cache.get("counter", new Long(0));
@@ -149,7 +154,7 @@ public class BasicService extends Kernel {
         r.setData(data);
         return r;
     }
-    
+
     private Result getFile(RequestObject request) {
         logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_FINEST, "", "STEP1"));
         byte[] fileContent = {};
@@ -172,7 +177,7 @@ public class BasicService extends Kernel {
                 result = new ParameterMapResult();
         }
         try {
-            byte[] b = htmlReaderAdapter.readFile(filePath);
+            byte[] b = htmlReader.readFile(filePath);
             result.setPayload(b);
             result.setFileExtension(fileExt);
             result.setCode(HttpAdapter.SC_OK);
@@ -187,5 +192,4 @@ public class BasicService extends Kernel {
         return result;
     }
 
-    
 }

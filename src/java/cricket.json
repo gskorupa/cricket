@@ -1,25 +1,25 @@
 {
-    "@type": "com.gskorupa.cricket.config.ConfigSet",
+    "@type": "org.cricketmsf.config.ConfigSet",
     "id": "new",
     "description": "This is sample configuration",
     "services": [
         {
-            "@type": "com.gskorupa.cricket.config.Configuration",
-            "service": "com.gskorupa.cricket.services.EchoService",
+            "@type": "org.cricketmsf.config.Configuration",
+            "service": "org.cricketmsf.services.EchoService",
             "host": "0.0.0.0",
             "port": "8080",
             "threads": 0,
             "adapters": {
                 "EchoHttpAdapterIface": {
                     "interfaceName": "EchoHttpAdapterIface",
-                    "classFullName": "com.gskorupa.cricket.in.http.EchoHttpAdapter",
+                    "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
                     "properties": {
                         "context": "/echo"
                     }
                 },
                 "LoggerAdapterIface": {
                     "interfaceName": "LoggerAdapterIface",
-                    "classFullName": "com.gskorupa.cricket.out.log.StandardLogger",
+                    "classFullName": "org.cricketmsf.out.log.StandardLogger",
                     "properties": {
                         "name": "EchoService",
                         "level": "ALL"
@@ -27,7 +27,7 @@
                 },
                 "KeyValueCacheAdapterIface": {
                     "interfaceName": "KeyValueCacheAdapterIface",
-                    "classFullName": "com.gskorupa.cricket.out.db.KeyValueStore",
+                    "classFullName": "org.cricketmsf.out.db.KeyValueStore",
                     "properties": {
                         "path": "./db",
                         "envVariable": "ECHO_DB_PATH",
@@ -37,7 +37,7 @@
                 },
                 "SchedulerIface": {
                     "interfaceName": "SchedulerIface",
-                    "classFullName": "com.gskorupa.cricket.in.scheduler.Scheduler",
+                    "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
                         "path": "./db",
                         "envVariable": "SCHEDULER_DB_PATH",
@@ -46,14 +46,14 @@
                 },
                 "HtmlGenAdapterIface": {
                     "interfaceName": "HtmlGenAdapterIface",
-                    "classFullName": "com.gskorupa.cricket.in.http.HtmlGenAdapter",
+                    "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
                     "properties": {
                         "context": "/"
                     }
                 },
                 "HtmlReaderAdapterIface": {
                     "interfaceName": "HtmlReaderAdapterIface",
-                    "classFullName": "com.gskorupa.cricket.out.html.HtmlReaderAdapter",
+                    "classFullName": "org.cricketmsf.out.html.HtmlReaderAdapter",
                     "properties": {
                         "root": "./www/"
                     }

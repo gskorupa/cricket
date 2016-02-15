@@ -67,7 +67,7 @@
         <jar  
             destfile="${dist}/${jar-name}">
             <manifest>
-                <attribute name="Main-Class" value="com.gskorupa.cricket.Runner"/>
+                <attribute name="Main-Class" value="org.cricketmsf.Runner"/>
             </manifest>
             <fileset dir="${build}"/>
             <zipfileset src="${lib}/json-io-4.3.0.jar" includes="com/**/*"/>
@@ -76,7 +76,7 @@
         <jar  
             destfile="${dist}/${jar-name-lite}">
             <manifest>
-                <attribute name="Main-Class" value="com.gskorupa.cricket.Runner"/>
+                <attribute name="Main-Class" value="org.cricketmsf.Runner"/>
             </manifest>
             <fileset dir="${build}"/>
             <zipfileset src="${lib}/json-io-4.3.0.jar" includes="com/**/*"/>
