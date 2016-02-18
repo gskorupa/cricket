@@ -15,65 +15,16 @@
  */
 package org.cricketmsf.out;
 
-import org.cricketmsf.Event;
-import org.cricketmsf.EventHook;
-import org.cricketmsf.Kernel;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class OutboundAdapter {
-
-    private HashMap<String, String> eventHookMethods =new HashMap();
     
     public OutboundAdapter(){
-        getEventHooks();
     }
     
-    public void addHookMethodNameForEvent(String eventCategory, String hookMethodName) {
-        eventHookMethods.put(eventCategory, hookMethodName);
-    }
-
-    protected void getEventHooks() {
-        EventHook ah;
-        String eventCategory;
-        // for every method of a Kernel instance (our service class extending Kernel)
-        for (Method m : Kernel.getInstance().getClass().getMethods()) {
-            ah = (EventHook) m.getAnnotation(EventHook.class);
-            // we search for annotated method
-            if (ah != null) {
-                eventCategory = ah.eventCategory();
-                addHookMethodNameForEvent(eventCategory, m.getName());
-                System.out.println("hook method for event category " + eventCategory + " : " + m.getName());
-            }
-        }
-    }
-    
-    public String getHookMethodNameForEvent(String eventCategory) {
-        String result = null;
-        result = eventHookMethods.get(eventCategory);
-        if (null == result) {
-            result = eventHookMethods.get("*");
-        }
-        return result;
-    }
-    
-    protected void sendEvent(Event event){
-        try {
-            Method m = Kernel.getInstance().getClass()
-                    .getMethod(getHookMethodNameForEvent(event.getCategory()),Event.class);
-            m.invoke(Kernel.getInstance(), event);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public void destroy(){
-        
+    public void destroy(){   
     }
 
 }

@@ -15,7 +15,6 @@
  */
 package org.cricketmsf.in.http;
 
-import org.cricketmsf.in.http.CsvFormatter;
 import org.cricketmsf.Event;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.Kernel;
@@ -315,13 +314,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 Event.LOG_INFO,
                 null,
                 sb.toString());
-
-        try {
-            Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForEvent("LOG"), Event.class);
-            m.invoke(Kernel.getInstance(), event);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+        Kernel.getInstance().handleEvent(event);
     }
 
     protected void sendLogEvent(String type, String message) {
@@ -331,12 +324,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 type,
                 null,
                 message);
-        try {
-            Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForEvent("LOG"), Event.class);
-            m.invoke(Kernel.getInstance(), event);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+        Kernel.getInstance().handleEvent(event);
     }
 
     protected void sendLogEvent(String message) {

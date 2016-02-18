@@ -16,9 +16,6 @@
 package org.cricketmsf.in.http;
 
 import org.cricketmsf.Adapter;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

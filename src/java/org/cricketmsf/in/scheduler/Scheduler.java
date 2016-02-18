@@ -1,7 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.cricketmsf.in.scheduler;
 
@@ -11,8 +21,6 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.out.db.KeyValueStore;
 import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.scheduler.Delay;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -103,14 +111,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
             public void run() {
                 // we should reset timepoint to prevent sending this event back from the service
                 ev.setTimePoint(null);
-                // get event handler of the Kernel
-                try {
-                    Method m = Kernel.getInstance().getClass().getMethod(getHookMethodNameForEvent(ev.getCategory()), Event.class);
-                    m.invoke(Kernel.getInstance(), ev);
-                    database.remove("" + ev.getId());
-                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
+                Kernel.getInstance().handleEvent(ev);
+                database.remove("" + ev.getId());
             }
 
             public Runnable init(Event event) {

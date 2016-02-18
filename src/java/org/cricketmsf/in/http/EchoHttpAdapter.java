@@ -44,21 +44,6 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
     @Override
     public byte[] formatResponse(int type, Result result){
         return super.formatResponse(type, result);
-        /*
-        String response="";
-        switch(type){
-            case HttpAdapter.XML:
-                response=((ParameterMapResult)result).toXmlString();
-                break;
-            case HttpAdapter.CSV:
-                response=((ParameterMapResult)result).toJsonString();
-                break;
-            default:
-                response=((ParameterMapResult)result).toJsonString();
-                break;
-        }
-        return response;
-        */
     }
     
 }

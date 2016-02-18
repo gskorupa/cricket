@@ -22,6 +22,8 @@ import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.out.OutboundAdapter;
 import java.util.logging.Logger;
 import static java.lang.Thread.MIN_PRIORITY;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -38,6 +40,8 @@ public abstract class Kernel {
 
     // singleton
     private static Object instance = null;
+    
+    private HashMap<String, String> eventHookMethods =new HashMap();
 
     // adapters
     public static ArrayList adapters = new ArrayList();
@@ -60,7 +64,47 @@ public abstract class Kernel {
     void setStartedAt(long time){
         startedAt=time;
     }
+    
+    public void addHookMethodNameForEvent(String eventCategory, String hookMethodName) {
+        eventHookMethods.put(eventCategory, hookMethodName);
+    }
 
+    protected void getEventHooks() {
+        EventHook ah;
+        String eventCategory;
+        System.out.println("REGISTERING EVENT HOOKS");
+        // for every method of a Kernel instance (our service class extending Kernel)
+        for (Method m : this.getClass().getMethods()) {
+            ah = (EventHook) m.getAnnotation(EventHook.class);
+            // we search for annotated method
+            if (ah != null) {
+                eventCategory = ah.eventCategory();
+                addHookMethodNameForEvent(eventCategory, m.getName());
+                System.out.println("hook method for event category " + eventCategory + " : " + m.getName());
+            }
+        }
+        System.out.println("END REGISTERING EVENT HOOKS");
+    }
+    
+    public String getHookMethodNameForEvent(String eventCategory) {
+        String result = null;
+        result = eventHookMethods.get(eventCategory);
+        if (null == result) {
+            result = eventHookMethods.get("*");
+        }
+        return result;
+    }
+    
+    public void handleEvent(Event event){
+        try {
+            Method m = getClass()
+                    .getMethod(getHookMethodNameForEvent(event.getCategory()),Event.class);
+            m.invoke(this, event);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+    
     protected synchronized  void registerAdapter(Object adapter, Class adapterClass){
         adapters.add(adapter);
         adapterClasses.add(adapterClass);
@@ -139,7 +183,7 @@ public abstract class Kernel {
             LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterInterfaceName);
             throw new Exception(e);
         }
-
+        System.out.println("END LOADING ADAPTERS");
     }
 
     /**
@@ -234,12 +278,13 @@ public abstract class Kernel {
      */
     public void runOnce() {
         //LOGGER.warning("Method runOnce should be overriden");
+        getEventHooks();
         getAdapters();
     }
 
     public void start() throws InterruptedException {
-
         getAdapters();
+        getEventHooks();
         if (isHttpHandlerLoaded()) {
             System.out.println("Starting http listener ...");
             Runtime.getRuntime().addShutdownHook(

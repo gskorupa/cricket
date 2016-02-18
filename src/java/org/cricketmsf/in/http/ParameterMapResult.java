@@ -15,7 +15,6 @@
  */
 package org.cricketmsf.in.http;
 
-import org.cricketmsf.in.http.Result;
 import java.util.HashMap;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

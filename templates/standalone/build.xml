@@ -65,7 +65,7 @@
         <jar destfile="${dist}/${ant.project.name}-${version}.jar">
             <manifest>
                 <!-- change the main class declaration below -->
-                <attribute name="Main-Class" value="com.gskorupa.cricket.Runner"/>
+                <attribute name="Main-Class" value="org.cricketmsf.Runner"/>
             </manifest>
             <fileset dir="${build}"/>
             <zipfileset src="${cricket-jar-location}" excludes="**/*.json" includes="**/*"/>

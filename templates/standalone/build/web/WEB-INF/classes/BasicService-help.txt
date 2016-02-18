@@ -1,0 +1,11 @@
+
+Usage: java -jar basicservice-1.0.0.jar [options]
+
+Runs the BasicService in standalone mode.
+
+Options:
+--help | -h            Print this usage information and exit.
+--run | -r             Run the configured service with embeded http server.
+--config | -c [path]   Use external configuration file.
+
+Without -r option, the runOnce() service method will be executed.

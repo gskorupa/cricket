@@ -93,7 +93,7 @@ public class EchoService extends Kernel {
 
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
     public Object doGetEcho(Event requestEvent) {
-        Event e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from runOnce() processed by scheduler. Hello!");
+        Event e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from doGetEcho() processed by scheduler. Hello!");
         processEvent(e);
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
@@ -146,7 +146,12 @@ public class EchoService extends Kernel {
             data.put(entry.getKey(), (String) entry.getValue());
         }
         if (data.containsKey("error")) {
-            r.setCode(HttpAdapter.SC_INTERNAL_SERVER_ERROR);
+            int errCode = HttpAdapter.SC_INTERNAL_SERVER_ERROR;
+            try {
+                errCode = Integer.parseInt((String) data.get("error"));
+            } catch (Exception e) {
+            }
+            r.setCode(errCode);
             data.put("error", "error forced by request");
         } else {
             r.setCode(HttpAdapter.SC_OK);

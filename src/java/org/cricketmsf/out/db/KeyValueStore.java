@@ -169,11 +169,6 @@ public class KeyValueStore  extends OutboundAdapter implements KeyValueCacheAdap
     private String getStoragePath() {
         return storagePath;
     }
-
-    //public KeyValueStore(String storagePath) {
-    //    setStoragePath(storagePath);
-    //    read();
-    //}
     
     public Set getKeySet(){
         return cache.keySet();

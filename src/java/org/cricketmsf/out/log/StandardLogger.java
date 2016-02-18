@@ -15,7 +15,6 @@
  */
 package org.cricketmsf.out.log;
 
-import org.cricketmsf.out.log.LoggerAdapterIface;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.out.OutboundAdapter;
@@ -37,6 +36,7 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
 
     public static final Logger logger = Logger.getGlobal();
 
+    @Override
     public void loadProperties(HashMap<String, String> properties) {
         setName(properties.get("name"));
         System.out.println("logger name: " + getName());
