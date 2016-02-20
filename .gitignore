@@ -31,3 +31,4 @@ hs_err_pid*
 /www/cpu.png
 /www/index.html
 /templates/standalone/build/web/WEB-INF/classes/cricket.json
+!/lib/json-io-4.3.0.jar
