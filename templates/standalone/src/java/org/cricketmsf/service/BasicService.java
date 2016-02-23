@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example.service;
+package org.cricketmsf.service;
 
 import org.cricketmsf.Event;
 import org.cricketmsf.EventHook;
@@ -40,25 +40,36 @@ import org.cricketmsf.out.log.LoggerAdapterIface;
  */
 public class BasicService extends Kernel {
 
-    // adapterClasses
+    // adapterClasses - built in
     LoggerAdapterIface logAdapter = null;
     EchoHttpAdapterIface httpAdapter = null;
     KeyValueCacheAdapterIface cache = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
     HtmlReaderAdapterIface htmlReaderAdapter = null;
+    // add your adapters here
 
+    /**
+     * 
+     */
     public BasicService() {
+        // built in adapters
         registerAdapter(logAdapter, LoggerAdapterIface.class);
         registerAdapter(httpAdapter, EchoHttpAdapterIface.class);
         registerAdapter(cache, KeyValueCacheAdapterIface.class);
         registerAdapter(scheduler, SchedulerIface.class);
         registerAdapter(htmlAdapter, HtmlGenAdapterIface.class);
         registerAdapter(htmlReaderAdapter, HtmlReaderAdapterIface.class);
+        // you need to register your adapters
+        
     }
 
+    /**
+     * Get adapter implementations declared in configuration file
+     */
     @Override
     public void getAdapters() {
+        // get built in adapters
         logAdapter = (LoggerAdapterIface)getRegistered(LoggerAdapterIface.class);
         httpAdapter = (EchoHttpAdapterIface)getRegistered(EchoHttpAdapterIface.class);
         cache = (KeyValueCacheAdapterIface)getRegistered(KeyValueCacheAdapterIface.class);
@@ -67,12 +78,21 @@ public class BasicService extends Kernel {
         htmlReaderAdapter = (HtmlReaderAdapterIface)getRegistered(HtmlReaderAdapterIface.class);
     }
 
+    /**
+     * Method invoked when the server is executed in application mode
+     */
     @Override
     public void runOnce() {
         super.runOnce();
         System.out.println("Hello from BasicService.runOnce()");
     }
 
+    /**
+     * Handle events created by HtmlGenAdapter when GET http request is received
+     * 
+     * @param event
+     * @return Result 
+     */
     @HttpAdapterHook(handlerClassName = "HtmlGenAdapterIface", requestMethod = "GET")
     public Object doGet(Event event) {
         RequestObject request = (RequestObject) event.getPayload();
@@ -87,31 +107,65 @@ public class BasicService extends Kernel {
         return result;
     }
     
+    /**
+     * Handle events created by EchoHttpAdapter when GET http request is received
+     * 
+     * @param requestEvent
+     * @return 
+     */
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
     public Object doGetEcho(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
+    /**
+     * Handle events created by EchoHttpAdapter when POST http request is received
+     * 
+     * @param requestEvent
+     * @return 
+     */
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "POST")
     public Object doPost(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
+    /**
+     * Handle events created by EchoHttpAdapter when PUT http request is received
+     * 
+     * @param requestEvent
+     * @return 
+     */
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "PUT")
     public Object doPut(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
+    /**
+     * Handle events created by EchoHttpAdapter when DELETE http request is received
+     * 
+     * @param requestEvent
+     * @return 
+     */
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "DELETE")
     public Object doDelete(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
+    /**
+     * Handle events of LOG category
+     * 
+     * @param event 
+     */
     @EventHook(eventCategory = "LOG")
     public void logEvent(Event event) {
         logAdapter.log(event);
     }
 
+    /**
+     * Handle events w
+     * 
+     * @param event 
+     */
     @EventHook(eventCategory = "*")
     public void processEvent(Event event) {
         if(event.getTimePoint()!=null){
@@ -122,6 +176,12 @@ public class BasicService extends Kernel {
         //does nothing
     }
 
+    /**
+     * 
+     * 
+     * @param request
+     * @return ParameterMapResult
+     */
     public Object sendEcho(RequestObject request) {
         
         //
@@ -187,5 +247,4 @@ public class BasicService extends Kernel {
         return result;
     }
 
-    
 }
