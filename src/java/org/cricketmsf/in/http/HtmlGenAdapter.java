@@ -75,7 +75,11 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
                 while (m.find()) {
                     paramName = m.group().substring(1);
                     replacement = (String) map.getOrDefault(paramName, m.group());
+                    try{
                     m.appendReplacement(res, replacement);
+                    }catch(Exception e){
+                        
+                    }
                 }
                 m.appendTail(res);
                 return res.toString().getBytes();
