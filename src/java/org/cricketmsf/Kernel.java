@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -41,6 +42,7 @@ public abstract class Kernel {
     // singleton
     private static Object instance = null;
     
+    private UUID uuid;
     private HashMap<String, String> eventHookMethods =new HashMap();
 
     // adapters
@@ -139,6 +141,7 @@ public abstract class Kernel {
         }
         try {
             instance = c.newInstance();
+            ((Kernel) instance).setUuid(UUID.randomUUID());
             ((Kernel) instance).loadAdapters(config, adapters, adapterClasses);
         } catch (Exception e) {
             instance = null;
@@ -151,6 +154,7 @@ public abstract class Kernel {
     private void loadAdapters(Configuration config, ArrayList adapters, ArrayList adapterClasses) throws Exception {
         setHttpHandlerLoaded(false);
         System.out.println("LOADING SERVICE PROPERTIES FOR " + config.getService());
+        System.out.println("UUID: "+getUuid().toString());
         setHost(config.getHost());
         System.out.println("http-host=" + getHost());
         try {
@@ -347,6 +351,20 @@ public abstract class Kernel {
      */
     public void setConfigSet(ConfigSet configSet) {
         this.configSet = configSet;
+    }
+
+    /**
+     * @return the uuid
+     */
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    /**
+     * @param uuid the uuid to set
+     */
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
     
 }

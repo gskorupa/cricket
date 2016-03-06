@@ -138,9 +138,10 @@ public class EchoService extends Kernel {
         ParameterMapResult r = new ParameterMapResult();
         HashMap<String, Object> data = new HashMap();
         Map<String, Object> map = request.parameters;
+        data.put("service.uuid", getUuid());
         data.put("request.method", request.method);
         data.put("request.pathExt", request.pathExt);
-        data.put("echo counter", cache.get("counter"));
+        data.put("echo.counter", cache.get("counter"));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             //System.out.println(entry.getKey() + "=" + entry.getValue());
             data.put(entry.getKey(), (String) entry.getValue());

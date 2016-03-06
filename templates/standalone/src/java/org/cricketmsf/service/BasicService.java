@@ -50,7 +50,7 @@ public class BasicService extends Kernel {
     // add your adapters here
 
     /**
-     * 
+     *
      */
     public BasicService() {
         // built in adapters
@@ -61,7 +61,7 @@ public class BasicService extends Kernel {
         registerAdapter(htmlAdapter, HtmlGenAdapterIface.class);
         registerAdapter(htmlReaderAdapter, HtmlReaderAdapterIface.class);
         // you need to register your adapters
-        
+
     }
 
     /**
@@ -70,12 +70,12 @@ public class BasicService extends Kernel {
     @Override
     public void getAdapters() {
         // get built in adapters
-        logAdapter = (LoggerAdapterIface)getRegistered(LoggerAdapterIface.class);
-        httpAdapter = (EchoHttpAdapterIface)getRegistered(EchoHttpAdapterIface.class);
-        cache = (KeyValueCacheAdapterIface)getRegistered(KeyValueCacheAdapterIface.class);
-        scheduler = (SchedulerIface)getRegistered(SchedulerIface.class);
-        htmlAdapter = (HtmlGenAdapterIface)getRegistered(HtmlGenAdapterIface.class);
-        htmlReaderAdapter = (HtmlReaderAdapterIface)getRegistered(HtmlReaderAdapterIface.class);
+        logAdapter = (LoggerAdapterIface) getRegistered(LoggerAdapterIface.class);
+        httpAdapter = (EchoHttpAdapterIface) getRegistered(EchoHttpAdapterIface.class);
+        cache = (KeyValueCacheAdapterIface) getRegistered(KeyValueCacheAdapterIface.class);
+        scheduler = (SchedulerIface) getRegistered(SchedulerIface.class);
+        htmlAdapter = (HtmlGenAdapterIface) getRegistered(HtmlGenAdapterIface.class);
+        htmlReaderAdapter = (HtmlReaderAdapterIface) getRegistered(HtmlReaderAdapterIface.class);
     }
 
     /**
@@ -89,9 +89,9 @@ public class BasicService extends Kernel {
 
     /**
      * Handle events created by HtmlGenAdapter when GET http request is received
-     * 
+     *
      * @param event
-     * @return Result 
+     * @return Result
      */
     @HttpAdapterHook(handlerClassName = "HtmlGenAdapterIface", requestMethod = "GET")
     public Object doGet(Event event) {
@@ -106,12 +106,13 @@ public class BasicService extends Kernel {
         result.setData(data);
         return result;
     }
-    
+
     /**
-     * Handle events created by EchoHttpAdapter when GET http request is received
-     * 
+     * Handle events created by EchoHttpAdapter when GET http request is
+     * received
+     *
      * @param requestEvent
-     * @return 
+     * @return
      */
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
     public Object doGetEcho(Event requestEvent) {
@@ -119,10 +120,11 @@ public class BasicService extends Kernel {
     }
 
     /**
-     * Handle events created by EchoHttpAdapter when POST http request is received
-     * 
+     * Handle events created by EchoHttpAdapter when POST http request is
+     * received
+     *
      * @param requestEvent
-     * @return 
+     * @return
      */
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "POST")
     public Object doPost(Event requestEvent) {
@@ -130,10 +132,11 @@ public class BasicService extends Kernel {
     }
 
     /**
-     * Handle events created by EchoHttpAdapter when PUT http request is received
-     * 
+     * Handle events created by EchoHttpAdapter when PUT http request is
+     * received
+     *
      * @param requestEvent
-     * @return 
+     * @return
      */
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "PUT")
     public Object doPut(Event requestEvent) {
@@ -141,10 +144,11 @@ public class BasicService extends Kernel {
     }
 
     /**
-     * Handle events created by EchoHttpAdapter when DELETE http request is received
-     * 
+     * Handle events created by EchoHttpAdapter when DELETE http request is
+     * received
+     *
      * @param requestEvent
-     * @return 
+     * @return
      */
     @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "DELETE")
     public Object doDelete(Event requestEvent) {
@@ -153,8 +157,8 @@ public class BasicService extends Kernel {
 
     /**
      * Handle events of LOG category
-     * 
-     * @param event 
+     *
+     * @param event
      */
     @EventHook(eventCategory = "LOG")
     public void logEvent(Event event) {
@@ -163,27 +167,27 @@ public class BasicService extends Kernel {
 
     /**
      * Handle events w
-     * 
-     * @param event 
+     *
+     * @param event
      */
     @EventHook(eventCategory = "*")
     public void processEvent(Event event) {
-        if(event.getTimePoint()!=null){
+        if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
-        }else{
+        } else {
             System.out.println(event.getPayload().toString());
         }
         //does nothing
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param request
      * @return ParameterMapResult
      */
     public Object sendEcho(RequestObject request) {
-        
+
         //
         Long counter;
         counter = (Long) cache.get("counter", new Long(0));
@@ -193,9 +197,10 @@ public class BasicService extends Kernel {
         ParameterMapResult r = new ParameterMapResult();
         HashMap<String, Object> data = new HashMap();
         Map<String, Object> map = request.parameters;
+        data.put("service.uuid", getUuid());
         data.put("request.method", request.method);
         data.put("request.pathExt", request.pathExt);
-        data.put("echo counter", cache.get("counter"));
+        data.put("echo.counter", cache.get("counter"));
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             //System.out.println(entry.getKey() + "=" + entry.getValue());
             data.put(entry.getKey(), (String) entry.getValue());
@@ -209,7 +214,7 @@ public class BasicService extends Kernel {
         r.setData(data);
         return r;
     }
-    
+
     private Result getFile(RequestObject request) {
         logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_FINEST, "", "STEP1"));
         byte[] fileContent = {};
