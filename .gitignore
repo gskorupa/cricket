@@ -33,3 +33,7 @@ hs_err_pid*
 /templates/standalone/build/web/WEB-INF/classes/cricket.json
 !/lib/json-io-4.3.0.jar
 !/templates/standalone/lib/cricket-1.0-B7.jar
+/attic/
+/build/
+/db/echo.xml
+/db/scheduler.xml

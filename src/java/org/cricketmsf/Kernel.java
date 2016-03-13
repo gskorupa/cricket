@@ -24,7 +24,6 @@ import java.util.logging.Logger;
 import static java.lang.Thread.MIN_PRIORITY;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -47,8 +46,7 @@ public abstract class Kernel {
     private HashMap<String, String> eventHookMethods = new HashMap();
 
     // adapters
-    public static ArrayList adapters = new ArrayList();
-    public static ArrayList adapterClasses = new ArrayList();
+    public HashMap<String, Object> adaptersMap = new HashMap();
 
     // http server
     private String host = null;
@@ -109,25 +107,16 @@ public abstract class Kernel {
         }
     }
 
-    /*
-    protected synchronized void registerAdapter(Object adapter, Class adapterClass) {
-        adapters.add(adapter);
-        adapterClasses.add(adapterClass.getSimpleName());
+    public HashMap<String, Object> getAdaptersMap() {
+        return adaptersMap;
     }
-    */
 
-    /*
-    protected Object getRegistered(Class interfaceClass) {
-        int index = adapterClasses.indexOf(interfaceClass);
-        return adapters.get(index);
-    }
-    */
-    
     protected Object getRegistered(String interfaceName) {
-        int index = adapterClasses.indexOf(interfaceName);
-        return adapters.get(index);
+        //int index = adapterClasses.indexOf(interfaceName);
+        //return adapters.get(index);
+        return adaptersMap.get(interfaceName);
     }
-    
+
     public Configuration getConfiguration(String serviceName) {
         if (configSet == null) {
             configSet = new ConfigSet();
@@ -153,7 +142,7 @@ public abstract class Kernel {
         try {
             instance = c.newInstance();
             ((Kernel) instance).setUuid(UUID.randomUUID());
-            ((Kernel) instance).loadAdapters(config, adapters, adapterClasses);
+            ((Kernel) instance).loadAdapters(config);
         } catch (Exception e) {
             instance = null;
             LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
@@ -162,7 +151,7 @@ public abstract class Kernel {
         return instance;
     }
 
-    private synchronized void loadAdapters(Configuration config, ArrayList adapters, ArrayList adapterClasses) throws Exception {
+    private synchronized void loadAdapters(Configuration config) throws Exception {
         setHttpHandlerLoaded(false);
         System.out.println("LOADING SERVICE PROPERTIES FOR " + config.getService());
         System.out.println("UUID: " + getUuid().toString());
@@ -183,16 +172,14 @@ public abstract class Kernel {
                 ac = adapterEntry.getValue();
                 System.out.println("ADAPTER: " + adapterInterfaceName);
                 Class c = Class.forName(ac.getClassFullName());
-                adapters.add(c.newInstance());
-                adapterClasses.add(adapterInterfaceName);
-                if (adapters.get(adapters.size() - 1) instanceof org.cricketmsf.in.http.HttpAdapter) {
+                adaptersMap.put(adapterInterfaceName, c.newInstance());
+                if (adaptersMap.get(adapterInterfaceName) instanceof org.cricketmsf.in.http.HttpAdapter) {
                     setHttpHandlerLoaded(true);
                 }
                 // loading properties
                 java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class);
-                loadPropsMethod.invoke(adapters.get(adapters.size() - 1), ac.getProperties());
+                loadPropsMethod.invoke(adaptersMap.get(adapterInterfaceName), ac.getProperties());
             }
-
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterInterfaceName);
             throw new Exception(e);
@@ -256,42 +243,10 @@ public abstract class Kernel {
         this.httpHandlerLoaded = httpHandlerLoaded;
     }
 
-    /*
-    public String getHelp() {
-        String content = "Help file not found";
-        try {
-            content = readHelpFile("/localhelp.txt");
-        } catch (Exception e) {
-            try {
-                content = readHelpFile("/help.txt");
-            } catch (Exception x) {
-                LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{x.getStackTrace()[0].toString(), x.getStackTrace()[1].toString()});
-                e.printStackTrace();
-            }
-        }
-        return content;
-    }
-     */
- /*
-    public String readHelpFile(String fileName) throws Exception {
-        String content = null;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(fileName)))) {
-            StringBuilder out = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                out.append(line);
-                out.append("\r\n");
-            }
-            content = out.toString();
-        }
-        return content;
-    }
-     */
- /*
-    * This method will be invoked when Kernel is executed without --run option
+    /**
+     * This method will be invoked when Kernel is executed without --run option
      */
     public void runOnce() {
-        //LOGGER.warning("Method runOnce should be overriden");
         getEventHooks();
         getAdapters();
     }
@@ -328,7 +283,6 @@ public abstract class Kernel {
     }
 
     protected void runInitTasks() {
-
     }
 
     public void shutdown() {
@@ -339,11 +293,11 @@ public abstract class Kernel {
         //getHttpd().server.stop(MIN_PRIORITY);
         //}
         //todo: stop adapters
-        for (int i = 0; i < adapters.size(); i++) {
-            if (adapters.get(i) instanceof org.cricketmsf.in.InboundAdapter) {
-                ((InboundAdapter) adapters.get(i)).destroy();
-            } else if (adapters.get(i) instanceof org.cricketmsf.out.OutboundAdapter) {
-                ((OutboundAdapter) adapters.get(i)).destroy();
+        for (Map.Entry<String, Object> adapterEntry : getAdaptersMap().entrySet()) {
+            if (adapterEntry.getValue() instanceof org.cricketmsf.in.InboundAdapter) {
+                ((InboundAdapter) adapterEntry.getValue()).destroy();
+            } else if (adapterEntry.getValue() instanceof org.cricketmsf.out.OutboundAdapter) {
+                ((OutboundAdapter) adapterEntry.getValue()).destroy();
             }
         }
         System.out.println("Kernel stopped");

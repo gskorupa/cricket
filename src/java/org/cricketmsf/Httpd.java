@@ -20,6 +20,8 @@ import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Map;
+import org.cricketmsf.config.AdapterConfiguration;
 
 /**
  *
@@ -27,11 +29,11 @@ import java.net.InetSocketAddress;
  */
 public class Httpd {
 
-    private Kernel service;
+    //private Kernel service;
     public HttpServer server = null;
 
     public Httpd(Kernel service) {
-        this.service = service;
+        //this.service = service;
         String host = service.getHost();
         if (null != host) {
             if (host.isEmpty() || "0.0.0.0".equals(host) || "*".equals(host)) {
@@ -48,12 +50,11 @@ public class Httpd {
             e.printStackTrace();
         }
         HttpContext context;
-        for (int i = 0; i < service.adapters.size(); i++) {
-            //if (service.adapters[i] instanceof com.sun.net.httpserver.HttpHandler) {
-            if (service.adapters.get(i) instanceof org.cricketmsf.in.http.HttpAdapter) {
+        for (Map.Entry<String, Object> adapterEntry : service.getAdaptersMap().entrySet()) {
+            if(adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter){
                 System.out.print("creating context: ");
-                System.out.println(((HttpAdapter) service.adapters.get(i)).getContext());
-                context = server.createContext(((HttpAdapter) service.adapters.get(i)).getContext(), (com.sun.net.httpserver.HttpHandler) service.adapters.get(i));
+                System.out.println(((HttpAdapter) adapterEntry.getValue()).getContext());
+                context = server.createContext(((HttpAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
                 context.getFilters().add(new ParameterFilter());
             }
         }
