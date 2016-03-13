@@ -48,23 +48,14 @@ public class EchoService extends Kernel {
     HtmlGenAdapterIface htmlAdapter = null;
     HtmlReaderAdapterIface htmlReader = null;
 
-    public EchoService() {
-        registerAdapter(logAdapter, LoggerAdapterIface.class);
-        registerAdapter(httpAdapter, EchoHttpAdapterIface.class);
-        registerAdapter(cache, KeyValueCacheAdapterIface.class);
-        registerAdapter(scheduler, SchedulerIface.class);
-        registerAdapter(htmlAdapter, HtmlGenAdapterIface.class);
-        registerAdapter(htmlReader, HtmlReaderAdapterIface.class);
-    }
-
     @Override
     public void getAdapters() {
-        logAdapter = (LoggerAdapterIface) getRegistered(LoggerAdapterIface.class);
-        httpAdapter = (EchoHttpAdapterIface) getRegistered(EchoHttpAdapterIface.class);
-        cache = (KeyValueCacheAdapterIface) getRegistered(KeyValueCacheAdapterIface.class);
-        scheduler = (SchedulerIface) getRegistered(SchedulerIface.class);
-        htmlAdapter = (HtmlGenAdapterIface) getRegistered(HtmlGenAdapterIface.class);
-        htmlReader = (HtmlReaderAdapterIface) getRegistered(HtmlReaderAdapterIface.class);
+        logAdapter = (LoggerAdapterIface) getRegistered("LoggerAdapterIface");
+        httpAdapter = (EchoHttpAdapterIface) getRegistered("EchoHttpAdapterIface");
+        cache = (KeyValueCacheAdapterIface) getRegistered("KeyValueCacheAdapterIface");
+        scheduler = (SchedulerIface) getRegistered("SchedulerIface");
+        htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");
+        htmlReader = (HtmlReaderAdapterIface) getRegistered("HtmlReaderAdapterIface");
     }
 
     @Override
@@ -138,7 +129,7 @@ public class EchoService extends Kernel {
         ParameterMapResult r = new ParameterMapResult();
         HashMap<String, Object> data = new HashMap();
         Map<String, Object> map = request.parameters;
-        data.put("service.uuid", getUuid());
+        data.put("service.uuid", getUuid().toString());
         data.put("request.method", request.method);
         data.put("request.pathExt", request.pathExt);
         data.put("echo.counter", cache.get("counter"));

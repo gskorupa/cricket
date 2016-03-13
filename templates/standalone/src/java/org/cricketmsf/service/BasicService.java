@@ -50,32 +50,17 @@ public class BasicService extends Kernel {
     // add your adapters here
 
     /**
-     *
-     */
-    public BasicService() {
-        // built in adapters
-        registerAdapter(logAdapter, LoggerAdapterIface.class);
-        registerAdapter(httpAdapter, EchoHttpAdapterIface.class);
-        registerAdapter(cache, KeyValueCacheAdapterIface.class);
-        registerAdapter(scheduler, SchedulerIface.class);
-        registerAdapter(htmlAdapter, HtmlGenAdapterIface.class);
-        registerAdapter(htmlReaderAdapter, HtmlReaderAdapterIface.class);
-        // you need to register your adapters
-
-    }
-
-    /**
      * Get adapter implementations declared in configuration file
      */
     @Override
     public void getAdapters() {
         // get built in adapters
-        logAdapter = (LoggerAdapterIface) getRegistered(LoggerAdapterIface.class);
-        httpAdapter = (EchoHttpAdapterIface) getRegistered(EchoHttpAdapterIface.class);
-        cache = (KeyValueCacheAdapterIface) getRegistered(KeyValueCacheAdapterIface.class);
-        scheduler = (SchedulerIface) getRegistered(SchedulerIface.class);
-        htmlAdapter = (HtmlGenAdapterIface) getRegistered(HtmlGenAdapterIface.class);
-        htmlReaderAdapter = (HtmlReaderAdapterIface) getRegistered(HtmlReaderAdapterIface.class);
+        logAdapter = (LoggerAdapterIface) getRegistered("LoggerAdapterIface");
+        httpAdapter = (EchoHttpAdapterIface) getRegistered("EchoHttpAdapterIface");
+        cache = (KeyValueCacheAdapterIface) getRegistered("KeyValueCacheAdapterIface");
+        scheduler = (SchedulerIface) getRegistered("SchedulerIface");
+        htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");
+        htmlReaderAdapter = (HtmlReaderAdapterIface) getRegistered("HtmlReaderAdapterIface");
     }
 
     /**

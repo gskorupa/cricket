@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -41,9 +42,9 @@ public abstract class Kernel {
 
     // singleton
     private static Object instance = null;
-    
+
     private UUID uuid;
-    private HashMap<String, String> eventHookMethods =new HashMap();
+    private HashMap<String, String> eventHookMethods = new HashMap();
 
     // adapters
     public static ArrayList adapters = new ArrayList();
@@ -60,13 +61,14 @@ public abstract class Kernel {
     protected ConfigSet configSet = null;
 
     private long startedAt = 0;
+
     public Kernel() {
     }
-    
-    void setStartedAt(long time){
-        startedAt=time;
+
+    void setStartedAt(long time) {
+        startedAt = time;
     }
-    
+
     public void addHookMethodNameForEvent(String eventCategory, String hookMethodName) {
         eventHookMethods.put(eventCategory, hookMethodName);
     }
@@ -87,7 +89,7 @@ public abstract class Kernel {
         }
         System.out.println("END REGISTERING EVENT HOOKS");
     }
-    
+
     public String getHookMethodNameForEvent(String eventCategory) {
         String result = null;
         result = eventHookMethods.get(eventCategory);
@@ -96,24 +98,33 @@ public abstract class Kernel {
         }
         return result;
     }
-    
-    public void handleEvent(Event event){
+
+    public void handleEvent(Event event) {
         try {
             Method m = getClass()
-                    .getMethod(getHookMethodNameForEvent(event.getCategory()),Event.class);
+                    .getMethod(getHookMethodNameForEvent(event.getCategory()), Event.class);
             m.invoke(this, event);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
     }
-    
-    protected synchronized  void registerAdapter(Object adapter, Class adapterClass){
+
+    /*
+    protected synchronized void registerAdapter(Object adapter, Class adapterClass) {
         adapters.add(adapter);
-        adapterClasses.add(adapterClass);
+        adapterClasses.add(adapterClass.getSimpleName());
     }
-    
-    protected Object getRegistered(Class interfaceClass){
+    */
+
+    /*
+    protected Object getRegistered(Class interfaceClass) {
         int index = adapterClasses.indexOf(interfaceClass);
+        return adapters.get(index);
+    }
+    */
+    
+    protected Object getRegistered(String interfaceName) {
+        int index = adapterClasses.indexOf(interfaceName);
         return adapters.get(index);
     }
     
@@ -151,10 +162,10 @@ public abstract class Kernel {
         return instance;
     }
 
-    private void loadAdapters(Configuration config, ArrayList adapters, ArrayList adapterClasses) throws Exception {
+    private synchronized void loadAdapters(Configuration config, ArrayList adapters, ArrayList adapterClasses) throws Exception {
         setHttpHandlerLoaded(false);
         System.out.println("LOADING SERVICE PROPERTIES FOR " + config.getService());
-        System.out.println("UUID: "+getUuid().toString());
+        System.out.println("UUID: " + getUuid().toString());
         setHost(config.getHost());
         System.out.println("http-host=" + getHost());
         try {
@@ -166,23 +177,22 @@ public abstract class Kernel {
         String adapterInterfaceName = null;
         AdapterConfiguration ac = null;
         try {
-            for (int i = 0; i < adapterClasses.size(); i++) {
-                adapterInterfaceName = ((Class)adapterClasses.get(i)).getSimpleName();
-                ac = config.getAdapterConfiguration(adapterInterfaceName);
+            HashMap<String, AdapterConfiguration> adcm = config.getAdapters();
+            for (Map.Entry<String, AdapterConfiguration> adapterEntry : adcm.entrySet()) {
+                adapterInterfaceName = adapterEntry.getKey();
+                ac = adapterEntry.getValue();
                 System.out.println("ADAPTER: " + adapterInterfaceName);
                 Class c = Class.forName(ac.getClassFullName());
-                if (((Class)adapterClasses.get(i)).isAssignableFrom(c)) {
-                    adapters.add(i,((Class)adapterClasses.get(i)).cast(c.newInstance()));
-                    if (adapters.get(i) instanceof org.cricketmsf.in.http.HttpAdapter) {
-                        setHttpHandlerLoaded(true);
-                    }
-                    // loading properties
-                    java.lang.reflect.Method loadPropsMethod = adapters.get(i).getClass().getMethod("loadProperties", HashMap.class);
-                    loadPropsMethod.invoke(adapters.get(i), ac.getProperties());
-                } else {
-                    LOGGER.log(Level.SEVERE, "Adapters initialization error. Adapter class must implement: {0}", adapterInterfaceName);
+                adapters.add(c.newInstance());
+                adapterClasses.add(adapterInterfaceName);
+                if (adapters.get(adapters.size() - 1) instanceof org.cricketmsf.in.http.HttpAdapter) {
+                    setHttpHandlerLoaded(true);
                 }
+                // loading properties
+                java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class);
+                loadPropsMethod.invoke(adapters.get(adapters.size() - 1), ac.getProperties());
             }
+
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterInterfaceName);
             throw new Exception(e);
@@ -261,8 +271,8 @@ public abstract class Kernel {
         }
         return content;
     }
-*/
-    /*
+     */
+ /*
     public String readHelpFile(String fileName) throws Exception {
         String content = null;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(fileName)))) {
@@ -276,8 +286,8 @@ public abstract class Kernel {
         }
         return content;
     }
-*/
-    /*
+     */
+ /*
     * This method will be invoked when Kernel is executed without --run option
      */
     public void runOnce() {
@@ -306,8 +316,8 @@ public abstract class Kernel {
             getHttpd().run();
             System.out.println("Running initialization tasks");
             runInitTasks();
-            long startedIn = System.currentTimeMillis()-startedAt;
-            System.out.println("Started in "+startedIn+"ms. Press Ctrl-C to stop");
+            long startedIn = System.currentTimeMillis() - startedAt;
+            System.out.println("Started in " + startedIn + "ms. Press Ctrl-C to stop");
             while (true) {
                 Thread.sleep(200);
             }
@@ -316,9 +326,9 @@ public abstract class Kernel {
             System.exit(MIN_PRIORITY);
         }
     }
-    
-    protected void runInitTasks(){
-        
+
+    protected void runInitTasks() {
+
     }
 
     public void shutdown() {
@@ -326,7 +336,7 @@ public abstract class Kernel {
         //some cleaning up code could be added here ... if required
         System.out.println("\nShutting down ...");
         //if (isHttpHandlerLoaded()) {
-            //getHttpd().server.stop(MIN_PRIORITY);
+        //getHttpd().server.stop(MIN_PRIORITY);
         //}
         //todo: stop adapters
         for (int i = 0; i < adapters.size(); i++) {
@@ -366,5 +376,5 @@ public abstract class Kernel {
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
     }
-    
+
 }
