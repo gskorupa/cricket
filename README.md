@@ -22,6 +22,10 @@ The http interface will be available at `http://localhost:8080/` To request the 
 
 To stop the service press `Ctrl-C`
 
+## Building a service with Cricket
+
+Use the service template as the starting point. Clone https://github.com/gskorupa/cricket-starter
+
 ## Documentation
 
 For project status and the roadmap look at https://github.com/gskorupa/Cricket/wiki
