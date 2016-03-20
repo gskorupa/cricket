@@ -1,17 +1,13 @@
-# Cricket
-Cricket is a tiny microservices framework for Java.
-
-Please check out the development guide at GitBook: 
-https://www.gitbook.com/book/gskorupa/building-microservices-with-cricket/
+# Cricket Microservices Framework for Java.
 
 ## Quick start
 
 You need:
 * Java 1.8
 * Apache Ant
-* Apache Tomcat 7 or 8 (to build servlet part of a web application)
 
-Edit build.xml and modify properties and file paths according to your system.
+Edit build.xml to modify properties and file paths according to your system. 
+Modify properties in cricket.json.
 Compile and build distribution package (Cricket.jar) with command:
 
 `ant dist`
@@ -26,4 +22,12 @@ The http interface will be available at `http://localhost:8080/` To request the 
 
 To stop the service press `Ctrl-C`
 
-*The project is not production ready so use with care. Please stay tuned for more documentation.*
+## Documentation
+
+For project status and the roadmap look at https://github.com/gskorupa/Cricket/wiki
+
+Development guide (preview): https://www.gitbook.com/book/gskorupa/building-microservices-with-cricket/
+
+Additional information: http://gskorupa.blogspot.com/
+
+*The project is under development. Please stay tuned for changes and more documentation.*

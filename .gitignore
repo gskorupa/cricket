@@ -37,3 +37,5 @@ hs_err_pid*
 /build/
 /db/echo.xml
 /db/scheduler.xml
+/db/servicedb.trace.db
+/db/servicedb.h2.db
