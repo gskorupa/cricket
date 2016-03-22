@@ -28,7 +28,9 @@ import java.util.Map;
 import java.util.Scanner;
 
 /**
- * EchoService
+ * Runner class is used when running JAR distribution. The class parses the command line
+ * arguments, reads config from cricket.json, then creates and runs the service instance according
+ * to the configuration.
  *
  * @author greg
  */
@@ -103,10 +105,21 @@ public class Runner {
         }
     }
     
+    /**
+     * Returns content of the default help file ("help.txt")
+     * @return  help content
+     */
     public String getHelp(){
         return getHelp(null);
     }
 
+    /**
+     * Returns content of the custom service help file (serviceName+"-help.txt")
+     * Example: if your service class name is org.cricketmsf.services.EchoService 
+     * then help file is EchoService-help.txt
+     * @param serviceName the service class simple name
+     * @return 
+     */
     public String getHelp(String serviceName) {
         String content = "Help file not found";
         String helpFileName="/help.txt";
@@ -125,7 +138,7 @@ public class Runner {
         return content;
     }
 
-    public String readHelpFile(String fileName) throws Exception {
+    private String readHelpFile(String fileName) throws Exception {
         String content = null;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(fileName)))) {
             StringBuilder out = new StringBuilder();

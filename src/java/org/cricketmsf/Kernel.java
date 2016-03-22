@@ -67,11 +67,11 @@ public abstract class Kernel {
         startedAt = time;
     }
 
-    public void addHookMethodNameForEvent(String eventCategory, String hookMethodName) {
+    private void addHookMethodNameForEvent(String eventCategory, String hookMethodName) {
         eventHookMethods.put(eventCategory, hookMethodName);
     }
 
-    protected void getEventHooks() {
+    private void getEventHooks() {
         EventHook ah;
         String eventCategory;
         System.out.println("REGISTERING EVENT HOOKS");
@@ -88,7 +88,7 @@ public abstract class Kernel {
         System.out.println("END REGISTERING EVENT HOOKS");
     }
 
-    public String getHookMethodNameForEvent(String eventCategory) {
+    private String getHookMethodNameForEvent(String eventCategory) {
         String result = null;
         result = eventHookMethods.get(eventCategory);
         if (null == result) {
@@ -97,6 +97,11 @@ public abstract class Kernel {
         return result;
     }
 
+    /**
+     * Invokes the service method annotated as dedicated to this event
+     * category
+     * @param event event object that should be processed
+     */
     public void handleEvent(Event event) {
         try {
             Method m = getClass()
@@ -112,23 +117,30 @@ public abstract class Kernel {
     }
 
     protected Object getRegistered(String interfaceName) {
-        //int index = adapterClasses.indexOf(interfaceName);
-        //return adapters.get(index);
         return adaptersMap.get(interfaceName);
     }
 
+    /*
     public Configuration getConfiguration(String serviceName) {
         if (configSet == null) {
             configSet = new ConfigSet();
         }
-
         return configSet.getConfiguration(serviceName);
     }
-
+    */
+    
+    /**
+     * Returns next unique identifier for Event.
+     * @return next unique identifier
+     */
     public static long getEventId() {
         return eventSeed += 1;
     }
 
+    /**
+     * Must be used to set adapter variables after instantiating them according
+     * to the configuration in cricket.json file. Look at EchoService example.
+     */
     public abstract void getAdapters();
 
     public static Kernel getInstance() {
@@ -151,6 +163,11 @@ public abstract class Kernel {
         return instance;
     }
 
+    /**
+     * Instantiates adapters following configuration in cricket.json
+     * @param config Configutation object loaded from cricket.json
+     * @throws Exception 
+     */
     private synchronized void loadAdapters(Configuration config) throws Exception {
         setHttpHandlerLoaded(false);
         System.out.println("LOADING SERVICE PROPERTIES FOR " + config.getService());
@@ -218,28 +235,28 @@ public abstract class Kernel {
     /**
      * @return the httpd
      */
-    public Httpd getHttpd() {
+    private Httpd getHttpd() {
         return httpd;
     }
 
     /**
      * @param httpd the httpd to set
      */
-    public void setHttpd(Httpd httpd) {
+    private void setHttpd(Httpd httpd) {
         this.httpd = httpd;
     }
 
     /**
      * @return the httpHandlerLoaded
      */
-    public boolean isHttpHandlerLoaded() {
+    private boolean isHttpHandlerLoaded() {
         return httpHandlerLoaded;
     }
 
     /**
      * @param httpHandlerLoaded the httpHandlerLoaded to set
      */
-    public void setHttpHandlerLoaded(boolean httpHandlerLoaded) {
+    private void setHttpHandlerLoaded(boolean httpHandlerLoaded) {
         this.httpHandlerLoaded = httpHandlerLoaded;
     }
 
@@ -251,6 +268,10 @@ public abstract class Kernel {
         getAdapters();
     }
 
+    /**
+     * Starts the service instance
+     * @throws InterruptedException 
+     */
     public void start() throws InterruptedException {
         getAdapters();
         getEventHooks();
@@ -282,6 +303,10 @@ public abstract class Kernel {
         }
     }
 
+    /**
+     * Could be overriden in a service implementation to run required code at the service start.
+     * As the last step of the service starting procedure.
+     */
     protected void runInitTasks() {
     }
 
@@ -318,6 +343,7 @@ public abstract class Kernel {
     }
 
     /**
+     * Return service instance unique identifier
      * @return the uuid
      */
     public UUID getUuid() {

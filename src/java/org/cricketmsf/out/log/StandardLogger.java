@@ -15,11 +15,13 @@
  */
 package org.cricketmsf.out.log;
 
+import java.io.IOException;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.out.OutboundAdapter;
 import java.util.HashMap;
 import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,6 +35,7 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
     //Logger logger;
     Level level = null;
     private String name;
+    private String fileLocation;
 
     public static final Logger logger = Logger.getGlobal();
 
@@ -40,12 +43,24 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
     public void loadProperties(HashMap<String, String> properties) {
         setName(properties.get("name"));
         System.out.println("logger name: " + getName());
+        setFileLocation(properties.get("log-file-name"));
+        System.out.println("log-file-name: " + getFileLocation());
         setLoggingLevel(properties.get("level"));
 
         Handler systemOut = new ConsoleHandler();
         systemOut.setLevel(level);
         systemOut.setFormatter(new StandardLoggerFormatter());
         logger.addHandler(systemOut);
+        if (!getFileLocation().isEmpty()) {
+            try {
+                Handler fileOut = new FileHandler(getFileLocation());
+                fileOut.setLevel(level);
+                fileOut.setFormatter(new StandardLoggerFormatter());
+                logger.addHandler(fileOut);
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
         logger.setLevel(level);
         // Prevent logs from processed by default Console handler.
         logger.setUseParentHandlers(false);
@@ -117,5 +132,19 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         } else {
             this.name = this.getClass().getName();
         }
+    }
+
+    /**
+     * @return the fileLocation
+     */
+    public String getFileLocation() {
+        return fileLocation;
+    }
+
+    /**
+     * @param fileLocation the fileLocation to set
+     */
+    public void setFileLocation(String fileLocation) {
+        this.fileLocation = fileLocation;
     }
 }

@@ -29,25 +29,28 @@ import java.util.Set;
  *
  * @author greg
  */
-public class KeyValueStore  extends OutboundAdapter implements KeyValueCacheAdapterIface{
+public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapterIface {
 
-    private LimitedMap cache=null;
+    private LimitedMap cache = null;
     private String storagePath;
-    private int capacity=0;
+    private int capacity = 0;
     private String envVariable;
     private String fileName;
-    
+    private boolean persistent=false;
+
     @Override
     public void start() {
         read();
     }
-    
+
     @Override
     public void destroy() {
-        write();
+        if (isPersistent()) {
+            write();
+        }
     }
-    
-    public void loadProperties(HashMap<String,String> properties) {
+
+    public void loadProperties(HashMap<String, String> properties) {
         setStoragePath(properties.get("path"));
         System.out.println("path: " + getStoragePath());
         setEnvVariable(properties.get("envVariable"));
@@ -56,8 +59,8 @@ public class KeyValueStore  extends OutboundAdapter implements KeyValueCacheAdap
             setStoragePath(System.getenv(getEnvVariable()));
         }
         // fix to handle '.'
-        if(getStoragePath().startsWith(".")){
-            setStoragePath(System.getProperty("user.dir")+getStoragePath().substring(1));
+        if (getStoragePath().startsWith(".")) {
+            setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
         }
         setFileName(properties.get("file"));
         System.out.println("file: " + getFileName());
@@ -68,15 +71,17 @@ public class KeyValueStore  extends OutboundAdapter implements KeyValueCacheAdap
                 : getStoragePath() + pathSeparator + getFileName()
         );
         System.out.println("cache file location: " + getStoragePath());
-        try{
-        setCapacity(Integer.parseInt(properties.get("max-records")));
-        }catch(NumberFormatException e){
+        try {
+            setCapacity(Integer.parseInt(properties.get("max-records")));
+        } catch (NumberFormatException e) {
             e.printStackTrace();
         }
-        System.out.println("max-records: "+getCapacity());
+        System.out.println("max-records: " + getCapacity());
+        setPersistent(Boolean.parseBoolean("persistent"));
+        System.out.println("persistent: " + isPersistent());
         start();
     }
-    
+
     private void setEnvVariable(String envVariable) {
         this.envVariable = envVariable;
     }
@@ -84,7 +89,7 @@ public class KeyValueStore  extends OutboundAdapter implements KeyValueCacheAdap
     private String getEnvVariable() {
         return envVariable;
     }
-    
+
     /**
      * @return the fileName
      */
@@ -98,7 +103,7 @@ public class KeyValueStore  extends OutboundAdapter implements KeyValueCacheAdap
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
-    
+
     public void read() {
         try {
             try (XMLDecoder decoder = new XMLDecoder(
@@ -124,16 +129,16 @@ public class KeyValueStore  extends OutboundAdapter implements KeyValueCacheAdap
         }
     }
 
-    private LimitedMap getCache(){
-        if(cache!=null){
+    private LimitedMap getCache() {
+        if (cache != null) {
             return cache;
-        }else{
+        } else {
             cache = new LimitedMap();
             cache.setMaxSize(capacity);
             return cache;
         }
     }
-    
+
     public synchronized void put(String key, Object value) {
         getCache().put(key, value);
     }
@@ -141,24 +146,24 @@ public class KeyValueStore  extends OutboundAdapter implements KeyValueCacheAdap
     public Object get(String key) {
         return getCache().get(key);
     }
-    
+
     public Object get(String key, Object defaultValue) {
         return getCache().containsKey(key) ? getCache().get(key) : defaultValue;
     }
-    
+
     public boolean containsKey(String key) {
         return getCache().containsKey(key);
     }
-    
-    public synchronized boolean remove(String key){
-        return getCache().remove(key)!=null ? true : false;
+
+    public synchronized boolean remove(String key) {
+        return getCache().remove(key) != null ? true : false;
     }
-    
-    public synchronized void clear(){
+
+    public synchronized void clear() {
         getCache().clear();
     }
-    
-    public long getSize(){
+
+    public long getSize() {
         return getCache().size();
     }
 
@@ -169,8 +174,8 @@ public class KeyValueStore  extends OutboundAdapter implements KeyValueCacheAdap
     private String getStoragePath() {
         return storagePath;
     }
-    
-    public Set getKeySet(){
+
+    public Set getKeySet() {
         return cache.keySet();
     }
 
@@ -187,5 +192,19 @@ public class KeyValueStore  extends OutboundAdapter implements KeyValueCacheAdap
     public void setCapacity(int capacity) {
         this.capacity = capacity;
     }
-    
+
+    /**
+     * @return the persistent
+     */
+    public boolean isPersistent() {
+        return persistent;
+    }
+
+    /**
+     * @param persistent the persistent to set
+     */
+    public void setPersistent(boolean persistent) {
+        this.persistent = persistent;
+    }
+
 }

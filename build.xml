@@ -42,6 +42,23 @@
             <compilerarg value="-Xlint:-options"/>          
         </javac>
     </target>
+    
+    <target name="doc" depends="init">
+        <javadoc packagenames="org.cricketmsf.*"
+                 sourcepath="${src}"
+                 defaultexcludes="yes"
+                 destdir="docs/api"
+                 author="true"
+                 version="true"
+                 use="true"
+                 windowtitle="Cricket MSF API">
+            <doctitle><![CDATA[<h1>Cricket Microservices Framework</h1>]]></doctitle>
+            <bottom><![CDATA[<i>Copyright &#169; 2016 Grzegorz Skorupa.</i>]]></bottom>
+            <tag name="todo" scope="all" description="To do:"/>
+            <link offline="true" href="http://docs.oracle.com/javase/8/docs/api/" packagelistLoc="C:\tmp"/>
+            <link href="http://docs.oracle.com/javase/8/docs/api/"/>
+        </javadoc>
+    </target>
 
     <target name="dist" depends="clean, compile"
             description="generate the distribution">
