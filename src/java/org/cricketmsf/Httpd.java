@@ -21,7 +21,6 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Map;
-import org.cricketmsf.config.AdapterConfiguration;
 
 /**
  *
@@ -56,6 +55,7 @@ public class Httpd {
                 System.out.println(((HttpAdapter) adapterEntry.getValue()).getContext());
                 context = server.createContext(((HttpAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
                 context.getFilters().add(new ParameterFilter());
+                context.getFilters().add(service.getSecurityFilter());
             }
         }
     }

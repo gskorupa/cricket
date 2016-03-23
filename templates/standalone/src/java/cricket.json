@@ -9,6 +9,7 @@
             "host": "0.0.0.0",
             "port": "8080",
             "threads": 0,
+            "filter": "org.cricketmsf.SecurityFilter",
             "adapters": {
                 "EchoHttpAdapterIface": {
                     "interfaceName": "EchoHttpAdapterIface",

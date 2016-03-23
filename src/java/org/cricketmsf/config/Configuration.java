@@ -27,6 +27,7 @@ public class Configuration {
     private String host;
     private String port;
     private int threads;
+    private String filter;
     
     private HashMap<String, AdapterConfiguration> adapters;
     
@@ -110,6 +111,20 @@ public class Configuration {
      */
     public void setService(String service) {
         this.service = service;
+    }
+
+    /**
+     * @return the securityFilter
+     */
+    public String getFilter() {
+        return filter;
+    }
+
+    /**
+     * @param securityFilter the securityFilter to set
+     */
+    public void setFilter(String filterName) {
+        this.filter = filterName;
     }
     
     

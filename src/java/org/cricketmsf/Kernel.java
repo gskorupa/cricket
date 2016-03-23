@@ -15,6 +15,7 @@
  */
 package org.cricketmsf;
 
+import com.sun.net.httpserver.Filter;
 import org.cricketmsf.config.AdapterConfiguration;
 import org.cricketmsf.config.ConfigSet;
 import org.cricketmsf.config.Configuration;
@@ -57,6 +58,8 @@ public abstract class Kernel {
     private static long eventSeed = System.currentTimeMillis();
 
     protected ConfigSet configSet = null;
+    
+    private Filter securityFilter=new SecurityFilter();
 
     private long startedAt = 0;
 
@@ -174,6 +177,8 @@ public abstract class Kernel {
         System.out.println("UUID: " + getUuid().toString());
         setHost(config.getHost());
         System.out.println("http-host=" + getHost());
+        setSecurityFilter(config.getFilter());
+        System.out.println("filter=" + config.getFilter());
         try {
             setPort(Integer.parseInt(config.getPort()));
         } catch (Exception e) {
@@ -202,6 +207,21 @@ public abstract class Kernel {
             throw new Exception(e);
         }
         System.out.println("END LOADING ADAPTERS");
+    }
+    
+    
+    private void setSecurityFilter(String filterName){
+        try{
+            Class c = Class.forName(filterName);
+            securityFilter=(SecurityFilter)c.newInstance();
+        }catch(ClassNotFoundException | InstantiationException | IllegalAccessException e){
+            e.printStackTrace();
+            securityFilter=new SecurityFilter();
+        }
+    }
+    
+    public Filter getSecurityFilter(){
+        return securityFilter;
     }
 
     /**

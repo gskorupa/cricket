@@ -41,3 +41,4 @@ hs_err_pid*
 /db/servicedb.h2.db
 /nbproject/ide-file-targets.xml
 !/templates/standalone/lib/cricket-1.0-B8.jar
+/log/cricket.log
