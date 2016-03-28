@@ -63,7 +63,79 @@ public class Event {
         createdAt=System.currentTimeMillis();
         calculateTimePoint();
     }
+    
+    public static Event log(Object source, String level, String message){
+        return new Event(
+                source.getClass().getSimpleName(),
+                Event.CATEGORY_LOG,
+                level,
+                "",
+                message);
+    }
+    
+    public static Event log(String source, String level, String message){
+        return new Event(
+                source,
+                Event.CATEGORY_LOG,
+                level,
+                "",
+                message);
+    }
+    
+    public static Event logSevere(String source, String message){
+        return new Event(
+                source,
+                Event.CATEGORY_LOG,
+                Event.LOG_SEVERE,
+                "",
+                message);
+    }
 
+    public static Event logWarning(String source, String message){
+        return new Event(
+                source,
+                Event.CATEGORY_LOG,
+                Event.LOG_WARNING,
+                "",
+                message);
+    }
+    
+    public static Event logInfo(String source, String message){
+        return new Event(
+                source,
+                Event.CATEGORY_LOG,
+                Event.LOG_INFO,
+                "",
+                message);
+    }
+    
+    public static Event logFine(String source, String message){
+        return new Event(
+                source,
+                Event.CATEGORY_LOG,
+                Event.LOG_FINE,
+                "",
+                message);
+    }
+    
+    public static Event logFiner(String source, String message){
+        return new Event(
+                source,
+                Event.CATEGORY_LOG,
+                Event.LOG_FINER,
+                "",
+                message);
+    }
+    
+    public static Event logFinest(String source, String message){
+        return new Event(
+                source,
+                Event.CATEGORY_LOG,
+                Event.LOG_FINEST,
+                "",
+                message);
+    }
+    
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getId())

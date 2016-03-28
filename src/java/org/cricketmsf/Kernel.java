@@ -114,6 +114,15 @@ public abstract class Kernel {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Invokes the service method annotated as dedicated to this event
+     * category
+     * @param event event object that should be processed
+     */
+    public static void handle(Event event) {
+        Kernel.getInstance().handleEvent(event);
+    }
 
     public HashMap<String, Object> getAdaptersMap() {
         return adaptersMap;
