@@ -68,7 +68,7 @@ public class EchoService extends Kernel {
         processEvent(e);
     }
 
-    @HttpAdapterHook(handlerClassName = "HtmlGenAdapterIface", requestMethod = "GET")
+    @HttpAdapterHook(adapterName = "HtmlGenAdapterIface", requestMethod = "GET")
     public Object doGet(Event event) {
         RequestObject request = (RequestObject) event.getPayload();
         Result result = getFile(request);
@@ -82,24 +82,24 @@ public class EchoService extends Kernel {
         return result;
     }
 
-    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
+    @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "GET")
     public Object doGetEcho(Event requestEvent) {
         Event e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from doGetEcho() processed by scheduler. Hello!");
         processEvent(e);
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
-    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "POST")
+    @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "POST")
     public Object doPost(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
-    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "PUT")
+    @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "PUT")
     public Object doPut(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
-    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "DELETE")
+    @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "DELETE")
     public Object doDelete(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }

@@ -40,7 +40,7 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
     public static final Logger logger = Logger.getGlobal();
 
     @Override
-    public void loadProperties(HashMap<String, String> properties) {
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setName(properties.get("name"));
         System.out.println("logger name: " + getName());
         setFileLocation(properties.get("log-file-name"));

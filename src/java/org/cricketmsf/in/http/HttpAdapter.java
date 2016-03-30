@@ -31,6 +31,7 @@ import org.cricketmsf.HttpAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.cricketmsf.config.AdapterConfiguration;
 
 /**
  *
@@ -65,12 +66,14 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     private HashMap<String, String> hookMethodNames = new HashMap();
 
     public HttpAdapter() {
-        getServiceHooks();
+        //getServiceHooks();
     }
 
-    private void getServiceHooks() {
+    protected void getServiceHooks(String adapterName) {
         HttpAdapterHook ah;
         String requestMethod;
+        //AdapterConfiguration ac=Kernel.getInstance().getConfigSet().getConfiguration(Kernel.getInstance().getClass().getName()).getAdapterConfiguration(context);
+        //String adapterName = ac.getName();
         // for every method of a Kernel instance (our service class extending Kernel)
         for (Method m : Kernel.getInstance().getClass().getMethods()) {
             ah = (HttpAdapterHook) m.getAnnotation(HttpAdapterHook.class);
@@ -81,13 +84,14 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 // file
                 // we need to find all names of implemented interfaces because
                 // handler class is mapped by the interface name
-                for (Class c : this.getClass().getInterfaces()) {
-                    if (ah.handlerClassName().equals(c.getSimpleName())) {
+                //for (Class c : this.getClass().getInterfaces()) {
+                    //if (ah.adapterName().equals(c.getSimpleName())) {
+                    if (ah.adapterName().equals(adapterName)) {
                         addHookMethodNameForMethod(requestMethod, m.getName());
                         System.out.println("hook method for http method " + requestMethod + " : " + m.getName());
-                        break;
+                        //break;
                     }
-                }
+                //}
             }
         }
     }

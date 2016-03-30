@@ -35,12 +35,12 @@ public class Configuration {
         adapters=new <String, AdapterConfiguration>HashMap();
     }
 
-    public AdapterConfiguration getAdapterConfiguration(String interfaceName){
-        return adapters.get(interfaceName);
+    public AdapterConfiguration getAdapterConfiguration(String name){
+        return adapters.get(name);
     }
     
     public void putAdapterConfiguration(AdapterConfiguration config){
-        adapters.put(config.getInterfaceName(), config);
+        adapters.put(config.getName(), config);
     }
 
     /**

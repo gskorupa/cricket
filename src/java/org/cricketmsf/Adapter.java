@@ -23,6 +23,6 @@ import java.util.HashMap;
  */
 public interface Adapter {
     
-    public void loadProperties(HashMap<String,String> properties);
+    public void loadProperties(HashMap<String,String> properties, String adapterName);
     
 }

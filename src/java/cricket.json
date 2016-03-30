@@ -11,7 +11,8 @@
             "threads": 0,
             "filter": "org.cricketmsf.SecurityFilter",
             "adapters": {
-                "EchoHttpAdapterIface": {
+                "EchoAdapter": {
+                    "name": "EchoAdapter",
                     "interfaceName": "EchoHttpAdapterIface",
                     "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
                     "properties": {
@@ -19,6 +20,7 @@
                     }
                 },
                 "LoggerAdapterIface": {
+                    "name": "LoggerAdapterIface",
                     "interfaceName": "LoggerAdapterIface",
                     "classFullName": "org.cricketmsf.out.log.StandardLogger",
                     "properties": {
@@ -28,6 +30,7 @@
                     }
                 },
                 "KeyValueCacheAdapterIface": {
+                    "name": "KeyValueCacheAdapterIface",
                     "interfaceName": "KeyValueCacheAdapterIface",
                     "classFullName": "org.cricketmsf.out.db.KeyValueStore",
                     "properties": {
@@ -39,6 +42,7 @@
                     }
                 },
                 "SchedulerIface": {
+                    "name": "SchedulerIface",
                     "interfaceName": "SchedulerIface",
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
@@ -48,6 +52,7 @@
                     }
                 },
                 "HtmlGenAdapterIface": {
+                    "name": "HtmlGenAdapterIface",
                     "interfaceName": "HtmlGenAdapterIface",
                     "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
                     "properties": {
@@ -55,6 +60,7 @@
                     }
                 },
                 "HtmlReaderAdapterIface": {
+                    "name": "HtmlReaderAdapterIface",
                     "interfaceName": "HtmlReaderAdapterIface",
                     "classFullName": "org.cricketmsf.out.html.HtmlReaderAdapter",
                     "properties": {

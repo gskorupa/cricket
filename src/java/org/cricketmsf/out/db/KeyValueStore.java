@@ -24,12 +24,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.Set;
+import org.cricketmsf.Adapter;
 
 /**
  *
  * @author greg
  */
-public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapterIface {
+public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapterIface, Adapter {
 
     private LimitedMap cache = null;
     private String storagePath;
@@ -50,7 +51,7 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
         }
     }
 
-    public void loadProperties(HashMap<String, String> properties) {
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setStoragePath(properties.get("path"));
         System.out.println("path: " + getStoragePath());
         setEnvVariable(properties.get("envVariable"));

@@ -25,7 +25,8 @@ import java.util.HashMap;
 public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface, Adapter {
 
     @Override
-    public void loadProperties(HashMap<String,String> properties) {
+    public void loadProperties(HashMap<String,String> properties, String adapterName) {
+        super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         System.out.println("context=" + getContext());
     }

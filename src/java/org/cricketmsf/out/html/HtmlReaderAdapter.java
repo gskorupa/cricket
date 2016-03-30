@@ -37,7 +37,7 @@ public class HtmlReaderAdapter extends OutboundAdapter implements Adapter, HtmlR
      * @param properties
      */
     @Override
-    public void loadProperties(HashMap<String, String> properties) {
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setRootPath(properties.get("root"));
         System.out.println("root path: " + getRootPath());
     }

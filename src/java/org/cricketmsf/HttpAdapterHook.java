@@ -29,6 +29,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface HttpAdapterHook {
-    public String handlerClassName();
+    public String adapterName();
     public String requestMethod();
 }

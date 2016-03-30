@@ -208,8 +208,8 @@ public abstract class Kernel {
                     setHttpHandlerLoaded(true);
                 }
                 // loading properties
-                java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class);
-                loadPropsMethod.invoke(adaptersMap.get(adapterInterfaceName), ac.getProperties());
+                java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class, String.class);
+                loadPropsMethod.invoke(adaptersMap.get(adapterInterfaceName), ac.getProperties(), adapterInterfaceName);
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterInterfaceName);

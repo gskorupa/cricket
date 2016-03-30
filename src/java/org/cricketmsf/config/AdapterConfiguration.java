@@ -23,6 +23,7 @@ import java.util.HashMap;
  */
 public class AdapterConfiguration {
     
+    private String name;
     private String interfaceName;
     private String classFullName;
     private HashMap<String,String> properties;
@@ -79,6 +80,24 @@ public class AdapterConfiguration {
      */
     public void setProperties(HashMap<String,String> properties) {
         this.properties = properties;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        if(name==null||name.isEmpty()){
+            return getInterfaceName();
+        }else{
+            return name;
+        }
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
     }
     
 }

@@ -27,7 +27,8 @@ import java.util.regex.Pattern;
 public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, Adapter {
 
     @Override
-    public void loadProperties(HashMap<String, String> properties) {
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         System.out.println("context=" + getContext());
     }

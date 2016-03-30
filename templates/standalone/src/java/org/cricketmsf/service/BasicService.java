@@ -78,7 +78,7 @@ public class BasicService extends Kernel {
      * @param event
      * @return Result
      */
-    @HttpAdapterHook(handlerClassName = "HtmlGenAdapterIface", requestMethod = "GET")
+    @HttpAdapterHook(adapterName = "HtmlGenAdapterIface", requestMethod = "GET")
     public Object doGet(Event event) {
         RequestObject request = (RequestObject) event.getPayload();
         Result result = getFile(request);
@@ -99,7 +99,7 @@ public class BasicService extends Kernel {
      * @param requestEvent
      * @return
      */
-    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "GET")
+    @HttpAdapterHook(adapterName = "EchoHttpAdapterIface", requestMethod = "GET")
     public Object doGetEcho(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
@@ -111,7 +111,7 @@ public class BasicService extends Kernel {
      * @param requestEvent
      * @return
      */
-    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "POST")
+    @HttpAdapterHook(adapterName = "EchoHttpAdapterIface", requestMethod = "POST")
     public Object doPost(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
@@ -123,7 +123,7 @@ public class BasicService extends Kernel {
      * @param requestEvent
      * @return
      */
-    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "PUT")
+    @HttpAdapterHook(adapterName = "EchoHttpAdapterIface", requestMethod = "PUT")
     public Object doPut(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
@@ -135,7 +135,7 @@ public class BasicService extends Kernel {
      * @param requestEvent
      * @return
      */
-    @HttpAdapterHook(handlerClassName = "EchoHttpAdapterIface", requestMethod = "DELETE")
+    @HttpAdapterHook(adapterName = "EchoHttpAdapterIface", requestMethod = "DELETE")
     public Object doDelete(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }

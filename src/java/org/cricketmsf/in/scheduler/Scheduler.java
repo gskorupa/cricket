@@ -50,7 +50,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
             = Executors.newScheduledThreadPool(1);
 
     @Override
-    public void loadProperties(HashMap<String, String> properties) {
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
 
         setStoragePath(properties.get("path"));
         System.out.println("path: " + getStoragePath());

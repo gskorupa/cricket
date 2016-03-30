@@ -9,8 +9,10 @@
             "host": "0.0.0.0",
             "port": "8080",
             "threads": 0,
+            "filter": "org.cricketmsf.SecurityFilter",
             "adapters": {
-                "EchoHttpAdapterIface": {
+                "EchoAdapter": {
+                    "name": "EchoAdapter",
                     "interfaceName": "EchoHttpAdapterIface",
                     "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
                     "properties": {
@@ -22,7 +24,8 @@
                     "classFullName": "org.cricketmsf.out.log.StandardLogger",
                     "properties": {
                         "name": "EchoService",
-                        "level": "ALL"
+                        "level": "ALL",
+                        "log-file-name": "./log/cricket.log"
                     }
                 },
                 "KeyValueCacheAdapterIface": {
@@ -32,7 +35,8 @@
                         "path": "./db",
                         "envVariable": "ECHO_DB_PATH",
                         "file": "echo.xml",
-                        "max-records": "10"
+                        "max-records": "10",
+                        "persistent": "false"
                     }
                 },
                 "SchedulerIface": {
