@@ -51,7 +51,7 @@ public class EchoService extends Kernel {
     @Override
     public void getAdapters() {
         logAdapter = (LoggerAdapterIface) getRegistered("LoggerAdapterIface");
-        httpAdapter = (EchoHttpAdapterIface) getRegistered("EchoHttpAdapterIface");
+        httpAdapter = (EchoHttpAdapterIface) getRegistered("EchoAdapter");
         cache = (KeyValueCacheAdapterIface) getRegistered("KeyValueCacheAdapterIface");
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");

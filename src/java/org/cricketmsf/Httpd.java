@@ -32,7 +32,6 @@ public class Httpd {
     public HttpServer server = null;
 
     public Httpd(Kernel service) {
-        //this.service = service;
         String host = service.getHost();
         if (null != host) {
             if (host.isEmpty() || "0.0.0.0".equals(host) || "*".equals(host)) {

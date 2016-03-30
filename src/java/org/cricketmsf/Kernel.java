@@ -128,18 +128,9 @@ public abstract class Kernel {
         return adaptersMap;
     }
 
-    protected Object getRegistered(String interfaceName) {
-        return adaptersMap.get(interfaceName);
+    protected Object getRegistered(String adapterName) {
+        return adaptersMap.get(adapterName);
     }
-
-    /*
-    public Configuration getConfiguration(String serviceName) {
-        if (configSet == null) {
-            configSet = new ConfigSet();
-        }
-        return configSet.getConfiguration(serviceName);
-    }
-    */
     
     /**
      * Returns next unique identifier for Event.
@@ -194,25 +185,25 @@ public abstract class Kernel {
         }
         System.out.println("http-port=" + getPort());
         System.out.println("LOADING ADAPTERS");
-        String adapterInterfaceName = null;
+        String adapterName = null;
         AdapterConfiguration ac = null;
         try {
             HashMap<String, AdapterConfiguration> adcm = config.getAdapters();
             for (Map.Entry<String, AdapterConfiguration> adapterEntry : adcm.entrySet()) {
-                adapterInterfaceName = adapterEntry.getKey();
+                adapterName = adapterEntry.getKey();
                 ac = adapterEntry.getValue();
-                System.out.println("ADAPTER: " + adapterInterfaceName);
+                System.out.println("ADAPTER: " + adapterName);
                 Class c = Class.forName(ac.getClassFullName());
-                adaptersMap.put(adapterInterfaceName, c.newInstance());
-                if (adaptersMap.get(adapterInterfaceName) instanceof org.cricketmsf.in.http.HttpAdapter) {
+                adaptersMap.put(adapterName, c.newInstance());
+                if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.http.HttpAdapter) {
                     setHttpHandlerLoaded(true);
                 }
                 // loading properties
                 java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class, String.class);
-                loadPropsMethod.invoke(adaptersMap.get(adapterInterfaceName), ac.getProperties(), adapterInterfaceName);
+                loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterInterfaceName);
+            LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterName);
             throw new Exception(e);
         }
         System.out.println("END LOADING ADAPTERS");
@@ -341,12 +332,7 @@ public abstract class Kernel {
 
     public void shutdown() {
 
-        //some cleaning up code could be added here ... if required
         System.out.println("\nShutting down ...");
-        //if (isHttpHandlerLoaded()) {
-        //getHttpd().server.stop(MIN_PRIORITY);
-        //}
-        //todo: stop adapters
         for (Map.Entry<String, Object> adapterEntry : getAdaptersMap().entrySet()) {
             if (adapterEntry.getValue() instanceof org.cricketmsf.in.InboundAdapter) {
                 ((InboundAdapter) adapterEntry.getValue()).destroy();

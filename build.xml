@@ -15,7 +15,7 @@
     <property name="jar-name-lite" value="cricket-lite-${version}.jar"/>
     <property name="war-name" value="cricket-${version}.war"/>
     <property name="standalone-lib" location="templates/standalone/lib"/>
-    <property name="tomcat-home" value="/home/greg/apache-tomcat-8.0.27" />
+    <property name="tomcat-home" value="/home/greg/apache-tomcat-7.0.67" />
 
     <path id="project-classpath">
         <pathelement location="${lib}/json-io-4.3.0.jar"/>
