@@ -1,6 +1,5 @@
 {
     "@type": "org.cricketmsf.config.ConfigSet",
-    "id": "new",
     "description": "This is sample configuration",
     "services": [
         {

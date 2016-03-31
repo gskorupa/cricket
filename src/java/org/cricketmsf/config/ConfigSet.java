@@ -23,7 +23,7 @@ import java.util.ArrayList;
  */
 public class ConfigSet {
     
-    private String id = "new";
+    //private String id = "new";
     String description="This is sample configuration";
     ArrayList<Configuration> services;
     
@@ -50,18 +50,14 @@ public class ConfigSet {
         return null;
     }
 
-    /**
-     * @return the id
-     */
+/*
     public String getId() {
         return id;
     }
 
-    /**
-     * @param id the id to set
-     */
+
     public void setId(String id) {
         this.id = id;
     }
-    
+  */  
 }

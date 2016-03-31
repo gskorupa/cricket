@@ -31,7 +31,6 @@ import org.cricketmsf.HttpAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import org.cricketmsf.config.AdapterConfiguration;
 
 /**
  *
@@ -66,32 +65,21 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     private HashMap<String, String> hookMethodNames = new HashMap();
 
     public HttpAdapter() {
-        //getServiceHooks();
     }
 
     protected void getServiceHooks(String adapterName) {
         HttpAdapterHook ah;
         String requestMethod;
-        //AdapterConfiguration ac=Kernel.getInstance().getConfigSet().getConfiguration(Kernel.getInstance().getClass().getName()).getAdapterConfiguration(context);
-        //String adapterName = ac.getName();
         // for every method of a Kernel instance (our service class extending Kernel)
         for (Method m : Kernel.getInstance().getClass().getMethods()) {
             ah = (HttpAdapterHook) m.getAnnotation(HttpAdapterHook.class);
             // we search for annotated method
             if (ah != null) {
                 requestMethod = ah.requestMethod();
-                // 'this' is a handler class loaded according to configuration described in propertis
-                // file
-                // we need to find all names of implemented interfaces because
-                // handler class is mapped by the interface name
-                //for (Class c : this.getClass().getInterfaces()) {
-                    //if (ah.adapterName().equals(c.getSimpleName())) {
-                    if (ah.adapterName().equals(adapterName)) {
-                        addHookMethodNameForMethod(requestMethod, m.getName());
-                        System.out.println("hook method for http method " + requestMethod + " : " + m.getName());
-                        //break;
-                    }
-                //}
+                if (ah.adapterName().equals(adapterName)) {
+                    addHookMethodNameForMethod(requestMethod, m.getName());
+                    System.out.println("hook method for http method " + requestMethod + " : " + m.getName());
+                }
             }
         }
     }
@@ -133,23 +121,23 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         switch (responseType) {
             case JSON:
                 headers.set("Content-Type", "application/json; charset=UTF-8");
-                responseData=formatResponse(JSON, result);
+                responseData = formatResponse(JSON, result);
                 break;
             case XML:
                 headers.set("Content-Type", "text/xml; charset=UTF-8");
-                responseData=formatResponse(XML, result);
+                responseData = formatResponse(XML, result);
                 break;
             case HTML:
                 headers.set("Content-Type", "text/html; charset=UTF-8");
-                responseData=formatResponse(HTML, result);
+                responseData = formatResponse(HTML, result);
                 break;
             case CSV:
                 headers.set("Content-Type", "text/csv; charset=UTF-8");
-                responseData=formatResponse(CSV, result);
+                responseData = formatResponse(CSV, result);
                 break;
             default:
                 headers.set("Content-Type", getMimeType(result.getFileExtension()));
-                responseData=result.getPayload();
+                responseData = result.getPayload();
                 break;
         }
         //calculate error code from response object
@@ -159,7 +147,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 errCode = 200;
                 break;
             case 405:
-                if (responseData.length==0) {
+                if (responseData.length == 0) {
                     responseData = result.getMessage().getBytes();
                 }
                 errCode = 405;
@@ -168,7 +156,6 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 errCode = result.getCode();
                 break;
         }
-        //System.out.println("RESPONSE: "+stringResponse);
         exchange.sendResponseHeaders(errCode, responseData.length);
         sendLogEvent(exchange, responseData.length);
         OutputStream os = exchange.getResponseBody();
@@ -177,7 +164,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         exchange.close();
     }
 
-    private String getMimeType(String fileExt){
+    private String getMimeType(String fileExt) {
         switch (fileExt) {
             case ".jpg":
                 return "image/jpg";
@@ -195,7 +182,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 return "text/plain";
         }
     }
-    
+
     /**
      *
      */
@@ -254,7 +241,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         }
         try {
             sendLogEvent(Event.LOG_FINE, "sending request to hook method " + hookMethodName);
-            Event event=new Event("HttpAdapter", Event.CATEGORY_GENERIC, "HTTP", null, requestObject);
+            Event event = new Event("HttpAdapter", Event.CATEGORY_GENERIC, "HTTP", null, requestObject);
             event.setPayload(requestObject);
             Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
             result = (Result) m.invoke(Kernel.getInstance(), event);
