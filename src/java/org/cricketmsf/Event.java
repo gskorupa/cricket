@@ -69,7 +69,7 @@ public class Event {
                 source.getClass().getSimpleName(),
                 Event.CATEGORY_LOG,
                 level,
-                "",
+                null,
                 message);
     }
     
@@ -78,7 +78,7 @@ public class Event {
                 source,
                 Event.CATEGORY_LOG,
                 level,
-                "",
+                null,
                 message);
     }
     
@@ -87,7 +87,7 @@ public class Event {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_SEVERE,
-                "",
+                null,
                 message);
     }
 
@@ -96,7 +96,7 @@ public class Event {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_WARNING,
-                "",
+                null,
                 message);
     }
     
@@ -105,7 +105,7 @@ public class Event {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_INFO,
-                "",
+                null,
                 message);
     }
     
@@ -114,7 +114,7 @@ public class Event {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_FINE,
-                "",
+                null,
                 message);
     }
     
@@ -123,7 +123,7 @@ public class Event {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_FINER,
-                "",
+                null,
                 message);
     }
     
@@ -132,7 +132,7 @@ public class Event {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_FINEST,
-                "",
+                null,
                 message);
     }
     
@@ -244,13 +244,8 @@ public class Event {
      */
     public void setTimePoint(String timePoint) {
         this.timePoint = timePoint;
-        //calculateTimePoint();
     }
     
-    //public void recalculate(){
-      //  calculateTimePoint();
-    //}
-
     private void calculateTimePoint() {
         String dateDefinition = getTimePoint();
         if (dateDefinition == null) {
@@ -259,7 +254,6 @@ public class Event {
         }
         long delay;
         if (dateDefinition.startsWith("+")) {
-            //long now = System.currentTimeMillis();
             try {
                 delay = Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1));
             } catch (NumberFormatException e) {
@@ -285,7 +279,6 @@ public class Event {
                     setCalculatedTimePoint(-1);
                     return;
             }
-            //setCalculatedTimePoint(multiplicator * delay + now);
             setCalculatedTimePoint(multiplicator * delay + createdAt);
         } else {
             //parse date and replace with delay from now

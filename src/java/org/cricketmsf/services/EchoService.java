@@ -61,10 +61,9 @@ public class EchoService extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
-        Event e = new Event("EchoService.runOnce()", "LOG", Event.LOG_INFO, null, "executed");
-        logEvent(e);
+        handle(Event.logInfo("EchoService.runOnce()", "executed"));
         System.out.println("Hello from EchoService.runOnce()");
-        e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from runOnce() processed by scheduler. Hello!");
+        Event e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from runOnce() processed by scheduler. Hello!");
         processEvent(e);
     }
 
@@ -153,7 +152,8 @@ public class EchoService extends Kernel {
     }
 
     private Result getFile(RequestObject request) {
-        logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_FINEST, "", "STEP1"));
+        handle(Event.logFinest("EchoService", "STEP1"));
+        //logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_FINEST, "", "STEP1"));
         byte[] fileContent = {};
         String filePath = request.pathExt;
         logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_FINEST, "", "pathExt=" + filePath));
