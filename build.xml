@@ -12,9 +12,7 @@
     <property name="web" location="web"/>
     <property name="lib" location="lib"/>
     <property name="jar-name" value="cricket-${version}.jar"/>
-    <property name="jar-name-lite" value="cricket-lite-${version}.jar"/>
     <property name="war-name" value="cricket-${version}.war"/>
-    <property name="standalone-lib" location="templates/standalone/lib"/>
     <property name="tomcat-home" value="/home/greg/apache-tomcat-7.0.67" />
 
     <path id="project-classpath">
@@ -65,8 +63,6 @@
         <!-- Create the distribution directory -->
         <mkdir dir="${dist}"/>
         <antcall inheritall="true" target="jar"/>
-        <copy file="${dist}/${jar-name}" todir="${standalone-lib}" overwrite="true"/>
-        <!--<copy file="${dist}/${jar-name-lite}" todir="${standalone-lib}" overwrite="true"/>-->
     </target>
 
     <target name="clean" description="clean up">
@@ -89,16 +85,6 @@
             <fileset dir="${build}"/>
             <zipfileset src="${lib}/json-io-4.3.0.jar" includes="com/**/*"/>
         </jar>
-        <!--
-        <jar  
-            destfile="${dist}/${jar-name-lite}">
-            <manifest>
-                <attribute name="Main-Class" value="org.cricketmsf.Runner"/>
-            </manifest>
-            <fileset dir="${build}"/>
-            <zipfileset src="${lib}/json-io-4.3.0.jar" includes="com/**/*"/>
-        </jar>
-        -->
     </target>
     
     <target name="war" depends="jar">
