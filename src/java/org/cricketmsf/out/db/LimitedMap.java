@@ -44,4 +44,16 @@ public class LimitedMap extends LinkedHashMap{
         this.maxSize = maxSize;
     }
     
+    public synchronized void clear(){
+        super.clear();
+    }
+    
+    public synchronized Object remove(String key) {
+        return super.remove(key);
+    }
+    
+    public synchronized void put(String key, Object value) {
+        super.put(key, value);
+    }
+    
 }

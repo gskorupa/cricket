@@ -105,6 +105,9 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
         this.fileName = fileName;
     }
 
+    /**
+     * Reads serialized database from disk
+     */
     public void read() {
         try {
             try (XMLDecoder decoder = new XMLDecoder(
@@ -118,6 +121,9 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
         cache.setMaxSize(capacity);
     }
 
+    /**
+     * Writes serialized database to disk
+     */
     public void write() {
         try {
             try (XMLEncoder encoder = new XMLEncoder(
@@ -140,7 +146,7 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
         }
     }
 
-    public synchronized void put(String key, Object value) {
+    public void put(String key, Object value) {
         getCache().put(key, value);
     }
 
@@ -156,11 +162,11 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
         return getCache().containsKey(key);
     }
 
-    public synchronized boolean remove(String key) {
+    public boolean remove(String key) {
         return getCache().remove(key) != null ? true : false;
     }
 
-    public synchronized void clear() {
+    public void clear() {
         getCache().clear();
     }
 

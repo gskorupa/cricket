@@ -166,6 +166,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
     private String getMimeType(String fileExt) {
         switch (fileExt) {
+            case ".ico":
+                return "image/x-icon";
             case ".jpg":
                 return "image/jpg";
             case ".jpeg":

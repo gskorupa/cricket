@@ -55,7 +55,7 @@ public class ParameterFilter extends Filter {
                 parsePostParameters(exchange);
                 break;
         }
-        System.out.println(this.getClass().getSimpleName());
+        //System.out.println(this.getClass().getSimpleName());
         chain.doFilter(exchange);
     }
 
