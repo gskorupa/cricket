@@ -15,7 +15,16 @@
                     "interfaceName": "EchoHttpAdapterIface",
                     "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
                     "properties": {
-                        "context": "/echo"
+                        "context": "/echo",
+                        "silent-mode": "true"
+                    }
+                },
+                "TestScheduler": {
+                    "name": "TestScheduler",
+                    "interfaceName": "EchoHttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
+                    "properties": {
+                        "context": "/scheduler"
                     }
                 },
                 "LoggerAdapterIface": {

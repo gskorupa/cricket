@@ -22,6 +22,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
+import org.cricketmsf.Event;
+import org.cricketmsf.Kernel;
+import org.cricketmsf.RequestObject;
+import org.cricketmsf.in.http.HttpAdapter;
+import org.cricketmsf.in.http.ParameterMapResult;
 
 /**
  *
@@ -63,6 +68,42 @@ public class HtmlReaderAdapter extends OutboundAdapter implements Adapter, HtmlR
         fileInputStream = new FileInputStream(file);
         fileInputStream.read(result);
         fileInputStream.close();
+        return result;
+    }
+    
+    public ParameterMapResult getFile(RequestObject request){
+        ParameterMapResult result= new ParameterMapResult();
+        result.setData(new HashMap(request.parameters));
+        byte[] emptyContent = {};
+        String filePath = request.pathExt;
+        Kernel.getInstance().handleEvent(Event.logFinest("HtmlReaderAdapter", "filePath="+filePath));
+        String fileExt = "";
+        if (!(filePath.isEmpty() || filePath.endsWith("/")) && filePath.indexOf(".") > 0) {
+            fileExt = filePath.substring(filePath.lastIndexOf("."));
+        }
+        switch (fileExt.toLowerCase()) {
+            case ".ico":
+            case ".jpg":
+            case ".jpeg":
+            case ".gif":
+            case ".png":
+                break;
+            default:
+                fileExt = ".html";
+        }
+        try {
+            byte[] b = readFile(filePath);
+            result.setPayload(b);
+            result.setFileExtension(fileExt);
+            result.setCode(HttpAdapter.SC_OK);
+            result.setMessage("");
+        } catch (Exception e) {
+            Kernel.getInstance().handleEvent(Event.logWarning("HtmlReaderAdapter", e.getMessage()));
+            result.setPayload(emptyContent);
+            result.setFileExtension(fileExt);
+            result.setCode(HttpAdapter.SC_NOT_FOUND);
+            result.setMessage("file not found");
+        }
         return result;
     }
 

@@ -20,5 +20,7 @@ package org.cricketmsf.in.http;
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public interface EchoHttpAdapterIface {
+    
+    public boolean isSilent();
 
 }

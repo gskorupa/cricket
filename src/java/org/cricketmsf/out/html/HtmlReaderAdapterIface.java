@@ -17,6 +17,8 @@ package org.cricketmsf.out.html;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import org.cricketmsf.RequestObject;
+import org.cricketmsf.in.http.ParameterMapResult;
 
 /**
  *
@@ -25,5 +27,6 @@ import java.io.IOException;
 public interface HtmlReaderAdapterIface {
     
     public byte[] readFile(String path) throws FileNotFoundException, IOException;
+    public ParameterMapResult getFile(RequestObject request);
     
 }

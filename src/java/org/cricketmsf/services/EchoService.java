@@ -21,14 +21,13 @@ import org.cricketmsf.HttpAdapterHook;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;
-import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.HashMap;
-import java.util.Map;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
-import org.cricketmsf.in.http.FileResult;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
+import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.http.Result;
+import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.html.HtmlReaderAdapterIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
@@ -47,6 +46,7 @@ public class EchoService extends Kernel {
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
     HtmlReaderAdapterIface htmlReader = null;
+    EchoHttpAdapterIface schedulerTester = null;
 
     @Override
     public void getAdapters() {
@@ -56,6 +56,7 @@ public class EchoService extends Kernel {
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");
         htmlReader = (HtmlReaderAdapterIface) getRegistered("HtmlReaderAdapterIface");
+        schedulerTester = (EchoHttpAdapterIface) getRegistered("TestScheduler");
     }
 
     @Override
@@ -70,36 +71,18 @@ public class EchoService extends Kernel {
     @HttpAdapterHook(adapterName = "HtmlGenAdapterIface", requestMethod = "GET")
     public Object doGet(Event event) {
         RequestObject request = (RequestObject) event.getPayload();
-        Result result = getFile(request);
-        HashMap<String, String> data = new HashMap();
-        //copy parameters from request to response data without modification
-        Map<String, Object> map = request.parameters;
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            data.put(entry.getKey(), (String) entry.getValue());
-        }
-        result.setData(data);
-        return result;
+        return htmlReader.getFile(request);
     }
 
-    @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "GET")
-    public Object doGetEcho(Event requestEvent) {
+    @HttpAdapterHook(adapterName = "TestScheduler", requestMethod = "GET")
+    public Object scheduleEvent(Event requestEvent) {
         Event e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from doGetEcho() processed by scheduler. Hello!");
         processEvent(e);
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
-    @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "POST")
-    public Object doPost(Event requestEvent) {
-        return sendEcho((RequestObject) requestEvent.getPayload());
-    }
-
-    @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "PUT")
-    public Object doPut(Event requestEvent) {
-        return sendEcho((RequestObject) requestEvent.getPayload());
-    }
-
-    @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "DELETE")
-    public Object doDelete(Event requestEvent) {
+    @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "*")
+    public Object doGetEcho(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
@@ -113,80 +96,37 @@ public class EchoService extends Kernel {
         if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
         } else {
-            System.out.println(event.getPayload().toString());
+            handle(Event.logInfo("EchoService", event.getPayload().toString()));
         }
     }
 
     public Object sendEcho(RequestObject request) {
 
-        //
-        Long counter;
-        counter = (Long) cache.get("counter", new Long(0));
-        counter++;
-        cache.put("counter", counter);
-
-        ParameterMapResult r = new ParameterMapResult();
-        HashMap<String, Object> data = new HashMap();
-        Map<String, Object> map = request.parameters;
-        data.put("service.uuid", getUuid().toString());
-        data.put("request.method", request.method);
-        data.put("request.pathExt", request.pathExt);
-        data.put("echo.counter", cache.get("counter"));
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            //System.out.println(entry.getKey() + "=" + entry.getValue());
-            data.put(entry.getKey(), (String) entry.getValue());
-        }
-        if (data.containsKey("error")) {
-            int errCode = HttpAdapter.SC_INTERNAL_SERVER_ERROR;
-            try {
-                errCode = Integer.parseInt((String) data.get("error"));
-            } catch (Exception e) {
+        StandardResult r = new StandardResult();
+        r.setCode(HttpAdapter.SC_OK);
+        if (!httpAdapter.isSilent()) {
+            // with echo counter
+            Long counter;
+            counter = (Long) cache.get("counter", new Long(0));
+            counter++;
+            cache.put("counter", counter);
+            HashMap<String, Object> data = new HashMap(request.parameters);
+            data.put("service.uuid", getUuid().toString());
+            data.put("request.method", request.method);
+            data.put("request.pathExt", request.pathExt);
+            data.put("echo.counter", cache.get("counter"));
+            if (data.containsKey("error")) {
+                int errCode = HttpAdapter.SC_INTERNAL_SERVER_ERROR;
+                try {
+                    errCode = Integer.parseInt((String) data.get("error"));
+                } catch (Exception e) {
+                }
+                r.setCode(errCode);
+                data.put("error", "error forced by request");
             }
-            r.setCode(errCode);
-            data.put("error", "error forced by request");
-        } else {
-            r.setCode(HttpAdapter.SC_OK);
+            r.setData(data);
         }
-        r.setData(data);
         return r;
-    }
-
-    private Result getFile(RequestObject request) {
-        handle(Event.logFinest("EchoService", "STEP1"));
-        //logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_FINEST, "", "STEP1"));
-        byte[] fileContent = {};
-        String filePath = request.pathExt;
-        logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_FINEST, "", "pathExt=" + filePath));
-        String fileExt = "";
-        if (!(filePath.isEmpty() || filePath.endsWith("/")) && filePath.indexOf(".") > 0) {
-            fileExt = filePath.substring(filePath.lastIndexOf("."));
-        }
-        Result result;
-        switch (fileExt.toLowerCase()) {
-            case ".jpg":
-            case ".jpeg":
-            case ".gif":
-            case ".png":
-                result = new FileResult();
-                break;
-            default:
-                fileExt = ".html";
-                result = new ParameterMapResult();
-        }
-        try {
-            byte[] b = htmlReader.readFile(filePath);
-            result.setPayload(b);
-            result.setFileExtension(fileExt);
-            result.setCode(HttpAdapter.SC_OK);
-            result.setMessage("");
-        } catch (Exception e) {
-            logEvent(new Event("EchoService", Event.CATEGORY_LOG, Event.LOG_WARNING, "", e.getMessage()));
-            result.setPayload(fileContent);
-            result.setFileExtension(fileExt);
-            result.setCode(HttpAdapter.SC_NOT_FOUND);
-            result.setMessage("file not found");
-        }
-        return result;
     }
 
 }

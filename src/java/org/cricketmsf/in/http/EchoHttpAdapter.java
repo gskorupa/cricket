@@ -24,27 +24,46 @@ import java.util.HashMap;
  */
 public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface, Adapter {
 
+    private boolean silent = false;
+
     @Override
-    public void loadProperties(HashMap<String,String> properties, String adapterName) {
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         System.out.println("context=" + getContext());
+        setSilent(properties.get("silent-mode"));
+        System.out.println("silent-mode=" + isSilent());
     }
-    
+
     /**
      * Formats response sent back by this adapter
      * <p>
-     * This method could be ommited if standard HttpAdapter.format method is OK.
-     * If you prefer to use HttpAdapter.format then you should use the full Cricket distribution.
-     * @param type      required response type: HttpAdapter.JSON, HttpAdapter.XML
-     *                  or HttpAdapter.CSV
-     * @param result    data to send as a response
-     * @return          String formatted according to required type
+     * This method could be omited if standard HttpAdapter.format method is OK.
+     * If you prefer to use HttpAdapter.format then you should use the full
+     * Cricket distribution.
+     *
+     * @param type required response type: HttpAdapter.JSON, HttpAdapter.XML or
+     * HttpAdapter.CSV
+     * @param result data to send as a response
+     * @return String formatted according to required type
      */
-    
     @Override
-    public byte[] formatResponse(int type, Result result){
+    public byte[] formatResponse(int type, Result result) {
         return super.formatResponse(type, result);
     }
-    
+
+    /**
+     * @return the silent
+     */
+    public boolean isSilent() {
+        return silent;
+    }
+
+    /**
+     * @param silent the silent to set
+     */
+    public void setSilent(String silent) {
+        this.silent = Boolean.parseBoolean(silent);
+    }
+
 }

@@ -235,7 +235,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
         if (hookMethodName == null) {
             sendLogEvent(Event.LOG_WARNING, "hook method is not defined for " + method);
-            result = new ParameterMapResult();
+            result = new StandardResult();
             result.setCode(SC_METHOD_NOT_ALLOWED);
             result.setMessage("method " + method + " is not allowed");
             //todo: set "Allow" header
