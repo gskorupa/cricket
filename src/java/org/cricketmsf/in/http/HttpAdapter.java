@@ -215,10 +215,10 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
         Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
         String method = exchange.getRequestMethod();
-        String adapterContext = exchange.getHttpContext().getPath();
+        //String adapterContext = exchange.getHttpContext().getPath();
         String pathExt = exchange.getRequestURI().getPath();
         if (null != pathExt) {
-            pathExt = pathExt.substring(adapterContext.length());
+            pathExt = pathExt.substring(exchange.getHttpContext().getPath().length());
             if (pathExt.startsWith("/")) {
                 pathExt = pathExt.substring(1);
             }

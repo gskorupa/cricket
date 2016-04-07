@@ -41,6 +41,12 @@ public class JsonFormatter {
         }
     }
 
+    /**
+     * Translates response object to JSON representation
+     * @param prettyPrint pretty print JSON or not
+     * @param o response object
+     * @return response as JSON String
+     */
     public String format(boolean prettyPrint, Object o) {
         args.clear();
         args.put(JsonWriter.PRETTY_PRINT, prettyPrint);
@@ -48,16 +54,4 @@ public class JsonFormatter {
         return JsonWriter.objectToJson(o, args)+"\n";
     }
 
-    /*
-    public String format(boolean prettyPrint, Object o) {
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        Gson gson;
-        if (prettyPrint) {
-            gson = gsonBuilder.setPrettyPrinting().create();
-        } else {
-            gson = gsonBuilder.create();
-        }
-        return gson.toJson(o)+"\n";
-    }
-     */
 }
