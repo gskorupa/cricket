@@ -28,7 +28,7 @@ public class ConfigSet {
     ArrayList<Configuration> services;
     
     public ConfigSet(){
-        services=new <Configuration>ArrayList();
+        services=new ArrayList<Configuration>();
     }
     
     public void addConfiguration(Configuration c){

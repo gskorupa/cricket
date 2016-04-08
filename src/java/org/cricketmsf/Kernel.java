@@ -44,10 +44,10 @@ public abstract class Kernel {
     private static Object instance = null;
 
     private UUID uuid;
-    private HashMap<String, String> eventHookMethods = new HashMap();
+    private HashMap<String, String> eventHookMethods = new HashMap<String, String>();
 
     // adapters
-    public HashMap<String, Object> adaptersMap = new HashMap();
+    public HashMap<String, Object> adaptersMap = new HashMap<String, Object>();
 
     // http server
     private String host = null;

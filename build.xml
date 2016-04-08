@@ -37,7 +37,7 @@
             destdir="${build}"
             includeantruntime="false" 
             classpathref="project-classpath">
-            <compilerarg value="-Xlint:-options"/>          
+            <!--<compilerarg value="-Xlint:unchecked"/>-->
         </javac>
     </target>
     

@@ -32,7 +32,7 @@ public class Configuration {
     private HashMap<String, AdapterConfiguration> adapters;
     
     public Configuration(){
-        adapters=new <String, AdapterConfiguration>HashMap();
+        adapters=new HashMap<String, AdapterConfiguration>();
     }
 
     public AdapterConfiguration getAdapterConfiguration(String name){

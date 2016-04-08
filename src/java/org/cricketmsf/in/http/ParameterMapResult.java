@@ -64,7 +64,7 @@ public class ParameterMapResult implements Result {
      * @param data the data to set
      */
     public void setData(Object data) {
-        this.data = (HashMap) data;
+        this.data = (HashMap<String, String>) data;
     }
 
     /*

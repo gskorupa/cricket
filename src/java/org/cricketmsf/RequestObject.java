@@ -27,7 +27,7 @@ public class RequestObject {
     
     public String method=null;
     public String pathExt=null;
-    public ArrayList<RequestHeader> headers = new ArrayList();
-    public Map<String, Object> parameters = new HashMap();
+    public ArrayList headers = new ArrayList<RequestHeader>();
+    public Map<String, Object> parameters = new HashMap<String, Object>();
 
 }

@@ -29,7 +29,7 @@ public class AdapterConfiguration {
     private HashMap<String,String> properties;
     
     public AdapterConfiguration(){
-        properties= new <String,String>HashMap();
+        properties= new HashMap<String,String>();
     }
     
     public String getProperty(String name){

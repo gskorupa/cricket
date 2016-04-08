@@ -110,7 +110,7 @@ public class EchoService extends Kernel {
             counter = (Long) cache.get("counter", new Long(0));
             counter++;
             cache.put("counter", counter);
-            HashMap<String, Object> data = new HashMap(request.parameters);
+            HashMap<String, Object> data = new HashMap<String, Object>(request.parameters);
             data.put("service.uuid", getUuid().toString());
             data.put("request.method", request.method);
             data.put("request.pathExt", request.pathExt);

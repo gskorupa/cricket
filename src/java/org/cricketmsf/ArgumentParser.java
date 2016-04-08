@@ -27,7 +27,7 @@ public class ArgumentParser {
     private Map<String, String> arguments;
     
     public ArgumentParser(){
-        arguments=new <String,String>HashMap();
+        arguments=new HashMap<String,String>();
     }
     
     public ArgumentParser(String[] args){
@@ -47,7 +47,7 @@ public class ArgumentParser {
     }
 
     public static Map<String, String> getArguments(String[] args) {
-        HashMap<String, String> map = new <String,String>HashMap();
+        HashMap<String, String> map = new HashMap<String,String>();
         String name="";
         String option="";
         boolean confToRead = false;
