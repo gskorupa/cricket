@@ -78,7 +78,7 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
             e.printStackTrace();
         }
         System.out.println("max-records: " + getCapacity());
-        setPersistent(Boolean.parseBoolean("persistent"));
+        setPersistent(Boolean.parseBoolean(properties.get("persistent")));
         System.out.println("persistent: " + isPersistent());
         start();
     }
