@@ -36,7 +36,8 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
     Level level = null;
     private String name;
     private String fileLocation;
-
+    private boolean muted=false;
+    
     public static final Logger logger = Logger.getGlobal();
 
     @Override
@@ -51,7 +52,7 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         systemOut.setLevel(level);
         systemOut.setFormatter(new StandardLoggerFormatter());
         logger.addHandler(systemOut);
-        if (!getFileLocation().isEmpty()) {
+        if (null!=getFileLocation() && !getFileLocation().isEmpty()) {
             try {
                 Handler fileOut = new FileHandler(getFileLocation());
                 fileOut.setLevel(level);
@@ -64,11 +65,13 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         logger.setLevel(level);
         // Prevent logs from processed by default Console handler.
         logger.setUseParentHandlers(false);
-
         System.out.println("logging level: " + logger.getLevel().getName());
     }
 
     public void log(Event event) {
+        if(isMuted()){ 
+            return;
+        }
         String level = event.getType();
         switch (level) {
             case "LOG_INFO":
@@ -103,7 +106,12 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
 
     private void setLoggingLevel(String level) {
         try {
-            this.level = Level.parse(level);
+            if(level.equalsIgnoreCase("NONE")){
+                this.level = Level.parse("SEVERE");
+                setMuted(true);
+            }else{
+                this.level = Level.parse(level);
+            }
         } catch (Exception e) {
             this.level = Level.ALL;
         }
@@ -146,5 +154,19 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
      */
     public void setFileLocation(String fileLocation) {
         this.fileLocation = fileLocation;
+    }
+
+    /**
+     * @return the muted
+     */
+    public boolean isMuted() {
+        return muted;
+    }
+
+    /**
+     * @param muted the muted to set
+     */
+    public void setMuted(boolean muted) {
+        this.muted = muted;
     }
 }
