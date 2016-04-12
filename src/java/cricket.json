@@ -4,6 +4,7 @@
     "services": [
         {
             "@type": "org.cricketmsf.config.Configuration",
+            "id": "EchoService",
             "service": "org.cricketmsf.services.EchoService",
             "host": "0.0.0.0",
             "port": "8080",

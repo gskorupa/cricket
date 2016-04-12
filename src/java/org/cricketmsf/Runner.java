@@ -58,21 +58,23 @@ public class Runner {
         configSet = runner.readConfig(arguments);
 
         Class serviceClass = null;
+        String serviceId;
         String serviceName;
         Configuration configuration = null;
         if (arguments.containsKey("service")) {
             // if service name provided as command line option
-            serviceName = arguments.get("service");
+            serviceId = arguments.get("service");
         } else {
             // otherwise get first configured service
-            serviceName = configSet.getDefault().getService();
+            serviceId = configSet.getDefault().getId();
         }
 
-        configuration = configSet.getConfiguration(serviceName);
+        configuration = configSet.getConfigurationById(serviceId);
+        serviceName=configuration.getService();
         
         // if serviceName isn't configured print error and exit
         if(configuration==null){
-            System.out.println("Configuration not found for "+serviceName);
+            System.out.println("Configuration not found for id="+serviceName);
             System.exit(-1);
         }
         

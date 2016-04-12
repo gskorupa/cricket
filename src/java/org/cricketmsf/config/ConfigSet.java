@@ -49,6 +49,17 @@ public class ConfigSet {
         }
         return null;
     }
+    
+    public Configuration getConfigurationById(String id){
+        Configuration c;
+        for(int i=0; i<services.size(); i++){
+            c=services.get(i);
+            if(id.equals(c.getId())){
+                return c;
+            }
+        }
+        return null;
+    }
 
 /*
     public String getId() {

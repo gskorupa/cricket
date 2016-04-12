@@ -7,6 +7,6 @@ Options:
 --help | -h            Print this usage information and exit.
 --run | -r             Run the configured service with embeded http server.
 --config | -c path     Use external configuration file.
--s serviceClass        Run selected service (eg. org.cricketmsf.services.EchoService).
+-s serviceID           Run selected service (eg. EchoService).
 
 Without -r option, the runOnce() service method will be executed.

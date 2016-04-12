@@ -23,6 +23,7 @@ import java.util.HashMap;
  */
 public class Configuration {
     
+    private String id;
     private String service;
     private String host;
     private String port;
@@ -125,6 +126,20 @@ public class Configuration {
      */
     public void setFilter(String filterName) {
         this.filter = filterName;
+    }
+
+    /**
+     * @return the id
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(String id) {
+        this.id = id;
     }
     
     

@@ -107,8 +107,8 @@ public class CricketServlet extends HttpServlet {
         Class serviceClass = null;
         String serviceName;
         Configuration configuration = null;
-        serviceName = configSet.getDefault().getService();
-        configuration = configSet.getConfiguration(serviceName);
+        serviceName = configSet.getDefault().getId();
+        configuration = configSet.getConfigurationById(serviceName);
         System.out.println("STARTING CRICKET SERVICE: "+serviceName);
         try {
             serviceClass = Class.forName(serviceName);
