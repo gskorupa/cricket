@@ -86,7 +86,6 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-
         int responseType = JSON;
 
         for (String v : exchange.getRequestHeaders().get("Accept")) {
@@ -102,6 +101,9 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                     break;
                 case "text/csv":
                     responseType = CSV;
+                    break;
+                case "text/plain":
+                    responseType = TEXT;
                     break;
                 default:
                     responseType = JSON;
@@ -134,6 +136,10 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             case CSV:
                 headers.set("Content-Type", "text/csv; charset=UTF-8");
                 responseData = formatResponse(CSV, result);
+                break;
+            case TEXT:
+                headers.set("Content-Type", "text/plain; charset=UTF-8");
+                responseData = formatResponse(TEXT, result);
                 break;
             default:
                 headers.set("Content-Type", getMimeType(result.getFileExtension()));
@@ -203,6 +209,9 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 break;
             case CSV:
                 formattedResponse = CsvFormatter.getInstance().format(result);
+                break;
+            case TEXT:
+                formattedResponse = TxtFormatter.getInstance().format(result);
                 break;
             default:
                 formattedResponse = JsonFormatter.getInstance().format(true, result);

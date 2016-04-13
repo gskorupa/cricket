@@ -43,7 +43,7 @@ public class ParameterFilter extends Filter {
     @Override
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
-        String method=exchange.getRequestMethod().toUpperCase();
+        String method = exchange.getRequestMethod().toUpperCase();
 
         switch (exchange.getRequestMethod().toUpperCase()) {
             case "GET":
@@ -72,13 +72,26 @@ public class ParameterFilter extends Filter {
     private void parsePostParameters(HttpExchange exchange)
             throws IOException {
 
+        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+
         @SuppressWarnings("unchecked")
         Map<String, Object> parameters = new HashMap<String, Object>();
         InputStreamReader isr
                 = new InputStreamReader(exchange.getRequestBody(), "utf-8");
         BufferedReader br = new BufferedReader(isr);
-        String query = br.readLine();
-        parseQuery(query, parameters);
+        String query;
+        StringBuilder content = new StringBuilder();
+        if ("text/plain".equalsIgnoreCase(contentType)) {
+            while ((query = br.readLine()) != null) {
+                content.append(query);
+                content.append("\r\n");
+            }
+            parameters.put("data", content.toString());
+        } else {
+            while ((query = br.readLine()) != null) {
+                parseQuery(query, parameters);
+            }
+        }
         isr.close();
         exchange.setAttribute("parameters", parameters);
     }

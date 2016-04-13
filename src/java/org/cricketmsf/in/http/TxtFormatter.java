@@ -15,52 +15,55 @@
  */
 package org.cricketmsf.in.http;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class CsvFormatter {
+public class TxtFormatter {
 
-    private static CsvFormatter instance = null;
+    private static TxtFormatter instance = null;
 
-    public static CsvFormatter getInstance() {
+    public static TxtFormatter getInstance() {
         if (instance != null) {
             return instance;
         } else {
-            instance = new CsvFormatter();
+            instance = new TxtFormatter();
             return instance;
         }
     }
 
     public String format(Result r) {
         StringBuilder sb = new StringBuilder();
-
         try {
-            CSVPrinter printer = new CSVPrinter(sb, CSVFormat.DEFAULT);
             if (r.getData() instanceof List) {
                 List list = (List) r.getData();
                 if (list.size() > 0) {
-                    printer.printRecord((List) list.get(0));
+                    List header = (List) list.get(0);
+                    List row;
                     for (int i = 1; i < list.size(); i++) {
-                        printer.printRecord((List) list.get(i));
+                        row=(List) list.get(i);
+                        for(int j=0; j<header.size(); j++){
+                            sb.append(header.get(j));
+                            sb.append("=");
+                            sb.append(row.get(j));
+                            sb.append("\r\n");
+                        }
+                        sb.append("\r\n");
                     }
                 }
-            } else if (r.getData() instanceof Map){
-                Map data = (Map) r.getData();
-                printer.printRecord(data.keySet());
-                printer.printRecord(data.values());
-            } else {
-                sb.append("unsupported data format");
-                //TODO: error code?
+            } else if (r.getData() instanceof Map) {
+                Map<String, Object> data = (Map<String, Object>) r.getData();
+                for (String key : data.keySet()) {
+                    sb.append(key);
+                    sb.append("=");
+                    sb.append(data.get(key));
+                    sb.append("\r\n");
+                }
             }
-            return sb.toString();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             sb.append(e.getMessage());
         }
