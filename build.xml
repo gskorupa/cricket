@@ -17,6 +17,7 @@
 
     <path id="project-classpath">
         <pathelement location="${lib}/json-io-4.3.0.jar"/>
+        <pathelement location="${lib}/commons-csv-1.2.jar"/>
         <fileset dir="${tomcat-home}/bin" includes="*.jar" />
         <fileset dir="${tomcat-home}/lib" includes="*.jar" />
     </path>
@@ -84,6 +85,7 @@
             </manifest>
             <fileset dir="${build}"/>
             <zipfileset src="${lib}/json-io-4.3.0.jar" includes="com/**/*"/>
+            <zipfileset src="${lib}/commons-csv-1.2.jar" includes="org/**/*"/>
         </jar>
     </target>
     

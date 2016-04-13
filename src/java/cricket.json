@@ -17,7 +17,7 @@
                     "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
                     "properties": {
                         "context": "/echo",
-                        "silent-mode": "false"
+                        "silent-mode": "true"
                     }
                 },
                 "TestScheduler": {
