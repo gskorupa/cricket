@@ -27,6 +27,7 @@ import java.util.Date;
 public class Event {
 
     public static final String CATEGORY_LOG = "LOG";
+    public static final String CATEGORY_HTTP_LOG = "HTTPLOG";
     public static final String CATEGORY_GENERIC = "EVENT";
 
     public static final String LOG_ALL = "ALL";

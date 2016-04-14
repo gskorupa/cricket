@@ -43,3 +43,5 @@ hs_err_pid*
 !/templates/standalone/lib/cricket-1.0-B8.jar
 /log/cricket.log
 !/lib/commons-csv-1.2.jar
+/http.log
+/cricket.log

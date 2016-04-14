@@ -312,7 +312,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
         Event event = new Event(
                 "HttpAdapter",
-                Event.CATEGORY_LOG,
+                Event.CATEGORY_HTTP_LOG,
                 Event.LOG_INFO,
                 null,
                 sb.toString());

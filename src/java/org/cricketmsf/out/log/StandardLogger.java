@@ -33,12 +33,12 @@ import java.util.logging.Logger;
 public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAdapterIface {
 
     //Logger logger;
-    Level level = null;
+    private Level level = null;
     private String name;
     private String fileLocation;
     private boolean muted=false;
     
-    public static final Logger logger = Logger.getGlobal();
+    private Logger logger=null;
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -46,11 +46,14 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         System.out.println("logger name: " + getName());
         setFileLocation(properties.get("log-file-name"));
         System.out.println("log-file-name: " + getFileLocation());
+        
         setLoggingLevel(properties.get("level"));
-
         Handler systemOut = new ConsoleHandler();
         systemOut.setLevel(level);
         systemOut.setFormatter(new StandardLoggerFormatter());
+        logger = Logger.getLogger(getName());
+        // Prevent logs from processed by default Console handler.
+        logger.setUseParentHandlers(false);
         logger.addHandler(systemOut);
         if (null!=getFileLocation() && !getFileLocation().isEmpty()) {
             try {
@@ -63,8 +66,6 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
             }
         }
         logger.setLevel(level);
-        // Prevent logs from processed by default Console handler.
-        logger.setUseParentHandlers(false);
         System.out.println("logging level: " + logger.getLevel().getName());
     }
 

@@ -25,8 +25,6 @@ import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.HashMap;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
-import org.cricketmsf.in.http.ParameterMapResult;
-import org.cricketmsf.in.http.Result;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.html.HtmlReaderAdapterIface;
@@ -86,8 +84,13 @@ public class EchoService extends Kernel {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
-    @EventHook(eventCategory = "LOG")
+    @EventHook(eventCategory = Event.CATEGORY_LOG)
     public void logEvent(Event event) {
+        logAdapter.log(event);
+    }
+    
+    @EventHook(eventCategory = Event.CATEGORY_HTTP_LOG)
+    public void logHttpEvent(Event event) {
         logAdapter.log(event);
     }
 
