@@ -4,9 +4,9 @@ Usage: java -jar cricket-1.0.0.jar [options]
 Runs the Cricket service in the a standalone mode.
 
 Options:
---help | -h            Print this usage information and exit.
---run | -r             Run the configured service with embeded http server.
---config | -c path     Use external configuration file.
--s serviceID           Run selected service (eg. EchoService).
+--help | -h                Print this usage information and exit
+--run | -r                 Run the configured service with embeded http server
+--config | -c path         Use external configuration file
+--service | -s serviceID   Run selected service
 
 Without -r option, the runOnce() service method will be executed.
