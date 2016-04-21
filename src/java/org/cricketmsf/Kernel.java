@@ -31,9 +31,9 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 /**
- * SimpleService
+ * Microkernel.
  *
- * @author greg
+ * @author Grzegorz Skorupa
  */
 public abstract class Kernel {
 

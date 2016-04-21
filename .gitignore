@@ -45,3 +45,4 @@ hs_err_pid*
 !/lib/commons-csv-1.2.jar
 /http.log
 /cricket.log
+/docs/api/

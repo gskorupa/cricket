@@ -21,6 +21,8 @@ import java.io.IOException;
 
 /**
  * This is default filter used to check required request conditions. 
+ * Does nothing.
+ * Could be used as a starting point to implement required filter.
  * 
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
@@ -42,17 +44,30 @@ public class SecurityFilter extends Filter {
         return errorCode;
     }
     
-    public boolean isProblemDetected(){
-        setErrorCode(200);
-        setErrorMessage("");
-        return false;
+    /**
+     * Does request analysis 
+     * 
+     * @param exchange  request object
+     * @return 
+     */
+    public boolean isProblemDetected(HttpExchange exchange){
+        // if we found problems analysing exchange object 
+        if(true){
+            setErrorCode(500);
+            setErrorMessage("");
+            return true;
+        }else{
+            setErrorCode(200);
+            setErrorMessage("");
+            return false;
+        }
     }
 
     @Override
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
         //System.out.println(this.getClass().getSimpleName());
-        if (isProblemDetected()) {
+        if (isProblemDetected(exchange)) {
             String message=getErrorMessage();
             exchange.sendResponseHeaders(getErrorCode(), message.length());
             exchange.getResponseBody().write(message.getBytes());

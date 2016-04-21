@@ -29,6 +29,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * This filter is used to recognize, parse and transform request parameters into
+ * the paramters map which could be easily accessible within adapters or service
+ * methods.
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  * Many thanks for Leonardo Marcelino https://leonardom.wordpress.com
@@ -81,6 +84,23 @@ public class ParameterFilter extends Filter {
         BufferedReader br = new BufferedReader(isr);
         String query;
         StringBuilder content = new StringBuilder();
+        switch (contentType.toLowerCase()) {
+            case "text/plain":
+            case "text/csv":
+            case "application/json":
+            case "text/xml":
+                while ((query = br.readLine()) != null) {
+                    content.append(query);
+                    content.append("\r\n");
+                }
+                parameters.put("data", content.toString());
+                break;
+            default:
+                while ((query = br.readLine()) != null) {
+                    parseQuery(query, parameters);
+                }
+        }
+        /*
         if ("text/plain".equalsIgnoreCase(contentType)) {
             while ((query = br.readLine()) != null) {
                 content.append(query);
@@ -92,6 +112,7 @@ public class ParameterFilter extends Filter {
                 parseQuery(query, parameters);
             }
         }
+        */
         isr.close();
         exchange.setAttribute("parameters", parameters);
     }

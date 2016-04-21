@@ -37,9 +37,12 @@ public class HtmlReaderAdapter extends OutboundAdapter implements Adapter, HtmlR
     private String rootPath;
 
     /**
-     * Configures the adapter
-     *
-     * @param properties
+     * This method is executed while adapter is instantiated during the service start.
+     * It's used to configure the adapter according to the configuration.
+     * 
+     * @param properties    map of properties readed from the configuration file
+     * @param adapterName   name of the adapter set in the configuration file (can be different
+     *  from the interface and class name.
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {

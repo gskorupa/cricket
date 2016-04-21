@@ -21,8 +21,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- *
- * @author greg
+ * Event 
+ * 
+ * @author Grzegorz Skorupa
  */
 public class Event {
 
@@ -47,6 +48,9 @@ public class Event {
     private long calculatedTimePoint = -1; // rename to timeMillis
     private long createdAt=-1;
 
+    /**
+     * Creates new Event instance. Sets new id and createdAt parameters.
+     */
     public Event() {
         if (id == -1) {
             this.id = Kernel.getEventId();
@@ -54,6 +58,19 @@ public class Event {
         createdAt=System.currentTimeMillis();
     }
 
+    /**
+     * Used to create new Event instance. Values of id and createdAt parameters are set within the constructor.
+     * Parameter timePoint can be one of two forms:
+     * a) "+9u" defines distance from event creation. "9" - number, "u" - unit (s,m,h,d - seconds, minutes, hours, days)
+     * where "9" means 10 seconds after the event creation
+     * b) "yyyy.MM.dd HH:mm:ss Z" defines exact time (see: SimpleDateFormat) 
+     * 
+     * @param origin    the name of the source of this event
+     * @param category  event category
+     * @param type      event type (subcategory)
+     * @param timePoint defines when this event should happen.
+     * @param payload   holds additional data 
+     */
     public Event(String origin, String category, String type, String timePoint, Object payload) {
         this.id = Kernel.getEventId();
         this.origin = origin;
@@ -65,6 +82,14 @@ public class Event {
         calculateTimePoint();
     }
     
+    /**
+     * Creates an Event used for logging (category LOG)
+     * 
+     * @param source    the Event origin
+     * @param level     logging level as String ("SEVERE", "INFO", "WARNING" etc)
+     * @param message   log message
+     * @return created Event
+     */
     public static Event log(Object source, String level, String message){
         return new Event(
                 source.getClass().getSimpleName(),
@@ -74,6 +99,14 @@ public class Event {
                 message);
     }
     
+    /**
+     * Creates an Event used for logging (category LOG)
+     * 
+     * @param source    the Event origin name
+     * @param level     logging level as String ("SEVERE", "INFO", "WARNING" etc)
+     * @param message   log message
+     * @return created Event
+     */
     public static Event log(String source, String level, String message){
         return new Event(
                 source,
@@ -83,6 +116,13 @@ public class Event {
                 message);
     }
     
+    /**
+     * Creates an Event used for logging (category LOG) of SEVERE level
+     * 
+     * @param source    the Event origin name
+     * @param message   log message
+     * @return created Event
+     */
     public static Event logSevere(String source, String message){
         return new Event(
                 source,
@@ -91,7 +131,14 @@ public class Event {
                 null,
                 message);
     }
-
+    
+    /**
+     * Creates an Event used for logging (category LOG) of WARNING level
+     * 
+     * @param source    the Event origin name
+     * @param message   log message
+     * @return created Event
+     */
     public static Event logWarning(String source, String message){
         return new Event(
                 source,
@@ -101,6 +148,13 @@ public class Event {
                 message);
     }
     
+    /**
+     * Creates an Event used for logging (category LOG) of INFO level
+     * 
+     * @param source    the Event origin name
+     * @param message   log message
+     * @return created Event
+     */
     public static Event logInfo(String source, String message){
         return new Event(
                 source,
@@ -110,6 +164,13 @@ public class Event {
                 message);
     }
     
+    /**
+     * Creates an Event used for logging (category LOG) of FINE level
+     * 
+     * @param source    the Event origin name
+     * @param message   log message
+     * @return created Event
+     */
     public static Event logFine(String source, String message){
         return new Event(
                 source,
@@ -119,6 +180,13 @@ public class Event {
                 message);
     }
     
+    /**
+     * Creates an Event used for logging (category LOG) of FINER level
+     * 
+     * @param source    the Event origin name
+     * @param message   log message
+     * @return created Event
+     */
     public static Event logFiner(String source, String message){
         return new Event(
                 source,
@@ -128,6 +196,13 @@ public class Event {
                 message);
     }
     
+    /**
+     * Creates an Event used for logging (category LOG) of FINEST level
+     * 
+     * @param source    the Event origin name
+     * @param message   log message
+     * @return created Event
+     */
     public static Event logFinest(String source, String message){
         return new Event(
                 source,
@@ -137,6 +212,10 @@ public class Event {
                 message);
     }
     
+    /**
+     * Returns event toString
+     * @return String representation of the event
+     */
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getId())
@@ -153,6 +232,10 @@ public class Event {
         return sb.toString();
     }
     
+    /**
+     * Returns event toString formatted for logging
+     * @return String representation of the event
+     */
     public String toLogString(){
         StringBuilder sb = new StringBuilder();
         sb.append(getId())

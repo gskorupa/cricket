@@ -26,10 +26,18 @@ public class ArgumentParser {
     
     private Map<String, String> arguments;
     
+    /**
+     * Default constructor
+     */
     public ArgumentParser(){
         arguments=new HashMap<String,String>();
     }
     
+    /**
+     * Creates ArgumentParser based on command line arguments
+     * 
+     * @param args  command line arguments
+     */
     public ArgumentParser(String[] args){
         arguments=getArguments(args);
     }
@@ -46,6 +54,12 @@ public class ArgumentParser {
         return (get("error")!=null);
     }
 
+    /**
+     * Parse command line arguments 
+     * 
+     * @param args  array of command line arguments
+     * @return  map of argument values related to argument names
+     */
     public static Map<String, String> getArguments(String[] args) {
         HashMap<String, String> map = new HashMap<String,String>();
         String name="";
