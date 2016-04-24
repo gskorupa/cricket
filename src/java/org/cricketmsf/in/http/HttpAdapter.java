@@ -221,7 +221,6 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     }
 
     private Result createResponse(HttpExchange exchange) {
-
         Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
         String method = exchange.getRequestMethod();
         //String adapterContext = exchange.getHttpContext().getPath();

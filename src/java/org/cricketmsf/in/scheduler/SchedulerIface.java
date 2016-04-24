@@ -23,7 +23,7 @@ import org.cricketmsf.Event;
  */
 public interface SchedulerIface {
     
-    public void handleEvent(Event event);
+    public boolean handleEvent(Event event);
     public boolean isRestored();
     
 }

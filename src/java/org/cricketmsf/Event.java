@@ -77,7 +77,11 @@ public class Event {
         this.category = category;
         this.type = type;
         this.payload = payload;
-        this.timePoint = timePoint;
+        if(timePoint!=null && timePoint.isEmpty()){
+            this.timePoint=null;
+        }else{
+            this.timePoint = timePoint;
+        }
         createdAt=System.currentTimeMillis();
         calculateTimePoint();
     }

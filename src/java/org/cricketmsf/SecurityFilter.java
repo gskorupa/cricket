@@ -51,10 +51,11 @@ public class SecurityFilter extends Filter {
      * @return 
      */
     public boolean isProblemDetected(HttpExchange exchange){
-        // if we found problems analysing exchange object 
-        if(true){
-            setErrorCode(500);
-            setErrorMessage("");
+        // if we found problems analysing exchange object
+        boolean problemDetected=false;
+        if(problemDetected){
+            setErrorCode(403);
+            setErrorMessage("request blocket by security filter\r\n");
             return true;
         }else{
             setErrorCode(200);

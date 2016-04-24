@@ -38,33 +38,43 @@ public class CsvFormatter {
         }
     }
 
-    public String format(Result r) {
+    public String format(List list) {
         StringBuilder sb = new StringBuilder();
-
-        try {
-            CSVPrinter printer = new CSVPrinter(sb, CSVFormat.DEFAULT);
-            if (r.getData() instanceof List) {
-                List list = (List) r.getData();
-                if (list.size() > 0) {
-                    printer.printRecord((List) list.get(0));
-                    for (int i = 1; i < list.size(); i++) {
-                        printer.printRecord((List) list.get(i));
-                    }
-                }
-            } else if (r.getData() instanceof Map){
-                Map data = (Map) r.getData();
-                printer.printRecord(data.keySet());
-                printer.printRecord(data.values());
-            } else {
-                sb.append("unsupported data format");
-                //TODO: error code?
+        try{
+        CSVPrinter printer = new CSVPrinter(sb, CSVFormat.DEFAULT);
+        if (list.size() > 0) {
+            printer.printRecord((List) list.get(0));
+            for (int i = 1; i < list.size(); i++) {
+                printer.printRecord((List) list.get(i));
             }
-            return sb.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        }catch(IOException e){
             sb.append(e.getMessage());
         }
         return sb.toString();
+    }
+
+    public String format(Map data) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            CSVPrinter printer = new CSVPrinter(sb, CSVFormat.DEFAULT);
+            printer.printRecord(data.keySet());
+            printer.printRecord(data.values());
+        } catch (IOException e) {
+            sb.append(e.getMessage());
+        }
+        return sb.toString();
+    }
+
+    public String format(Result r) {
+            if (r.getData() instanceof List) {
+                return format((List) r.getData());
+            } else if (r.getData() instanceof Map) {
+                return format((Map) r.getData());
+            } else {
+                return "unsupported data format";
+                //TODO: error code?
+            }
     }
 
 }

@@ -48,7 +48,7 @@ public class ParameterFilter extends Filter {
             throws IOException {
         String method = exchange.getRequestMethod().toUpperCase();
 
-        switch (exchange.getRequestMethod().toUpperCase()) {
+        switch (method) {
             case "GET":
                 parseGetParameters(exchange);
                 break;
@@ -57,6 +57,8 @@ public class ParameterFilter extends Filter {
             case "DELETE":
                 parsePostParameters(exchange);
                 break;
+            default:
+                parseGetParameters(exchange);
         }
         //System.out.println(this.getClass().getSimpleName());
         chain.doFilter(exchange);

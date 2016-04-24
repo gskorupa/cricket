@@ -103,14 +103,14 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         return envVariable;
     }
 
-    public void handleEvent(Event event) {
-        handleEvent(event, false);
+    public boolean handleEvent(Event event) {
+        return handleEvent(event, false);
     }
 
-    public void handleEvent(Event event, boolean restored) {
+    public boolean handleEvent(Event event, boolean restored) {
 
         if (event.getTimePoint() == null) {
-            return;
+            return false;
         }
 
         final Runnable runnable = new Runnable() {
@@ -144,6 +144,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
             }
         }, 60 * 60, SECONDS);
          */
+        return true;
     }
 
     private void processDatabase() {
