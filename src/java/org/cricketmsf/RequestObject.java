@@ -15,7 +15,7 @@
  */
 package org.cricketmsf;
 
-import java.util.ArrayList;
+import com.sun.net.httpserver.Headers;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +27,7 @@ public class RequestObject {
     
     public String method=null;
     public String pathExt=null;
-    public ArrayList headers = new ArrayList<RequestHeader>();
+    public Headers headers = null;
     public Map<String, Object> parameters = new HashMap<String, Object>();
 
 }

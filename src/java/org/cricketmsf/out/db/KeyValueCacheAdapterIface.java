@@ -15,6 +15,8 @@
  */
 package org.cricketmsf.out.db;
 
+import java.util.Map;
+
 /**
  *
  * @author greg
@@ -25,6 +27,7 @@ public interface KeyValueCacheAdapterIface {
     public void put(String key, Object value);
     public Object get(String key);
     public Object get(String key, Object defaultValue);
+    public Map getAll();
     public boolean containsKey(String key);
     public boolean remove(String key);
     public void clear();

@@ -25,10 +25,12 @@ import java.util.logging.Logger;
 import static java.lang.Thread.MIN_PRIORITY;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
+import org.cricketmsf.config.HttpHeader;
 
 /**
  * Microkernel.
@@ -45,6 +47,7 @@ public abstract class Kernel {
 
     private UUID uuid;
     private HashMap<String, String> eventHookMethods = new HashMap<String, String>();
+    private String id;
 
     // adapters
     public HashMap<String, Object> adaptersMap = new HashMap<String, Object>();
@@ -58,8 +61,9 @@ public abstract class Kernel {
     private static long eventSeed = System.currentTimeMillis();
 
     protected ConfigSet configSet = null;
-    
-    private Filter securityFilter=new SecurityFilter();
+
+    private Filter securityFilter = new SecurityFilter();
+    private ArrayList corsHeaders;
 
     private long startedAt = 0;
 
@@ -101,8 +105,8 @@ public abstract class Kernel {
     }
 
     /**
-     * Invokes the service method annotated as dedicated to this event
-     * category
+     * Invokes the service method annotated as dedicated to this event category
+     *
      * @param event event object that should be processed
      */
     public void handleEvent(Event event) {
@@ -114,10 +118,10 @@ public abstract class Kernel {
             e.printStackTrace();
         }
     }
-    
+
     /**
-     * Invokes the service method annotated as dedicated to this event
-     * category
+     * Invokes the service method annotated as dedicated to this event category
+     *
      * @param event event object that should be processed
      */
     public static void handle(Event event) {
@@ -131,9 +135,10 @@ public abstract class Kernel {
     protected Object getRegistered(String adapterName) {
         return adaptersMap.get(adapterName);
     }
-    
+
     /**
      * Returns next unique identifier for Event.
+     *
      * @return next unique identifier
      */
     public static long getEventId() {
@@ -157,6 +162,7 @@ public abstract class Kernel {
         try {
             instance = c.newInstance();
             ((Kernel) instance).setUuid(UUID.randomUUID());
+            ((Kernel) instance).setId(config.getId());
             ((Kernel) instance).loadAdapters(config);
         } catch (Exception e) {
             instance = null;
@@ -168,8 +174,9 @@ public abstract class Kernel {
 
     /**
      * Instantiates adapters following configuration in cricket.json
+     *
      * @param config Configutation object loaded from cricket.json
-     * @throws Exception 
+     * @throws Exception
      */
     private synchronized void loadAdapters(Configuration config) throws Exception {
         setHttpHandlerLoaded(false);
@@ -179,6 +186,8 @@ public abstract class Kernel {
         System.out.println("http-host=" + getHost());
         setSecurityFilter(config.getFilter());
         System.out.println("filter=" + config.getFilter());
+        setCorsHeaders(config.getCors());
+        System.out.println("CORS=" + config.getCors());
         try {
             setPort(Integer.parseInt(config.getPort()));
         } catch (Exception e) {
@@ -208,19 +217,18 @@ public abstract class Kernel {
         }
         System.out.println("END LOADING ADAPTERS");
     }
-    
-    
-    private void setSecurityFilter(String filterName){
-        try{
+
+    private void setSecurityFilter(String filterName) {
+        try {
             Class c = Class.forName(filterName);
-            securityFilter=(SecurityFilter)c.newInstance();
-        }catch(ClassNotFoundException | InstantiationException | IllegalAccessException e){
+            securityFilter = (SecurityFilter) c.newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
-            securityFilter=new SecurityFilter();
+            securityFilter = new SecurityFilter();
         }
     }
-    
-    public Filter getSecurityFilter(){
+
+    public Filter getSecurityFilter() {
         return securityFilter;
     }
 
@@ -290,7 +298,8 @@ public abstract class Kernel {
 
     /**
      * Starts the service instance
-     * @throws InterruptedException 
+     *
+     * @throws InterruptedException
      */
     public void start() throws InterruptedException {
         getAdapters();
@@ -324,8 +333,8 @@ public abstract class Kernel {
     }
 
     /**
-     * Could be overriden in a service implementation to run required code at the service start.
-     * As the last step of the service starting procedure.
+     * Could be overriden in a service implementation to run required code at
+     * the service start. As the last step of the service starting procedure.
      */
     protected void runInitTasks() {
     }
@@ -359,6 +368,7 @@ public abstract class Kernel {
 
     /**
      * Return service instance unique identifier
+     *
      * @return the uuid
      */
     public UUID getUuid() {
@@ -370,6 +380,53 @@ public abstract class Kernel {
      */
     public void setUuid(UUID uuid) {
         this.uuid = uuid;
+    }
+
+    /**
+     * @return the id
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    private void setId(String id) {
+        this.id = id;
+    }
+
+    /**
+     * @return the corsHeaders
+     */
+    public ArrayList getCorsHeaders() {
+        return corsHeaders;
+    }
+
+    /**
+     * @param corsHeaders the corsHeaders to set
+     */
+    public void setCorsHeaders(ArrayList corsHeaders) {
+        //this.corsHeaders = corsHeaders;
+        if (corsHeaders != null) {
+            String header;
+            this.corsHeaders = new ArrayList<HttpHeader>();
+            for (int i = 0; i < corsHeaders.size(); i++) {
+                header = (String) corsHeaders.get(i);
+                try {
+                    this.corsHeaders.add(
+                            new HttpHeader(
+                                    header.substring(0, header.indexOf(":")).trim(),
+                                    header.substring(header.indexOf(":") + 1).trim()
+                            )
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            this.corsHeaders = null;
+        }
     }
 
 }

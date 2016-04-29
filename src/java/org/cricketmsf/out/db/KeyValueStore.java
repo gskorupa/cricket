@@ -23,6 +23,7 @@ import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import org.cricketmsf.Adapter;
 
@@ -165,6 +166,10 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
 
     public Object get(String key, Object defaultValue) {
         return getCache().containsKey(key) ? getCache().get(key) : defaultValue;
+    }
+    
+    public Map getAll(){
+        return getCache();
     }
 
     public boolean containsKey(String key) {

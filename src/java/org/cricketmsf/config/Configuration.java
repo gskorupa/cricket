@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.config;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -29,7 +30,7 @@ public class Configuration {
     private String port;
     private int threads;
     private String filter;
-    
+    private ArrayList<HttpHeader> cors;
     private HashMap<String, AdapterConfiguration> adapters;
     
     public Configuration(){
@@ -140,6 +141,20 @@ public class Configuration {
      */
     public void setId(String id) {
         this.id = id;
+    }
+
+    /**
+     * @return the cors
+     */
+    public ArrayList<HttpHeader> getCors() {
+        return cors;
+    }
+
+    /**
+     * @param cors the cors to set
+     */
+    public void setCors(ArrayList<HttpHeader> cors) {
+        this.cors = cors;
     }
     
     

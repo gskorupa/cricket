@@ -59,7 +59,7 @@ public class Runner {
 
         Class serviceClass = null;
         String serviceId;
-        String serviceName;
+        String serviceName=null;
         Configuration configuration = null;
         if (arguments.containsKey("service")) {
             // if service name provided as command line option
@@ -68,14 +68,15 @@ public class Runner {
             // otherwise get first configured service
             serviceId = configSet.getDefault().getId();
         }
-
+        
         configuration = configSet.getConfigurationById(serviceId);
-        serviceName=configuration.getService();
         
         // if serviceName isn't configured print error and exit
         if(configuration==null){
-            System.out.println("Configuration not found for id="+serviceName);
+            System.out.println("Configuration not found for id="+serviceId);
             System.exit(-1);
+        }else{
+            serviceName=configuration.getService();
         }
         
         if(arguments.containsKey("help")){

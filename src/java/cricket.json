@@ -10,6 +10,7 @@
             "port": "8080",
             "threads": 0,
             "filter": "org.cricketmsf.SecurityFilter",
+            "cors": ["Access-Control-Allow-Origin:*"],
             "adapters": {
                 "EchoAdapter": {
                     "name": "EchoAdapter",

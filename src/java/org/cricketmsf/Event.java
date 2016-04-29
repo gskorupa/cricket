@@ -19,6 +19,7 @@ import org.cricketmsf.scheduler.Delay;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Event 
@@ -47,6 +48,9 @@ public class Event {
     private String timePoint; // rename to timeDefinition
     private long calculatedTimePoint = -1; // rename to timeMillis
     private long createdAt=-1;
+    private String serviceId;
+    private UUID serviceUuid;
+    private long rootEventId=-1;
 
     /**
      * Creates new Event instance. Sets new id and createdAt parameters.
@@ -56,6 +60,8 @@ public class Event {
             this.id = Kernel.getEventId();
         }
         createdAt=System.currentTimeMillis();
+        serviceId=Kernel.getInstance().getId();
+        serviceUuid=Kernel.getInstance().getUuid();
     }
 
     /**
@@ -68,12 +74,15 @@ public class Event {
      * @param origin    the name of the source of this event
      * @param category  event category
      * @param type      event type (subcategory)
+     * @param rootEventId the ID of event which starts processing (not created by other event)
      * @param timePoint defines when this event should happen.
      * @param payload   holds additional data 
      */
     public Event(String origin, String category, String type, String timePoint, Object payload) {
         this.id = Kernel.getEventId();
-        this.origin = origin;
+        this.serviceId = Kernel.getInstance().getId();
+        this.serviceUuid = Kernel.getInstance().getUuid();
+        this.rootEventId = -1;
         this.category = category;
         this.type = type;
         this.payload = payload;
@@ -84,6 +93,53 @@ public class Event {
         }
         createdAt=System.currentTimeMillis();
         calculateTimePoint();
+    }
+    
+    /**
+     * Used to create new Event instance. Values of id and createdAt parameters are set within the constructor.
+     * Parameter timePoint can be one of two forms:
+     * a) "+9u" defines distance from event creation. "9" - number, "u" - unit (s,m,h,d - seconds, minutes, hours, days)
+     * where "9" means 10 seconds after the event creation
+     * b) "yyyy.MM.dd HH:mm:ss Z" defines exact time (see: SimpleDateFormat) 
+     * 
+     * @param origin    the name of the source of this event
+     * @param category  event category
+     * @param type      event type (subcategory)
+     * @param rootEventId the ID of event which starts processing (not created by other event)
+     * @param timePoint defines when this event should happen.
+     * @param payload   holds additional data 
+     */
+    public Event(String origin, String category, String type, long rootEventId, String timePoint, Object payload) {
+        this.id = Kernel.getEventId();
+        this.serviceId = Kernel.getInstance().getId();
+        this.serviceUuid = Kernel.getInstance().getUuid();
+        this.rootEventId = rootEventId;
+        this.category = category;
+        this.type = type;
+        this.payload = payload;
+        if(timePoint!=null && timePoint.isEmpty()){
+            this.timePoint=null;
+        }else{
+            this.timePoint = timePoint;
+        }
+        createdAt=System.currentTimeMillis();
+        calculateTimePoint();
+    }
+    
+    /**
+     * Creates new event based with rootEventId set to parent's rootEventId (if not equals -1)
+     * or parent's ID (if parent.rootEventId==-1).
+     * 
+     * @return child event
+     */
+    public Event createChild(){
+        Event e=new Event(this.origin, this.category, this.type, this.timePoint, this.payload);
+        if(this.rootEventId>-1){
+            e.rootEventId=this.rootEventId;
+        }else{
+            e.rootEventId=this.id;
+        }
+        return e;
     }
     
     /**
@@ -224,7 +280,13 @@ public class Event {
         StringBuilder sb = new StringBuilder();
         sb.append(getId())
                 .append(":")
+                .append(getRootEventId())
+                .append(":")
                 .append(getOrigin())
+                .append(":")
+                .append(getServiceId())
+                .append(":")
+                .append(getServiceUuid().toString())
                 .append(":")
                 .append(getCategory())
                 .append(":")
@@ -367,7 +429,7 @@ public class Event {
                     setCalculatedTimePoint(-1);
                     return;
             }
-            setCalculatedTimePoint(multiplicator * delay + createdAt);
+            setCalculatedTimePoint(multiplicator * delay + getCreatedAt());
         } else {
             //parse date and replace with delay from now
             Date target;
@@ -416,5 +478,61 @@ public class Event {
                 time = 0;
         }
         calculatedTimePoint = time;
+    }
+
+    /**
+     * @return the createdAt
+     */
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    /**
+     * @param createdAt the createdAt to set
+     */
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    /**
+     * @return the serviceId
+     */
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    /**
+     * @param serviceId the serviceId to set
+     */
+    public void setServiceId(String serviceId) {
+        this.serviceId = serviceId;
+    }
+
+    /**
+     * @return the serviceUuid
+     */
+    public UUID getServiceUuid() {
+        return serviceUuid;
+    }
+
+    /**
+     * @param serviceUuid the serviceUuid to set
+     */
+    public void setServiceUuid(UUID serviceUuid) {
+        this.serviceUuid = serviceUuid;
+    }
+
+    /**
+     * @return the rootEventId
+     */
+    public long getRootEventId() {
+        return rootEventId;
+    }
+
+    /**
+     * @param rootEventId the rootEventId to set
+     */
+    public void setRootEventId(long rootEventId) {
+        this.rootEventId = rootEventId;
     }
 }

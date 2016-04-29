@@ -31,6 +31,7 @@ import org.cricketmsf.HttpAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.cricketmsf.config.HttpHeader;
 
 /**
  *
@@ -146,6 +147,15 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 responseData = result.getPayload();
                 break;
         }
+
+        if(Kernel.getInstance().getCorsHeaders()!=null){
+            HttpHeader h;
+            for(int i=0; i<Kernel.getInstance().getCorsHeaders().size(); i++){
+                h=(HttpHeader)Kernel.getInstance().getCorsHeaders().get(i);
+                headers.set(h.getName(),h.getValue());
+            }
+        }
+        
         //calculate error code from response object
         int errCode = 200;
         switch (result.getCode()) {
@@ -237,6 +247,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         requestObject.method = method;
         requestObject.parameters = parameters;
         requestObject.pathExt = pathExt;
+        requestObject.headers =exchange.getRequestHeaders();
 
         Result result = null;
         String hookMethodName = getHookMethodNameForMethod(method);
