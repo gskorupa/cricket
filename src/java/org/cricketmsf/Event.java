@@ -535,4 +535,13 @@ public class Event {
     public void setRootEventId(long rootEventId) {
         this.rootEventId = rootEventId;
     }
+    
+    public String getRequestParameter(String name){
+        String value=null;
+        try{
+        value=(String)((RequestObject)getPayload()).parameters.get(name);
+        }catch(Exception e){
+        }
+        return value;
+    }
 }

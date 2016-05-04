@@ -202,14 +202,19 @@ public abstract class Kernel {
                 adapterName = adapterEntry.getKey();
                 ac = adapterEntry.getValue();
                 System.out.println("ADAPTER: " + adapterName);
-                Class c = Class.forName(ac.getClassFullName());
-                adaptersMap.put(adapterName, c.newInstance());
-                if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.http.HttpAdapter) {
-                    setHttpHandlerLoaded(true);
+                try {
+                    Class c = Class.forName(ac.getClassFullName());
+                    adaptersMap.put(adapterName, c.newInstance());
+                    if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.http.HttpAdapter) {
+                        setHttpHandlerLoaded(true);
+                    }
+                    // loading properties
+                    java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class, String.class);
+                    loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
+                } catch (Exception ex) {
+                    adaptersMap.put(adapterName, null);
+                    System.out.println("Adapter "+adapterName+" configuration error: "+ex.getClass().getSimpleName());
                 }
-                // loading properties
-                java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class, String.class);
-                loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterName);
@@ -322,7 +327,11 @@ public abstract class Kernel {
             System.out.println("Running initialization tasks");
             runInitTasks();
             long startedIn = System.currentTimeMillis() - startedAt;
-            System.out.println("Started in " + startedIn + "ms. Press Ctrl-C to stop");
+            System.out.println("#");
+            System.out.println("# Http service listening on port "+getPort());
+            System.out.println("#");
+            System.out.println("# Started in " + startedIn + "ms. Press Ctrl-C to stop");
+            System.out.println(">");
             while (true) {
                 Thread.sleep(200);
             }
