@@ -64,6 +64,9 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     private String context;
 
     private HashMap<String, String> hookMethodNames = new HashMap();
+    
+    private boolean extendedResponse = true;
+    private String dateFormat = "dd/MMM/yyyy:kk:mm:ss Z";
 
     public HttpAdapter() {
     }
@@ -212,15 +215,17 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         String formattedResponse;
         switch (type) {
             case JSON:
-                formattedResponse = JsonFormatter.getInstance().format(true, result);
+                formattedResponse = JsonFormatter.getInstance().format(true, isExtendedResponse()?result:result.getData());
                 break;
             case XML:
-                formattedResponse = XmlFormatter.getInstance().format(true, result);
+                formattedResponse = XmlFormatter.getInstance().format(true, isExtendedResponse()?result:result.getData());
                 break;
             case CSV:
+                // formats only Result.getData() object
                 formattedResponse = CsvFormatter.getInstance().format(result);
                 break;
             case TEXT:
+                // formats only Result.getData() object
                 formattedResponse = TxtFormatter.getInstance().format(result);
                 break;
             default:
@@ -248,6 +253,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         requestObject.parameters = parameters;
         requestObject.pathExt = pathExt;
         requestObject.headers =exchange.getRequestHeaders();
+        requestObject.clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
+                
 
         Result result = null;
         String hookMethodName = getHookMethodNameForMethod(method);
@@ -341,6 +348,34 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
     protected void sendLogEvent(String message) {
         sendLogEvent(Event.LOG_INFO, message);
+    }
+
+    /**
+     * @return the extendedResponse
+     */
+    public boolean isExtendedResponse() {
+        return extendedResponse;
+    }
+
+    /**
+     * @param extendedResponse the extendedResponse to set
+     */
+    public void setExtendedResponse(String paramValue) {
+        this.extendedResponse = !("false".equalsIgnoreCase(paramValue));
+    }
+
+    /**
+     * @return the dateFormat
+     */
+    public String getDateFormat() {
+        return dateFormat;
+    }
+
+    /**
+     * @param dateFormat the dateFormat to set
+     */
+    public void setDateFormat(String dateFormat) {
+        this.dateFormat = dateFormat;
     }
 
 }

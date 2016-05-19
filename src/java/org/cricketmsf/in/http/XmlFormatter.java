@@ -37,7 +37,13 @@ public class XmlFormatter {
         }
     }
 
-    public String format(boolean prettyPrint, Result r) {
+    /**
+     * 
+     * @param prettyPrint
+     * @param r response object (Result or Result.getData())
+     * @return 
+     */
+    public String format(boolean prettyPrint, Object r) {
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(r.getClass());
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();

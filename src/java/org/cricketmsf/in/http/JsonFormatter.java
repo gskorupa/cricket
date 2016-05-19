@@ -50,6 +50,7 @@ public class JsonFormatter {
     public String format(boolean prettyPrint, Object o) {
         args.clear();
         args.put(JsonWriter.PRETTY_PRINT, prettyPrint);
+        args.put(JsonWriter.DATE_FORMAT, "dd/MMM/yyyy:kk:mm:ss Z");
         args.put(JsonWriter.TYPE, false);
         return JsonWriter.objectToJson(o, args)+"\n";
     }
