@@ -37,6 +37,10 @@ public class SimpleHttpAdapter extends HttpAdapter implements HttpAdapterIface, 
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         System.out.println("context=" + getContext());
+        setExtendedResponse(properties.get("extended-response"));
+        System.out.println("extended-response=" + getContext());
+        setDateFormat(properties.get("date-format"));
+        System.out.println("date-format=" + getContext());
     }
 
 }

@@ -25,6 +25,7 @@ import java.util.Map;
  */
 public class RequestObject {
     
+    public String clientIp=null;
     public String method=null;
     public String pathExt=null;
     public Headers headers = null;
