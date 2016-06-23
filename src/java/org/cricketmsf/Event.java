@@ -79,6 +79,7 @@ public class Event {
      * @param payload   holds additional data 
      */
     public Event(String origin, String category, String type, String timePoint, Object payload) {
+        this.origin = origin;
         this.id = Kernel.getEventId();
         this.serviceId = Kernel.getInstance().getId();
         this.serviceUuid = Kernel.getInstance().getUuid();
@@ -114,6 +115,7 @@ public class Event {
         this.serviceId = Kernel.getInstance().getId();
         this.serviceUuid = Kernel.getInstance().getUuid();
         this.rootEventId = rootEventId;
+        this.origin = origin;
         this.category = category;
         this.type = type;
         this.payload = payload;
