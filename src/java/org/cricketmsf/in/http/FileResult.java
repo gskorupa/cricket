@@ -15,6 +15,9 @@
  */
 package org.cricketmsf.in.http;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  *
  * @author greg
@@ -26,6 +29,8 @@ public class FileResult implements Result {
     private int code;
     private byte[] payload;
     private String fileExt;
+    private Date modificationDate;
+    private String modificationDateFormatted;
 
     /**
      * @return the data
@@ -97,4 +102,18 @@ public class FileResult implements Result {
         this.fileExt = fileExt;
     }
     
+    public void setModificationDate(Date date) {
+        modificationDate = date;
+        SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
+        modificationDateFormatted = dt1.format(modificationDate);
+
+    }
+
+    public Date getModificationDate() {
+        return modificationDate;
+    }
+
+    public String getModificationDateFormatted() {
+        return modificationDateFormatted;
+    }
 }

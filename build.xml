@@ -13,13 +13,15 @@
     <property name="lib" location="lib"/>
     <property name="jar-name" value="cricket-${version}.jar"/>
     <property name="war-name" value="cricket-${version}.war"/>
-    <property name="tomcat-home" value="/home/greg/apache-tomcat-7.0.67" />
+    <property name="tomcat-home" value="/home/greg/apache-tomcat" />
 
     <path id="project-classpath">
         <pathelement location="${lib}/json-io-4.3.0.jar"/>
         <pathelement location="${lib}/commons-csv-1.2.jar"/>
+        <!--
         <fileset dir="${tomcat-home}/bin" includes="*.jar" />
         <fileset dir="${tomcat-home}/lib" includes="*.jar" />
+        -->
     </path>
 
     <target name="init">

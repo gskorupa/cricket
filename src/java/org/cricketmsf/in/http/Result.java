@@ -15,6 +15,8 @@
  */
 package org.cricketmsf.in.http;
 
+import java.util.Date;
+
 /**
  *
  * @author greg
@@ -58,5 +60,11 @@ public interface Result {
     public String getFileExtension();
     
     public void setFileExtension(String fileExt);
+    
+    public void setModificationDate(Date date);
+    
+    public Date getModificationDate();
+    
+    public String getModificationDateFormatted();
     
 }

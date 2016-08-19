@@ -27,8 +27,8 @@ import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
-import org.cricketmsf.out.html.HtmlReaderAdapterIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
+import org.cricketmsf.out.file.FileReaderAdapterIface;
 
 /**
  * EchoService
@@ -43,7 +43,7 @@ public class EchoService extends Kernel {
     KeyValueCacheAdapterIface cache = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
-    HtmlReaderAdapterIface htmlReader = null;
+    FileReaderAdapterIface htmlReader = null;
     EchoHttpAdapterIface schedulerTester = null;
 
     @Override
@@ -53,7 +53,7 @@ public class EchoService extends Kernel {
         cache = (KeyValueCacheAdapterIface) getRegistered("KeyValueCacheAdapterIface");
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");
-        htmlReader = (HtmlReaderAdapterIface) getRegistered("HtmlReaderAdapterIface");
+        htmlReader = (FileReaderAdapterIface) getRegistered("FileReaderAdapterIface");
         schedulerTester = (EchoHttpAdapterIface) getRegistered("TestScheduler");
     }
 

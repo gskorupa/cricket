@@ -15,6 +15,8 @@
  */
 package org.cricketmsf.in.http;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -36,6 +38,8 @@ public class ParameterMapResult implements Result {
     private String message;
     private byte[] payload;
     private String fileExt;
+    private Date modificationDate;
+    private String modificationDateFormatted;
 
     public void setCode(int code) {
         this.code = code;
@@ -120,4 +124,18 @@ public class ParameterMapResult implements Result {
         this.fileExt = fileExt;
     }
 
+    public void setModificationDate(Date date) {
+        modificationDate = date;
+        SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
+        modificationDateFormatted = dt1.format(modificationDate);
+
+    }
+
+    public Date getModificationDate() {
+        return modificationDate;
+    }
+
+    public String getModificationDateFormatted() {
+        return modificationDateFormatted;
+    }
 }

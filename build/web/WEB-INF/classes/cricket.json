@@ -1,10 +1,87 @@
 {
     "@type": "org.cricketmsf.config.ConfigSet",
-    "id": "new",
     "description": "This is sample configuration",
     "services": [
         {
             "@type": "org.cricketmsf.config.Configuration",
+            "id": "echo",
+            "service": "org.cricketmsf.services.EchoService",
+            "host": "0.0.0.0",
+            "port": "8080",
+            "threads": 0,
+            "filter": "org.cricketmsf.SecurityFilter",
+            "cors": ["Access-Control-Allow-Origin:*"],
+            "adapters": {
+                "EchoAdapter": {
+                    "name": "EchoAdapter",
+                    "interfaceName": "EchoHttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
+                    "properties": {
+                        "context": "/echo",
+                        "silent-mode": "false"
+                    }
+                },
+                "TestScheduler": {
+                    "name": "TestScheduler",
+                    "interfaceName": "EchoHttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
+                    "properties": {
+                        "context": "/scheduler"
+                    }
+                },
+                "LoggerAdapterIface": {
+                    "name": "LoggerAdapterIface",
+                    "interfaceName": "LoggerAdapterIface",
+                    "classFullName": "org.cricketmsf.out.log.StandardLogger",
+                    "properties": {
+                        "name": "EchoService",
+                        "level": "FINEST",
+                        "log-file-name": "./data/cricket.log"
+                    }
+                },
+                "KeyValueCacheAdapterIface": {
+                    "name": "KeyValueCacheAdapterIface",
+                    "interfaceName": "KeyValueCacheAdapterIface",
+                    "classFullName": "org.cricketmsf.out.db.KeyValueStore",
+                    "properties": {
+                        "path": "./data",
+                        "envVariable": "ECHO_DB_PATH",
+                        "file": "echo.xml",
+                        "max-records": "10",
+                        "persistent": "true"
+                    }
+                },
+                "SchedulerIface": {
+                    "name": "SchedulerIface",
+                    "interfaceName": "SchedulerIface",
+                    "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
+                    "properties": {
+                        "path": "./data",
+                        "envVariable": "SCHEDULER_DB_PATH",
+                        "file": "scheduler.xml"
+                    }
+                },
+                "HtmlGenAdapterIface": {
+                    "name": "HtmlGenAdapterIface",
+                    "interfaceName": "HtmlGenAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
+                    "properties": {
+                        "context": "/"
+                    }
+                },
+                "FileReaderAdapterIface": {
+                    "name": "FileReaderAdapterIface",
+                    "interfaceName": "FileReaderAdapterIface",
+                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
+                    "properties": {
+                        "root": "./www/"
+                    }
+                }
+            }
+        },
+        {
+            "@type": "org.cricketmsf.config.Configuration",
+            "id": "echo-silent",
             "service": "org.cricketmsf.services.EchoService",
             "host": "0.0.0.0",
             "port": "8080",
@@ -16,23 +93,34 @@
                     "interfaceName": "EchoHttpAdapterIface",
                     "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
                     "properties": {
-                        "context": "/echo"
+                        "context": "/echo",
+                        "silent-mode": "true"
+                    }
+                },
+                "TestScheduler": {
+                    "name": "TestScheduler",
+                    "interfaceName": "EchoHttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
+                    "properties": {
+                        "context": "/scheduler"
                     }
                 },
                 "LoggerAdapterIface": {
+                    "name": "LoggerAdapterIface",
                     "interfaceName": "LoggerAdapterIface",
                     "classFullName": "org.cricketmsf.out.log.StandardLogger",
                     "properties": {
                         "name": "EchoService",
-                        "level": "ALL",
-                        "log-file-name": "./log/cricket.log"
+                        "level": "INFO",
+                        "log-file-name": ""
                     }
                 },
                 "KeyValueCacheAdapterIface": {
+                    "name": "KeyValueCacheAdapterIface",
                     "interfaceName": "KeyValueCacheAdapterIface",
                     "classFullName": "org.cricketmsf.out.db.KeyValueStore",
                     "properties": {
-                        "path": "./db",
+                        "path": "./data",
                         "envVariable": "ECHO_DB_PATH",
                         "file": "echo.xml",
                         "max-records": "10",
@@ -40,24 +128,27 @@
                     }
                 },
                 "SchedulerIface": {
+                    "name": "SchedulerIface",
                     "interfaceName": "SchedulerIface",
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
-                        "path": "./db",
+                        "path": "./data",
                         "envVariable": "SCHEDULER_DB_PATH",
                         "file": "scheduler.xml"
                     }
                 },
                 "HtmlGenAdapterIface": {
+                    "name": "HtmlGenAdapterIface",
                     "interfaceName": "HtmlGenAdapterIface",
                     "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
                     "properties": {
                         "context": "/"
                     }
                 },
-                "HtmlReaderAdapterIface": {
-                    "interfaceName": "HtmlReaderAdapterIface",
-                    "classFullName": "org.cricketmsf.out.html.HtmlReaderAdapter",
+                "FileReaderAdapterIface": {
+                    "name": "FileReaderAdapterIface",
+                    "interfaceName": "FileReaderAdapterIface",
+                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
                         "root": "./www/"
                     }

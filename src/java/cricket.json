@@ -36,7 +36,7 @@
                     "properties": {
                         "name": "EchoService",
                         "level": "FINEST",
-                        "log-file-name": "./log/cricket.log"
+                        "log-file-name": "./data/cricket.log"
                     }
                 },
                 "KeyValueCacheAdapterIface": {
@@ -44,7 +44,7 @@
                     "interfaceName": "KeyValueCacheAdapterIface",
                     "classFullName": "org.cricketmsf.out.db.KeyValueStore",
                     "properties": {
-                        "path": "./db",
+                        "path": "./data",
                         "envVariable": "ECHO_DB_PATH",
                         "file": "echo.xml",
                         "max-records": "10",
@@ -56,7 +56,7 @@
                     "interfaceName": "SchedulerIface",
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
-                        "path": "./db",
+                        "path": "./data",
                         "envVariable": "SCHEDULER_DB_PATH",
                         "file": "scheduler.xml"
                     }
@@ -69,10 +69,10 @@
                         "context": "/"
                     }
                 },
-                "HtmlReaderAdapterIface": {
-                    "name": "HtmlReaderAdapterIface",
-                    "interfaceName": "HtmlReaderAdapterIface",
-                    "classFullName": "org.cricketmsf.out.html.HtmlReaderAdapter",
+                "FileReaderAdapterIface": {
+                    "name": "FileReaderAdapterIface",
+                    "interfaceName": "FileReaderAdapterIface",
+                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
                         "root": "./www/"
                     }
@@ -120,7 +120,7 @@
                     "interfaceName": "KeyValueCacheAdapterIface",
                     "classFullName": "org.cricketmsf.out.db.KeyValueStore",
                     "properties": {
-                        "path": "./db",
+                        "path": "./data",
                         "envVariable": "ECHO_DB_PATH",
                         "file": "echo.xml",
                         "max-records": "10",
@@ -132,7 +132,7 @@
                     "interfaceName": "SchedulerIface",
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
-                        "path": "./db",
+                        "path": "./data",
                         "envVariable": "SCHEDULER_DB_PATH",
                         "file": "scheduler.xml"
                     }
@@ -145,10 +145,10 @@
                         "context": "/"
                     }
                 },
-                "HtmlReaderAdapterIface": {
-                    "name": "HtmlReaderAdapterIface",
-                    "interfaceName": "HtmlReaderAdapterIface",
-                    "classFullName": "org.cricketmsf.out.html.HtmlReaderAdapter",
+                "FileReaderAdapterIface": {
+                    "name": "FileReaderAdapterIface",
+                    "interfaceName": "FileReaderAdapterIface",
+                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
                         "root": "./www/"
                     }

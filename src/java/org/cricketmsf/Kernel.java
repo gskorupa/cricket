@@ -38,6 +38,8 @@ import org.cricketmsf.config.HttpHeader;
  * @author Grzegorz Skorupa
  */
 public abstract class Kernel {
+    
+    private static final String VERSION = "1.0.0";
 
     // emergency LOGGER
     private static final Logger LOGGER = Logger.getLogger(org.cricketmsf.Kernel.class.getName());
@@ -172,6 +174,15 @@ public abstract class Kernel {
         return instance;
     }
 
+    private void printHeader(String version) {
+        System.out.println();
+        System.out.println("   __|   \\  |  __|");
+        System.out.println("  (     |\\/ |  _|   Cricket Microservices Framework");
+        System.out.println(" \\___| _|  _| _|    version " + version);
+        System.out.println();
+        // big text generated using http://patorjk.com/software/taag
+    }
+
     /**
      * Instantiates adapters following configuration in cricket.json
      *
@@ -179,6 +190,7 @@ public abstract class Kernel {
      * @throws Exception
      */
     private synchronized void loadAdapters(Configuration config) throws Exception {
+        printHeader(VERSION);
         setHttpHandlerLoaded(false);
         System.out.println("LOADING SERVICE PROPERTIES FOR " + config.getService());
         System.out.println("UUID: " + getUuid().toString());
@@ -213,7 +225,7 @@ public abstract class Kernel {
                     loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
                 } catch (Exception ex) {
                     adaptersMap.put(adapterName, null);
-                    System.out.println("Adapter "+adapterName+" configuration error: "+ex.getClass().getSimpleName());
+                    System.out.println("Adapter " + adapterName + " configuration error: " + ex.getClass().getSimpleName());
                 }
             }
         } catch (Exception e) {
@@ -221,6 +233,7 @@ public abstract class Kernel {
             throw new Exception(e);
         }
         System.out.println("END LOADING ADAPTERS");
+        System.out.println();
     }
 
     private void setSecurityFilter(String filterName) {
@@ -327,11 +340,13 @@ public abstract class Kernel {
             System.out.println("Running initialization tasks");
             runInitTasks();
             long startedIn = System.currentTimeMillis() - startedAt;
+            printHeader(VERSION);
+            System.out.println("# Service "+getId()+ " is running");
             System.out.println("#");
-            System.out.println("# Http service listening on port "+getPort());
+            System.out.println("# HTTP listening on port " + getPort());
             System.out.println("#");
             System.out.println("# Started in " + startedIn + "ms. Press Ctrl-C to stop");
-            System.out.println(">");
+            System.out.println();
             while (true) {
                 Thread.sleep(200);
             }

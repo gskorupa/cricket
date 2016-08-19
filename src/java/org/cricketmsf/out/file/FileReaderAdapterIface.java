@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.out.html;
+package org.cricketmsf.out.file;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.cricketmsf.RequestObject;
@@ -24,9 +25,9 @@ import org.cricketmsf.in.http.ParameterMapResult;
  *
  * @author greg
  */
-public interface HtmlReaderAdapterIface {
+public interface FileReaderAdapterIface {
     
-    public byte[] readFile(String path) throws FileNotFoundException, IOException;
+    public byte[] readFile(File file) throws FileNotFoundException, IOException;
     public ParameterMapResult getFile(RequestObject request);
     
 }

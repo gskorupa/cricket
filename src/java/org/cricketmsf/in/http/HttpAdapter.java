@@ -123,7 +123,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData = {};
-
+        
+        headers.set("Last-Modified", result.getModificationDateFormatted());
         switch (responseType) {
             case JSON:
                 headers.set("Content-Type", "application/json; charset=UTF-8");
@@ -199,6 +200,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 return "text/css";
             case ".js":
                 return "text/javascript";
+            case ".json":
+                return "application/json";
             default:
                 return "text/plain";
         }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.out.html;
+package org.cricketmsf.out.file;
 
 import org.cricketmsf.Adapter;
 import org.cricketmsf.out.OutboundAdapter;
@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
@@ -32,17 +33,17 @@ import org.cricketmsf.in.http.ParameterMapResult;
  *
  * @author greg
  */
-public class HtmlReaderAdapter extends OutboundAdapter implements Adapter, HtmlReaderAdapterIface {
+public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileReaderAdapterIface {
 
     private String rootPath;
 
     /**
-     * This method is executed while adapter is instantiated during the service start.
-     * It's used to configure the adapter according to the configuration.
-     * 
-     * @param properties    map of properties readed from the configuration file
-     * @param adapterName   name of the adapter set in the configuration file (can be different
-     *  from the interface and class name.
+     * This method is executed while adapter is instantiated during the service
+     * start. It's used to configure the adapter according to the configuration.
+     *
+     * @param properties map of properties readed from the configuration file
+     * @param adapterName name of the adapter set in the configuration file (can
+     * be different from the interface and class name.
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -59,32 +60,35 @@ public class HtmlReaderAdapter extends OutboundAdapter implements Adapter, HtmlR
      * @throws IOException
      */
     @Override
-    public byte[] readFile(String filePath) throws FileNotFoundException, IOException {
-        String path=getRootPath()+filePath;
-        if(path.endsWith("/")){
-            path=path+"index.html";
-        }
+    public byte[] readFile(File file) throws FileNotFoundException, IOException {
         byte[] result = {};
         FileInputStream fileInputStream = null;
-        File file = new File(path);
         result = new byte[(int) file.length()];
         fileInputStream = new FileInputStream(file);
         fileInputStream.read(result);
         fileInputStream.close();
         return result;
     }
-    
-    public ParameterMapResult getFile(RequestObject request){
-        ParameterMapResult result= new ParameterMapResult();
+   
+    private File getFileObject(String filePath){
+        String path = getRootPath() + filePath;
+        if (path.endsWith("/")) {
+            path = path + "index.html";
+        }
+        return new File(path);
+    }
+
+    public ParameterMapResult getFile(RequestObject request) {
+        ParameterMapResult result = new ParameterMapResult();
         result.setData(new HashMap(request.parameters));
         byte[] emptyContent = {};
         String filePath = request.pathExt;
-        Kernel.getInstance().handleEvent(Event.logFinest("HtmlReaderAdapter", "filePath="+filePath));
+        Kernel.getInstance().handleEvent(Event.logFinest("FileReaderAdapter", "filePath=" + filePath));
         String fileExt = "";
         if (!(filePath.isEmpty() || filePath.endsWith("/")) && filePath.indexOf(".") > 0) {
             fileExt = filePath.substring(filePath.lastIndexOf("."));
         }
-        switch (fileExt.toLowerCase()) {
+        /*switch (fileExt.toLowerCase()) {
             case ".ico":
             case ".jpg":
             case ".jpeg":
@@ -93,15 +97,22 @@ public class HtmlReaderAdapter extends OutboundAdapter implements Adapter, HtmlR
                 break;
             default:
                 fileExt = ".html";
+        }*/
+        if (fileExt.isEmpty()) {
+            fileExt = ".html";
         }
+        File f=null;
+        
         try {
-            byte[] b = readFile(filePath);
+            f=getFileObject(filePath);
+            byte[] b = readFile(f);
             result.setPayload(b);
             result.setFileExtension(fileExt);
             result.setCode(HttpAdapter.SC_OK);
+            result.setModificationDate(new Date(f.lastModified()));
             result.setMessage("");
         } catch (Exception e) {
-            Kernel.getInstance().handleEvent(Event.logWarning("HtmlReaderAdapter", e.getMessage()));
+            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter", e.getMessage()));
             result.setPayload(emptyContent);
             result.setFileExtension(fileExt);
             result.setCode(HttpAdapter.SC_NOT_FOUND);
