@@ -28,6 +28,7 @@ public interface KeyValueCacheAdapterIface {
     public Object get(String key);
     public Object get(String key, Object defaultValue);
     public Map getAll();
+    public Map search(ComparatorIface comparator, Object pattern);
     public boolean containsKey(String key);
     public boolean remove(String key);
     public void clear();

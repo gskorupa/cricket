@@ -22,8 +22,8 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Event 
- * 
+ * Event
+ *
  * @author Grzegorz Skorupa
  */
 public class Event {
@@ -47,10 +47,11 @@ public class Event {
     private Object payload;
     private String timePoint; // rename to timeDefinition
     private long calculatedTimePoint = -1; // rename to timeMillis
-    private long createdAt=-1;
+    private long createdAt = -1;
     private String serviceId;
     private UUID serviceUuid;
-    private long rootEventId=-1;
+    private long rootEventId = -1;
+    private boolean httpType = false;
 
     /**
      * Creates new Event instance. Sets new id and createdAt parameters.
@@ -59,24 +60,26 @@ public class Event {
         if (id == -1) {
             this.id = Kernel.getEventId();
         }
-        createdAt=System.currentTimeMillis();
-        serviceId=Kernel.getInstance().getId();
-        serviceUuid=Kernel.getInstance().getUuid();
+        createdAt = System.currentTimeMillis();
+        serviceId = Kernel.getInstance().getId();
+        serviceUuid = Kernel.getInstance().getUuid();
     }
 
     /**
-     * Used to create new Event instance. Values of id and createdAt parameters are set within the constructor.
-     * Parameter timePoint can be one of two forms:
-     * a) "+9u" defines distance from event creation. "9" - number, "u" - unit (s,m,h,d - seconds, minutes, hours, days)
-     * where "9" means 10 seconds after the event creation
-     * b) "yyyy.MM.dd HH:mm:ss Z" defines exact time (see: SimpleDateFormat) 
-     * 
-     * @param origin    the name of the source of this event
-     * @param category  event category
-     * @param type      event type (subcategory)
-     * @param rootEventId the ID of event which starts processing (not created by other event)
+     * Used to create new Event instance. Values of id and createdAt parameters
+     * are set within the constructor. Parameter timePoint can be one of two
+     * forms: a) "+9u" defines distance from event creation. "9" - number, "u" -
+     * unit (s,m,h,d - seconds, minutes, hours, days) where "9" means 10 seconds
+     * after the event creation b) "yyyy.MM.dd HH:mm:ss Z" defines exact time
+     * (see: SimpleDateFormat)
+     *
+     * @param origin the name of the source of this event
+     * @param category event category
+     * @param type event type (subcategory)
+     * @param rootEventId the ID of event which starts processing (not created
+     * by other event)
      * @param timePoint defines when this event should happen.
-     * @param payload   holds additional data 
+     * @param payload holds additional data
      */
     public Event(String origin, String category, String type, String timePoint, Object payload) {
         this.origin = origin;
@@ -87,28 +90,44 @@ public class Event {
         this.category = category;
         this.type = type;
         this.payload = payload;
-        if(timePoint!=null && timePoint.isEmpty()){
-            this.timePoint=null;
-        }else{
+        if (timePoint != null && timePoint.isEmpty()) {
+            this.timePoint = null;
+        } else {
             this.timePoint = timePoint;
         }
-        createdAt=System.currentTimeMillis();
+        createdAt = System.currentTimeMillis();
         calculateTimePoint();
     }
-    
+
+    public Event(String origin, RequestObject request) {
+        this.origin = origin;
+        this.id = Kernel.getEventId();
+        this.serviceId = Kernel.getInstance().getId();
+        this.serviceUuid = Kernel.getInstance().getUuid();
+        this.rootEventId = -1;
+        this.category = Event.CATEGORY_GENERIC;
+        this.type = "HTTP";
+        this.payload = request;
+        this.timePoint = null;
+        createdAt = System.currentTimeMillis();
+        calculateTimePoint();
+    }
+
     /**
-     * Used to create new Event instance. Values of id and createdAt parameters are set within the constructor.
-     * Parameter timePoint can be one of two forms:
-     * a) "+9u" defines distance from event creation. "9" - number, "u" - unit (s,m,h,d - seconds, minutes, hours, days)
-     * where "9" means 10 seconds after the event creation
-     * b) "yyyy.MM.dd HH:mm:ss Z" defines exact time (see: SimpleDateFormat) 
-     * 
-     * @param origin    the name of the source of this event
-     * @param category  event category
-     * @param type      event type (subcategory)
-     * @param rootEventId the ID of event which starts processing (not created by other event)
+     * Used to create new Event instance. Values of id and createdAt parameters
+     * are set within the constructor. Parameter timePoint can be one of two
+     * forms: a) "+9u" defines distance from event creation. "9" - number, "u" -
+     * unit (s,m,h,d - seconds, minutes, hours, days) where "9" means 10 seconds
+     * after the event creation b) "yyyy.MM.dd HH:mm:ss Z" defines exact time
+     * (see: SimpleDateFormat)
+     *
+     * @param origin the name of the source of this event
+     * @param category event category
+     * @param type event type (subcategory)
+     * @param rootEventId the ID of event which starts processing (not created
+     * by other event)
      * @param timePoint defines when this event should happen.
-     * @param payload   holds additional data 
+     * @param payload holds additional data
      */
     public Event(String origin, String category, String type, long rootEventId, String timePoint, Object payload) {
         this.id = Kernel.getEventId();
@@ -119,40 +138,40 @@ public class Event {
         this.category = category;
         this.type = type;
         this.payload = payload;
-        if(timePoint!=null && timePoint.isEmpty()){
-            this.timePoint=null;
-        }else{
+        if (timePoint != null && timePoint.isEmpty()) {
+            this.timePoint = null;
+        } else {
             this.timePoint = timePoint;
         }
-        createdAt=System.currentTimeMillis();
+        createdAt = System.currentTimeMillis();
         calculateTimePoint();
     }
-    
+
     /**
-     * Creates new event based with rootEventId set to parent's rootEventId (if not equals -1)
-     * or parent's ID (if parent.rootEventId==-1).
-     * 
+     * Creates new event based with rootEventId set to parent's rootEventId (if
+     * not equals -1) or parent's ID (if parent.rootEventId==-1).
+     *
      * @return child event
      */
-    public Event createChild(){
-        Event e=new Event(this.origin, this.category, this.type, this.timePoint, this.payload);
-        if(this.rootEventId>-1){
-            e.rootEventId=this.rootEventId;
-        }else{
-            e.rootEventId=this.id;
+    public Event createChild() {
+        Event e = new Event(this.origin, this.category, this.type, this.timePoint, this.payload);
+        if (this.rootEventId > -1) {
+            e.rootEventId = this.rootEventId;
+        } else {
+            e.rootEventId = this.id;
         }
         return e;
     }
-    
+
     /**
      * Creates an Event used for logging (category LOG)
-     * 
-     * @param source    the Event origin
-     * @param level     logging level as String ("SEVERE", "INFO", "WARNING" etc)
-     * @param message   log message
+     *
+     * @param source the Event origin
+     * @param level logging level as String ("SEVERE", "INFO", "WARNING" etc)
+     * @param message log message
      * @return created Event
      */
-    public static Event log(Object source, String level, String message){
+    public static Event log(Object source, String level, String message) {
         return new Event(
                 source.getClass().getSimpleName(),
                 Event.CATEGORY_LOG,
@@ -160,16 +179,16 @@ public class Event {
                 null,
                 message);
     }
-    
+
     /**
      * Creates an Event used for logging (category LOG)
-     * 
-     * @param source    the Event origin name
-     * @param level     logging level as String ("SEVERE", "INFO", "WARNING" etc)
-     * @param message   log message
+     *
+     * @param source the Event origin name
+     * @param level logging level as String ("SEVERE", "INFO", "WARNING" etc)
+     * @param message log message
      * @return created Event
      */
-    public static Event log(String source, String level, String message){
+    public static Event log(String source, String level, String message) {
         return new Event(
                 source,
                 Event.CATEGORY_LOG,
@@ -177,15 +196,15 @@ public class Event {
                 null,
                 message);
     }
-    
+
     /**
      * Creates an Event used for logging (category LOG) of SEVERE level
-     * 
-     * @param source    the Event origin name
-     * @param message   log message
+     *
+     * @param source the Event origin name
+     * @param message log message
      * @return created Event
      */
-    public static Event logSevere(String source, String message){
+    public static Event logSevere(String source, String message) {
         return new Event(
                 source,
                 Event.CATEGORY_LOG,
@@ -193,15 +212,15 @@ public class Event {
                 null,
                 message);
     }
-    
+
     /**
      * Creates an Event used for logging (category LOG) of WARNING level
-     * 
-     * @param source    the Event origin name
-     * @param message   log message
+     *
+     * @param source the Event origin name
+     * @param message log message
      * @return created Event
      */
-    public static Event logWarning(String source, String message){
+    public static Event logWarning(String source, String message) {
         return new Event(
                 source,
                 Event.CATEGORY_LOG,
@@ -209,15 +228,15 @@ public class Event {
                 null,
                 message);
     }
-    
+
     /**
      * Creates an Event used for logging (category LOG) of INFO level
-     * 
-     * @param source    the Event origin name
-     * @param message   log message
+     *
+     * @param source the Event origin name
+     * @param message log message
      * @return created Event
      */
-    public static Event logInfo(String source, String message){
+    public static Event logInfo(String source, String message) {
         return new Event(
                 source,
                 Event.CATEGORY_LOG,
@@ -225,15 +244,15 @@ public class Event {
                 null,
                 message);
     }
-    
+
     /**
      * Creates an Event used for logging (category LOG) of FINE level
-     * 
-     * @param source    the Event origin name
-     * @param message   log message
+     *
+     * @param source the Event origin name
+     * @param message log message
      * @return created Event
      */
-    public static Event logFine(String source, String message){
+    public static Event logFine(String source, String message) {
         return new Event(
                 source,
                 Event.CATEGORY_LOG,
@@ -241,15 +260,15 @@ public class Event {
                 null,
                 message);
     }
-    
+
     /**
      * Creates an Event used for logging (category LOG) of FINER level
-     * 
-     * @param source    the Event origin name
-     * @param message   log message
+     *
+     * @param source the Event origin name
+     * @param message log message
      * @return created Event
      */
-    public static Event logFiner(String source, String message){
+    public static Event logFiner(String source, String message) {
         return new Event(
                 source,
                 Event.CATEGORY_LOG,
@@ -257,15 +276,15 @@ public class Event {
                 null,
                 message);
     }
-    
+
     /**
      * Creates an Event used for logging (category LOG) of FINEST level
-     * 
-     * @param source    the Event origin name
-     * @param message   log message
+     *
+     * @param source the Event origin name
+     * @param message log message
      * @return created Event
      */
-    public static Event logFinest(String source, String message){
+    public static Event logFinest(String source, String message) {
         return new Event(
                 source,
                 Event.CATEGORY_LOG,
@@ -273,9 +292,10 @@ public class Event {
                 null,
                 message);
     }
-    
+
     /**
      * Returns event toString
+     *
      * @return String representation of the event
      */
     public String toString() {
@@ -299,12 +319,13 @@ public class Event {
                 .append(getPayload() != null ? getPayload().toString() : "");
         return sb.toString();
     }
-    
+
     /**
      * Returns event toString formatted for logging
+     *
      * @return String representation of the event
      */
-    public String toLogString(){
+    public String toLogString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getId())
                 .append(":")
@@ -397,7 +418,7 @@ public class Event {
     public void setTimePoint(String timePoint) {
         this.timePoint = timePoint;
     }
-    
+
     private void calculateTimePoint() {
         String dateDefinition = getTimePoint();
         if (dateDefinition == null) {
@@ -537,13 +558,24 @@ public class Event {
     public void setRootEventId(long rootEventId) {
         this.rootEventId = rootEventId;
     }
-    
-    public String getRequestParameter(String name){
-        String value=null;
-        try{
-        value=(String)((RequestObject)getPayload()).parameters.get(name);
-        }catch(Exception e){
+
+    public String getRequestParameter(String name) {
+        String value = null;
+        try {
+            value = (String) ((RequestObject) getPayload()).parameters.get(name);
+        } catch (Exception e) {
         }
         return value;
     }
+
+    /**
+     * @return the request
+     */
+    public RequestObject getRequest() {
+        if(httpType){
+            return (RequestObject)payload;
+        }
+        return null;
+    }
+
 }

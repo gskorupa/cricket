@@ -23,6 +23,8 @@ import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import org.cricketmsf.Adapter;
@@ -38,7 +40,7 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
     private int capacity = 0;
     private String envVariable;
     private String fileName;
-    private boolean persistent=false;
+    private boolean persistent = false;
 
     @Override
     public void start() {
@@ -53,12 +55,12 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
     }
 
     /**
-     * This method is executed while adapter is instantiated during the service start.
-     * It's used to configure the adapter according to the configuration.
-     * 
-     * @param properties    map of properties readed from the configuration file
-     * @param adapterName   name of the adapter set in the configuration file (can be different
-     *  from the interface and class name.
+     * This method is executed while adapter is instantiated during the service
+     * start. It's used to configure the adapter according to the configuration.
+     *
+     * @param properties map of properties readed from the configuration file
+     * @param adapterName name of the adapter set in the configuration file (can
+     * be different from the interface and class name.
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -156,34 +158,57 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
         }
     }
 
+    @Override
     public void put(String key, Object value) {
         getCache().put(key, value);
     }
 
+    @Override
     public Object get(String key) {
         return getCache().get(key);
     }
 
+    @Override
     public Object get(String key, Object defaultValue) {
         return getCache().containsKey(key) ? getCache().get(key) : defaultValue;
     }
-    
-    public Map getAll(){
+
+    @Override
+    public Map getAll() {
         return getCache();
     }
 
+    @Override
+    public Map search(ComparatorIface comparator, Object pattern) {
+        Map result = new LinkedHashMap();
+        Iterator<String> keySetIterator = getCache().keySet().iterator();
+        String key;
+        while (keySetIterator.hasNext()) {
+            key = keySetIterator.next();
+            Object value = cache.get(key);
+            if (comparator.compare(value, pattern) == 0) {
+                result.put(key, value);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public boolean containsKey(String key) {
         return getCache().containsKey(key);
     }
 
+    @Override
     public boolean remove(String key) {
-        return getCache().remove(key) != null ? true : false;
+        return getCache().remove(key) != null;
     }
 
+    @Override
     public void clear() {
         getCache().clear();
     }
 
+    @Override
     public long getSize() {
         return getCache().size();
     }

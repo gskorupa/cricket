@@ -272,7 +272,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         }
         try {
             sendLogEvent(Event.LOG_FINE, "sending request to hook method " + hookMethodName);
-            Event event = new Event("HttpAdapter", Event.CATEGORY_GENERIC, "HTTP", null, requestObject);
+            Event event = new Event("HttpAdapter", requestObject);
             event.setPayload(requestObject);
             Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
             result = (Result) m.invoke(Kernel.getInstance(), event);
