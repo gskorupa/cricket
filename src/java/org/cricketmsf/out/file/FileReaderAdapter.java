@@ -15,12 +15,14 @@
  */
 package org.cricketmsf.out.file;
 
+import java.io.BufferedInputStream;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.out.OutboundAdapter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import org.cricketmsf.Event;
@@ -58,19 +60,34 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
      * @return file content
      * @throws FileNotFoundException
      * @throws IOException
-     */
+     */   
     @Override
     public byte[] readFile(File file) throws FileNotFoundException, IOException {
-        byte[] result = {};
-        FileInputStream fileInputStream = null;
-        result = new byte[(int) file.length()];
-        fileInputStream = new FileInputStream(file);
-        fileInputStream.read(result);
-        fileInputStream.close();
+        byte[] result = new byte[(int) file.length()];
+        InputStream input = null;
+        try {
+            int totalBytesRead = 0;
+            input = new BufferedInputStream(new FileInputStream(file));
+            while (totalBytesRead < result.length) {
+                int bytesRemaining = result.length - totalBytesRead;
+                //input.read() returns -1, 0, or more :
+                int bytesRead = input.read(result, totalBytesRead, bytesRemaining);
+                if (bytesRead > 0) {
+                    totalBytesRead = totalBytesRead + bytesRead;
+                }
+            }
+            /*
+         the above style is a bit tricky: it places bytes into the 'result' array; 
+         'result' is an output parameter;
+         the while loop usually has a single iteration only.
+             */
+        } finally {
+            input.close();
+        }
         return result;
     }
-   
-    private File getFileObject(String filePath){
+
+    private File getFileObject(String filePath) {
         String path = getRootPath() + filePath;
         if (path.endsWith("/")) {
             path = path + "index.html";
@@ -101,10 +118,10 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         if (fileExt.isEmpty()) {
             fileExt = ".html";
         }
-        File f=null;
-        
+        File f = null;
+
         try {
-            f=getFileObject(filePath);
+            f = getFileObject(filePath);
             byte[] b = readFile(f);
             result.setPayload(b);
             result.setFileExtension(fileExt);
