@@ -60,7 +60,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
      * @return file content
      * @throws FileNotFoundException
      * @throws IOException
-     */
+     */   
     @Override
     public byte[] readFile(File file) throws FileNotFoundException, IOException {
         byte[] result = new byte[(int) file.length()];
@@ -85,10 +85,6 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             input.close();
         }
         return result;
-    }
-
-    private File getFileObject(String path) {
-        return new File(path);
     }
 
     public ParameterMapResult getFile(RequestObject request) {
@@ -119,7 +115,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             }
             
             checkAccess(filePath);
-
+            
             byte[] b = readFile(f);
             result.setPayload(b);
             result.setFileExtension(fileExt);
