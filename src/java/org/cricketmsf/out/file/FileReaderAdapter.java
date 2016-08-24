@@ -60,7 +60,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
      * @return file content
      * @throws FileNotFoundException
      * @throws IOException
-     */   
+     */
     @Override
     public byte[] readFile(File file) throws FileNotFoundException, IOException {
         byte[] result = new byte[(int) file.length()];
@@ -87,41 +87,39 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         return result;
     }
 
-    private File getFileObject(String filePath) {
-        String path = getRootPath() + filePath;
-        if (path.endsWith("/")) {
-            path = path + "index.html";
-        }
+    private File getFileObject(String path) {
         return new File(path);
     }
 
     public ParameterMapResult getFile(RequestObject request) {
         ParameterMapResult result = new ParameterMapResult();
         result.setData(new HashMap(request.parameters));
-        byte[] emptyContent = {};
         String filePath = request.pathExt;
-        Kernel.getInstance().handleEvent(Event.logFinest("FileReaderAdapter", "filePath=" + filePath));
+        File f;
         String fileExt = "";
-        if (!(filePath.isEmpty() || filePath.endsWith("/")) && filePath.indexOf(".") > 0) {
-            fileExt = filePath.substring(filePath.lastIndexOf("."));
-        }
-        /*switch (fileExt.toLowerCase()) {
-            case ".ico":
-            case ".jpg":
-            case ".jpeg":
-            case ".gif":
-            case ".png":
-                break;
-            default:
-                fileExt = ".html";
-        }*/
-        if (fileExt.isEmpty()) {
-            fileExt = ".html";
-        }
-        File f = null;
+
+        Kernel.getInstance().handleEvent(Event.logFinest("FileReaderAdapter", "requested filePath=" + filePath));
 
         try {
-            f = getFileObject(filePath);
+
+            if (filePath.isEmpty() || filePath.endsWith("/")) {
+                filePath = filePath.concat("index.html");
+            }
+
+            filePath = getRootPath() + filePath;
+
+            f = new File(filePath);
+            if (f.isDirectory()) {
+                filePath = filePath.concat("/index.html");
+                f = new File(filePath);
+            }
+
+            if (filePath.lastIndexOf(".") > 0) {
+                fileExt = filePath.substring(filePath.lastIndexOf("."));
+            }
+            
+            checkAccess(filePath);
+
             byte[] b = readFile(f);
             result.setPayload(b);
             result.setFileExtension(fileExt);
@@ -129,13 +127,22 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             result.setModificationDate(new Date(f.lastModified()));
             result.setMessage("");
         } catch (Exception e) {
-            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter", filePath+" not readable or not found"));
+            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter", filePath + " not readable or not found"));
+            byte[] emptyContent = {};
+            //String content="<HTML><body>ERROR</body></HTML>";
+            //result.setPayload(content.getBytes());
             result.setPayload(emptyContent);
-            result.setFileExtension(fileExt);
+            result.setFileExtension(".html");
             result.setCode(HttpAdapter.SC_NOT_FOUND);
             result.setMessage("file not found");
         }
         return result;
+    }
+
+    private void checkAccess(String filePath) throws FileNotFoundException {
+        if (filePath.indexOf("..") > 0) {
+            throw new FileNotFoundException("");
+        }
     }
 
     /**

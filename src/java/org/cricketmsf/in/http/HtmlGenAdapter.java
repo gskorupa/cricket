@@ -50,10 +50,10 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
      */
     @Override
     public byte[] formatResponse(int type, Result result) {
-        if (type == FILE) {
-            return result.getPayload();
-        } else {
+        if (type == HTML) {
             return updateHtml((ParameterMapResult) result);
+        } else {
+            return result.getPayload();
         }
     }
 

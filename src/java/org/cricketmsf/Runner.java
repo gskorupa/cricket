@@ -16,6 +16,7 @@
 package org.cricketmsf;
 
 import com.cedarsoftware.util.io.JsonReader;
+import com.cedarsoftware.util.io.JsonWriter;
 import org.cricketmsf.config.ConfigSet;
 import org.cricketmsf.config.Configuration;
 import java.io.BufferedReader;
@@ -28,9 +29,9 @@ import java.util.Map;
 import java.util.Scanner;
 
 /**
- * Runner class is used when running JAR distribution. The class parses the command line
- * arguments, reads config from cricket.json, then creates and runs the service instance according
- * to the configuration.
+ * Runner class is used when running JAR distribution. The class parses the
+ * command line arguments, reads config from cricket.json, then creates and runs
+ * the service instance according to the configuration.
  *
  * @author greg
  */
@@ -59,7 +60,7 @@ public class Runner {
 
         Class serviceClass = null;
         String serviceId;
-        String serviceName=null;
+        String serviceName = null;
         Configuration configuration = null;
         if (arguments.containsKey("service")) {
             // if service name provided as command line option
@@ -68,19 +69,24 @@ public class Runner {
             // otherwise get first configured service
             serviceId = configSet.getDefault().getId();
         }
-        
+
         configuration = configSet.getConfigurationById(serviceId);
-        
+
         // if serviceName isn't configured print error and exit
-        if(configuration==null){
-            System.out.println("Configuration not found for id="+serviceId);
+        if (configuration == null) {
+            System.out.println("Configuration not found for id=" + serviceId);
             System.exit(-1);
-        }else{
-            serviceName=configuration.getService();
+        } else {
+            serviceName = configuration.getService();
+        }
+
+        if (arguments.containsKey("help")) {
+            System.out.println(runner.getHelp(serviceName));
+            System.exit(0);
         }
         
-        if(arguments.containsKey("help")){
-            System.out.println(runner.getHelp(serviceName));
+        if (arguments.containsKey("print")) {
+            System.out.println(runner.getAsString(configSet));
             System.exit(0);
         }
 
@@ -93,7 +99,7 @@ public class Runner {
         System.out.println("RUNNER");
         try {
             service = (Kernel) Kernel.getInstanceWithProperties(serviceClass, configuration);
-            service.configSet=configSet;
+            service.configSet = configSet;
             if (arguments.containsKey("run")) {
                 service.setStartedAt(runAt);
                 service.start();
@@ -107,27 +113,30 @@ public class Runner {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Returns content of the default help file ("help.txt")
-     * @return  help content
+     *
+     * @return help content
      */
-    public String getHelp(){
+    public String getHelp() {
         return getHelp(null);
     }
 
     /**
      * Returns content of the custom service help file (serviceName+"-help.txt")
-     * Example: if your service class name is org.cricketmsf.services.EchoService 
-     * then help file is EchoService-help.txt
+     * Example: if your service class name is
+     * org.cricketmsf.services.EchoService then help file is
+     * EchoService-help.txt
+     *
      * @param serviceName the service class simple name
-     * @return 
+     * @return
      */
     public String getHelp(String serviceName) {
         String content = "Help file not found";
-        String helpFileName="/help.txt";
-        if(null!=serviceName){
-            helpFileName="/"+serviceName.substring(serviceName.lastIndexOf(".")+1)+"-help.txt";
+        String helpFileName = "/help.txt";
+        if (null != serviceName) {
+            helpFileName = "/" + serviceName.substring(serviceName.lastIndexOf(".") + 1) + "-help.txt";
         }
         try {
             content = readHelpFile(helpFileName);
@@ -156,7 +165,7 @@ public class Runner {
     }
 
     public ConfigSet readConfig(ArgumentParser arguments) {
-        ConfigSet cs=null;
+        ConfigSet cs = null;
         if (arguments.containsKey("config")) {
             //Properties props;
             Map args = new HashMap();
@@ -186,5 +195,11 @@ public class Runner {
             cs = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
         }
         return cs;
+    }
+
+    public String getAsString(ConfigSet c) {
+        Map args = new HashMap();
+        args.put(JsonWriter.PRETTY_PRINT, true);
+        return JsonWriter.objectToJson(c, args);
     }
 }
