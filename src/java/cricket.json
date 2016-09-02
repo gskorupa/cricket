@@ -21,12 +21,30 @@
                         "silent-mode": "false"
                     }
                 },
+                "ScriptingService": {
+                    "name": "ScriptingService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.ScriptingAdapter",
+                    "properties": {
+                        "context": "/script",
+                        "response-type": "JSON",
+                        "silent-mode": "false"
+                    }
+                },
                 "TestScheduler": {
                     "name": "TestScheduler",
                     "interfaceName": "EchoHttpAdapterIface",
                     "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
                     "properties": {
                         "context": "/scheduler"
+                    }
+                },
+                "ScriptingEngine": {
+                    "name": "ScriptingEngine",
+                    "interfaceName": "ScriptingAdapterIface",
+                    "classFullName": "org.cricketmsf.out.script.NashornScriptingAdapter",
+                    "properties": {
+                        "script-file": "./script.js"
                     }
                 },
                 "LoggerAdapterIface": {

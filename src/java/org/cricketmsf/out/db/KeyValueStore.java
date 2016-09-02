@@ -22,9 +22,10 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.cricketmsf.Adapter;
@@ -179,15 +180,15 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
     }
 
     @Override
-    public Map search(ComparatorIface comparator, Object pattern) {
-        Map result = new LinkedHashMap();
+    public List search(ComparatorIface comparator, Object pattern) {
+        List result = new ArrayList();
         Iterator<String> keySetIterator = getCache().keySet().iterator();
         String key;
         while (keySetIterator.hasNext()) {
             key = keySetIterator.next();
             Object value = cache.get(key);
             if (comparator.compare(value, pattern) == 0) {
-                result.put(key, value);
+                result.add(value);
             }
         }
         return result;

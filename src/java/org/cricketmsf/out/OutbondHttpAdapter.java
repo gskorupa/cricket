@@ -54,6 +54,7 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
         return code == HttpURLConnection.HTTP_ACCEPTED || code == HttpURLConnection.HTTP_CREATED || code == HttpURLConnection.HTTP_OK;
     }
 
+    @Override
     public Result send(Object data) {
         String requestData = "";
 
@@ -126,7 +127,7 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
             list = new ArrayList();
             list.add(data);
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (header != null && !header.isEmpty()) {
             sb.append(header).append("\r\n");
         }
@@ -144,6 +145,7 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
     /**
      * @return the userAgent
      */
+    @Override
     public String getUserAgent() {
         return userAgent;
     }
@@ -151,6 +153,7 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
     /**
      * @param userAgent the userAgent to set
      */
+    @Override
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
     }
@@ -158,6 +161,7 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
     /**
      * @return the contentType
      */
+    @Override
     public String getContentType() {
         return contentType;
     }
@@ -165,6 +169,7 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
     /**
      * @param contentType the contentType to set
      */
+    @Override
     public void setContentType(String contentType) {
         this.contentType = contentType;
     }
@@ -172,6 +177,7 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
     /**
      * @return the endpointURL
      */
+    @Override
     public String getEndpointURL() {
         return endpointURL;
     }
@@ -179,6 +185,7 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
     /**
      * @param endpointURL the endpointURL to set
      */
+    @Override
     public void setEndpointURL(String endpointURL) {
         this.endpointURL = endpointURL;
     }
@@ -186,6 +193,7 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
     /**
      * @return the requestMethod
      */
+    @Override
     public String getRequestMethod() {
         return requestMethod;
     }
@@ -193,6 +201,7 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
     /**
      * @param requestMethod the requestMethod to set
      */
+    @Override
     public void setRequestMethod(String requestMethod) {
         this.requestMethod = requestMethod;
     }

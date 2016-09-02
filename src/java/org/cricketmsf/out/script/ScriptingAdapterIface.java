@@ -13,25 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.out.db;
+package org.cricketmsf.out.script;
 
-import java.util.List;
-import java.util.Map;
+import org.cricketmsf.RequestObject;
+import org.cricketmsf.in.http.StandardResult;
 
 /**
  *
  * @author greg
  */
-public interface KeyValueCacheAdapterIface {
+public interface ScriptingAdapterIface {
     
-    public void start();
-    public void put(String key, Object value);
-    public Object get(String key);
-    public Object get(String key, Object defaultValue);
-    public Map getAll();
-    public List search(ComparatorIface comparator, Object pattern);
-    public boolean containsKey(String key);
-    public boolean remove(String key);
-    public void clear();
-    public long getSize();
+    public String readScript(String path);
+    public StandardResult processRequest(RequestObject request);
+    
 }

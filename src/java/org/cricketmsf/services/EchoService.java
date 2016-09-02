@@ -25,10 +25,12 @@ import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.HashMap;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
+import org.cricketmsf.in.http.HttpAdapterIface;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.file.FileReaderAdapterIface;
+import org.cricketmsf.out.script.ScriptingAdapterIface;
 
 /**
  * EchoService
@@ -45,6 +47,8 @@ public class EchoService extends Kernel {
     HtmlGenAdapterIface htmlAdapter = null;
     FileReaderAdapterIface htmlReader = null;
     EchoHttpAdapterIface schedulerTester = null;
+    HttpAdapterIface scriptTester = null;
+    ScriptingAdapterIface scriptingEngine = null;
 
     @Override
     public void getAdapters() {
@@ -55,6 +59,8 @@ public class EchoService extends Kernel {
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");
         htmlReader = (FileReaderAdapterIface) getRegistered("FileReaderAdapterIface");
         schedulerTester = (EchoHttpAdapterIface) getRegistered("TestScheduler");
+        scriptTester = (HttpAdapterIface) getRegistered("ScriptingService");
+        scriptingEngine = (ScriptingAdapterIface) getRegistered("ScriptingEngine");
     }
 
     @Override
@@ -84,6 +90,13 @@ public class EchoService extends Kernel {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
+    @HttpAdapterHook(adapterName = "ScriptingService", requestMethod = "*")
+    public Object doGetScript(Event requestEvent) {
+        StandardResult r=  scriptingEngine.processRequest((RequestObject)requestEvent.getPayload());
+        r.setCode(HttpAdapter.SC_OK);
+        return r;
+    }
+    
     @EventHook(eventCategory = Event.CATEGORY_LOG)
     public void logEvent(Event event) {
         logAdapter.log(event);

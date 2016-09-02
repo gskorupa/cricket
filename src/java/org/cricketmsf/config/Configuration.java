@@ -31,10 +31,12 @@ public class Configuration {
     private int threads;
     private String filter;
     private ArrayList<HttpHeader> cors;
+    private HashMap<String, String> properties;
     private HashMap<String, AdapterConfiguration> adapters;
     
     public Configuration(){
         adapters=new HashMap<String, AdapterConfiguration>();
+        properties=new HashMap<String, String>();
     }
 
     public AdapterConfiguration getAdapterConfiguration(String name){
@@ -45,6 +47,14 @@ public class Configuration {
         adapters.put(config.getName(), config);
     }
 
+    public String getProperty(String name){
+        return properties.get(name);
+    }
+    
+    public void putProperty(String name, String value){
+        properties.put(name, value);
+    }
+    
     /**
      * @return the host
      */
@@ -123,7 +133,7 @@ public class Configuration {
     }
 
     /**
-     * @param securityFilter the securityFilter to set
+     * @param filterName the securityFilter to set
      */
     public void setFilter(String filterName) {
         this.filter = filterName;
@@ -155,6 +165,20 @@ public class Configuration {
      */
     public void setCors(ArrayList<HttpHeader> cors) {
         this.cors = cors;
+    }
+
+    /**
+     * @return the properties
+     */
+    public HashMap<String, String> getProperties() {
+        return properties;
+    }
+
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(HashMap<String, String> properties) {
+        this.properties = properties;
     }
     
     

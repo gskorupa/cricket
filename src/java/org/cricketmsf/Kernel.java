@@ -54,6 +54,9 @@ public abstract class Kernel {
     // adapters
     public HashMap<String, Object> adaptersMap = new HashMap<String, Object>();
 
+    // user defined properties
+    public HashMap<String, String> properties = new HashMap<String, String>();
+    
     // http server
     private String host = null;
     private int port = 0;
@@ -165,7 +168,8 @@ public abstract class Kernel {
             instance = c.newInstance();
             ((Kernel) instance).setUuid(UUID.randomUUID());
             ((Kernel) instance).setId(config.getId());
-            ((Kernel) instance).loadAdapters(config);
+            ((Kernel) instance).setProperties(config.getProperties());
+            ((Kernel) instance).loadAdapters(config);           
         } catch (Exception e) {
             instance = null;
             LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
@@ -451,6 +455,20 @@ public abstract class Kernel {
         } else {
             this.corsHeaders = null;
         }
+    }
+
+    /**
+     * @return the properties
+     */
+    public HashMap<String, String> getProperties() {
+        return properties;
+    }
+
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(HashMap<String, String> properties) {
+        this.properties = properties;
     }
 
 }
