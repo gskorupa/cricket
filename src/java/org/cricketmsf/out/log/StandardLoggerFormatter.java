@@ -16,8 +16,10 @@
 package org.cricketmsf.out.log;
 
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
+import org.cricketmsf.Kernel;
 
 /**
  *
@@ -27,7 +29,12 @@ public class StandardLoggerFormatter extends Formatter {
 
     @Override
     public String format(LogRecord record) {
-        String sdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(record.getMillis());
-        return record.getLevel() + ":" +sdate+": "+ record.getMessage()+"\n";
+        
+        StringBuilder sb=new StringBuilder(record.getLevel()+":");
+        sb.append(Kernel.getInstance().dateFormat.format(record.getMillis()));
+        sb.append(": ");
+        sb.append(record.getMessage());
+        sb.append("\n");
+        return sb.toString();
     }
 }

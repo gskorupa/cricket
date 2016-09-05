@@ -11,6 +11,9 @@
             "threads": 0,
             "filter": "org.cricketmsf.SecurityFilter",
             "cors": ["Access-Control-Allow-Origin:*"],
+            "properties": {
+                "time-zone": "GMT"
+            },
             "adapters": {
                 "EchoAdapter": {
                     "name": "EchoAdapter",
@@ -105,6 +108,9 @@
             "port": "8080",
             "threads": 0,
             "filter": "org.cricketmsf.SecurityFilter",
+            "properties": {
+                "time-zone": "GMT"
+            },
             "adapters": {
                 "EchoAdapter": {
                     "name": "EchoAdapter",

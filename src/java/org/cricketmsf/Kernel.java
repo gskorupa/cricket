@@ -25,9 +25,11 @@ import java.util.logging.Logger;
 import static java.lang.Thread.MIN_PRIORITY;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
 import org.cricketmsf.config.HttpHeader;
@@ -48,14 +50,16 @@ public abstract class Kernel {
     private static Object instance = null;
 
     private UUID uuid;
-    private HashMap<String, String> eventHookMethods = new HashMap<String, String>();
+    private HashMap<String, String> eventHookMethods = new HashMap<>();
     private String id;
 
     // adapters
-    public HashMap<String, Object> adaptersMap = new HashMap<String, Object>();
+    public HashMap<String, Object> adaptersMap = new HashMap<>();
 
     // user defined properties
-    public HashMap<String, String> properties = new HashMap<String, String>();
+    public HashMap<String, String> properties = new HashMap<>();
+    
+    public SimpleDateFormat dateFormat = null;
     
     // http server
     private String host = null;
@@ -71,6 +75,8 @@ public abstract class Kernel {
     private ArrayList corsHeaders;
 
     private long startedAt = 0;
+    
+    
 
     public Kernel() {
     }
@@ -169,6 +175,7 @@ public abstract class Kernel {
             ((Kernel) instance).setUuid(UUID.randomUUID());
             ((Kernel) instance).setId(config.getId());
             ((Kernel) instance).setProperties(config.getProperties());
+            ((Kernel) instance).configureTimeFormat();
             ((Kernel) instance).loadAdapters(config);           
         } catch (Exception e) {
             instance = null;
@@ -176,6 +183,11 @@ public abstract class Kernel {
             e.printStackTrace();
         }
         return instance;
+    }
+    
+    private void configureTimeFormat(){
+        dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+        dateFormat.setTimeZone(TimeZone.getTimeZone(getProperties().getOrDefault("time-zone", "GMT")));
     }
 
     private void printHeader(String version) {
