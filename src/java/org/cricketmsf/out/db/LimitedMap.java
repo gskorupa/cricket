@@ -26,6 +26,7 @@ public class LimitedMap extends LinkedHashMap{
     
     private int maxSize =0;
     
+    @Override
     protected boolean removeEldestEntry(Map.Entry eldest) {
         return maxSize>0 ? size() > maxSize : false;
      }
@@ -44,6 +45,7 @@ public class LimitedMap extends LinkedHashMap{
         this.maxSize = maxSize;
     }
     
+    @Override
     public synchronized void clear(){
         super.clear();
     }

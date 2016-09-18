@@ -13,18 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.out.script;
-
-import org.cricketmsf.RequestObject;
-import org.cricketmsf.in.http.StandardResult;
+package org.cricketmsf.in;
 
 /**
  *
  * @author greg
  */
-public interface ScriptingAdapterIface {
+public interface Result {
     
-    public String readScript(String path);
-    public StandardResult processRequest(RequestObject request);
+    /**
+     * @return the status code
+     */
+    public int getCode();
+    
+    /**
+     * @param code the status code to set
+     */
+    public void setCode(int code);
+    
+    /**
+     * @return the status message
+     */
+    public String getMessage();
+    
+    /**
+     * @param message the message to set
+     */
+    public void setMessage(String message);
+    
+    public byte[] getPayload();
+    
+    public void setPayload(byte[] payload);
+    
     
 }

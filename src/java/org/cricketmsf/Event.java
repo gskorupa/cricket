@@ -76,8 +76,6 @@ public class Event {
      * @param origin the name of the source of this event
      * @param category event category
      * @param type event type (subcategory)
-     * @param rootEventId the ID of event which starts processing (not created
-     * by other event)
      * @param timePoint defines when this event should happen.
      * @param payload holds additional data
      */

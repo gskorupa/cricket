@@ -28,7 +28,7 @@ public class ConfigSet {
     ArrayList<Configuration> services;
     
     public ConfigSet(){
-        services=new ArrayList<Configuration>();
+        services=new ArrayList<>();
     }
     
     public void addConfiguration(Configuration c){
@@ -61,14 +61,4 @@ public class ConfigSet {
         return null;
     }
 
-/*
-    public String getId() {
-        return id;
-    }
-
-
-    public void setId(String id) {
-        this.id = id;
-    }
-  */  
 }

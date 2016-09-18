@@ -59,6 +59,7 @@ public class Delay {
         return definedTimepoint;
     }
     
+    @Override
     public String toString(){
         return "DELAY "+getDelay()+" "+getUnit();
     }

@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 import org.cricketmsf.HttpAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
@@ -63,14 +62,16 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
     private String context;
 
-    private HashMap<String, String> hookMethodNames = new HashMap();
+    //private HashMap<String, String> hookMethodNames = new HashMap();
     
     private boolean extendedResponse = true;
     private String dateFormat = "dd/MMM/yyyy:kk:mm:ss Z";
 
     public HttpAdapter() {
+        super();
     }
 
+    @Override
     protected void getServiceHooks(String adapterName) {
         HttpAdapterHook ah;
         String requestMethod;
@@ -293,10 +294,12 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         return context;
     }
 
+    @Override
     public void addHookMethodNameForMethod(String requestMethod, String hookMethodName) {
         hookMethodNames.put(requestMethod, hookMethodName);
     }
 
+    @Override
     public String getHookMethodNameForMethod(String requestMethod) {
         String result = null;
         result = hookMethodNames.get(requestMethod);
@@ -361,7 +364,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     }
 
     /**
-     * @param extendedResponse the extendedResponse to set
+     * @param paramValue 
      */
     public void setExtendedResponse(String paramValue) {
         this.extendedResponse = !("false".equalsIgnoreCase(paramValue));

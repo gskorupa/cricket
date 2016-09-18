@@ -15,6 +15,8 @@
  */
 package org.cricketmsf.services;
 
+import java.io.File;
+import java.util.Date;
 import org.cricketmsf.Event;
 import org.cricketmsf.EventHook;
 import org.cricketmsf.HttpAdapterHook;
@@ -23,6 +25,7 @@ import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.HashMap;
+import org.cricketmsf.InboundAdapterHook;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.HttpAdapterIface;
@@ -30,7 +33,9 @@ import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.file.FileReaderAdapterIface;
-import org.cricketmsf.out.script.ScriptingAdapterIface;
+import org.cricketmsf.in.http.ParameterMapResult;
+import org.cricketmsf.in.monitor.EnvironmentMonitorIface;
+import org.cricketmsf.out.file.FileObject;
 
 /**
  * EchoService
@@ -45,10 +50,10 @@ public class EchoService extends Kernel {
     KeyValueCacheAdapterIface cache = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
-    FileReaderAdapterIface htmlReader = null;
+    FileReaderAdapterIface fileReader = null;
     EchoHttpAdapterIface schedulerTester = null;
     HttpAdapterIface scriptTester = null;
-    ScriptingAdapterIface scriptingEngine = null;
+    EnvironmentMonitorIface envMonitor = null;
 
     @Override
     public void getAdapters() {
@@ -57,25 +62,91 @@ public class EchoService extends Kernel {
         cache = (KeyValueCacheAdapterIface) getRegistered("KeyValueCacheAdapterIface");
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");
-        htmlReader = (FileReaderAdapterIface) getRegistered("FileReaderAdapterIface");
+        fileReader = (FileReaderAdapterIface) getRegistered("FileReaderAdapterIface");
         schedulerTester = (EchoHttpAdapterIface) getRegistered("TestScheduler");
         scriptTester = (HttpAdapterIface) getRegistered("ScriptingService");
-        scriptingEngine = (ScriptingAdapterIface) getRegistered("ScriptingEngine");
+        envMonitor = (EnvironmentMonitorIface) getRegistered("EnvironmentMonitor");
     }
 
     @Override
     public void runOnce() {
         super.runOnce();
-        handle(Event.logInfo("EchoService.runOnce()", "executed"));
-        System.out.println("Hello from EchoService.runOnce()");
+        handleEvent(Event.logInfo("EchoService.runOnce()", "executed"));
         Event e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from runOnce() processed by scheduler. Hello!");
         processEvent(e);
     }
 
+    @Override
+    public void runInitTasks() {
+    }
+
+    @Override
+    public void runFinalTasks() {
+    }
+
+    @EventHook(eventCategory = "*")
+    public void processEvent(Event event) {
+        if (event.getTimePoint() != null) {
+            scheduler.handleEvent(event);
+        } else {
+            handleEvent(Event.logInfo("EchoService", event.getPayload().toString()));
+        }
+    }
+
+    /**
+     * Process requests from simple web server implementation given by
+     * HtmlGenAdapter access web web resources
+     *
+     * @param event
+     * @return ParameterMapResult with the file content as a byte array
+     */
     @HttpAdapterHook(adapterName = "HtmlGenAdapterIface", requestMethod = "GET")
     public Object doGet(Event event) {
+        boolean useCache = htmlAdapter.useCache();
         RequestObject request = (RequestObject) event.getPayload();
-        return htmlReader.getFile(request);
+        String filePath = fileReader.getFilePath(request);
+
+        ParameterMapResult result = new ParameterMapResult();
+        result.setData(request.parameters);
+
+        // we can use cache if available
+        FileObject fo = null;
+        if (useCache && cache.containsKey(filePath)) {
+            try {
+                fo = (FileObject) cache.get(filePath);
+            } catch (ClassCastException e) {
+                fo = null;
+            }
+        }
+        if (fo == null) {
+            File file = new File(filePath);
+            byte[] content = fileReader.getFileBytes(file, filePath);
+            //if (content.length > 0) {
+                fo = new FileObject();
+                fo.content = content;
+                fo.modified = new Date(file.lastModified());
+                fo.filePath = filePath;
+                fo.fileExtension = fileReader.getFileExt(filePath);
+                if(useCache) {
+                    cache.put(filePath, fo);
+                }
+            //}
+        }else{
+            handleEvent(Event.logInfo("cache", "readed from cache"));
+        }
+        // f==null means file not found (sure - it's a shortcut)
+        if (fo.content.length > 0) {
+            result.setCode(HttpAdapter.SC_OK);
+            result.setMessage("");
+            result.setPayload(fo.content);
+            result.setFileExtension(fo.fileExtension);
+            result.setModificationDate(fo.modified);
+        } else {
+            result.setCode(HttpAdapter.SC_NOT_FOUND);
+            result.setMessage("file not found");
+        }
+
+        return result;
     }
 
     @HttpAdapterHook(adapterName = "TestScheduler", requestMethod = "GET")
@@ -89,31 +160,21 @@ public class EchoService extends Kernel {
     public Object doGetEcho(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
-
-    @HttpAdapterHook(adapterName = "ScriptingService", requestMethod = "*")
-    public Object doGetScript(Event requestEvent) {
-        StandardResult r=  scriptingEngine.processRequest((RequestObject)requestEvent.getPayload());
-        r.setCode(HttpAdapter.SC_OK);
-        return r;
-    }
     
+    @InboundAdapterHook(adapterName = "EnvironmentAdapter", inputMethod="*")
+    public Object processMonitoringEvent(Event event){
+        handleEvent(Event.logInfo(this.getClass().getSimpleName(), (String)event.getPayload()));
+        return null;
+    }
+
     @EventHook(eventCategory = Event.CATEGORY_LOG)
     public void logEvent(Event event) {
         logAdapter.log(event);
     }
-    
+
     @EventHook(eventCategory = Event.CATEGORY_HTTP_LOG)
     public void logHttpEvent(Event event) {
         logAdapter.log(event);
-    }
-
-    @EventHook(eventCategory = "*")
-    public void processEvent(Event event) {
-        if (event.getTimePoint() != null) {
-            scheduler.handleEvent(event);
-        } else {
-            handle(Event.logInfo("EchoService", event.getPayload().toString()));
-        }
     }
 
     public Object sendEcho(RequestObject request) {
@@ -126,7 +187,7 @@ public class EchoService extends Kernel {
             counter = (Long) cache.get("counter", new Long(0));
             counter++;
             cache.put("counter", counter);
-            HashMap<String, Object> data = new HashMap<String, Object>(request.parameters);
+            HashMap<String, Object> data = new HashMap<>(request.parameters);
             data.put("service.uuid", getUuid().toString());
             data.put("request.method", request.method);
             data.put("request.pathExt", request.pathExt);

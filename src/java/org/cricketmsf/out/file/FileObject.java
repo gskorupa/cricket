@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf;
+package org.cricketmsf.out.file;
 
-import com.sun.net.httpserver.Headers;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Date;
 
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author greg
  */
-public class RequestObject {
+public class FileObject {
     
-    public String clientIp=null;
-    public String method=null;
-    public String pathExt=null;
-    public Headers headers = null;
-    public Map<String, Object> parameters = new HashMap<>();
-
+    public byte[] content;
+    public Date modified;
+    public String filePath;
+    public String fileExtension;
+    
 }

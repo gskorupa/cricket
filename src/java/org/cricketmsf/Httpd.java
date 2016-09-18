@@ -28,7 +28,6 @@ import java.util.Map;
  */
 public class Httpd {
 
-    //private Kernel service;
     public HttpServer server = null;
 
     public Httpd(Kernel service) {

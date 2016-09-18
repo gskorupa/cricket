@@ -24,30 +24,12 @@
                         "silent-mode": "false"
                     }
                 },
-                "ScriptingService": {
-                    "name": "ScriptingService",
-                    "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.ScriptingAdapter",
-                    "properties": {
-                        "context": "/script",
-                        "response-type": "JSON",
-                        "silent-mode": "false"
-                    }
-                },
                 "TestScheduler": {
                     "name": "TestScheduler",
                     "interfaceName": "EchoHttpAdapterIface",
                     "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
                     "properties": {
                         "context": "/scheduler"
-                    }
-                },
-                "ScriptingEngine": {
-                    "name": "ScriptingEngine",
-                    "interfaceName": "ScriptingAdapterIface",
-                    "classFullName": "org.cricketmsf.out.script.NashornScriptingAdapter",
-                    "properties": {
-                        "script-file": "./script.js"
                     }
                 },
                 "LoggerAdapterIface": {
@@ -57,7 +39,8 @@
                     "properties": {
                         "name": "EchoService",
                         "level": "FINEST",
-                        "log-file-name": "./data/cricket.log"
+                        "log-file-name": "./data/cricket.log",
+                        "console": "true"
                     }
                 },
                 "KeyValueCacheAdapterIface": {
@@ -69,7 +52,7 @@
                         "envVariable": "ECHO_DB_PATH",
                         "file": "echo.xml",
                         "max-records": "10",
-                        "persistent": "true"
+                        "persistent": "false"
                     }
                 },
                 "SchedulerIface": {
@@ -87,7 +70,8 @@
                     "interfaceName": "HtmlGenAdapterIface",
                     "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
                     "properties": {
-                        "context": "/"
+                        "context": "/",
+                        "use-cache": "false"
                     }
                 },
                 "FileReaderAdapterIface": {
@@ -96,6 +80,17 @@
                     "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
                         "root": "./www/"
+                    }
+                },
+                "EnvironmentAdapter": {
+                    "name": "EnvironmentAdapter",
+                    "interfaceName": "EnvironmentMonitorIface",
+                    "classFullName": "org.cricketmsf.in.monitor.EnvironmentMonitor",
+                    "properties": {
+                        "sampling-interval": "1000",
+                        "disk-path": "/",
+                        "disk-limit": "10M",
+                        "memory-limit": "100M"                        
                     }
                 }
             }
@@ -175,6 +170,17 @@
                     "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
                         "root": "./www/"
+                    }
+                },
+                "EnvironmentAdapter": {
+                    "name": "EnvironmentAdapter",
+                    "interfaceName": "EnvironmentMonitorIface",
+                    "classFullName": "org.cricketmsf.in.monitor.EnvironmentMonitor",
+                    "properties": {
+                        "sampling-interval": "1000",
+                        "disk-path": "/",
+                        "disk-limit": "10M",
+                        "memory-limit": "100M"                        
                     }
                 }
             }

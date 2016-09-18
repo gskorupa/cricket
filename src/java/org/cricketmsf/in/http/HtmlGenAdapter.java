@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, Adapter {
+    
+    private boolean useCache = false;
 
     /**
      * This method is executed while adapter is instantiated during the service start.
@@ -39,8 +41,15 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         System.out.println("context=" + getContext());
+        useCache = properties.getOrDefault("use-cache", "false").equalsIgnoreCase("true");
+        System.out.println("use-cache=" + useCache());
     }
 
+    @Override
+    public boolean useCache(){
+        return useCache;
+    }
+    
     /**
      * Formats response sent back by this adapter
      *

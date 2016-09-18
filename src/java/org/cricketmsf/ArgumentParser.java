@@ -30,7 +30,7 @@ public class ArgumentParser {
      * Default constructor
      */
     public ArgumentParser(){
-        arguments=new HashMap<String,String>();
+        arguments=new HashMap<>();
     }
     
     /**
@@ -61,15 +61,15 @@ public class ArgumentParser {
      * @return  map of argument values related to argument names
      */
     public static Map<String, String> getArguments(String[] args) {
-        HashMap<String, String> map = new HashMap<String,String>();
-        String name="";
+        HashMap<String, String> map = new HashMap<>();
+        String name;
         String option="";
         boolean confToRead = false;
         if(args==null){
             return map;
         }
-        for (int i = 0; i < args.length; i++) {
-            name = args[i];
+        for (String arg : args) {
+            name = arg;
             if (confToRead) {
                 if(name.startsWith("-")){
                     map.put("error", "option "+option+" must be followed by value");

@@ -63,6 +63,7 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
     /**
      * @return the silent
      */
+    @Override
     public boolean isSilent() {
         return silent;
     }

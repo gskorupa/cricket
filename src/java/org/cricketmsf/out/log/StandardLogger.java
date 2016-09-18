@@ -36,17 +36,17 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
     private Level level = null;
     private String name;
     private String fileLocation;
-    private boolean muted=false;
-    
-    private Logger logger=null;
+    private boolean muted = false;
+    private boolean consoleHandler = true;
+    private Logger logger = null;
 
     /**
-     * This method is executed while adapter is instantiated during the service start.
-     * It's used to configure the adapter according to the configuration.
-     * 
-     * @param properties    map of properties readed from the configuration file
-     * @param adapterName   name of the adapter set in the configuration file (can be different
-     *  from the interface and class name.
+     * This method is executed while adapter is instantiated during the service
+     * start. It's used to configure the adapter according to the configuration.
+     *
+     * @param properties map of properties readed from the configuration file
+     * @param adapterName name of the adapter set in the configuration file (can
+     * be different from the interface and class name.
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -54,7 +54,8 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         System.out.println("logger name: " + getName());
         setFileLocation(properties.get("log-file-name"));
         System.out.println("log-file-name: " + getFileLocation());
-        
+        setConsoleHandler(properties.getOrDefault("console", "true"));
+        System.out.println("log to console: " + isConsoleHandler());
         setLoggingLevel(properties.get("level"));
         Handler systemOut = new ConsoleHandler();
         systemOut.setLevel(level);
@@ -62,8 +63,10 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         logger = Logger.getLogger(getName());
         // Prevent logs from processed by default Console handler.
         logger.setUseParentHandlers(false);
-        logger.addHandler(systemOut);
-        if (null!=getFileLocation() && !getFileLocation().isEmpty()) {
+        if (isConsoleHandler()) {
+            logger.addHandler(systemOut);
+        }
+        if (null != getFileLocation() && !getFileLocation().isEmpty()) {
             try {
                 Handler fileOut = new FileHandler(getFileLocation());
                 fileOut.setLevel(level);
@@ -77,8 +80,9 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         System.out.println("logging level: " + logger.getLevel().getName());
     }
 
+    @Override
     public void log(Event event) {
-        if(isMuted()){ 
+        if (isMuted()) {
             return;
         }
         String level = event.getType();
@@ -115,10 +119,10 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
 
     private void setLoggingLevel(String level) {
         try {
-            if(level.equalsIgnoreCase("NONE")){
+            if (level.equalsIgnoreCase("NONE")) {
                 this.level = Level.parse("SEVERE");
                 setMuted(true);
-            }else{
+            } else {
                 this.level = Level.parse(level);
             }
         } catch (Exception e) {
@@ -177,5 +181,19 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
      */
     public void setMuted(boolean muted) {
         this.muted = muted;
+    }
+
+    /**
+     * @return the consoleHandler
+     */
+    public boolean isConsoleHandler() {
+        return consoleHandler;
+    }
+
+    /**
+     * @param useConsole the consoleHandler to set
+     */
+    public void setConsoleHandler(String useConsole) {
+        this.consoleHandler = useConsole.equalsIgnoreCase("true");
     }
 }

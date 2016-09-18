@@ -40,7 +40,7 @@ import org.cricketmsf.config.HttpHeader;
  * @author Grzegorz Skorupa
  */
 public abstract class Kernel {
-    
+
     private static final String VERSION = "1.0.0";
 
     // emergency LOGGER
@@ -58,14 +58,15 @@ public abstract class Kernel {
 
     // user defined properties
     public HashMap<String, String> properties = new HashMap<>();
-    
+
     public SimpleDateFormat dateFormat = null;
-    
+
     // http server
     private String host = null;
     private int port = 0;
     private Httpd httpd;
     private boolean httpHandlerLoaded = false;
+    private boolean inboundAdaptersLoaded = false;
 
     private static long eventSeed = System.currentTimeMillis();
 
@@ -75,8 +76,6 @@ public abstract class Kernel {
     private ArrayList corsHeaders;
 
     private long startedAt = 0;
-    
-    
 
     public Kernel() {
     }
@@ -176,7 +175,7 @@ public abstract class Kernel {
             ((Kernel) instance).setId(config.getId());
             ((Kernel) instance).setProperties(config.getProperties());
             ((Kernel) instance).configureTimeFormat();
-            ((Kernel) instance).loadAdapters(config);           
+            ((Kernel) instance).loadAdapters(config);
         } catch (Exception e) {
             instance = null;
             LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
@@ -184,9 +183,9 @@ public abstract class Kernel {
         }
         return instance;
     }
-    
-    private void configureTimeFormat(){
-        dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+
+    private void configureTimeFormat() {
+        dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
         dateFormat.setTimeZone(TimeZone.getTimeZone(getProperties().getOrDefault("time-zone", "GMT")));
     }
 
@@ -208,6 +207,7 @@ public abstract class Kernel {
     private synchronized void loadAdapters(Configuration config) throws Exception {
         printHeader(VERSION);
         setHttpHandlerLoaded(false);
+        setInboundAdaptersLoaded(false);
         System.out.println("LOADING SERVICE PROPERTIES FOR " + config.getService());
         System.out.println("UUID: " + getUuid().toString());
         setHost(config.getHost());
@@ -221,6 +221,7 @@ public abstract class Kernel {
         } catch (Exception e) {
         }
         System.out.println("http-port=" + getPort());
+        System.out.println("Extended properties: "+getProperties().toString());
         System.out.println("LOADING ADAPTERS");
         String adapterName = null;
         AdapterConfiguration ac = null;
@@ -235,13 +236,15 @@ public abstract class Kernel {
                     adaptersMap.put(adapterName, c.newInstance());
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.http.HttpAdapter) {
                         setHttpHandlerLoaded(true);
+                    } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.InboundAdapter) {
+                        setInboundAdaptersLoaded(true);
                     }
                     // loading properties
                     java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class, String.class);
                     loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
-                } catch (Exception ex) {
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                     adaptersMap.put(adapterName, null);
-                    System.out.println("Adapter " + adapterName + " configuration error: " + ex.getClass().getSimpleName());
+                    System.out.println("ERROR: " + adapterName + "configuration: " + ex.getClass().getSimpleName());
                 }
             }
         } catch (Exception e) {
@@ -338,34 +341,42 @@ public abstract class Kernel {
     public void start() throws InterruptedException {
         getAdapters();
         getEventHooks();
-        if (isHttpHandlerLoaded()) {
-            System.out.println("Starting http listener ...");
+        if (isHttpHandlerLoaded() || isInboundAdaptersLoaded()) {
+
             Runtime.getRuntime().addShutdownHook(
                     new Thread() {
                 public void run() {
                     try {
-                        Thread.sleep(200);
                         shutdown();
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
             });
-            setHttpd(new Httpd(this));
-            getHttpd().run();
+
             System.out.println("Running initialization tasks");
             runInitTasks();
+
+            System.out.println("Starting listeners ...");
+            // run listeners for inbound adapters
+            runListeners();
+
+            System.out.println("Starting http listener ...");
+            setHttpd(new Httpd(this));
+            getHttpd().run();
+
             long startedIn = System.currentTimeMillis() - startedAt;
             printHeader(VERSION);
-            System.out.println("# Service "+getId()+ " is running");
+            System.out.println("# Service " + getId() + " is running");
             System.out.println("#");
             System.out.println("# HTTP listening on port " + getPort());
             System.out.println("#");
             System.out.println("# Started in " + startedIn + "ms. Press Ctrl-C to stop");
             System.out.println();
-            while (true) {
-                Thread.sleep(200);
-            }
+            runFinalTasks();
+            Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+
         } else {
             System.out.println("Couldn't find any http request hook method. Exiting ...");
             System.exit(MIN_PRIORITY);
@@ -374,9 +385,30 @@ public abstract class Kernel {
 
     /**
      * Could be overriden in a service implementation to run required code at
-     * the service start. As the last step of the service starting procedure.
+     * the service start. As the last step of the service starting procedure before
+     * HTTP service.
      */
     protected void runInitTasks() {
+    }
+    
+    /**
+     * Could be overriden in a service implementation to run required code at
+     * the service start. As the last step of the service starting procedure after 
+     * HTTP service.
+     */
+    protected void runFinalTasks() {
+        
+    }
+
+    protected void runListeners() {
+        for (Map.Entry<String, Object> adapterEntry : getAdaptersMap().entrySet()) {
+            if (adapterEntry.getValue() instanceof org.cricketmsf.in.InboundAdapter) {
+                if (! (adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter)) {
+                    (new Thread((InboundAdapter) adapterEntry.getValue())).start();
+                    System.out.println(adapterEntry.getValue().getClass().getSimpleName());
+                }
+            }
+        }
     }
 
     public void shutdown() {
@@ -481,6 +513,20 @@ public abstract class Kernel {
      */
     public void setProperties(HashMap<String, String> properties) {
         this.properties = properties;
+    }
+
+    /**
+     * @return the inboundAdaptersLoaded
+     */
+    public boolean isInboundAdaptersLoaded() {
+        return inboundAdaptersLoaded;
+    }
+
+    /**
+     * @param inboundAdaptersLoaded the inboundAdaptersLoaded to set
+     */
+    public void setInboundAdaptersLoaded(boolean inboundAdaptersLoaded) {
+        this.inboundAdaptersLoaded = inboundAdaptersLoaded;
     }
 
 }

@@ -49,3 +49,5 @@ hs_err_pid*
 /www/kitty.jpg
 /data/echo.xml
 /data/scheduler.xml
+/www/test/test.txt
+/data/cricket.log.lck

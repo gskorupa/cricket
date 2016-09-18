@@ -55,12 +55,11 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
 
     /**
      * Reads the file content
-     *
-     * @param filePath the file location (prepended with the rootPath)
+     * @param file file object to read from
      * @return file content
      * @throws FileNotFoundException
      * @throws IOException
-     */   
+     */
     @Override
     public byte[] readFile(File file) throws FileNotFoundException, IOException {
         byte[] result = new byte[(int) file.length()];
@@ -87,6 +86,74 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         return result;
     }
 
+    @Override
+    public String getFilePath(RequestObject request) {
+        String filePath = request.pathExt;
+        if (filePath.isEmpty() || filePath.endsWith("/")) {
+            filePath = filePath.concat("index.html");
+        }
+        filePath = getRootPath() + filePath;
+        File f = new File(filePath);
+        if (f.isDirectory()) {
+            filePath = filePath.concat("/index.html");
+        }
+        return filePath;
+    }
+
+    @Override
+    public String getFileExt(String filePath) {
+        if (filePath.lastIndexOf(".") > 0) {
+            return filePath.substring(filePath.lastIndexOf("."));
+        } else {
+            return "";
+        }
+    }
+
+    @Override
+    public byte[] getFileBytes(File file, String filePath){
+        try {
+            checkAccess(filePath);
+            byte[] b = readFile(file);
+            return b;
+        } catch (Exception e) {
+            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter", filePath + " not readable or not found"));
+            byte[] emptyContent = {};
+            return emptyContent;
+        }
+    }
+    
+    @Override
+    public ParameterMapResult getFile(String filePath, HashMap parameters) {
+        ParameterMapResult result = new ParameterMapResult();
+        result.setData(parameters);
+        File f;
+        String fileExt;
+
+        Kernel.getInstance().handleEvent(Event.logFinest("FileReaderAdapter", "requested filePath=" + filePath));
+        try {
+            f = new File(filePath);
+            fileExt = getFileExt(filePath);
+
+            checkAccess(filePath);
+
+            byte[] b = readFile(f);
+            result.setPayload(b);
+            result.setFileExtension(fileExt);
+            result.setCode(HttpAdapter.SC_OK);
+            result.setModificationDate(new Date(f.lastModified()));
+            result.setMessage("");
+        } catch (Exception e) {
+            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter", filePath + " not readable or not found"));
+            byte[] emptyContent = {};
+            result.setPayload(emptyContent);
+            result.setFileExtension(".html");
+            result.setCode(HttpAdapter.SC_NOT_FOUND);
+            result.setMessage("file not found");
+        }
+        return result;
+    }
+
+    @Override
     public ParameterMapResult getFile(RequestObject request) {
         ParameterMapResult result = new ParameterMapResult();
         result.setData(new HashMap(request.parameters));
@@ -107,15 +174,17 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             f = new File(filePath);
             if (f.isDirectory()) {
                 filePath = filePath.concat("/index.html");
-                f = new File(filePath);
+
             }
+
+            f = new File(filePath);
 
             if (filePath.lastIndexOf(".") > 0) {
                 fileExt = filePath.substring(filePath.lastIndexOf("."));
             }
-            
+
             checkAccess(filePath);
-            
+
             byte[] b = readFile(f);
             result.setPayload(b);
             result.setFileExtension(fileExt);
@@ -125,8 +194,6 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         } catch (Exception e) {
             Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter", filePath + " not readable or not found"));
             byte[] emptyContent = {};
-            //String content="<HTML><body>ERROR</body></HTML>";
-            //result.setPayload(content.getBytes());
             result.setPayload(emptyContent);
             result.setFileExtension(".html");
             result.setCode(HttpAdapter.SC_NOT_FOUND);
