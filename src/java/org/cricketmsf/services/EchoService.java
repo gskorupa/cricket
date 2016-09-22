@@ -26,6 +26,11 @@ import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.HashMap;
 import org.cricketmsf.InboundAdapterHook;
+import org.cricketmsf.annotation.RestApiErrorCode;
+import org.cricketmsf.annotation.RestApiParameter;
+import org.cricketmsf.annotation.RestApiResult;
+import org.cricketmsf.annotation.RestApiResultCode;
+import org.cricketmsf.annotation.RestApiUriVariables;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.HttpAdapterIface;
@@ -156,7 +161,22 @@ public class EchoService extends Kernel {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
 
-    @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "*")
+    /**
+     * Handling request from EchoAdapter.
+     * The method is linked to the adapter by using @HttpAdapterHook annotation.
+     * Other annotations are for the API documentation only and has no result in the 
+     * method or the service logic.
+     * 
+     * @param requestEvent
+     * @return 
+     */
+    @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "GET")
+    @RestApiUriVariables(path = "/{id}", description = "eg. object ID (here not used)")
+    @RestApiParameter(name = "name", constraint = "optional", description = "")
+    @RestApiParameter(name = "surname", constraint = "optional", description = "")
+    @RestApiResult(description = "StandardResult with copy of request parameters")
+    @RestApiResultCode(code = 200, description = "OK")
+    @RestApiErrorCode(code = 500, description = "error forced by request parameter")
     public Object doGetEcho(Event requestEvent) {
         return sendEcho((RequestObject) requestEvent.getPayload());
     }
