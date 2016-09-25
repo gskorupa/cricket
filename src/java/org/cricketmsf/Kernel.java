@@ -201,7 +201,7 @@ public abstract class Kernel {
     /**
      * Instantiates adapters following configuration in cricket.json
      *
-     * @param config Configutation object loaded from cricket.json
+     * @param config Configuration object loaded from cricket.json
      * @throws Exception
      */
     private synchronized void loadAdapters(Configuration config) throws Exception {

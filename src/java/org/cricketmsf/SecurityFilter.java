@@ -20,46 +20,37 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 
 /**
- * This is default filter used to check required request conditions. 
- * Does nothing.
- * Could be used as a starting point to implement required filter.
- * 
+ * This is default filter used to check required request conditions. Does
+ * nothing. Could be used as a starting point to implement required filter.
+ *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class SecurityFilter extends Filter {
-    
-    private int errorCode=200;
-    private String errorMessage="";
+
+    private int errorCode = 200;
+    private String errorMessage = "";
 
     @Override
     public String description() {
         return "Default security filter";
     }
-    
-    public String getErrorMessage(){
-        return errorMessage;
-    }
-    
-    public int getErrorCode(){
-        return errorCode;
-    }
-    
+
     /**
-     * Does request analysis 
-     * 
-     * @param exchange  request object
-     * @return 
+     * Does request analysis
+     *
+     * @param exchange request object
+     * @return
      */
-    public boolean isProblemDetected(HttpExchange exchange){
+    public boolean isProblemDetected(HttpExchange exchange) {
         // if we found problems analysing exchange object
-        boolean problemDetected=false;
-        if(problemDetected){
-            setErrorCode(403);
-            setErrorMessage("request blocket by security filter\r\n");
+        boolean problemDetected = false;
+        if (problemDetected) {
+            errorCode = 403;
+            errorMessage = "request blocket by security filter\r\n";
             return true;
-        }else{
-            setErrorCode(200);
-            setErrorMessage("");
+        } else {
+            errorCode = 200;
+            errorMessage = "";
             return false;
         }
     }
@@ -67,29 +58,13 @@ public class SecurityFilter extends Filter {
     @Override
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
-        //System.out.println(this.getClass().getSimpleName());
         if (isProblemDetected(exchange)) {
-            String message=getErrorMessage();
-            exchange.sendResponseHeaders(getErrorCode(), message.length());
-            exchange.getResponseBody().write(message.getBytes());
+            exchange.sendResponseHeaders(errorCode, errorMessage.length());
+            exchange.getResponseBody().write(errorMessage.getBytes());
             exchange.getResponseBody().close();
         } else {
             chain.doFilter(exchange);
         }
-    }
-
-    /**
-     * @param errorCode the errorCode to set
-     */
-    public void setErrorCode(int errorCode) {
-        this.errorCode = errorCode;
-    }
-
-    /**
-     * @param errorMessage the errorMessage to set
-     */
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
     }
 
 }

@@ -157,7 +157,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             HttpHeader h;
             for(int i=0; i<Kernel.getInstance().getCorsHeaders().size(); i++){
                 h=(HttpHeader)Kernel.getInstance().getCorsHeaders().get(i);
-                headers.set(h.getName(),h.getValue());
+                headers.set(h.name, h.value);
             }
         }
         
@@ -219,10 +219,10 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         String formattedResponse;
         switch (type) {
             case JSON:
-                formattedResponse = JsonFormatter.getInstance().format(true, isExtendedResponse()?result:result.getData());
+                formattedResponse = JsonFormatter.getInstance().format(true, extendedResponse?result:result.getData());
                 break;
             case XML:
-                formattedResponse = XmlFormatter.getInstance().format(true, isExtendedResponse()?result:result.getData());
+                formattedResponse = XmlFormatter.getInstance().format(true, extendedResponse?result:result.getData());
                 break;
             case CSV:
                 // formats only Result.getData() object
@@ -370,16 +370,11 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         this.extendedResponse = !("false".equalsIgnoreCase(paramValue));
     }
 
-    /**
-     * @return the dateFormat
-     */
+
     public String getDateFormat() {
         return dateFormat;
     }
 
-    /**
-     * @param dateFormat the dateFormat to set
-     */
     public void setDateFormat(String dateFormat) {
         this.dateFormat = dateFormat;
     }
