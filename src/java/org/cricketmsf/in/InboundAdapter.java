@@ -19,7 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import org.cricketmsf.Event;
-import org.cricketmsf.InboundAdapterHook;
+import org.cricketmsf.annotation.InboundAdapterHook;
 import org.cricketmsf.Kernel;
 
 /**

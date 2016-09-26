@@ -41,26 +41,28 @@ public class SecurityFilter extends Filter {
      * @param exchange request object
      * @return
      */
-    public boolean isProblemDetected(HttpExchange exchange) {
+    public SecurityFilterResult checkRequest(HttpExchange exchange) {
         // if we found problems analysing exchange object
         boolean problemDetected = false;
+        
+        SecurityFilterResult result = new SecurityFilterResult();
         if (problemDetected) {
-            errorCode = 403;
-            errorMessage = "request blocket by security filter\r\n";
-            return true;
+            result.code = 403; // FORBIDDEN
+            result.message = "request blocket by security filter\r\n";
         } else {
-            errorCode = 200;
-            errorMessage = "";
-            return false;
+            result.code = 200;
+            result.message = "";
         }
+        return result;
     }
 
     @Override
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
-        if (isProblemDetected(exchange)) {
-            exchange.sendResponseHeaders(errorCode, errorMessage.length());
-            exchange.getResponseBody().write(errorMessage.getBytes());
+        SecurityFilterResult result = checkRequest(exchange);
+        if (result.code != 200) {
+            exchange.sendResponseHeaders(result.code, result.message.length());
+            exchange.getResponseBody().write(result.message.getBytes());
             exchange.getResponseBody().close();
         } else {
             chain.doFilter(exchange);

@@ -15,20 +15,11 @@
  */
 package org.cricketmsf;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author greg
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface InboundAdapterHook {
-    public String adapterName();
-    public String inputMethod();
+public class SecurityFilterResult {
+    public int code = 0;
+    public String message = "";
 }

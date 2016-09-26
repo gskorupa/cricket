@@ -18,14 +18,14 @@ package org.cricketmsf.services;
 import java.io.File;
 import java.util.Date;
 import org.cricketmsf.Event;
-import org.cricketmsf.EventHook;
-import org.cricketmsf.HttpAdapterHook;
+import org.cricketmsf.annotation.EventHook;
+import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.HashMap;
-import org.cricketmsf.InboundAdapterHook;
+import org.cricketmsf.annotation.InboundAdapterHook;
 import org.cricketmsf.annotation.RestApiErrorCode;
 import org.cricketmsf.annotation.RestApiParameter;
 import org.cricketmsf.annotation.RestApiResult;
@@ -108,7 +108,8 @@ public class EchoService extends Kernel {
     @HttpAdapterHook(adapterName = "HtmlGenAdapterIface", requestMethod = "GET")
     public Object doGet(Event event) {
         boolean useCache = htmlAdapter.useCache();
-        RequestObject request = (RequestObject) event.getPayload();
+        //RequestObject request = (RequestObject) event.getPayload();
+        RequestObject request = event.getRequest();
         String filePath = fileReader.getFilePath(request);
 
         ParameterMapResult result = new ParameterMapResult();
@@ -158,7 +159,7 @@ public class EchoService extends Kernel {
     public Object scheduleEvent(Event requestEvent) {
         Event e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from doGetEcho() processed by scheduler. Hello!");
         processEvent(e);
-        return sendEcho((RequestObject) requestEvent.getPayload());
+        return sendEcho(requestEvent.getRequest());
     }
 
     /**
@@ -178,7 +179,7 @@ public class EchoService extends Kernel {
     @RestApiResultCode(code = 200, description = "OK")
     @RestApiErrorCode(code = 500, description = "error forced by request parameter")
     public Object doGetEcho(Event requestEvent) {
-        return sendEcho((RequestObject) requestEvent.getPayload());
+        return sendEcho(requestEvent.getRequest());
     }
     
     @InboundAdapterHook(adapterName = "EnvironmentAdapter", inputMethod="*")
@@ -198,7 +199,6 @@ public class EchoService extends Kernel {
     }
 
     public Object sendEcho(RequestObject request) {
-
         StandardResult r = new StandardResult();
         r.setCode(HttpAdapter.SC_OK);
         if (!httpAdapter.isSilent()) {

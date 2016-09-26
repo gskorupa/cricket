@@ -26,7 +26,7 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
-import org.cricketmsf.HttpAdapterHook;
+import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,6 +38,7 @@ import org.cricketmsf.config.HttpHeader;
  */
 public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
+    public final static int NONE = -1;
     public final static int JSON = 0;
     public final static int XML = 1;
     public final static int CSV = 2;
@@ -63,7 +64,6 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     private String context;
 
     //private HashMap<String, String> hookMethodNames = new HashMap();
-    
     private boolean extendedResponse = true;
     private String dateFormat = "dd/MMM/yyyy:kk:mm:ss Z";
 
@@ -120,11 +120,9 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         Result result = createResponse(exchange);
 
         responseType = setResponseType(responseType, result.getFileExtension());
-
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData = {};
-        
         headers.set("Last-Modified", result.getModificationDateFormatted());
         switch (responseType) {
             case JSON:
@@ -147,34 +145,42 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 headers.set("Content-Type", "text/plain; charset=UTF-8");
                 responseData = formatResponse(TEXT, result);
                 break;
+            case NONE:
+                headers.set("Content-Type", "text/plain; charset=UTF-8");
+                responseData = result.getMessage()!=null ? result.getMessage().getBytes() : "".getBytes();
+                break;
             default:
                 headers.set("Content-Type", getMimeType(result.getFileExtension()));
                 responseData = result.getPayload();
                 break;
         }
-
-        if(Kernel.getInstance().getCorsHeaders()!=null){
+        if (Kernel.getInstance().getCorsHeaders() != null) {
             HttpHeader h;
-            for(int i=0; i<Kernel.getInstance().getCorsHeaders().size(); i++){
-                h=(HttpHeader)Kernel.getInstance().getCorsHeaders().get(i);
+            for (int i = 0; i < Kernel.getInstance().getCorsHeaders().size(); i++) {
+                h = (HttpHeader) Kernel.getInstance().getCorsHeaders().get(i);
                 headers.set(h.name, h.value);
             }
         }
-        
         //calculate error code from response object
         int errCode = 200;
         switch (result.getCode()) {
             case 0:
                 errCode = 200;
                 break;
-            case 405:
-                if (responseData.length == 0) {
-                    responseData = result.getMessage().getBytes();
-                }
-                errCode = 405;
-                break;
+            //case 405:
+            //    if (responseData.length == 0) {
+            //        responseData = result.getMessage().getBytes();
+            //        responseData = "not allowed".getBytes();
+            //    }
+            //    errCode = 405;
+            //    break;
             default:
                 errCode = result.getCode();
+                if (responseData.length == 0) {
+                    if (result.getMessage() != null) {
+                        responseData = result.getMessage().getBytes();
+                    }
+                }
                 break;
         }
         exchange.sendResponseHeaders(errCode, responseData.length);
@@ -209,20 +215,25 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     }
 
     /**
+     * Calculates response type based on the file type
      *
+     * @param oryginalResponseType
+     * @param fileExt
+     * @return response type
      */
-    protected int setResponseType(int oryginalResponseType, String fileExt) {
-        return oryginalResponseType;
+    protected int setResponseType(int expectedResponseType, String fileExt) {
+        //return fileExt != null ? expectedResponseType : NONE;
+        return expectedResponseType;
     }
 
     public byte[] formatResponse(int type, Result result) {
         String formattedResponse;
         switch (type) {
             case JSON:
-                formattedResponse = JsonFormatter.getInstance().format(true, extendedResponse?result:result.getData());
+                formattedResponse = JsonFormatter.getInstance().format(true, extendedResponse ? result : result.getData());
                 break;
             case XML:
-                formattedResponse = XmlFormatter.getInstance().format(true, extendedResponse?result:result.getData());
+                formattedResponse = XmlFormatter.getInstance().format(true, extendedResponse ? result : result.getData());
                 break;
             case CSV:
                 // formats only Result.getData() object
@@ -256,9 +267,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         requestObject.method = method;
         requestObject.parameters = parameters;
         requestObject.pathExt = pathExt;
-        requestObject.headers =exchange.getRequestHeaders();
+        requestObject.headers = exchange.getRequestHeaders();
         requestObject.clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
-                
 
         Result result = null;
         String hookMethodName = getHookMethodNameForMethod(method);
@@ -268,6 +278,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             result = new StandardResult();
             result.setCode(SC_METHOD_NOT_ALLOWED);
             result.setMessage("method " + method + " is not allowed");
+            result.setFileExtension(null);
             //todo: set "Allow" header
             return result;
         }
@@ -364,12 +375,11 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     }
 
     /**
-     * @param paramValue 
+     * @param paramValue
      */
     public void setExtendedResponse(String paramValue) {
         this.extendedResponse = !("false".equalsIgnoreCase(paramValue));
     }
-
 
     public String getDateFormat() {
         return dateFormat;

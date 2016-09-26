@@ -25,16 +25,16 @@ import java.util.Date;
 public class StandardResult implements Result {
 
     private int code;
-    private String message;
-    private Object data;
-    private byte[] payload;
-    private String fileExtension;
+    private String message = null;
+    private Object data = null;
+    private byte[] payload = {};
+    private String fileExtension = null;
     private Date modificationDate;
     private String modificationDateFormatted;
 
     public StandardResult() {
         setCode(HttpAdapter.SC_OK);
-        setModificationDate(new Date());
+        setModificationDate(new Date());        
     }
 
     public StandardResult(Object data) {

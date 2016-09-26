@@ -15,6 +15,7 @@
  */
 package org.cricketmsf;
 
+import org.cricketmsf.annotation.EventHook;
 import com.sun.net.httpserver.Filter;
 import org.cricketmsf.config.AdapterConfiguration;
 import org.cricketmsf.config.ConfigSet;

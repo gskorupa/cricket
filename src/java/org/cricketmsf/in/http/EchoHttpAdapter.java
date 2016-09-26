@@ -27,12 +27,12 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
     private boolean silent = false;
 
     /**
-     * This method is executed while adapter is instantiated during the service start.
-     * It's used to configure the adapter according to the configuration.
-     * 
-     * @param properties    map of properties readed from the configuration file
-     * @param adapterName   name of the adapter set in the configuration file (can be different
-     *  from the interface and class name.
+     * This method is executed while adapter is instantiated during the service
+     * start. It's used to configure the adapter according to the configuration.
+     *
+     * @param properties map of properties readed from the configuration file
+     * @param adapterName name of the adapter set in the configuration file (can
+     * be different from the interface and class name.
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -58,6 +58,11 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
     @Override
     public byte[] formatResponse(int type, Result result) {
         return super.formatResponse(type, result);
+    }
+
+    @Override
+    protected int setResponseType(int oryginalResponseType, String fileExt) {
+        return oryginalResponseType;
     }
 
     /**

@@ -25,16 +25,18 @@ import java.util.regex.Pattern;
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, Adapter {
-    
+
     private boolean useCache = false;
+    private boolean processingVariables = false;
+    
 
     /**
-     * This method is executed while adapter is instantiated during the service start.
-     * It's used to configure the adapter according to the configuration.
-     * 
-     * @param properties    map of properties readed from the configuration file
-     * @param adapterName   name of the adapter set in the configuration file (can be different
-     *  from the interface and class name.
+     * This method is executed while adapter is instantiated during the service
+     * start. It's used to configure the adapter according to the configuration.
+     *
+     * @param properties map of properties readed from the configuration file
+     * @param adapterName name of the adapter set in the configuration file (can
+     * be different from the interface and class name.
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -43,13 +45,15 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
         System.out.println("context=" + getContext());
         useCache = properties.getOrDefault("use-cache", "false").equalsIgnoreCase("true");
         System.out.println("use-cache=" + useCache());
+        processingVariables= (properties.getOrDefault("page-processor", "false").equalsIgnoreCase("true"));
+        System.out.println("page-processor=" + processingVariables);
     }
 
     @Override
-    public boolean useCache(){
+    public boolean useCache() {
         return useCache;
     }
-    
+
     /**
      * Formats response sent back by this adapter
      *
@@ -59,7 +63,7 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
      */
     @Override
     public byte[] formatResponse(int type, Result result) {
-        if (type == HTML) {
+        if (type == HTML && processingVariables) {
             return updateHtml((ParameterMapResult) result);
         } else {
             return result.getPayload();
@@ -68,12 +72,16 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
 
     @Override
     protected int setResponseType(int oryginalResponseType, String fileExt) {
-        switch (fileExt) {
-            case ".html":
-            case ".htm":
-                return HTML;
-            default:
-                return FILE;
+        if (fileExt != null) {
+            switch (fileExt) {
+                case ".html":
+                case ".htm":
+                    return HTML;
+                default:
+                    return FILE;
+            }
+        } else {
+            return oryginalResponseType;
         }
     }
 
@@ -93,10 +101,10 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
                 while (m.find()) {
                     paramName = m.group().substring(1);
                     replacement = (String) map.getOrDefault(paramName, m.group());
-                    try{
-                    m.appendReplacement(res, replacement);
-                    }catch(Exception e){
-                        
+                    try {
+                        m.appendReplacement(res, replacement);
+                    } catch (Exception e) {
+
                     }
                 }
                 m.appendTail(res);

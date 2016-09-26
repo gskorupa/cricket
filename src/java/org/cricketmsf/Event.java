@@ -31,6 +31,7 @@ public class Event {
     public static final String CATEGORY_LOG = "LOG";
     public static final String CATEGORY_HTTP_LOG = "HTTPLOG";
     public static final String CATEGORY_GENERIC = "EVENT";
+    public static final String CATEGORY_HTTP = "HTTP";
 
     public static final String LOG_ALL = "ALL";
     public static final String LOG_FINEST = "FINEST";
@@ -51,7 +52,7 @@ public class Event {
     private String serviceId;
     private UUID serviceUuid;
     private long rootEventId = -1;
-    private boolean httpType = false;
+    private RequestObject request = null;
 
     /**
      * Creates new Event instance. Sets new id and createdAt parameters.
@@ -103,9 +104,10 @@ public class Event {
         this.serviceId = Kernel.getInstance().getId();
         this.serviceUuid = Kernel.getInstance().getUuid();
         this.rootEventId = -1;
-        this.category = Event.CATEGORY_GENERIC;
-        this.type = "HTTP";
-        this.payload = request;
+        this.category = Event.CATEGORY_HTTP;
+        this.type = "";
+        this.payload = null;
+        this.request = request;
         this.timePoint = null;
         createdAt = System.currentTimeMillis();
         calculateTimePoint();
@@ -559,10 +561,11 @@ public class Event {
 
     public String getRequestParameter(String name) {
         String value = null;
-        try {
-            value = (String) ((RequestObject) getPayload()).parameters.get(name);
-        } catch (Exception e) {
-        }
+        //try {
+        //    value = (String) ((RequestObject) getPayload()).parameters.get(name);
+        //} catch (Exception e) {
+        //}
+        value = (String)getRequest().parameters.get(name);
         return value;
     }
 
@@ -570,10 +573,11 @@ public class Event {
      * @return the request
      */
     public RequestObject getRequest() {
-        if(httpType){
-            return (RequestObject)payload;
-        }
-        return null;
+        //if(httpEvent){
+          //  return (RequestObject)payload;
+        //}
+        //return null;
+        return request;
     }
 
 }
