@@ -57,13 +57,13 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
     /**
      * Formats response sent back by this adapter
      *
-     * @param type ignored
+     * @param type 
      * @param result received back from the service
      * @return the payload field of the result modified with parameters
      */
     @Override
-    public byte[] formatResponse(int type, Result result) {
-        if (type == HTML && processingVariables) {
+    public byte[] formatResponse(String type, Result result) {
+        if (HTML.equalsIgnoreCase(type) && processingVariables) {
             return updateHtml((ParameterMapResult) result);
         } else {
             return result.getPayload();
@@ -71,14 +71,14 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
     }
 
     @Override
-    protected int setResponseType(int oryginalResponseType, String fileExt) {
+    protected String setResponseType(String oryginalResponseType, String fileExt) {
         if (fileExt != null) {
             switch (fileExt) {
                 case ".html":
                 case ".htm":
-                    return HTML;
+                    return "text/html";
                 default:
-                    return FILE;
+                    return "";
             }
         } else {
             return oryginalResponseType;

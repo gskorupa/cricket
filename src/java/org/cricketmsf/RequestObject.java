@@ -30,5 +30,5 @@ public class RequestObject {
     public String pathExt=null;
     public Headers headers = null;
     public Map<String, Object> parameters = new HashMap<>();
-
+    public String acceptedResponseType = null;
 }

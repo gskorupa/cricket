@@ -30,6 +30,7 @@ import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import org.cricketmsf.config.HttpHeader;
 
 /**
@@ -38,13 +39,11 @@ import org.cricketmsf.config.HttpHeader;
  */
 public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
-    public final static int NONE = -1;
-    public final static int JSON = 0;
-    public final static int XML = 1;
-    public final static int CSV = 2;
-    public final static int HTML = 3;
-    public final static int FILE = 4;
-    public final static int TEXT = 5;
+    public final static String JSON = "application/json";
+    public final static String XML = "text/xml";
+    public final static String CSV = "text/csv";
+    public final static String HTML = "text/html";
+    public final static String TEXT = "text/plain";
 
     public final static int SC_OK = 200;
     public final static int SC_ACCEPTED = 202;
@@ -61,6 +60,15 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     public final static int SC_INTERNAL_SERVER_ERROR = 500;
     public final static int SC_NOT_IMPLEMENTED = 501;
 
+    private String[] acceptedTypes = {
+        "application/json",
+        "text/xml",
+        "text/html",
+        "text/csv",
+        "text/plain"
+    };
+    protected HashMap acceptedTypesMap;
+
     private String context;
 
     //private HashMap<String, String> hookMethodNames = new HashMap();
@@ -69,6 +77,10 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
     public HttpAdapter() {
         super();
+        acceptedTypesMap = new HashMap();
+        for (int i = 0; i < acceptedTypes.length; i++) {
+            acceptedTypesMap.put(acceptedTypes[i], acceptedTypes[i]);
+        }
     }
 
     @Override
@@ -91,64 +103,49 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        int responseType = JSON;
-
-        for (String v : exchange.getRequestHeaders().get("Accept")) {
-            switch (v.toLowerCase()) {
-                case "application/json":
-                    responseType = JSON;
-                    break;
-                case "text/xml":
-                    responseType = XML;
-                    break;
-                case "text/html":
-                    responseType = HTML;
-                    break;
-                case "text/csv":
-                    responseType = CSV;
-                    break;
-                case "text/plain":
-                    responseType = TEXT;
-                    break;
-                default:
-                    responseType = JSON;
-                    break;
+        //int responseType = JSON;
+        String acceptedResponseType = JSON;
+        try {
+            acceptedResponseType = exchange.getRequestHeaders().get("Accept").get(0);
+            if (!acceptedTypesMap.containsKey(acceptedResponseType)) {
+                acceptedResponseType = JSON;
             }
-
+        } catch (IndexOutOfBoundsException e) {
         }
+        
+        Result result = createResponse(exchange, acceptedResponseType);
 
-        Result result = createResponse(exchange);
+        acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
 
-        responseType = setResponseType(responseType, result.getFileExtension());
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData = {};
         headers.set("Last-Modified", result.getModificationDateFormatted());
-        switch (responseType) {
-            case JSON:
+        switch (acceptedResponseType.toLowerCase()) {
+            case "application/json":
                 headers.set("Content-Type", "application/json; charset=UTF-8");
                 responseData = formatResponse(JSON, result);
                 break;
-            case XML:
+            case "text/xml":
                 headers.set("Content-Type", "text/xml; charset=UTF-8");
                 responseData = formatResponse(XML, result);
                 break;
-            case HTML:
+            case "text/html":
                 headers.set("Content-Type", "text/html; charset=UTF-8");
                 responseData = formatResponse(HTML, result);
                 break;
-            case CSV:
+            case "text/csv":
                 headers.set("Content-Type", "text/csv; charset=UTF-8");
                 responseData = formatResponse(CSV, result);
                 break;
-            case TEXT:
+            case "text/plain":
                 headers.set("Content-Type", "text/plain; charset=UTF-8");
                 responseData = formatResponse(TEXT, result);
                 break;
-            case NONE:
-                headers.set("Content-Type", "text/plain; charset=UTF-8");
-                responseData = result.getMessage()!=null ? result.getMessage().getBytes() : "".getBytes();
-                break;
+            //case NONE:
+            //    headers.set("Content-Type", "text/plain; charset=UTF-8");
+            //    responseData = result.getMessage() != null ? result.getMessage().getBytes() : "".getBytes();
+            //    break;
             default:
                 headers.set("Content-Type", getMimeType(result.getFileExtension()));
                 responseData = result.getPayload();
@@ -162,27 +159,18 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             }
         }
         //calculate error code from response object
-        int errCode = 200;
-        switch (result.getCode()) {
-            case 0:
-                errCode = 200;
-                break;
-            //case 405:
-            //    if (responseData.length == 0) {
-            //        responseData = result.getMessage().getBytes();
-            //        responseData = "not allowed".getBytes();
-            //    }
-            //    errCode = 405;
-            //    break;
-            default:
-                errCode = result.getCode();
-                if (responseData.length == 0) {
-                    if (result.getMessage() != null) {
-                        responseData = result.getMessage().getBytes();
-                    }
+        int errCode;
+        if (result.getCode() == 0) {
+            errCode = SC_OK;
+        } else {
+            errCode = result.getCode();
+            if (responseData.length == 0) {
+                if (result.getMessage() != null) {
+                    responseData = result.getMessage().getBytes();
                 }
-                break;
+            }
         }
+
         exchange.sendResponseHeaders(errCode, responseData.length);
         sendLogEvent(exchange, responseData.length);
         OutputStream os = exchange.getResponseBody();
@@ -208,25 +196,25 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             case ".js":
                 return "text/javascript";
             case ".json":
-                return "application/json";
+                return JSON;
             default:
-                return "text/plain";
+                return TEXT;
         }
     }
 
     /**
      * Calculates response type based on the file type
      *
-     * @param oryginalResponseType
+     * @param acceptedResponseType
      * @param fileExt
      * @return response type
      */
-    protected int setResponseType(int expectedResponseType, String fileExt) {
+    protected String setResponseType(String acceptedResponseType, String fileExt) {
         //return fileExt != null ? expectedResponseType : NONE;
-        return expectedResponseType;
+        return acceptedResponseType;
     }
 
-    public byte[] formatResponse(int type, Result result) {
+    public byte[] formatResponse(String type, Result result) {
         String formattedResponse;
         switch (type) {
             case JSON:
@@ -250,7 +238,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         return formattedResponse.getBytes();
     }
 
-    private Result createResponse(HttpExchange exchange) {
+    private Result createResponse(HttpExchange exchange, String acceptedResponseType) {
         Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
         String method = exchange.getRequestMethod();
         //String adapterContext = exchange.getHttpContext().getPath();
@@ -269,6 +257,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         requestObject.pathExt = pathExt;
         requestObject.headers = exchange.getRequestHeaders();
         requestObject.clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
+        requestObject.acceptedResponseType = acceptedResponseType;
 
         Result result = null;
         String hookMethodName = getHookMethodNameForMethod(method);

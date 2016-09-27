@@ -24,8 +24,7 @@ import java.util.HashMap;
  */
 public class ScriptingAdapter extends HttpAdapter implements HttpAdapterIface, Adapter {
 
-    private String responseTypeString;
-    private int responseType;
+    private String responseType;
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -40,8 +39,8 @@ public class ScriptingAdapter extends HttpAdapter implements HttpAdapterIface, A
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         System.out.println("context=" + getContext());
-        setResponseType(properties.get("response-type"));
-        System.out.println("response-type=" + getResponseTypeString());
+        setResponseType(properties.getOrDefault("response-type","application/json"));
+        System.out.println("response-type=" + getResponseType());
     }
 
     /**
@@ -52,45 +51,23 @@ public class ScriptingAdapter extends HttpAdapter implements HttpAdapterIface, A
      * @return the payload field of the result modified with parameters
      */
     @Override
-    public byte[] formatResponse(int type, Result result) {
+    public byte[] formatResponse(String type, Result result) {
         return result.getPayload();
     }
 
-    protected int setResponseType(String config) {
-        switch (config.toUpperCase()) {
-            case "JSON": 
-                setResponseTypeString("JSON");
-                responseType = JSON;
-            case "TEXT": 
-                setResponseTypeString("TEXT");
-                responseType = TEXT;
-            default:
-                setResponseTypeString("JSON");
-                responseType = JSON;
+    protected void setResponseType(String config) {
+        if(acceptedTypesMap.containsKey(config)){
+            responseType = config;
+        }else{
+            responseType = JSON;
         }
-        return responseType;
     }
 
     /**
      * @return the responseType
      */
-    public int getResponseType() {
+    public String getResponseType() {
         return responseType;
-    }
-
-
-    /**
-     * @return the responseTypeString
-     */
-    public String getResponseTypeString() {
-        return responseTypeString;
-    }
-
-    /**
-     * @param responseTypeString the responseTypeString to set
-     */
-    public void setResponseTypeString(String responseTypeString) {
-        this.responseTypeString = responseTypeString;
     }
 
 }

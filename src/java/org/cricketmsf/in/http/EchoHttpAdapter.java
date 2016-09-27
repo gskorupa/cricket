@@ -56,12 +56,12 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
      * @return String formatted according to required type
      */
     @Override
-    public byte[] formatResponse(int type, Result result) {
+    public byte[] formatResponse(String type, Result result) {
         return super.formatResponse(type, result);
     }
 
     @Override
-    protected int setResponseType(int oryginalResponseType, String fileExt) {
+    protected String setResponseType(String oryginalResponseType, String fileExt) {
         return oryginalResponseType;
     }
 
