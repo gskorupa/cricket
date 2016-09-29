@@ -17,16 +17,23 @@ package org.cricketmsf.in.http;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author greg
  */
+
+@XmlAccessorType (XmlAccessType.FIELD)
 public class StandardResult implements Result {
 
+    private Object data = null;
+    
     private int code;
     private String message = null;
-    private Object data = null;
     private byte[] payload = {};
     private String fileExtension = null;
     private Date modificationDate;

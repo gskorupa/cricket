@@ -150,6 +150,8 @@ public class EchoService extends Kernel {
         } else {
             result.setCode(HttpAdapter.SC_NOT_FOUND);
             result.setMessage("file not found");
+            result.setPayload(fo.content);
+            result.setFileExtension(null);
         }
 
         return result;

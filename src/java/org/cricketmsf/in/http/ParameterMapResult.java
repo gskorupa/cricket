@@ -40,6 +40,11 @@ public class ParameterMapResult implements Result {
     private String fileExt;
     private Date modificationDate;
     private String modificationDateFormatted;
+    
+    public ParameterMapResult() {
+        setCode(HttpAdapter.SC_OK);
+        setModificationDate(new Date());        
+    }
 
     public void setCode(int code) {
         this.code = code;

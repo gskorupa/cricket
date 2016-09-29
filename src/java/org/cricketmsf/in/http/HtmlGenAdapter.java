@@ -87,7 +87,7 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
 
     private byte[] updateHtml(ParameterMapResult result) {
 
-        if (result.getData() != null) {
+        if (result.getData() != null && result.getPayload()!=null) {
             HashMap map = (HashMap) result.getData();
             if (!map.isEmpty()) {
                 //output = result.getPayload();

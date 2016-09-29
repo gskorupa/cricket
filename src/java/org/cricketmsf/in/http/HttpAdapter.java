@@ -114,9 +114,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         }
         
         Result result = createResponse(exchange, acceptedResponseType);
-
         acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
-
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData = {};
@@ -158,20 +156,18 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 headers.set(h.name, h.value);
             }
         }
-        //calculate error code from response object
-        int errCode;
+
         if (result.getCode() == 0) {
-            errCode = SC_OK;
+            result.setCode(SC_OK);
         } else {
-            errCode = result.getCode();
             if (responseData.length == 0) {
                 if (result.getMessage() != null) {
                     responseData = result.getMessage().getBytes();
                 }
             }
         }
+        exchange.sendResponseHeaders(result.getCode(), responseData.length);
 
-        exchange.sendResponseHeaders(errCode, responseData.length);
         sendLogEvent(exchange, responseData.length);
         OutputStream os = exchange.getResponseBody();
         os.write(responseData);

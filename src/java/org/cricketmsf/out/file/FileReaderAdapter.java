@@ -116,7 +116,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             byte[] b = readFile(file);
             return b;
         } catch (Exception e) {
-            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter", filePath + " not readable or not found"));
+            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter(1)", filePath + " not readable or not found"));
             byte[] emptyContent = {};
             return emptyContent;
         }
@@ -143,7 +143,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             result.setModificationDate(new Date(f.lastModified()));
             result.setMessage("");
         } catch (Exception e) {
-            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter", filePath + " not readable or not found"));
+            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter(2)", filePath + " not readable or not found"));
             byte[] emptyContent = {};
             result.setPayload(emptyContent);
             result.setFileExtension(".html");
@@ -192,7 +192,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             result.setModificationDate(new Date(f.lastModified()));
             result.setMessage("");
         } catch (Exception e) {
-            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter", filePath + " not readable or not found"));
+            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter(3)", filePath + " not readable or not found"));
             byte[] emptyContent = {};
             result.setPayload(emptyContent);
             result.setFileExtension(".html");

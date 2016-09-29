@@ -71,7 +71,8 @@
                     "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
                     "properties": {
                         "context": "/",
-                        "use-cache": "false"
+                        "use-cache": "false",
+                        "page-processor": "false"
                     }
                 },
                 "FileReaderAdapterIface": {
