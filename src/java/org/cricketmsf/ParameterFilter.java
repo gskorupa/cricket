@@ -30,8 +30,8 @@ import java.util.Map;
 
 /**
  * This filter is used to recognize, parse and transform request parameters into
- * the parameters map which could be easily accessible within adapters or service
- * methods.
+ * the parameters map which could be easily accessible within adapters or
+ * service methods.
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  * Many thanks for Leonardo Marcelino https://leonardom.wordpress.com
@@ -60,7 +60,6 @@ public class ParameterFilter extends Filter {
             default:
                 parseGetParameters(exchange);
         }
-        //System.out.println(this.getClass().getSimpleName());
         chain.doFilter(exchange);
     }
 
@@ -80,30 +79,59 @@ public class ParameterFilter extends Filter {
         String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> parameters = new HashMap<String, Object>();
+        Map<String, Object> parameters = new HashMap<>();
         InputStreamReader isr
                 = new InputStreamReader(exchange.getRequestBody(), "utf-8");
         BufferedReader br = new BufferedReader(isr);
         String query;
         StringBuilder content = new StringBuilder();
-        switch (contentType.toLowerCase()) {
-            case "text/plain":
-            case "text/csv":
-            case "application/json":
-            case "text/xml":
-                while ((query = br.readLine()) != null) {
-                    content.append(query);
-                    content.append("\r\n");
-                }
-                parameters.put("data", content.toString());
-                break;
-            default:
-                while ((query = br.readLine()) != null) {
-                    parseQuery(query, parameters);
-                }
+        if (contentType.startsWith("multipart/form-data;")) {
+            parameters=parseForm(contentType.substring(30), br);
+        } else {
+            switch (contentType.toLowerCase()) {
+                case "text/plain":
+                case "text/csv":
+                case "application/json":
+                case "text/xml":
+                    while ((query = br.readLine()) != null) {
+                        content.append(query);
+                        content.append("\r\n");
+                    }
+                    parameters.put("data", content.toString());
+                    break;
+                default:
+                    while ((query = br.readLine()) != null) {
+                        parseQuery(query, parameters);
+                    }
+            }
         }
         isr.close();
         exchange.setAttribute("parameters", parameters);
+    }
+    
+    private HashMap<String, Object> parseForm(String boundary, BufferedReader br)
+        throws IOException{
+        
+        HashMap<String, Object> parameters = new HashMap<>();
+        String line;
+        String contentDisposition;
+        String paramName;
+        String value;
+        line=br.readLine();
+        do {
+            //first line is boundary
+            //read next
+            contentDisposition=br.readLine();
+            paramName=contentDisposition.substring(38, contentDisposition.length()-1);
+            //empty line
+            line = br.readLine();
+            value="";
+            while(!(line=br.readLine()).startsWith("--"+boundary)){
+                value=value.concat(line);
+            }
+            parameters.put(paramName, value);
+        }while(!line.equals("--"+boundary+"--"));
+        return parameters;
     }
 
     @SuppressWarnings("unchecked")

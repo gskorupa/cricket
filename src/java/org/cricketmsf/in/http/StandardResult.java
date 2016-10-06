@@ -19,8 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
@@ -98,6 +96,10 @@ public class StandardResult implements Result {
 
     public void setPayload(byte[] payload) {
         this.payload = payload;
+    }
+    
+    public void buildPayload(String payload) {
+        this.payload = payload.getBytes();
     }
 
     public String getFileExtension() {

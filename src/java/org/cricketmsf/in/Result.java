@@ -45,5 +45,5 @@ public interface Result {
     
     public void setPayload(byte[] payload);
     
-    
+    public void buildPayload(String payload);
 }
