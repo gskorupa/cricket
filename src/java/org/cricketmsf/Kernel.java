@@ -107,7 +107,7 @@ public abstract class Kernel {
     }
 
     private String getHookMethodNameForEvent(String eventCategory) {
-        String result = null;
+        String result;
         result = eventHookMethods.get(eventCategory);
         if (null == result) {
             result = eventHookMethods.get("*");
@@ -481,9 +481,9 @@ public abstract class Kernel {
      */
     public void setCorsHeaders(ArrayList corsHeaders) {
         //this.corsHeaders = corsHeaders;
+        this.corsHeaders = new ArrayList<>();
         if (corsHeaders != null) {
             String header;
-            this.corsHeaders = new ArrayList<HttpHeader>();
             for (int i = 0; i < corsHeaders.size(); i++) {
                 header = (String) corsHeaders.get(i);
                 try {
@@ -497,8 +497,6 @@ public abstract class Kernel {
                     e.printStackTrace();
                 }
             }
-        } else {
-            this.corsHeaders = null;
         }
     }
 

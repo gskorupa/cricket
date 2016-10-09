@@ -22,7 +22,7 @@ import java.util.HashMap;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class SimpleHttpAdapter extends HttpAdapter implements HttpAdapterIface, Adapter {
+public class StandardHttpAdapter extends HttpAdapter implements HttpAdapterIface, Adapter {
 
     /**
      * This method is executed while adapter is instantiated during the service start.

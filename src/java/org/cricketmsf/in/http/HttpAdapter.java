@@ -60,27 +60,29 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     public final static int SC_INTERNAL_SERVER_ERROR = 500;
     public final static int SC_NOT_IMPLEMENTED = 501;
 
-    private String[] acceptedTypes = {
+    private final String[] acceptedTypes = {
         "application/json",
         "text/xml",
         "text/html",
         "text/csv",
         "text/plain"
     };
-    protected HashMap acceptedTypesMap;
+    protected HashMap<String, String> acceptedTypesMap;
 
     private String context;
 
     //private HashMap<String, String> hookMethodNames = new HashMap();
     private boolean extendedResponse = true;
-    private String dateFormat = "dd/MMM/yyyy:kk:mm:ss Z";
+    //private String dateFormat = "dd/MMM/yyyy:kk:mm:ss Z";
+    SimpleDateFormat dateFormat;
 
     public HttpAdapter() {
         super();
-        acceptedTypesMap = new HashMap();
-        for (int i = 0; i < acceptedTypes.length; i++) {
-            acceptedTypesMap.put(acceptedTypes[i], acceptedTypes[i]);
+        acceptedTypesMap = new HashMap<>();
+        for (String acceptedType : acceptedTypes) {
+            acceptedTypesMap.put(acceptedType, acceptedType);
         }
+        dateFormat = Kernel.getInstance().dateFormat;
     }
 
     @Override
@@ -106,19 +108,33 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         //int responseType = JSON;
         String acceptedResponseType = JSON;
         try {
-            acceptedResponseType = exchange.getRequestHeaders().get("Accept").get(0);
-            if (!acceptedTypesMap.containsKey(acceptedResponseType)) {
-                acceptedResponseType = JSON;
-            }
+            //acceptedResponseType = exchange.getRequestHeaders().get("Accept").get(0);
+            acceptedResponseType
+                    = acceptedTypesMap.getOrDefault(exchange.getRequestHeaders().get("Accept").get(0), JSON);
+            //if (!acceptedTypesMap.containsKey(acceptedResponseType)) {
+            //    acceptedResponseType = JSON;
+            //}
         } catch (IndexOutOfBoundsException e) {
         }
+
+        //Result result = createResponse(exchange, acceptedResponseType);
         
-        Result result = createResponse(exchange, acceptedResponseType);
+        Result result = createResponse(buildRequestObject(exchange, acceptedResponseType));
+
         acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
-        byte[] responseData = {};
+        byte[] responseData;
+        if (acceptedTypesMap.containsKey(acceptedResponseType)) {
+            headers.set("Content-Type", acceptedResponseType + "; charset=UTF-8");
+            responseData = formatResponse(acceptedResponseType, result);
+        } else {
+            headers.set("Content-Type", getMimeType(result.getFileExtension()));
+            responseData = result.getPayload();
+        }
         headers.set("Last-Modified", result.getModificationDateFormatted());
+
+        /*
         switch (acceptedResponseType.toLowerCase()) {
             case "application/json":
                 headers.set("Content-Type", "application/json; charset=UTF-8");
@@ -149,12 +165,11 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 responseData = result.getPayload();
                 break;
         }
-        if (Kernel.getInstance().getCorsHeaders() != null) {
-            HttpHeader h;
-            for (int i = 0; i < Kernel.getInstance().getCorsHeaders().size(); i++) {
-                h = (HttpHeader) Kernel.getInstance().getCorsHeaders().get(i);
-                headers.set(h.name, h.value);
-            }
+         */
+        HttpHeader h;
+        for (int i = 0; i < Kernel.getInstance().getCorsHeaders().size(); i++) {
+            h = (HttpHeader) Kernel.getInstance().getCorsHeaders().get(i);
+            headers.set(h.name, h.value);
         }
 
         if (result.getCode() == 0) {
@@ -169,9 +184,14 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         exchange.sendResponseHeaders(result.getCode(), responseData.length);
 
         sendLogEvent(exchange, responseData.length);
+        /*
         OutputStream os = exchange.getResponseBody();
         os.write(responseData);
         os.close();
+        */
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(responseData);
+        }
         exchange.close();
     }
 
@@ -234,7 +254,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         return formattedResponse.getBytes();
     }
 
-    private Result createResponse(HttpExchange exchange, String acceptedResponseType) {
+    RequestObject buildRequestObject(HttpExchange exchange, String acceptedResponseType){
         Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
         String method = exchange.getRequestMethod();
         //String adapterContext = exchange.getHttpContext().getPath();
@@ -254,17 +274,46 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         requestObject.headers = exchange.getRequestHeaders();
         requestObject.clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
         requestObject.acceptedResponseType = acceptedResponseType;
+        
+        return requestObject;
+    }
+    
+    protected RequestObject preprocess(RequestObject request){
+        return request;
+    }
+    
+    //private Result createResponse(HttpExchange exchange, String acceptedResponseType) {
+    private Result createResponse(RequestObject requestObject) {
+        /*
+        Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
+        String method = exchange.getRequestMethod();
+        //String adapterContext = exchange.getHttpContext().getPath();
+        String pathExt = exchange.getRequestURI().getPath();
+        if (null != pathExt) {
+            pathExt = pathExt.substring(exchange.getHttpContext().getPath().length());
+            if (pathExt.startsWith("/")) {
+                pathExt = pathExt.substring(1);
+            }
+        }
 
-        Result result = null;
-        String hookMethodName = getHookMethodNameForMethod(method);
+        //
+        RequestObject requestObject = new RequestObject();
+        requestObject.method = method;
+        requestObject.parameters = parameters;
+        requestObject.pathExt = pathExt;
+        requestObject.headers = exchange.getRequestHeaders();
+        requestObject.clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
+        requestObject.acceptedResponseType = acceptedResponseType;
+        */
+        Result result = new StandardResult();
+        String hookMethodName = getHookMethodNameForMethod(requestObject.method);
 
         if (hookMethodName == null) {
-            sendLogEvent(Event.LOG_WARNING, "hook method is not defined for " + method);
-            result = new StandardResult();
+            sendLogEvent(Event.LOG_WARNING, "hook method is not defined for " + requestObject.method);
             result.setCode(SC_METHOD_NOT_ALLOWED);
-            result.setMessage("method " + method + " is not allowed");
+            result.setMessage("method " + requestObject.method + " is not allowed");
             result.setFileExtension(null);
-            //todo: set "Allow" header
+            //TODO: set "Allow" header
             return result;
         }
         try {
@@ -274,7 +323,11 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
             result = (Result) m.invoke(Kernel.getInstance(), event);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            sendLogEvent(Event.LOG_SEVERE, e.getMessage());
+            result.setCode(SC_INTERNAL_SERVER_ERROR);
+            result.setMessage("handler method error");
+            result.setFileExtension(null);
         }
         return result;
     }
@@ -306,7 +359,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     }
 
     protected void sendLogEvent(HttpExchange exchange, int length) {
-        SimpleDateFormat sdf = new SimpleDateFormat("[dd/MMM/yyyy:kk:mm:ss Z]");
+        //SimpleDateFormat sdf = new SimpleDateFormat("[dd/MMM/yyyy:kk:mm:ss Z]");
         StringBuilder sb = new StringBuilder();
 
         sb.append(exchange.getRemoteAddress().getAddress().getHostAddress());
@@ -317,7 +370,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             sb.append("-");
         }
         sb.append(" ");
-        sb.append(sdf.format(new Date()));
+        sb.append(dateFormat.format(new Date()));
         sb.append(" ");
         sb.append(exchange.getRequestMethod());
         sb.append(" ");
@@ -366,12 +419,12 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         this.extendedResponse = !("false".equalsIgnoreCase(paramValue));
     }
 
-    public String getDateFormat() {
+    /*public String getDateFormat() {
         return dateFormat;
-    }
+    }*/
 
     public void setDateFormat(String dateFormat) {
-        this.dateFormat = dateFormat;
+        this.dateFormat = new SimpleDateFormat(dateFormat);
     }
 
 }

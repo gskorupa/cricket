@@ -86,7 +86,7 @@ public class Runner {
         }
         
         if (arguments.containsKey("print")) {
-            System.out.println(runner.getAsString(configSet));
+            System.out.println(runner.getConfigAsString(configSet));
             System.exit(0);
         }
 
@@ -197,7 +197,7 @@ public class Runner {
         return cs;
     }
 
-    public String getAsString(ConfigSet c) {
+    public String getConfigAsString(ConfigSet c) {
         Map args = new HashMap();
         args.put(JsonWriter.PRETTY_PRINT, true);
         return JsonWriter.objectToJson(c, args);

@@ -5,16 +5,18 @@
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <property name="version" value="1.0.0"/>
+    <!--<property name="version" value="1.0.0"/>-->
     <property name="src" location="src/java"/>
     <property name="build" location="build/web/WEB-INF/classes"/>
     <property name="dist" location="dist"/>
     <property name="web" location="web"/>
     <property name="lib" location="lib"/>
-    <property name="jar-name" value="cricket-${version}.jar"/>
+    <!--<property name="jar-name" value="cricket-${version}.jar"/>-->
+    <property name="jar-name" value="cricket.jar"/>
+    <!--
     <property name="war-name" value="cricket-${version}.war"/>
     <property name="tomcat-home" value="/home/greg/apache-tomcat" />
-
+    -->
     <path id="project-classpath">
         <pathelement location="${lib}/json-io-4.3.0.jar"/>
         <pathelement location="${lib}/commons-csv-1.2.jar"/>
@@ -26,9 +28,14 @@
 
     <target name="init">
         <!-- Create the time stamp -->
-        <tstamp/>
+        <tstamp>
+            <format property="version" pattern="yyyy.MM.dd"/>
+        </tstamp>
         <!-- Create the build directory structure used by compile -->
         <mkdir dir="${build}"/>
+        <propertyfile file="${src}/cricket.properties">
+            <entry  key="version" value="${version}"/>
+        </propertyfile>
     </target>
 
     <target name="compile" depends="init" description="compile the source">
