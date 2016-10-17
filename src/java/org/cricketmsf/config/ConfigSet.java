@@ -26,6 +26,7 @@ public class ConfigSet {
     //private String id = "new";
     String description="This is sample configuration";
     ArrayList<Configuration> services;
+    private String kernelVersion;
     
     public ConfigSet(){
         services=new ArrayList<>();
@@ -59,6 +60,20 @@ public class ConfigSet {
             }
         }
         return null;
+    }
+
+    /**
+     * @return the kernelVersion
+     */
+    public String getKernelVersion() {
+        return kernelVersion;
+    }
+
+    /**
+     * @param kernelVersion the kernelVersion to set
+     */
+    public void setKernelVersion(String kernelVersion) {
+        this.kernelVersion = kernelVersion;
     }
 
 }

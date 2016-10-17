@@ -22,10 +22,13 @@ import org.cricketmsf.config.Configuration;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Scanner;
 
 /**
@@ -84,7 +87,7 @@ public class Runner {
             System.out.println(runner.getHelp(serviceName));
             System.exit(0);
         }
-        
+
         if (arguments.containsKey("print")) {
             System.out.println(runner.getConfigAsString(configSet));
             System.exit(0);
@@ -193,6 +196,14 @@ public class Runner {
             types.put("java.utils.HashMap", "properties");
             args.put(JsonReader.TYPE_NAME_MAP, types);
             cs = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
+            // read Kernel version
+            Properties prop = new Properties();
+            try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cricket.properties")) {
+                if (inputStream != null) {
+                    prop.load(inputStream);
+                }
+            } catch (IOException e) {}
+            cs.setKernelVersion(prop.getProperty("version", "unknown"));
         }
         return cs;
     }

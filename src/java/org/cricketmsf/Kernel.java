@@ -42,8 +42,6 @@ import org.cricketmsf.config.HttpHeader;
  */
 public abstract class Kernel {
 
-    private static final String VERSION = "1.0.0";
-
     // emergency LOGGER
     private static final Logger LOGGER = Logger.getLogger(org.cricketmsf.Kernel.class.getName());
 
@@ -206,7 +204,6 @@ public abstract class Kernel {
      * @throws Exception
      */
     private synchronized void loadAdapters(Configuration config) throws Exception {
-        printHeader(VERSION);
         setHttpHandlerLoaded(false);
         setInboundAdaptersLoaded(false);
         System.out.println("LOADING SERVICE PROPERTIES FOR " + config.getService());
@@ -332,6 +329,7 @@ public abstract class Kernel {
     public void runOnce() {
         getEventHooks();
         getAdapters();
+        printHeader(Kernel.getInstance().configSet.getKernelVersion());
     }
 
     /**
@@ -368,7 +366,7 @@ public abstract class Kernel {
             getHttpd().run();
 
             long startedIn = System.currentTimeMillis() - startedAt;
-            printHeader(VERSION);
+            printHeader(Kernel.getInstance().configSet.getKernelVersion());
             System.out.println("# Service " + getId() + " is running");
             System.out.println("#");
             System.out.println("# HTTP listening on port " + getPort());
