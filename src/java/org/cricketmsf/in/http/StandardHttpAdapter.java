@@ -23,7 +23,7 @@ import java.util.HashMap;
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class StandardHttpAdapter extends HttpAdapter implements HttpAdapterIface, Adapter {
-
+    
     /**
      * This method is executed while adapter is instantiated during the service start.
      * It's used to configure the adapter according to the configuration.

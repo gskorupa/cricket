@@ -29,6 +29,10 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
     private boolean useCache = false;
     private boolean processingVariables = false;
     
+    public HtmlGenAdapter(){
+        super();
+        mode = WEBSITE_MODE;
+    }
 
     /**
      * This method is executed while adapter is instantiated during the service

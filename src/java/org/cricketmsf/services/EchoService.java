@@ -107,54 +107,58 @@ public class EchoService extends Kernel {
      */
     @HttpAdapterHook(adapterName = "HtmlGenAdapterIface", requestMethod = "GET")
     public Object doGet(Event event) {
-        boolean useCache = htmlAdapter.useCache();
-        //RequestObject request = (RequestObject) event.getPayload();
+
         RequestObject request = event.getRequest();
         String filePath = fileReader.getFilePath(request);
-
+        byte[] content;
         ParameterMapResult result = new ParameterMapResult();
-        result.setData(request.parameters);
 
         // we can use cache if available
         FileObject fo = null;
-        if (useCache && cache.containsKey(filePath)) {
+        boolean fileReady = false;
+        if (htmlAdapter.useCache()) {
             try {
                 fo = (FileObject) cache.get(filePath);
+                if (fo != null) {
+                    fileReady = true;
+                    result.setCode(HttpAdapter.SC_OK);
+                    result.setMessage("");
+                    result.setPayload(fo.content);
+                    result.setFileExtension(fo.fileExtension);
+                    result.setModificationDate(fo.modified);
+                    handle(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
+                    return result;
+                }
             } catch (ClassCastException e) {
-                fo = null;
             }
         }
-        if (fo == null) {
+        // if not in cache
+        if (!fileReady) {
             File file = new File(filePath);
-            byte[] content = fileReader.getFileBytes(file, filePath);
-            //if (content.length > 0) {
-                fo = new FileObject();
-                fo.content = content;
-                fo.modified = new Date(file.lastModified());
-                fo.filePath = filePath;
-                fo.fileExtension = fileReader.getFileExt(filePath);
-                if(useCache) {
-                    cache.put(filePath, fo);
-                }
-            //}
-        }else{
-            handleEvent(Event.logInfo("cache", "readed from cache"));
+            content = fileReader.getFileBytes(file, filePath);
+            if (content.length == 0) {
+                // file not found or empty file
+                result.setCode(HttpAdapter.SC_NOT_FOUND);
+                result.setMessage("file not found");
+                result.setData(request.parameters);
+                result.setPayload("file not found".getBytes());
+                return result;
+            }
+            fo = new FileObject();
+            fo.content = content;
+            fo.modified = new Date(file.lastModified());
+            fo.filePath = filePath;
+            fo.fileExtension = fileReader.getFileExt(filePath);
+            if (htmlAdapter.useCache() && content.length > 0) {
+                cache.put(filePath, fo);
+            }
         }
-        // f==null means file not found (sure - it's a shortcut)
-        if (fo.content.length > 0) {
-            result.setCode(HttpAdapter.SC_OK);
-            result.setMessage("");
-            result.setPayload(fo.content);
-            result.setFileExtension(fo.fileExtension);
-            result.setModificationDate(fo.modified);
-        } else {
-            result.setCode(HttpAdapter.SC_NOT_FOUND);
-            result.setMessage("file not found");
-            result.setPayload(fo.content);
-            result.setFileExtension(null);
-        }
-
-        return result;
+        result.setCode(HttpAdapter.SC_OK);
+        result.setMessage("");
+        result.setPayload(fo.content);
+        result.setFileExtension(fo.fileExtension);
+        result.setModificationDate(fo.modified);
+        return result;    
     }
 
     @HttpAdapterHook(adapterName = "TestScheduler", requestMethod = "GET")

@@ -27,6 +27,7 @@ public class RequestObject {
     
     public String clientIp=null;
     public String method=null;
+    public String uri=null;
     public String pathExt=null;
     public Headers headers = null;
     public Map<String, Object> parameters = new HashMap<>();

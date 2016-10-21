@@ -49,6 +49,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     public final static int SC_ACCEPTED = 202;
     public final static int SC_CREATED = 201;
 
+    public final static int SC_MOVED_PERMANENTLY = 301;
     public final static int SC_NOT_MODIFIED = 304;
 
     public final static int SC_BAD_REQUEST = 400;
@@ -59,6 +60,9 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
     public final static int SC_INTERNAL_SERVER_ERROR = 500;
     public final static int SC_NOT_IMPLEMENTED = 501;
+
+    public final static int SERVICE_MODE = 0;
+    public final static int WEBSITE_MODE = 1;
 
     private final String[] acceptedTypes = {
         "application/json",
@@ -75,6 +79,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     private boolean extendedResponse = true;
     //private String dateFormat = "dd/MMM/yyyy:kk:mm:ss Z";
     SimpleDateFormat dateFormat;
+
+    protected int mode = SERVICE_MODE;
 
     public HttpAdapter() {
         super();
@@ -118,77 +124,44 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         }
 
         //Result result = createResponse(exchange, acceptedResponseType);
-        
         Result result = createResponse(buildRequestObject(exchange, acceptedResponseType));
 
         acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData;
-        if (acceptedTypesMap.containsKey(acceptedResponseType)) {
-            headers.set("Content-Type", acceptedResponseType + "; charset=UTF-8");
-            responseData = formatResponse(acceptedResponseType, result);
-        } else {
-            headers.set("Content-Type", getMimeType(result.getFileExtension()));
-            responseData = result.getPayload();
-        }
-        headers.set("Last-Modified", result.getModificationDateFormatted());
 
-        /*
-        switch (acceptedResponseType.toLowerCase()) {
-            case "application/json":
-                headers.set("Content-Type", "application/json; charset=UTF-8");
-                responseData = formatResponse(JSON, result);
-                break;
-            case "text/xml":
-                headers.set("Content-Type", "text/xml; charset=UTF-8");
-                responseData = formatResponse(XML, result);
-                break;
-            case "text/html":
-                headers.set("Content-Type", "text/html; charset=UTF-8");
-                responseData = formatResponse(HTML, result);
-                break;
-            case "text/csv":
-                headers.set("Content-Type", "text/csv; charset=UTF-8");
-                responseData = formatResponse(CSV, result);
-                break;
-            case "text/plain":
-                headers.set("Content-Type", "text/plain; charset=UTF-8");
-                responseData = formatResponse(TEXT, result);
-                break;
-            //case NONE:
-            //    headers.set("Content-Type", "text/plain; charset=UTF-8");
-            //    responseData = result.getMessage() != null ? result.getMessage().getBytes() : "".getBytes();
-            //    break;
-            default:
+        if (result.getCode() == SC_MOVED_PERMANENTLY) {
+            headers.set("Location", result.getMessage());
+            responseData = ("moved to " + result.getMessage()).getBytes();
+        } else {
+            if (acceptedTypesMap.containsKey(acceptedResponseType)) {
+                headers.set("Content-Type", acceptedResponseType + "; charset=UTF-8");
+                responseData = formatResponse(acceptedResponseType, result);
+            } else {
                 headers.set("Content-Type", getMimeType(result.getFileExtension()));
                 responseData = result.getPayload();
-                break;
-        }
-         */
-        HttpHeader h;
-        for (int i = 0; i < Kernel.getInstance().getCorsHeaders().size(); i++) {
-            h = (HttpHeader) Kernel.getInstance().getCorsHeaders().get(i);
-            headers.set(h.name, h.value);
-        }
+            }
+            headers.set("Last-Modified", result.getModificationDateFormatted());
 
-        if (result.getCode() == 0) {
-            result.setCode(SC_OK);
-        } else {
-            if (responseData.length == 0) {
-                if (result.getMessage() != null) {
-                    responseData = result.getMessage().getBytes();
+            HttpHeader h;
+            for (int i = 0; i < Kernel.getInstance().getCorsHeaders().size(); i++) {
+                h = (HttpHeader) Kernel.getInstance().getCorsHeaders().get(i);
+                headers.set(h.name, h.value);
+            }
+            if (result.getCode() == 0) {
+                result.setCode(SC_OK);
+            } else {
+                if (responseData.length == 0) {
+                    if (result.getMessage() != null) {
+                        responseData = result.getMessage().getBytes();
+                    }
                 }
             }
         }
-        exchange.sendResponseHeaders(result.getCode(), responseData.length);
 
+        exchange.sendResponseHeaders(result.getCode(), responseData.length);
         sendLogEvent(exchange, responseData.length);
-        /*
-        OutputStream os = exchange.getResponseBody();
-        os.write(responseData);
-        os.close();
-        */
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(responseData);
         }
@@ -254,7 +227,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         return formattedResponse.getBytes();
     }
 
-    RequestObject buildRequestObject(HttpExchange exchange, String acceptedResponseType){
+    RequestObject buildRequestObject(HttpExchange exchange, String acceptedResponseType) {
         Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
         String method = exchange.getRequestMethod();
         //String adapterContext = exchange.getHttpContext().getPath();
@@ -270,42 +243,33 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         RequestObject requestObject = new RequestObject();
         requestObject.method = method;
         requestObject.parameters = parameters;
+        requestObject.uri = exchange.getRequestURI().toString();
         requestObject.pathExt = pathExt;
         requestObject.headers = exchange.getRequestHeaders();
         requestObject.clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
         requestObject.acceptedResponseType = acceptedResponseType;
-        
+
         return requestObject;
     }
-    
-    protected RequestObject preprocess(RequestObject request){
+
+    protected RequestObject preprocess(RequestObject request) {
         return request;
     }
-    
+
     //private Result createResponse(HttpExchange exchange, String acceptedResponseType) {
     private Result createResponse(RequestObject requestObject) {
-        /*
-        Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
-        String method = exchange.getRequestMethod();
-        //String adapterContext = exchange.getHttpContext().getPath();
-        String pathExt = exchange.getRequestURI().getPath();
-        if (null != pathExt) {
-            pathExt = pathExt.substring(exchange.getHttpContext().getPath().length());
-            if (pathExt.startsWith("/")) {
-                pathExt = pathExt.substring(1);
+
+        Result result = new StandardResult();
+        if (mode == WEBSITE_MODE) {
+            if (!requestObject.uri.endsWith("/")) {
+                if (requestObject.uri.lastIndexOf("/") > requestObject.uri.lastIndexOf(".")) {
+                    // redirect to index.file but only if property index.file is not null
+                    result.setCode(SC_MOVED_PERMANENTLY);
+                    result.setMessage(requestObject.uri + "/");
+                    return result;
+                }
             }
         }
-
-        //
-        RequestObject requestObject = new RequestObject();
-        requestObject.method = method;
-        requestObject.parameters = parameters;
-        requestObject.pathExt = pathExt;
-        requestObject.headers = exchange.getRequestHeaders();
-        requestObject.clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
-        requestObject.acceptedResponseType = acceptedResponseType;
-        */
-        Result result = new StandardResult();
         String hookMethodName = getHookMethodNameForMethod(requestObject.method);
 
         if (hookMethodName == null) {
@@ -422,7 +386,6 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     /*public String getDateFormat() {
         return dateFormat;
     }*/
-
     public void setDateFormat(String dateFormat) {
         this.dateFormat = new SimpleDateFormat(dateFormat);
     }

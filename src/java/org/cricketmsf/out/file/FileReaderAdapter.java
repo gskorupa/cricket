@@ -93,10 +93,13 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             filePath = filePath.concat("index.html");
         }
         filePath = getRootPath() + filePath;
+        //not needed after last changes in HttpAdapter
+        /*
         File f = new File(filePath);
         if (f.isDirectory()) {
             filePath = filePath.concat("/index.html");
         }
+        */
         return filePath;
     }
 
