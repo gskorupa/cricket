@@ -51,7 +51,7 @@ public class InboundAdapter implements Runnable{
         }
         try {
             Kernel.handle(
-                Event.logInfo(this.getClass().getSimpleName(), "sending event to hook " + method)
+                Event.logFine(this.getClass().getSimpleName(), "sending event to hook " + method)
             );
             Event event = new Event();
             event.setOrigin(this.getClass().getSimpleName());
