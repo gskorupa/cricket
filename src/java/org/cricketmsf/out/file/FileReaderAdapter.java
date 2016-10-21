@@ -38,6 +38,7 @@ import org.cricketmsf.in.http.ParameterMapResult;
 public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileReaderAdapterIface {
 
     private String rootPath;
+    private String indexFileName;
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -50,7 +51,9 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setRootPath(properties.get("root"));
-        System.out.println("root path: " + getRootPath());
+        System.out.println("\troot path: " + getRootPath());
+        indexFileName=properties.getOrDefault("index-file", "index.html");
+        System.out.println("\tindex-file: " + indexFileName);
     }
 
     /**
@@ -90,16 +93,9 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
     public String getFilePath(RequestObject request) {
         String filePath = request.pathExt;
         if (filePath.isEmpty() || filePath.endsWith("/")) {
-            filePath = filePath.concat("index.html");
+            filePath = filePath.concat(indexFileName);
         }
         filePath = getRootPath() + filePath;
-        //not needed after last changes in HttpAdapter
-        /*
-        File f = new File(filePath);
-        if (f.isDirectory()) {
-            filePath = filePath.concat("/index.html");
-        }
-        */
         return filePath;
     }
 
@@ -169,15 +165,15 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         try {
 
             if (filePath.isEmpty() || filePath.endsWith("/")) {
-                filePath = filePath.concat("index.html");
+                filePath = filePath.concat(indexFileName);
             }
 
             filePath = getRootPath() + filePath;
 
             f = new File(filePath);
             if (f.isDirectory()) {
-                filePath = filePath.concat("/index.html");
-
+                //filePath = filePath.concat("/index.html");
+                filePath = filePath.concat(indexFileName);
             }
 
             f = new File(filePath);
