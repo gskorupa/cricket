@@ -29,9 +29,10 @@ import org.cricketmsf.in.http.ParameterMapResult;
 public interface FileReaderAdapterIface {
     
     public byte[] readFile(File file) throws FileNotFoundException, IOException;
-    public ParameterMapResult getFile(RequestObject request);
+    public byte[] readFile(String filePath) throws FileNotFoundException, IOException;
+    //public ParameterMapResult getFile(RequestObject request);
     public String getFilePath(RequestObject request);
-    public ParameterMapResult getFile(String filePath, HashMap parameters);
+    //public ParameterMapResult getFile(String filePath, HashMap parameters);
     public String getFileExt(String filePath);
     public byte[] getFileBytes(File file, String filePath);
     

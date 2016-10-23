@@ -89,6 +89,39 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         return result;
     }
 
+/**
+     * Reads the file content
+     * @param filePath file path
+     * @return file content
+     */
+    @Override
+    public byte[] readFile(String filePath) {
+        File file = new File(filePath);
+        byte[] result = new byte[(int) file.length()];
+        InputStream input=null;
+        try {
+            int totalBytesRead = 0;
+            input = new BufferedInputStream(new FileInputStream(file));
+            while (totalBytesRead < result.length) {
+                int bytesRemaining = result.length - totalBytesRead;
+                //input.read() returns -1, 0, or more :
+                int bytesRead = input.read(result, totalBytesRead, bytesRemaining);
+                if (bytesRead > 0) {
+                    totalBytesRead = totalBytesRead + bytesRead;
+                }
+            }
+        }catch(IOException e){
+            result = new byte[0];
+            return result;
+        }
+        finally {
+            try{
+            input.close();
+            }catch(IOException e){}
+        }
+        return result;
+    }
+
     @Override
     public String getFilePath(RequestObject request) {
         String filePath = request.pathExt;
@@ -121,6 +154,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         }
     }
     
+    /*
     @Override
     public ParameterMapResult getFile(String filePath, HashMap parameters) {
         ParameterMapResult result = new ParameterMapResult();
@@ -200,7 +234,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         }
         return result;
     }
-
+*/
     private void checkAccess(String filePath) throws FileNotFoundException {
         if (filePath.indexOf("..") > 0) {
             throw new FileNotFoundException("");
