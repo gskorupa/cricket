@@ -247,7 +247,7 @@ public abstract class Kernel {
                     loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                     adaptersMap.put(adapterName, null);
-                    System.out.println("ERROR: " + adapterName + "configuration: " + ex.getClass().getSimpleName());
+                    System.out.println("ERROR: " + adapterName + " configuration: " + ex.getClass().getSimpleName());
                 }
             }
         } catch (Exception e) {

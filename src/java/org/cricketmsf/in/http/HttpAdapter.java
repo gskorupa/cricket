@@ -387,7 +387,9 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         return dateFormat;
     }*/
     public void setDateFormat(String dateFormat) {
-        this.dateFormat = new SimpleDateFormat(dateFormat);
+        if (dateFormat != null) {
+            this.dateFormat = new SimpleDateFormat(dateFormat);
+        }
     }
 
 }

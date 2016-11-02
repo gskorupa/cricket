@@ -29,6 +29,15 @@ import org.cricketmsf.Kernel;
 public class InboundAdapter implements Runnable{
     
     protected HashMap<String, String> hookMethodNames;
+    private HashMap<String, String> properties;
+    
+    public void loadProperties(HashMap<String,String> properties, String adapterName){
+        this.properties = (HashMap<String,String>)properties.clone();
+    }
+    
+    public String getProperty(String name){
+        return properties.get(name);
+    }
     
     public InboundAdapter(){
         hookMethodNames = new HashMap<>();
