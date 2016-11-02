@@ -39,9 +39,9 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
-        System.out.println("context=" + getContext());
+        System.out.println("\tcontext=" + getContext());
         setSilent(properties.get("silent-mode"));
-        System.out.println("silent-mode=" + isSilent());
+        System.out.println("\tsilent-mode=" + isSilent());
     }
     
     @Override

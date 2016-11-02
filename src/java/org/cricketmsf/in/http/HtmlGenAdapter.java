@@ -46,11 +46,11 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
-        System.out.println("context=" + getContext());
+        System.out.println("\tcontext=" + getContext());
         useCache = properties.getOrDefault("use-cache", "false").equalsIgnoreCase("true");
-        System.out.println("use-cache=" + useCache());
+        System.out.println("\tuse-cache=" + useCache());
         processingVariables= (properties.getOrDefault("page-processor", "false").equalsIgnoreCase("true"));
-        System.out.println("page-processor=" + processingVariables);
+        System.out.println("\tpage-processor=" + processingVariables);
     }
 
     @Override

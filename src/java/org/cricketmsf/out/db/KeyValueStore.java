@@ -66,9 +66,9 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setStoragePath(properties.get("path"));
-        System.out.println("path: " + getStoragePath());
+        System.out.println("\tpath: " + getStoragePath());
         setEnvVariable(properties.get("envVariable"));
-        System.out.println("envVAriable name: " + getEnvVariable());
+        System.out.println("\tenvVAriable name: " + getEnvVariable());
         if (System.getenv(getEnvVariable()) != null) {
             setStoragePath(System.getenv(getEnvVariable()));
         }
@@ -77,22 +77,22 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
             setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
         }
         setFileName(properties.get("file"));
-        System.out.println("file: " + getFileName());
+        System.out.println("\tfile: " + getFileName());
         String pathSeparator = System.getProperty("file.separator");
         setStoragePath(
                 getStoragePath().endsWith(pathSeparator)
                 ? getStoragePath() + getFileName()
                 : getStoragePath() + pathSeparator + getFileName()
         );
-        System.out.println("cache file location: " + getStoragePath());
+        System.out.println("\tcache file location: " + getStoragePath());
         try {
             setCapacity(Integer.parseInt(properties.get("max-records")));
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
-        System.out.println("max-records: " + getCapacity());
+        System.out.println("\tmax-records: " + getCapacity());
         setPersistent(Boolean.parseBoolean(properties.get("persistent")));
-        System.out.println("persistent: " + isPersistent());
+        System.out.println("\tpersistent: " + isPersistent());
         start();
     }
 

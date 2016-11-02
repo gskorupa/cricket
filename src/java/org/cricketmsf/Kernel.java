@@ -75,10 +75,15 @@ public abstract class Kernel {
     private ArrayList corsHeaders;
 
     private long startedAt = 0;
+    private boolean started = false;
 
     public Kernel() {
     }
 
+    public boolean isStarted(){
+        return started;
+    }
+    
     void setStartedAt(long time) {
         startedAt = time;
     }
@@ -375,7 +380,7 @@ public abstract class Kernel {
             System.out.println();
             runFinalTasks();
             Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-
+            started = true;
         } else {
             System.out.println("Couldn't find any http request hook method. Exiting ...");
             System.exit(MIN_PRIORITY);

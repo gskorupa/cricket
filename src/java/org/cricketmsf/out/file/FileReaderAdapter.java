@@ -27,9 +27,12 @@ import java.util.Date;
 import java.util.HashMap;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
+import static org.cricketmsf.Kernel.handle;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
+import org.cricketmsf.in.http.Result;
+import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 
 /**
  *
@@ -129,6 +132,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             filePath = filePath.concat(indexFileName);
         }
         filePath = getRootPath() + filePath;
+        System.out.println("FILEPATH="+filePath);
         return filePath;
     }
 
@@ -235,6 +239,61 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         return result;
     }
 */
+    
+    public Result getFile(RequestObject request, KeyValueCacheAdapterIface cache){
+        String filePath = getFilePath(request);
+        byte[] content;
+        ParameterMapResult result = new ParameterMapResult();
+        result.setData(request.parameters);
+
+        // we can use cache if available
+        FileObject fo = null;
+        boolean fileReady = false;
+        if (cache!=null) {
+            try {
+                fo = (FileObject) cache.get(filePath);
+                if (fo != null) {
+                    fileReady = true;
+                    result.setCode(HttpAdapter.SC_OK);
+                    result.setMessage("");
+                    result.setPayload(fo.content);
+                    result.setFileExtension(fo.fileExtension);
+                    result.setModificationDate(fo.modified);
+                    handle(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
+                    return result;
+                }
+            } catch (ClassCastException e) {
+            }
+        }
+        // if not in cache
+        if (!fileReady) {
+            File file = new File(filePath);
+            content = getFileBytes(file, filePath);
+            if (content.length == 0) {
+                // file not found or empty file
+                result.setCode(HttpAdapter.SC_NOT_FOUND);
+                result.setMessage("file not found");
+                
+                result.setPayload("file not found".getBytes());
+                return result;
+            }
+            fo = new FileObject();
+            fo.content = content;
+            fo.modified = new Date(file.lastModified());
+            fo.filePath = filePath;
+            fo.fileExtension = getFileExt(filePath);
+            if (cache!=null && content.length > 0) {
+                cache.put(filePath, fo);
+            }
+        }
+        result.setCode(HttpAdapter.SC_OK);
+        result.setMessage("");
+        result.setPayload(fo.content);
+        result.setFileExtension(fo.fileExtension);
+        result.setModificationDate(fo.modified);
+        return result;
+    }
+    
     private void checkAccess(String filePath) throws FileNotFoundException {
         if (filePath.indexOf("..") > 0) {
             throw new FileNotFoundException("");

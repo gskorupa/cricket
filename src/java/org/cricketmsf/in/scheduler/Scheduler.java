@@ -61,9 +61,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
 
         setStoragePath(properties.get("path"));
-        System.out.println("path: " + getStoragePath());
+        System.out.println("\tpath: " + getStoragePath());
         setEnvVariable(properties.get("envVariable"));
-        System.out.println("envVAriable name: " + getEnvVariable());
+        System.out.println("\tenvVAriable name: " + getEnvVariable());
         if (System.getenv(getEnvVariable()) != null) {
             setStoragePath(System.getenv(getEnvVariable()));
         }
@@ -72,14 +72,14 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
             setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
         }
         setFileName(properties.get("file"));
-        System.out.println("file: " + getFileName());
+        System.out.println("\tfile: " + getFileName());
         String pathSeparator = System.getProperty("file.separator");
         setStoragePath(
                 getStoragePath().endsWith(pathSeparator)
                 ? getStoragePath() + getFileName()
                 : getStoragePath() + pathSeparator + getFileName()
         );
-        System.out.println("scheduler database file location: " + getStoragePath());
+        System.out.println("\tscheduler database file location: " + getStoragePath());
         database = new KeyValueStore();
         database.setStoragePath(getStoragePath());
         database.read();
@@ -108,17 +108,24 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     }
 
     public boolean handleEvent(Event event, boolean restored) {
-
         if (event.getTimePoint() == null) {
             return false;
         }
-
-        final Runnable runnable = new Runnable() {
+        final Runnable runnable;
+        runnable = new Runnable() {
             Event ev;
 
             public void run() {
                 // we should reset timepoint to prevent sending this event back from the service
                 ev.setTimePoint(null);
+                // we should wait until Kernel finishes initialization process
+                while(!Kernel.getInstance().isStarted()){
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                        
+                    }
+                }
                 Kernel.getInstance().handleEvent(ev);
                 database.remove("" + ev.getId());
             }

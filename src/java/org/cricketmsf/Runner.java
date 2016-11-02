@@ -204,6 +204,7 @@ public class Runner {
                 }
             } catch (IOException e) {}
             cs.setKernelVersion(prop.getProperty("version", "unknown"));
+            cs.forceProperty(arguments.get("force"));
         }
         return cs;
     }

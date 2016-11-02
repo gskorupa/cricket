@@ -38,6 +38,8 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
 
     private final String JSON = "application/json";
     private final String CSV = "text/csv";
+    private final String HTML = "text/html";
+    private final String TEXT = "text/plain";
 
     private String userAgent = "Mozilla/5.0";
     private String contentType = "application/json";
@@ -65,6 +67,9 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
                 break;
             case CSV:
                 requestData = translateToCsv(data);
+                break;
+            case TEXT:
+                requestData = translateToText(data);
                 break;
             default:
                 System.out.println("unsupported content type: "+getContentType());
@@ -115,6 +120,12 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
         return result;
     }
 
+    protected String translateToText(Object data) {
+        if(data!=null){
+            return data.toString();
+        }
+        return "";
+    }
     protected String translateToCsv(Object data) {
         return translateToCsv(data, null);
     }

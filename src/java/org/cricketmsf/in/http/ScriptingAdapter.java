@@ -38,9 +38,9 @@ public class ScriptingAdapter extends HttpAdapter implements HttpAdapterIface, A
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
-        System.out.println("context=" + getContext());
+        System.out.println("\tcontext=" + getContext());
         setResponseType(properties.getOrDefault("response-type","application/json"));
-        System.out.println("response-type=" + getResponseType());
+        System.out.println("\tresponse-type=" + getResponseType());
     }
 
     /**

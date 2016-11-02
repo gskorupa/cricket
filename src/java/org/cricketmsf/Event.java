@@ -298,6 +298,7 @@ public class Event {
      *
      * @return String representation of the event
      */
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getId())

@@ -18,9 +18,9 @@ package org.cricketmsf.out.file;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.HashMap;
 import org.cricketmsf.RequestObject;
-import org.cricketmsf.in.http.ParameterMapResult;
+import org.cricketmsf.in.http.Result;
+import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 
 /**
  *
@@ -35,5 +35,7 @@ public interface FileReaderAdapterIface {
     //public ParameterMapResult getFile(String filePath, HashMap parameters);
     public String getFileExt(String filePath);
     public byte[] getFileBytes(File file, String filePath);
+    
+    public Result getFile(RequestObject request, KeyValueCacheAdapterIface cache);
     
 }

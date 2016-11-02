@@ -51,13 +51,13 @@ public class EnvironmentMonitor extends InboundAdapter implements Adapter, Envir
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
-        System.out.println("sampling-interval: "+samplingInterval+" miliseconds");
+        System.out.println("\tsampling-interval: "+samplingInterval+" miliseconds");
         setDisk(properties.getOrDefault("disk-path", "."));
-        System.out.println("disk-path: "+diskPath);
+        System.out.println("\tdisk-path: "+diskPath);
         setMemoryLimit((properties.getOrDefault("memory-limit", "5M")));
-        System.out.println("memory-limit: "+memoryLimitConfig);
+        System.out.println("\tmemory-limit: "+memoryLimitConfig);
         setDiskLimit((properties.getOrDefault("disk-limit", "10M")));
-        System.out.println("disk-limit: "+diskLimitConfig);
+        System.out.println("\tdisk-limit: "+diskLimitConfig);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class EnvironmentMonitor extends InboundAdapter implements Adapter, Envir
         try {
             this.samplingInterval = Integer.parseInt(samplingInterval);
         } catch (NumberFormatException e) {
-            System.out.println(e.getMessage());
+            Kernel.getInstance().handleEvent(Event.logWarning("loadProperties", e.getMessage()));
         }
     }
 

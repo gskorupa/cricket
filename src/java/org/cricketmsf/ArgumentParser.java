@@ -102,6 +102,11 @@ public class ArgumentParser {
                         confToRead = true;
                         option="service";
                         break;
+                    case "--force":
+                    case "-f":
+                        confToRead = true;
+                        option="force";
+                        break;
                     default:
                         map.put("error", "unknown option " + name);
                 }
@@ -114,6 +119,9 @@ public class ArgumentParser {
                     break;
                 case "service":
                     map.put("error", "-s or --service option requires an argument");
+                    break;
+                case "force":
+                    map.put("error", "-f or --force option requires an argument");
                     break;
             }
             

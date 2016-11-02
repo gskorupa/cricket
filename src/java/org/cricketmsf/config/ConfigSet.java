@@ -22,40 +22,56 @@ import java.util.ArrayList;
  * @author greg
  */
 public class ConfigSet {
-    
+
     //private String id = "new";
-    String description="This is sample configuration";
+    String description = "This is sample configuration";
     ArrayList<Configuration> services;
     private String kernelVersion;
-    
-    public ConfigSet(){
-        services=new ArrayList<>();
+
+    public ConfigSet() {
+        services = new ArrayList<>();
     }
-    
-    public void addConfiguration(Configuration c){
-        services.add(c);
+
+    public void addConfiguration(Configuration c) {
+        int index=getIndexOf(c.getId());
+        if(index>-1){
+            services.set(index, c);
+        }else{
+            services.add(c);
+        }
     }
-    
-    public Configuration getDefault(){
+
+    public Configuration getDefault() {
         return services.get(0);
     }
     
-    public Configuration getConfiguration(String serviceName){
+    private int getIndexOf(String serviceId){
         Configuration c;
         for(int i=0; i<services.size(); i++){
             c=services.get(i);
-            if(serviceName.equals(c.getService())){
+            if(c.getId().equalsIgnoreCase(serviceId)){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public Configuration getConfiguration(String serviceName) {
+        Configuration c;
+        for (int i = 0; i < services.size(); i++) {
+            c = services.get(i);
+            if (serviceName.equals(c.getService())) {
                 return c;
             }
         }
         return null;
     }
-    
-    public Configuration getConfigurationById(String id){
+
+    public Configuration getConfigurationById(String id) {
         Configuration c;
-        for(int i=0; i<services.size(); i++){
-            c=services.get(i);
-            if(id.equals(c.getId())){
+        for (int i = 0; i < services.size(); i++) {
+            c = services.get(i);
+            if (id.equals(c.getId())) {
                 return c;
             }
         }
@@ -74,6 +90,54 @@ public class ConfigSet {
      */
     public void setKernelVersion(String kernelVersion) {
         this.kernelVersion = kernelVersion;
+    }
+
+    public void forceProperty(String definition) {
+        // service^property=value^adapter^property=value
+        // service^property
+        // service^^adapter^^property=value
+        String serviceId = null;
+        String serviceProperty = null;
+        String servicePropertyValue = null;
+        String adapter = null;
+        String adapterProperty = null;
+        String adapterPropertyValue = null;
+        String[] tmp;
+
+        try {
+            if (definition.isEmpty()) {
+                return;
+            }
+        } catch (NullPointerException e) {
+            return;
+        }
+        
+        String[] elements = definition.split("\\^");
+        serviceId = elements[0];
+        if (elements.length > 1) {
+            tmp = elements[1].split("\\=");
+            serviceProperty = tmp[0];
+            servicePropertyValue = tmp.length > 1 ? tmp[1] : null;
+        }
+        if (elements.length > 2) {
+            adapter = elements[2];
+        }
+        if (elements.length > 3) {
+            tmp = elements[3].split("\\=");
+            adapterProperty = tmp[0];
+            adapterPropertyValue = tmp.length > 1 ? tmp[1] : null;
+        }
+               
+        Configuration config = getConfigurationById(serviceId);
+        if(servicePropertyValue != null){
+            config.putProperty(serviceProperty, servicePropertyValue);
+        }
+        if(adapterPropertyValue != null){
+            AdapterConfiguration ac= config.getAdapterConfiguration(adapter);
+            ac.putProperty(adapterProperty, adapterPropertyValue);
+            config.putAdapterConfiguration(ac);
+        }
+        addConfiguration(config);
     }
 
 }
