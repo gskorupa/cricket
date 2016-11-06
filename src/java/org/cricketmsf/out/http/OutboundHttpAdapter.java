@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.out;
+package org.cricketmsf.out.http;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -34,12 +34,13 @@ import org.cricketmsf.in.http.StandardResult;
  *
  * @author greg
  */
-public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
+public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
 
     private final String JSON = "application/json";
     private final String CSV = "text/csv";
     private final String HTML = "text/html";
     private final String TEXT = "text/plain";
+    private final String XML = "text/xml";
 
     private String userAgent = "Mozilla/5.0";
     private String contentType = "application/json";
@@ -58,23 +59,36 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
 
     @Override
     public Result send(Object data) {
+        return send(data, true);
+    }
+
+    @Override
+    public Result send(Object data, boolean transform) {
         String requestData = "";
 
         StandardResult result = new StandardResult();
-        switch (getContentType().toLowerCase()) {
-            case JSON:
-                requestData = translateToJson(data);
-                break;
-            case CSV:
-                requestData = translateToCsv(data);
-                break;
-            case TEXT:
-                requestData = translateToText(data);
-                break;
-            default:
-                System.out.println("unsupported content type: "+getContentType());
+        if (transform) {
+            switch (getContentType().toLowerCase()) {
+                case JSON:
+                    requestData = translateToJson(data);
+                    break;
+                case CSV:
+                    requestData = translateToCsv(data);
+                    break;
+                case TEXT:
+                    requestData = translateToText(data);
+                    break;
+                default:
+                    Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), "unsupported content type: " + getContentType()));
+            }
+        } else {
+            if (requestData instanceof String) {
+                requestData = (String) data;
+            } else {
+                requestData = data.toString();
+            }
         }
-        System.out.println(requestData);
+        //System.out.println(requestData);
         result.setCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
         //result.setContent("");
         //result.setContentLength(0);
@@ -121,11 +135,12 @@ public class OutbondHttpAdapter implements OutbondHttpAdapterIface, Adapter {
     }
 
     protected String translateToText(Object data) {
-        if(data!=null){
+        if (data != null) {
             return data.toString();
         }
         return "";
     }
+
     protected String translateToCsv(Object data) {
         return translateToCsv(data, null);
     }

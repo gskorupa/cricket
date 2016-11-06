@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.out;
+package org.cricketmsf.out.http;
 
 import java.util.HashMap;
 import org.cricketmsf.in.http.Result;
@@ -23,11 +23,13 @@ import org.cricketmsf.in.http.Result;
  *
  * @author greg
  */
-public interface OutbondHttpAdapterIface {
+public interface OutboundHttpAdapterIface {
 
     public void loadProperties(HashMap<String, String> properties, String adapterName);
 
     public Result send(Object data);
+    
+    public Result send(Object data, boolean transform);
     
     public String getUserAgent();
     
