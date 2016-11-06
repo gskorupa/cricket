@@ -6,12 +6,12 @@
             "@type": "org.cricketmsf.config.Configuration",
             "id": "echo",
             "service": "org.cricketmsf.services.EchoService",
-            "host": "0.0.0.0",
-            "port": "8080",
-            "threads": 0,
-            "filter": "org.cricketmsf.SecurityFilter",
-            "cors": ["Access-Control-Allow-Origin:*"],
             "properties": {
+                "host": "0.0.0.0",
+                "port": "8080",
+                "threads": "0",
+                "filter": "org.cricketmsf.SecurityFilter",
+                "cors": "Access-Control-Allow-Origin:*",
                 "time-zone": "GMT"
             },
             "adapters": {

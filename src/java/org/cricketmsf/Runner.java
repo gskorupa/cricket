@@ -22,10 +22,10 @@ import org.cricketmsf.config.Configuration;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -67,7 +67,7 @@ public class Runner {
         Configuration configuration = null;
         if (arguments.containsKey("service")) {
             // if service name provided as command line option
-            serviceId = arguments.get("service");
+            serviceId = (String)arguments.get("service");
         } else {
             // otherwise get first configured service
             serviceId = configSet.getDefault().getId();
@@ -178,7 +178,7 @@ public class Runner {
             types.put("java.utils.HashMap", "properties");
             args.put(JsonReader.TYPE_NAME_MAP, types);
             try {
-                InputStream propertyFile = new FileInputStream(new File(arguments.get("config")));
+                InputStream propertyFile = new FileInputStream(new File((String)arguments.get("config")));
                 String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
                 cs = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
             } catch (Exception e) {
@@ -204,14 +204,29 @@ public class Runner {
                 }
             } catch (IOException e) {}
             cs.setKernelVersion(prop.getProperty("version", "unknown"));
-            cs.forceProperty(arguments.get("force"));
+            // force property changes based on command line --force param
+            if(arguments.containsKey("force")){
+                ArrayList<String> forcedProps = (ArrayList)arguments.get("force");
+                for(int i=0; i<forcedProps.size(); i++){
+                    cs.forceProperty(forcedProps.get(i));
+                }
+            }
         }
         return cs;
     }
 
     public String getConfigAsString(ConfigSet c) {
+        Map nameBlackList = new HashMap();
+        ArrayList blackList = new ArrayList();
+        blackList.add("host");
+        blackList.add("port");
+        blackList.add("threads");
+        blackList.add("filter");
+        blackList.add("cors");
+        nameBlackList.put(Configuration.class, blackList);
         Map args = new HashMap();
         args.put(JsonWriter.PRETTY_PRINT, true);
+        //args.put(JsonWriter., args)
         return JsonWriter.objectToJson(c, args);
     }
 }

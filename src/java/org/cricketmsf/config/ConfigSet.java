@@ -94,8 +94,7 @@ public class ConfigSet {
 
     public void forceProperty(String definition) {
         // service^property=value^adapter^property=value
-        // service^property
-        // service^^adapter^^property=value
+        // service^^adapter^property=value
         String serviceId = null;
         String serviceProperty = null;
         String servicePropertyValue = null;

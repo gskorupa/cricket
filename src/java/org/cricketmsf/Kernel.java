@@ -29,6 +29,7 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -56,8 +57,7 @@ public abstract class Kernel {
     public HashMap<String, Object> adaptersMap = new HashMap<>();
 
     // user defined properties
-    public HashMap<String, String> properties = new HashMap<>();
-
+    public HashMap<String, Object> properties = new HashMap<>();
     public SimpleDateFormat dateFormat = null;
 
     // http server
@@ -178,7 +178,7 @@ public abstract class Kernel {
             ((Kernel) instance).setUuid(UUID.randomUUID());
             ((Kernel) instance).setId(config.getId());
             ((Kernel) instance).setProperties(config.getProperties());
-            ((Kernel) instance).configureTimeFormat();
+            ((Kernel) instance).configureTimeFormat(config);
             ((Kernel) instance).loadAdapters(config);
         } catch (Exception e) {
             instance = null;
@@ -188,9 +188,9 @@ public abstract class Kernel {
         return instance;
     }
 
-    private void configureTimeFormat() {
+    private void configureTimeFormat(Configuration config) {
         dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
-        dateFormat.setTimeZone(TimeZone.getTimeZone(getProperties().getOrDefault("time-zone", "GMT")));
+        dateFormat.setTimeZone(TimeZone.getTimeZone(config.getProperty("time-zone", "GMT")));
     }
 
     private void printHeader(String version) {
@@ -212,18 +212,20 @@ public abstract class Kernel {
         setHttpHandlerLoaded(false);
         setInboundAdaptersLoaded(false);
         System.out.println("LOADING SERVICE PROPERTIES FOR " + config.getService());
-        System.out.println("UUID: " + getUuid().toString());
-        setHost(config.getHost());
-        System.out.println("http-host=" + getHost());
-        setSecurityFilter(config.getFilter());
-        System.out.println("filter=" + config.getFilter());
-        setCorsHeaders(config.getCors());
-        System.out.println("CORS=" + config.getCors());
+        System.out.println("\tUUID: " + getUuid().toString());
+        //setHost(config.getHost());
+        setHost(config.getProperty("host", "0.0.0.0"));
+        System.out.println("\thost=" + getHost());
         try {
-            setPort(Integer.parseInt(config.getPort()));
+            //setPort(Integer.parseInt(config.getPort()));
+            setPort(Integer.parseInt(config.getProperty("port", "8080")));
         } catch (Exception e) {
         }
-        System.out.println("http-port=" + getPort());
+        System.out.println("\tport=" + getPort());
+        setSecurityFilter(config.getProperty("filter"));
+        System.out.println("\tfilter=" + getSecurityFilter().getClass().getName());
+        setCorsHeaders(config.getProperty("cors"));
+        System.out.println("\tCORS=" + getCorsHeaders());
         System.out.println("Extended properties: "+getProperties().toString());
         System.out.println("LOADING ADAPTERS");
         String adapterName = null;
@@ -482,13 +484,11 @@ public abstract class Kernel {
     /**
      * @param corsHeaders the corsHeaders to set
      */
-    public void setCorsHeaders(ArrayList corsHeaders) {
-        //this.corsHeaders = corsHeaders;
+    public void setCorsHeaders(String corsHeaders) {
         this.corsHeaders = new ArrayList<>();
         if (corsHeaders != null) {
-            String header;
-            for (int i = 0; i < corsHeaders.size(); i++) {
-                header = (String) corsHeaders.get(i);
+            String[] headers = corsHeaders.split("\\|");
+            for (String header : headers) {
                 try {
                     this.corsHeaders.add(
                             new HttpHeader(
@@ -506,14 +506,14 @@ public abstract class Kernel {
     /**
      * @return the properties
      */
-    public HashMap<String, String> getProperties() {
+    public HashMap<String, Object> getProperties() {
         return properties;
     }
 
     /**
      * @param properties the properties to set
      */
-    public void setProperties(HashMap<String, String> properties) {
+    public void setProperties(HashMap<String, Object> properties) {
         this.properties = properties;
     }
 

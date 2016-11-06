@@ -15,6 +15,7 @@
  */
 package org.cricketmsf;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ import java.util.Map;
  */
 public class ArgumentParser {
     
-    private Map<String, String> arguments;
+    private Map<String, Object> arguments;
     
     /**
      * Default constructor
@@ -46,7 +47,7 @@ public class ArgumentParser {
         return arguments.containsKey(key);
     }
     
-    public String get(String key){
+    public Object get(String key){
         return arguments.get(key);
     }
     
@@ -60,8 +61,9 @@ public class ArgumentParser {
      * @param args  array of command line arguments
      * @return  map of argument values related to argument names
      */
-    public static Map<String, String> getArguments(String[] args) {
-        HashMap<String, String> map = new HashMap<>();
+    public static Map<String, Object> getArguments(String[] args) {
+        HashMap<String, Object> map = new HashMap<>();
+        ArrayList forced = new ArrayList();
         String name;
         String option="";
         boolean confToRead = false;
@@ -74,7 +76,11 @@ public class ArgumentParser {
                 if(name.startsWith("-")){
                     map.put("error", "option "+option+" must be followed by value");
                 }else{
-                    map.put(option, name);
+                    if("force".equals(option)){
+                        forced.add(name);
+                    }else{
+                        map.put(option, name);
+                    }
                     confToRead=false;
                     option="";
                 }
@@ -125,6 +131,9 @@ public class ArgumentParser {
                     break;
             }
             
+        }
+        if(forced.size()>0){
+            map.put("force", forced);
         }
         return map;
     }

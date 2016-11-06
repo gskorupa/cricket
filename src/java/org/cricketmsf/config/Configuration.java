@@ -31,12 +31,12 @@ public class Configuration {
     private int threads;
     private String filter;
     private ArrayList<HttpHeader> cors;
-    private HashMap<String, String> properties;
+    private HashMap<String, Object> properties;
     private HashMap<String, AdapterConfiguration> adapters;
     
     public Configuration(){
-        adapters=new HashMap<String, AdapterConfiguration>();
-        properties=new HashMap<String, String>();
+        adapters=new HashMap<>();
+        properties=new HashMap<>();
     }
 
     public AdapterConfiguration getAdapterConfiguration(String name){
@@ -48,10 +48,14 @@ public class Configuration {
     }
 
     public String getProperty(String name){
-        return properties.get(name);
+        return (String)properties.get(name);
     }
     
-    public void putProperty(String name, String value){
+    public String getProperty(String name, String defaultValue){
+        return (String)properties.getOrDefault(name, defaultValue);
+    }
+    
+    public void putProperty(String name, Object value){
         properties.put(name, value);
     }
     
@@ -153,31 +157,18 @@ public class Configuration {
         this.id = id;
     }
 
-    /**
-     * @return the cors
-     */
-    public ArrayList<HttpHeader> getCors() {
-        return cors;
-    }
-
-    /**
-     * @param cors the cors to set
-     */
-    public void setCors(ArrayList<HttpHeader> cors) {
-        this.cors = cors;
-    }
 
     /**
      * @return the properties
      */
-    public HashMap<String, String> getProperties() {
+    public HashMap<String, Object> getProperties() {
         return properties;
     }
 
     /**
      * @param properties the properties to set
      */
-    public void setProperties(HashMap<String, String> properties) {
+    public void setProperties(HashMap<String, Object> properties) {
         this.properties = properties;
     }
     
