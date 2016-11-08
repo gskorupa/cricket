@@ -16,6 +16,7 @@
 package org.cricketmsf.out.http;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
@@ -42,15 +43,12 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
     private final String TEXT = "text/plain";
     private final String XML = "text/xml";
 
-    private String userAgent = "Mozilla/5.0";
-    private String contentType = "application/json";
     private String endpointURL;
-    private String requestMethod = "POST";
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
-        setEndpointURL(properties.get("url"));
-        System.out.println("url: " + getEndpointURL());
+        endpointURL = properties.get("url");
+        System.out.println("url: " + endpointURL);
     }
 
     private boolean isRequestSuccessful(int code) {
@@ -59,16 +57,30 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
 
     @Override
     public Result send(Object data) {
-        return send(data, true);
+        return send(null, data, true);
+    }
+
+    @Override
+    public Result send(Request request, Object data) {
+        return send(request, data, true);
     }
 
     @Override
     public Result send(Object data, boolean transform) {
+        return send(null, data, transform);
+    }
+
+    @Override
+    public Result send(Request request, Object data, boolean transform) {
+
+        if (request == null) {
+            request = new Request();
+        }
         String requestData = "";
 
         StandardResult result = new StandardResult();
         if (transform) {
-            switch (getContentType().toLowerCase()) {
+            switch (request.properties.get("Content-Type")) {
                 case JSON:
                     requestData = translateToJson(data);
                     break;
@@ -78,8 +90,14 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
                 case TEXT:
                     requestData = translateToText(data);
                     break;
+                case HTML:
+                    requestData = translateToHtml(data);
+                    break;
                 default:
-                    Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), "unsupported content type: " + getContentType()));
+                    Kernel.handle(
+                            Event.logSevere(this.getClass().getSimpleName(),
+                                    "unsupported content type: " + request.properties.get("Content-Type"))
+                    );
             }
         } else {
             if (requestData instanceof String) {
@@ -88,50 +106,52 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
                 requestData = data.toString();
             }
         }
-        //System.out.println(requestData);
         result.setCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
-        //result.setContent("");
-        //result.setContentLength(0);
-        //result.setResponseTime(-1);
         try {
 
-            Kernel.handle(Event.logFine(this.getClass().getSimpleName(), "sending to " + getEndpointURL()));
+            Kernel.handle(Event.logFine(this.getClass().getSimpleName(), "sending to " + endpointURL));
 
             long startPoint = System.currentTimeMillis();
-            URL obj = new URL(getEndpointURL());
+            URL obj = new URL(endpointURL);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-            con.setRequestMethod(getRequestMethod());
-            con.setRequestProperty("User-Agent", getUserAgent());
+            con.setRequestMethod(request.method);
+            for (String key : request.properties.keySet()) {
+                con.setRequestProperty(key, request.properties.get(key));
+            }
             con.setDoOutput(true);
-            con.setRequestProperty("Content-Type", getContentType());
             con.setFixedLengthStreamingMode(requestData.getBytes().length);
-            PrintWriter out = new PrintWriter(con.getOutputStream());
-            out.print(requestData);
-            out.close();
+            try (PrintWriter out = new PrintWriter(con.getOutputStream())) {
+                out.print(requestData);
+            }
             con.connect();
             result.setCode(con.getResponseCode());
             //System.out.println(result.getCode());
             //result.setResponseTime(System.currentTimeMillis() - startPoint);
-            if (isRequestSuccessful(result.getCode())) { // success
-                BufferedReader in = new BufferedReader(new InputStreamReader(
-                        con.getInputStream()));
-                String inputLine;
-                StringBuilder response = new StringBuilder();
-
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
+            if (isRequestSuccessful(result.getCode())) {
+                StringBuilder response;
+                try ( // success
+                        BufferedReader in = new BufferedReader(new InputStreamReader(
+                                con.getInputStream()))) {
+                    String inputLine;
+                    response = new StringBuilder();
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
                 }
-                in.close();
                 //result.setContentLength(response.length());
                 result.setPayload(response.toString().getBytes());
             } else {
                 //result.setContent("");
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), e.getMessage()));
             result.setCode(500);
         }
         return result;
+    }
+
+    protected String translateToHtml(Object data) {
+        return translateToText(data);
     }
 
     protected String translateToText(Object data) {
@@ -166,70 +186,6 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
 
     protected String translateToJson(Object data) {
         return null;
-    }
-
-    /**
-     * @return the userAgent
-     */
-    @Override
-    public String getUserAgent() {
-        return userAgent;
-    }
-
-    /**
-     * @param userAgent the userAgent to set
-     */
-    @Override
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
-    }
-
-    /**
-     * @return the contentType
-     */
-    @Override
-    public String getContentType() {
-        return contentType;
-    }
-
-    /**
-     * @param contentType the contentType to set
-     */
-    @Override
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    /**
-     * @return the endpointURL
-     */
-    @Override
-    public String getEndpointURL() {
-        return endpointURL;
-    }
-
-    /**
-     * @param endpointURL the endpointURL to set
-     */
-    @Override
-    public void setEndpointURL(String endpointURL) {
-        this.endpointURL = endpointURL;
-    }
-
-    /**
-     * @return the requestMethod
-     */
-    @Override
-    public String getRequestMethod() {
-        return requestMethod;
-    }
-
-    /**
-     * @param requestMethod the requestMethod to set
-     */
-    @Override
-    public void setRequestMethod(String requestMethod) {
-        this.requestMethod = requestMethod;
     }
 
 }

@@ -25,25 +25,9 @@ import org.cricketmsf.in.http.Result;
  */
 public interface OutboundHttpAdapterIface {
 
-    public void loadProperties(HashMap<String, String> properties, String adapterName);
-
     public Result send(Object data);
-    
+    public Result send(Request request, Object data);
     public Result send(Object data, boolean transform);
+    public Result send(Request request, Object data, boolean transform);
     
-    public String getUserAgent();
-    
-    public void setUserAgent(String userAgent);
-    
-    public String getContentType();
-    
-    public void setContentType(String contentType);
-    
-    public String getEndpointURL();
-    
-    public void setEndpointURL(String endpointURL);
-    
-    public String getRequestMethod();
-    
-    public void setRequestMethod(String requestMethod);
 }
