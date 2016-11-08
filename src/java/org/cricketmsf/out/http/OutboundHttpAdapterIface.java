@@ -15,7 +15,6 @@
  */
 package org.cricketmsf.out.http;
 
-import java.util.HashMap;
 import org.cricketmsf.in.http.Result;
 
 /**
@@ -26,8 +25,8 @@ import org.cricketmsf.in.http.Result;
 public interface OutboundHttpAdapterIface {
 
     public Result send(Object data);
-    public Result send(Request request, Object data);
+    public Result send(String url, Request request, Object data);
     public Result send(Object data, boolean transform);
-    public Result send(Request request, Object data, boolean transform);
+    public Result send(String url, Request request, Object data, boolean transform);
     
 }

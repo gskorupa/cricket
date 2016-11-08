@@ -57,21 +57,21 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
 
     @Override
     public Result send(Object data) {
-        return send(null, data, true);
+        return send(endpointURL, null, data, true);
     }
 
     @Override
-    public Result send(Request request, Object data) {
-        return send(request, data, true);
+    public Result send(String url, Request request, Object data) {
+        return send(url, request, data, true);
     }
 
     @Override
     public Result send(Object data, boolean transform) {
-        return send(null, data, transform);
+        return send(endpointURL, null, data, transform);
     }
 
     @Override
-    public Result send(Request request, Object data, boolean transform) {
+    public Result send(String url, Request request, Object data, boolean transform) {
 
         if (request == null) {
             request = new Request();
