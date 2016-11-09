@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,11 +45,18 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
     private final String XML = "text/xml";
 
     private String endpointURL;
+    private long timeout = 0;
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         endpointURL = properties.get("url");
-        System.out.println("url: " + endpointURL);
+        System.out.println("\turl: " + endpointURL);
+        try{
+            timeout = Long.parseLong(properties.getOrDefault("timeout", "120000"));
+        }catch(NumberFormatException e){
+            
+        }
+        System.out.println("\ttimeout: "+timeout);
     }
 
     private boolean isRequestSuccessful(int code) {
@@ -109,11 +117,15 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
         result.setCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
         try {
 
-            Kernel.handle(Event.logFine(this.getClass().getSimpleName(), "sending to " + endpointURL));
+            Kernel.handle(Event.logFine(this.getClass().getSimpleName(), "sending to " + url));
 
             long startPoint = System.currentTimeMillis();
-            URL obj = new URL(endpointURL);
-            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+            URL urlObj = new URL(url);
+            HttpURLConnection con;
+            // TODO: Proxy proxy = new Proxy(Proxy.Type.HTTP, sa);
+            con = (HttpURLConnection) urlObj.openConnection();
+            con.setReadTimeout(0);
+            //TODO: this adapter can block entire service waiting for timeout
             con.setRequestMethod(request.method);
             for (String key : request.properties.keySet()) {
                 con.setRequestProperty(key, request.properties.get(key));
@@ -144,8 +156,10 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
                 //result.setContent("");
             }
         } catch (IOException e) {
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), e.getMessage()));
+            String message=e.getMessage();
+            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), message));
             result.setCode(500);
+            result.setMessage(message);
         }
         return result;
     }
