@@ -45,7 +45,7 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
     private final String XML = "text/xml";
 
     private String endpointURL;
-    private long timeout = 0;
+    protected long timeout = 0;
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
