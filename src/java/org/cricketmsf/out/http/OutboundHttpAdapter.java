@@ -45,14 +45,14 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
     private final String XML = "text/xml";
 
     private String endpointURL;
-    protected long timeout = 0;
+    protected int timeout = 0;
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         endpointURL = properties.get("url");
         System.out.println("\turl: " + endpointURL);
         try{
-            timeout = Long.parseLong(properties.getOrDefault("timeout", "120000"));
+            timeout = Integer.parseInt(properties.getOrDefault("timeout", "120000"));
         }catch(NumberFormatException e){
             
         }
@@ -124,7 +124,8 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
             HttpURLConnection con;
             // TODO: Proxy proxy = new Proxy(Proxy.Type.HTTP, sa);
             con = (HttpURLConnection) urlObj.openConnection();
-            con.setReadTimeout(0);
+            con.setReadTimeout(timeout);
+            con.setConnectTimeout(timeout);
             //TODO: this adapter can block entire service waiting for timeout
             con.setRequestMethod(request.method);
             for (String key : request.properties.keySet()) {

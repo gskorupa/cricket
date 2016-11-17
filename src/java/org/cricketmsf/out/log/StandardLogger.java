@@ -51,11 +51,11 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setName(properties.get("name"));
-        System.out.println("logger name: " + getName());
+        System.out.println("\tlogger name: " + getName());
         setFileLocation(properties.get("log-file-name"));
-        System.out.println("log-file-name: " + getFileLocation());
+        System.out.println("\tlog-file-name: " + getFileLocation());
         setConsoleHandler(properties.getOrDefault("console", "true"));
-        System.out.println("log to console: " + isConsoleHandler());
+        System.out.println("\tlog to console: " + isConsoleHandler());
         setLoggingLevel(properties.get("level"));
         Handler systemOut = new ConsoleHandler();
         systemOut.setLevel(level);
@@ -77,7 +77,7 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
             }
         }
         logger.setLevel(level);
-        System.out.println("logging level: " + logger.getLevel().getName());
+        System.out.println("\tlogging level: " + logger.getLevel().getName());
     }
 
     @Override

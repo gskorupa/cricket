@@ -32,6 +32,12 @@ public class Httpd {
 
     public Httpd(Kernel service) {
         String host = service.getHost();
+        int backlog = 0;
+        try{
+            backlog = Integer.parseInt((String)service.getProperties().getOrDefault("threads","0"));
+        }catch(NumberFormatException | ClassCastException e){
+            
+        }
         if (null != host) {
             if (host.isEmpty() || "0.0.0.0".equals(host) || "*".equals(host)) {
                 host = null;
@@ -39,9 +45,9 @@ public class Httpd {
         }
         try {
             if (host == null) {
-                server = HttpServer.create(new InetSocketAddress(service.getPort()), 0);
+                server = HttpServer.create(new InetSocketAddress(service.getPort()), backlog);
             } else {
-                server = HttpServer.create(new InetSocketAddress(host, service.getPort()), 0);
+                server = HttpServer.create(new InetSocketAddress(host, service.getPort()), backlog);
             }
         } catch (IOException e) {
             e.printStackTrace();

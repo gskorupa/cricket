@@ -132,6 +132,10 @@ public class ArgumentParser {
             }
             
         }
+        String envArg=System.getenv("CMF_PARAM");
+        if(envArg!=null && !envArg.isEmpty()){
+            forced.add(envArg);
+        }
         if(forced.size()>0){
             map.put("force", forced);
         }

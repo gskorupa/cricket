@@ -36,11 +36,11 @@ public class StandardHttpAdapter extends HttpAdapter implements HttpAdapterIface
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
-        System.out.println("context=" + getContext());
+        System.out.println("\tcontext=" + getContext());
         setExtendedResponse(properties.getOrDefault("extended-response","false"));
-        System.out.println("extended-response=" + isExtendedResponse());
+        System.out.println("\textended-response=" + isExtendedResponse());
         setDateFormat(properties.get("date-format"));
-        System.out.println("date-format=" + dateFormat);
+        System.out.println("\tdate-format=" + dateFormat);
     }
 
 }
