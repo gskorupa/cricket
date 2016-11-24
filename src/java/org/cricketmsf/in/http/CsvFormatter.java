@@ -51,7 +51,7 @@ public class CsvFormatter {
         }catch(IOException e){
             sb.append(e.getMessage());
         }
-        return sb.toString();
+        return sb.append("\r\n").toString();
     }
 
     public String format(Map data) {
@@ -62,8 +62,9 @@ public class CsvFormatter {
             printer.printRecord(data.values());
         } catch (IOException e) {
             sb.append(e.getMessage());
+            
         }
-        return sb.toString();
+        return sb.append("\r\n").toString();
     }
 
     public String format(Result r) {
@@ -72,7 +73,7 @@ public class CsvFormatter {
             } else if (r.getData() instanceof Map) {
                 return format((Map) r.getData());
             } else {
-                return "unsupported data format";
+                return "unsupported data format\r\n";
                 //TODO: error code?
             }
     }

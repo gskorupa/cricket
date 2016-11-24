@@ -164,6 +164,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         sendLogEvent(exchange, responseData.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(responseData);
+            os.flush();
         }
         exchange.close();
     }
@@ -224,6 +225,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 formattedResponse = JsonFormatter.getInstance().format(true, result);
                 break;
         }
+        formattedResponse=formattedResponse;
         return formattedResponse.getBytes();
     }
 

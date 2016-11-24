@@ -64,6 +64,7 @@ public class TxtFormatter {
                 }
             } else {
                 sb.append(r.getData().toString());
+                sb.append("\r\n");
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -412,6 +412,10 @@ public class Event {
     public String getTimePoint() {
         return timePoint;
     }
+    
+    public boolean isFutureEvent(){
+        return getTimePoint() != null;
+    }
 
     /**
      * @param timePoint the timePoint to set

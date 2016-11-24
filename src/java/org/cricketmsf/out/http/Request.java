@@ -14,12 +14,14 @@ import java.util.HashMap;
 public class Request {
     public HashMap<String, String> properties;
     public String method;
+    public Object data;
     
     public Request(){
         method = "GET";
         properties = new HashMap<>();
         properties.put("User-Agent", "Mozilla/5.0");
         properties.put("Content-Type", "text/html");
+        data = null;
     }
     
     public void setProperty(String key, String value){
@@ -30,6 +32,8 @@ public class Request {
         method = method.toUpperCase();
     }
     
-    
+    public void setData(Object data){
+        this.data = data;
+    }
     
 }

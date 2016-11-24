@@ -52,7 +52,7 @@ public class JsonFormatter {
         args.put(JsonWriter.PRETTY_PRINT, prettyPrint);
         args.put(JsonWriter.DATE_FORMAT, "dd/MMM/yyyy:kk:mm:ss Z");
         args.put(JsonWriter.TYPE, false);
-        return JsonWriter.objectToJson(o, args)+"\n";
+        return JsonWriter.objectToJson(o, args)+"\r\n";
     }
 
 }

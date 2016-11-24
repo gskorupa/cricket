@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,12 +50,12 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         endpointURL = properties.get("url");
         System.out.println("\turl: " + endpointURL);
-        try{
+        try {
             timeout = Integer.parseInt(properties.getOrDefault("timeout", "120000"));
-        }catch(NumberFormatException e){
-            
+        } catch (NumberFormatException e) {
+
         }
-        System.out.println("\ttimeout: "+timeout);
+        System.out.println("\ttimeout: " + timeout);
     }
 
     private boolean isRequestSuccessful(int code) {
@@ -79,10 +78,18 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
     }
 
     @Override
+    public Result send(Request request, boolean transform) {
+        return send(endpointURL, request, null, transform);
+    }
+
+    @Override
     public Result send(String url, Request request, Object data, boolean transform) {
 
         if (request == null) {
             request = new Request();
+        }
+        if (data != null) {
+            request.setData(data);
         }
         String requestData = "";
 
@@ -90,16 +97,16 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
         if (transform) {
             switch (request.properties.get("Content-Type")) {
                 case JSON:
-                    requestData = translateToJson(data);
+                    requestData = translateToJson(request.data);
                     break;
                 case CSV:
-                    requestData = translateToCsv(data);
+                    requestData = translateToCsv(request.data);
                     break;
                 case TEXT:
-                    requestData = translateToText(data);
+                    requestData = translateToText(request.data);
                     break;
                 case HTML:
-                    requestData = translateToHtml(data);
+                    requestData = translateToHtml(request.data);
                     break;
                 default:
                     Kernel.handle(
@@ -109,9 +116,9 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
             }
         } else {
             if (requestData instanceof String) {
-                requestData = (String) data;
+                requestData = (String) request.data;
             } else {
-                requestData = data.toString();
+                requestData = request.data.toString();
             }
         }
         result.setCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
@@ -157,7 +164,7 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
                 //result.setContent("");
             }
         } catch (IOException e) {
-            String message=e.getMessage();
+            String message = e.getMessage();
             Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), message));
             result.setCode(500);
             result.setMessage(message);
