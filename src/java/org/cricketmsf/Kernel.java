@@ -262,8 +262,8 @@ public abstract class Kernel {
     private void setSecurityFilter(String filterName) {
         try {
             Class c = Class.forName(filterName);
-            securityFilter = (SecurityFilter) c.newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            securityFilter = (Filter) c.newInstance();
+        } catch (ClassCastException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
             securityFilter = new SecurityFilter();
         }
