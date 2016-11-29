@@ -66,6 +66,7 @@
             <link offline="true" href="http://docs.oracle.com/javase/8/docs/api/" packagelistLoc="C:\tmp"/>
             <link href="http://docs.oracle.com/javase/8/docs/api/"/>
         </javadoc>
+        <zip basedir="docs/api" destfile="CricketDoc.zip"/>
     </target>
 
     <target name="dist" depends="clean, compile"
