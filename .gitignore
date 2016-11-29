@@ -53,3 +53,6 @@ hs_err_pid*
 /data/cricket.log.lck
 /docs/notes.txt
 /CricketDoc.zip
+/nbproject/
+/.projectKnowledge/
+/dist/CricketDoc.zip

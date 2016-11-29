@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Cricket" default="all" basedir=".">
     <description>Builds, tests, and runs the project Vricket.</description>
-    <target name="all" depends="init,jar">
+    <target name="all" depends="dist">
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <!--<property name="version" value="1.0.0"/>-->
+    <property name="version" value="1.0.0"/>
     <property name="src" location="src/java"/>
-    <property name="build" location="build/web/WEB-INF/classes"/>
+    <property name="build" location="build/classes"/>
     <property name="dist" location="dist"/>
     <property name="web" location="web"/>
     <property name="lib" location="lib"/>
-    <!--<property name="jar-name" value="cricket-${version}.jar"/>-->
-    <property name="jar-name" value="cricket.jar"/>
+    <property name="jar-name" value="cricket-${version}.jar"/>
     <!--
     <property name="war-name" value="cricket-${version}.war"/>
     <property name="tomcat-home" value="/home/greg/apache-tomcat" />
@@ -20,10 +19,6 @@
     <path id="project-classpath">
         <pathelement location="${lib}/json-io-4.3.0.jar"/>
         <pathelement location="${lib}/commons-csv-1.2.jar"/>
-        <!--
-        <fileset dir="${tomcat-home}/bin" includes="*.jar" />
-        <fileset dir="${tomcat-home}/lib" includes="*.jar" />
-        -->
     </path>
 
     <target name="init">
@@ -66,7 +61,7 @@
             <link offline="true" href="http://docs.oracle.com/javase/8/docs/api/" packagelistLoc="C:\tmp"/>
             <link href="http://docs.oracle.com/javase/8/docs/api/"/>
         </javadoc>
-        <zip basedir="docs/api" destfile="CricketDoc.zip"/>
+        <zip basedir="docs/api" destfile="${dist}/CricketDoc.zip"/>
     </target>
 
     <target name="dist" depends="clean, compile"
@@ -74,6 +69,7 @@
         <!-- Create the distribution directory -->
         <mkdir dir="${dist}"/>
         <antcall inheritall="true" target="jar"/>
+        <antcall inheritall="true" target="doc"/>
     </target>
 
     <target name="clean" description="clean up">
@@ -99,10 +95,4 @@
         </jar>
     </target>
     
-    <target name="war" depends="jar">
-        <war destfile="${dist}/${war-name}" webxml="web/WEB-INF/web.xml">
-            <lib dir="lib"></lib>
-            <classes dir="build/web/WEB-INF/classes"/>
-        </war>
-    </target>
 </project>
