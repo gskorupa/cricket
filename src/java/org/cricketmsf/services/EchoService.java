@@ -40,6 +40,8 @@ import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.file.FileReaderAdapterIface;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.monitor.EnvironmentMonitorIface;
+import org.cricketmsf.out.db.KeyValueDB;
+import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.file.FileObject;
 
 /**
@@ -52,7 +54,7 @@ public class EchoService extends Kernel {
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
     EchoHttpAdapterIface httpAdapter = null;
-    KeyValueCacheAdapterIface cache = null;
+    KeyValueDB database = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
     FileReaderAdapterIface fileReader = null;
@@ -64,7 +66,7 @@ public class EchoService extends Kernel {
     public void getAdapters() {
         logAdapter = (LoggerAdapterIface) getRegistered("LoggerAdapterIface");
         httpAdapter = (EchoHttpAdapterIface) getRegistered("EchoAdapter");
-        cache = (KeyValueCacheAdapterIface) getRegistered("KeyValueCacheAdapterIface");
+        database = (KeyValueDB) getRegistered("nosql");
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("HtmlGenAdapterIface");
         fileReader = (FileReaderAdapterIface) getRegistered("FileReaderAdapterIface");
@@ -83,6 +85,18 @@ public class EchoService extends Kernel {
 
     @Override
     public void runInitTasks() {
+        try {
+            database.addTable("wwwcache", 100, false);
+        } catch (KeyValueDBException e) {
+            System.out.println("wwwcache "+e.getMessage());
+            e.printStackTrace();
+        }
+        try {
+            database.addTable("echo", 10, true);
+        } catch (KeyValueDBException e) {
+            System.out.println("echo "+e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -113,12 +127,17 @@ public class EchoService extends Kernel {
         byte[] content;
         ParameterMapResult result = new ParameterMapResult();
 
-        // we can use cache if available
+        // we can use database if available
         FileObject fo = null;
         boolean fileReady = false;
         if (htmlAdapter.useCache()) {
             try {
-                fo = (FileObject) cache.get(filePath);
+                try {
+                    fo = (FileObject) database.get("wwwcache", filePath);
+                } catch (KeyValueDBException e) {
+                    e.printStackTrace();
+                    fo = null;
+                }
                 if (fo != null) {
                     fileReady = true;
                     result.setCode(HttpAdapter.SC_OK);
@@ -126,13 +145,13 @@ public class EchoService extends Kernel {
                     result.setPayload(fo.content);
                     result.setFileExtension(fo.fileExtension);
                     result.setModificationDate(fo.modified);
-                    handle(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
+                    handle(Event.logFine(this.getClass().getSimpleName(), "read from database"));
                     return result;
                 }
             } catch (ClassCastException e) {
             }
         }
-        // if not in cache
+        // if not in database
         if (!fileReady) {
             File file = new File(filePath);
             content = fileReader.getFileBytes(file, filePath);
@@ -150,7 +169,11 @@ public class EchoService extends Kernel {
             fo.filePath = filePath;
             fo.fileExtension = fileReader.getFileExt(filePath);
             if (htmlAdapter.useCache() && content.length > 0) {
-                cache.put(filePath, fo);
+                try {
+                    database.put("wwwcache", filePath, fo);
+                } catch (KeyValueDBException e) {
+                    e.printStackTrace();
+                }
             }
         }
         result.setCode(HttpAdapter.SC_OK);
@@ -158,7 +181,7 @@ public class EchoService extends Kernel {
         result.setPayload(fo.content);
         result.setFileExtension(fo.fileExtension);
         result.setModificationDate(fo.modified);
-        return result;    
+        return result;
     }
 
     @HttpAdapterHook(adapterName = "TestScheduler", requestMethod = "GET")
@@ -169,13 +192,12 @@ public class EchoService extends Kernel {
     }
 
     /**
-     * Handling request from EchoAdapter.
-     * The method is linked to the adapter by using @HttpAdapterHook annotation.
-     * Other annotations are for the API documentation only and has no result in the 
-     * method or the service logic.
-     * 
+     * Handling request from EchoAdapter. The method is linked to the adapter by
+     * using @HttpAdapterHook annotation. Other annotations are for the API
+     * documentation only and has no result in the method or the service logic.
+     *
      * @param requestEvent
-     * @return 
+     * @return
      */
     @HttpAdapterHook(adapterName = "EchoAdapter", requestMethod = "GET")
     @RestApiUriVariables(path = "/{id}", description = "eg. object ID (here not used)")
@@ -187,10 +209,10 @@ public class EchoService extends Kernel {
     public Object doGetEcho(Event requestEvent) {
         return sendEcho(requestEvent.getRequest());
     }
-    
-    @InboundAdapterHook(adapterName = "EnvironmentAdapter", inputMethod="*")
-    public Object processMonitoringEvent(Event event){
-        handleEvent(Event.logInfo(this.getClass().getSimpleName(), (String)event.getPayload()));
+
+    @InboundAdapterHook(adapterName = "EnvironmentAdapter", inputMethod = "*")
+    public Object processMonitoringEvent(Event event) {
+        handleEvent(Event.logInfo(this.getClass().getSimpleName(), (String) event.getPayload()));
         return null;
     }
 
@@ -209,15 +231,28 @@ public class EchoService extends Kernel {
         r.setCode(HttpAdapter.SC_OK);
         if (!httpAdapter.isSilent()) {
             // with echo counter
-            Long counter;
-            counter = (Long) cache.get("counter", new Long(0));
+            Long counter = 0L;
+            try {
+                counter = (Long) database.get("echo", "counter", new Long(0));
+            } catch (KeyValueDBException e) {
+                e.printStackTrace();
+            }
             counter++;
-            cache.put("counter", counter);
+            try {
+                database.put("echo", "counter", counter);
+            } catch (KeyValueDBException e) {
+                e.printStackTrace();
+            }
             HashMap<String, Object> data = new HashMap<>(request.parameters);
             data.put("service.uuid", getUuid().toString());
             data.put("request.method", request.method);
             data.put("request.pathExt", request.pathExt);
-            data.put("echo.counter", cache.get("counter"));
+            counter = -1L;
+            try {
+                data.put("echo.counter", database.get("echo", "counter"));
+            } catch (KeyValueDBException e) {
+                e.printStackTrace();
+            }
             if (data.containsKey("error")) {
                 int errCode = HttpAdapter.SC_INTERNAL_SERVER_ERROR;
                 try {

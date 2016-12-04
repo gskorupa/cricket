@@ -56,3 +56,5 @@ hs_err_pid*
 /nbproject/
 /.projectKnowledge/
 /dist/CricketDoc.zip
+/data/echo.echo.db
+/data/echo.db

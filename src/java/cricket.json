@@ -43,16 +43,13 @@
                         "console": "true"
                     }
                 },
-                "KeyValueCacheAdapterIface": {
-                    "name": "KeyValueCacheAdapterIface",
+                "nosql": {
+                    "name": "nosql",
                     "interfaceName": "KeyValueCacheAdapterIface",
-                    "classFullName": "org.cricketmsf.out.db.KeyValueStore",
+                    "classFullName": "org.cricketmsf.out.db.KeyValueDB",
                     "properties": {
                         "path": "./data",
-                        "envVariable": "ECHO_DB_PATH",
-                        "file": "echo.xml",
-                        "max-records": "10",
-                        "persistent": "false"
+                        "name": "echo"
                     }
                 },
                 "SchedulerIface": {
