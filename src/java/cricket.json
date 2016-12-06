@@ -12,7 +12,8 @@
                 "threads": "0",
                 "filter": "org.cricketmsf.SecurityFilter",
                 "cors": "Access-Control-Allow-Origin:*",
-                "time-zone": "GMT"
+                "time-zone": "GMT",
+                "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME"
             },
             "adapters": {
                 "EchoAdapter": {
