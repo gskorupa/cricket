@@ -88,14 +88,12 @@ public class EchoService extends Kernel {
         try {
             database.addTable("wwwcache", 100, false);
         } catch (KeyValueDBException e) {
-            System.out.println("wwwcache "+e.getMessage());
-            e.printStackTrace();
+            handle(Event.logFinest("EchoService.runInitTasks", "table wwwcache exists"));
         }
         try {
-            database.addTable("echo", 10, true);
+            database.addTable("counters", 10, true);
         } catch (KeyValueDBException e) {
-            System.out.println("echo "+e.getMessage());
-            e.printStackTrace();
+            handle(Event.logFinest("EchoService.runInitTasks", "table counters exists"));
         }
     }
 

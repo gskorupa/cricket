@@ -21,6 +21,20 @@ public class KeyValueDBException extends Exception {
     
     public KeyValueDBException(int code){
         this.code = code;
+        switch (code){
+            case 1:
+                message = "unable to create table";
+                break;
+            case 2:
+                message = "unable to delete table";
+                break;
+            case 3:
+                message = "table does not exists";
+                break;
+            case 999:
+                message = "unknown error";
+                break;
+        }
     }
     
     public KeyValueDBException(int code, String message){
@@ -29,7 +43,7 @@ public class KeyValueDBException extends Exception {
     }
     
     public String getMessage(){
-        return ""+code;
+        return message;
     }
     
     public int getCode(){

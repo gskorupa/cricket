@@ -58,3 +58,4 @@ hs_err_pid*
 /dist/CricketDoc.zip
 /data/echo.echo.db
 /data/echo.db
+/data/echo.counters.db

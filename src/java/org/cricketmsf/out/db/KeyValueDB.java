@@ -69,6 +69,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
                     addTable(params[0], Integer.parseInt(params[1]), Boolean.valueOf(params[2]).booleanValue());
                     line = bufr.readLine();
                 }
+                line = bufr.readLine();
             }
             bufr.close();
         } catch (IOException e) {
@@ -80,6 +81,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     public void stop() {
         try {
             FileWriter fw = new FileWriter(filePath);
+            fw.write("# "+this.getClass().getName()+"\r\n");
+            fw.write("# DO NOT MODIFY\r\n");
+            fw.write("#\r\n");
             tables.keySet().forEach((key) -> {
                 if (tables.get(key).persistent) {
                     tables.get(key).write();
