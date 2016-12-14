@@ -85,36 +85,41 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         if (isMuted()) {
             return;
         }
-        String level = event.getType();
-        switch (level) {
-            case "LOG_INFO":
-            case "INFO":
-                logger.log(Level.INFO, event.toLogString());
-                break;
-            case "LOG_FINEST":
-            case "FINEST":
-                logger.log(Level.FINEST, event.toLogString());
-                break;
-            case "LOG_FINER":
-            case "FINER":
-                logger.log(Level.FINER, event.toLogString());
-                break;
-            case "LOG_FINE":
-            case "FINE":
-                logger.log(Level.FINE, event.toLogString());
-                break;
-            case "LOG_WARNING":
-            case "WARNING":
-                logger.log(Level.WARNING, event.toLogString());
-                break;
-            case "LOG_SEVERE":
-            case "SEVERE":
-                logger.log(Level.SEVERE, event.toLogString());
-                break;
-            default:
-                logger.log(Level.FINEST, event.toLogString());
-                break;
-        }
+        
+        new Thread(() -> {
+            Level tmpLevel;
+            switch (event.getType()) {
+                case "LOG_INFO":
+                case "INFO":
+                    tmpLevel = Level.INFO;
+                    break;
+                case "LOG_FINEST":
+                case "FINEST":
+                    tmpLevel = Level.FINEST;
+                    break;
+                case "LOG_FINER":
+                case "FINER":
+                    tmpLevel = Level.FINER;
+                    break;
+                case "LOG_FINE":
+                case "FINE":
+                    tmpLevel = Level.FINE;
+                    break;
+                case "LOG_WARNING":
+                case "WARNING":
+                    tmpLevel = Level.WARNING;
+                    break;
+                case "LOG_SEVERE":
+                case "SEVERE":
+                    tmpLevel = Level.SEVERE;
+                    break;
+                default:
+                    tmpLevel = Level.FINEST;
+                    break;
+            }
+            logger.log(tmpLevel, event.toLogString());
+        }).start();
+
     }
 
     private void setLoggingLevel(String level) {

@@ -111,6 +111,14 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
+        new Thread(() -> {
+            try{
+                doHandle(exchange);
+            }catch(IOException e){}
+        }).start();
+    }
+    
+    public void doHandle(HttpExchange exchange) throws IOException {
         //int responseType = JSON;
         String acceptedResponseType = JSON;
         try {
@@ -122,7 +130,6 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             //}
         } catch (IndexOutOfBoundsException e) {
         }
-
         //Result result = createResponse(exchange, acceptedResponseType);
         Result result = createResponse(buildRequestObject(exchange, acceptedResponseType));
 

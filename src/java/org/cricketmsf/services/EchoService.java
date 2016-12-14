@@ -121,7 +121,6 @@ public class EchoService extends Kernel {
      */
     @HttpAdapterHook(adapterName = "HtmlGenAdapterIface", requestMethod = "GET")
     public Object doGet(Event event) {
-
         RequestObject request = event.getRequest();
         String filePath = fileReader.getFilePath(request);
         byte[] content;
