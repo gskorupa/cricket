@@ -40,10 +40,11 @@ public class CommandRunner extends InboundAdapter implements Adapter, CommandRun
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
-        command=properties.getOrDefault("command", "");
+        super.loadProperties(properties, adapterName);
+        command = properties.getOrDefault("command", "");
         System.out.println("\tcommand=" + command);
-    }
 
+    }
 
     @Override
     public String execute() {

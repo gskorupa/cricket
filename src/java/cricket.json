@@ -46,7 +46,7 @@
                 },
                 "nosql": {
                     "name": "nosql",
-                    "interfaceName": "KeyValueCacheAdapterIface",
+                    "interfaceName": "KeyValueDBIface",
                     "classFullName": "org.cricketmsf.out.db.KeyValueDB",
                     "properties": {
                         "path": "./data",

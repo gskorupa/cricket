@@ -112,12 +112,13 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         new Thread(() -> {
-            try{
+            try {
                 doHandle(exchange);
-            }catch(IOException e){}
+            } catch (IOException e) {
+            }
         }).start();
     }
-    
+
     public void doHandle(HttpExchange exchange) throws IOException {
         //int responseType = JSON;
         String acceptedResponseType = JSON;
@@ -150,12 +151,18 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 responseData = result.getPayload();
             }
             headers.set("Last-Modified", result.getModificationDateFormatted());
+            if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+                CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
+                //TODO: check 
+            }
 
+            /*
             HttpHeader h;
             for (int i = 0; i < Kernel.getInstance().getCorsHeaders().size(); i++) {
                 h = (HttpHeader) Kernel.getInstance().getCorsHeaders().get(i);
                 headers.set(h.name, h.value);
             }
+             */
             if (result.getCode() == 0) {
                 result.setCode(SC_OK);
             } else {
@@ -232,7 +239,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 formattedResponse = JsonFormatter.getInstance().format(true, result);
                 break;
         }
-        formattedResponse=formattedResponse;
+        formattedResponse = formattedResponse;
         return formattedResponse.getBytes();
     }
 

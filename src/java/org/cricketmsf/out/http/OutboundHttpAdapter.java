@@ -46,16 +46,21 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
     private String endpointURL;
     protected int timeout = 0;
 
+    public HashMap<String, String> properties = new HashMap<>();
+
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         endpointURL = properties.get("url");
+        properties.put("url", endpointURL);
         System.out.println("\turl: " + endpointURL);
         try {
+            properties.put("timeout", properties.getOrDefault("timeout", "120000"));
             timeout = Integer.parseInt(properties.getOrDefault("timeout", "120000"));
         } catch (NumberFormatException e) {
 
         }
         System.out.println("\ttimeout: " + timeout);
+
     }
 
     private boolean isRequestSuccessful(int code) {
@@ -115,10 +120,12 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
                     );
             }
         } else {
-            if (requestData instanceof String) {
-                requestData = (String) request.data;
-            } else {
-                requestData = request.data.toString();
+            if (request.data != null) {
+                if (requestData instanceof String) {
+                    requestData = (String) request.data;
+                } else {
+                    requestData = request.data.toString();
+                }
             }
         }
         result.setCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
@@ -138,10 +145,13 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
             for (String key : request.properties.keySet()) {
                 con.setRequestProperty(key, request.properties.get(key));
             }
-            con.setDoOutput(true);
-            con.setFixedLengthStreamingMode(requestData.getBytes().length);
-            try (PrintWriter out = new PrintWriter(con.getOutputStream())) {
-                out.print(requestData);
+
+            if (requestData.length() > 0) {
+                con.setDoOutput(true);
+                con.setFixedLengthStreamingMode(requestData.getBytes().length);
+                try (PrintWriter out = new PrintWriter(con.getOutputStream())) {
+                    out.print(requestData);
+                }
             }
             con.connect();
             result.setCode(con.getResponseCode());
@@ -208,6 +218,13 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
 
     protected String translateToJson(Object data) {
         return null;
+    }
+
+    /**
+     * @return the properties
+     */
+    public HashMap<String, String> getProperties() {
+        return properties;
     }
 
 }

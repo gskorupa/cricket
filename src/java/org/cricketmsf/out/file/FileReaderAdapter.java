@@ -33,6 +33,8 @@ import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.http.Result;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
+import org.cricketmsf.out.db.KeyValueDBException;
+import org.cricketmsf.out.db.KeyValueDBIface;
 
 /**
  *
@@ -55,12 +57,13 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setRootPath(properties.get("root"));
         System.out.println("\troot path: " + getRootPath());
-        indexFileName=properties.getOrDefault("index-file", "index.html");
+        indexFileName = properties.getOrDefault("index-file", "index.html");
         System.out.println("\tindex-file: " + indexFileName);
     }
 
     /**
      * Reads the file content
+     *
      * @param file file object to read from
      * @return file content
      * @throws FileNotFoundException
@@ -81,19 +84,15 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                     totalBytesRead = totalBytesRead + bytesRead;
                 }
             }
-            /*
-         the above style is a bit tricky: it places bytes into the 'result' array; 
-         'result' is an output parameter;
-         the while loop usually has a single iteration only.
-             */
         } finally {
             input.close();
         }
         return result;
     }
 
-/**
+    /**
      * Reads the file content
+     *
      * @param filePath file path
      * @return file content
      */
@@ -101,7 +100,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
     public byte[] readFile(String filePath) {
         File file = new File(filePath);
         byte[] result = new byte[(int) file.length()];
-        InputStream input=null;
+        InputStream input = null;
         try {
             int totalBytesRead = 0;
             input = new BufferedInputStream(new FileInputStream(file));
@@ -113,14 +112,14 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                     totalBytesRead = totalBytesRead + bytesRead;
                 }
             }
-        }catch(IOException e){
+        } catch (IOException e) {
             result = new byte[0];
             return result;
-        }
-        finally {
-            try{
-            input.close();
-            }catch(IOException e){}
+        } finally {
+            try {
+                input.close();
+            } catch (IOException e) {
+            }
         }
         return result;
     }
@@ -132,7 +131,6 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             filePath = filePath.concat(indexFileName);
         }
         filePath = getRootPath() + filePath;
-        System.out.println("FILEPATH="+filePath);
         return filePath;
     }
 
@@ -146,7 +144,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
     }
 
     @Override
-    public byte[] getFileBytes(File file, String filePath){
+    public byte[] getFileBytes(File file, String filePath) {
         try {
             checkAccess(filePath);
             byte[] b = readFile(file);
@@ -157,90 +155,8 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             return emptyContent;
         }
     }
-    
-    /*
-    @Override
-    public ParameterMapResult getFile(String filePath, HashMap parameters) {
-        ParameterMapResult result = new ParameterMapResult();
-        result.setData(parameters);
-        File f;
-        String fileExt;
 
-        Kernel.getInstance().handleEvent(Event.logFinest("FileReaderAdapter", "requested filePath=" + filePath));
-        try {
-            f = new File(filePath);
-            fileExt = getFileExt(filePath);
-
-            checkAccess(filePath);
-
-            byte[] b = readFile(f);
-            result.setPayload(b);
-            result.setFileExtension(fileExt);
-            result.setCode(HttpAdapter.SC_OK);
-            result.setModificationDate(new Date(f.lastModified()));
-            result.setMessage("");
-        } catch (Exception e) {
-            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter(2)", filePath + " not readable or not found"));
-            byte[] emptyContent = {};
-            result.setPayload(emptyContent);
-            result.setFileExtension(".html");
-            result.setCode(HttpAdapter.SC_NOT_FOUND);
-            result.setMessage("file not found");
-        }
-        return result;
-    }
-
-    @Override
-    public ParameterMapResult getFile(RequestObject request) {
-        ParameterMapResult result = new ParameterMapResult();
-        result.setData(new HashMap(request.parameters));
-        String filePath = request.pathExt;
-        File f;
-        String fileExt = "";
-
-        Kernel.getInstance().handleEvent(Event.logFinest("FileReaderAdapter", "requested filePath=" + filePath));
-
-        try {
-
-            if (filePath.isEmpty() || filePath.endsWith("/")) {
-                filePath = filePath.concat(indexFileName);
-            }
-
-            filePath = getRootPath() + filePath;
-
-            f = new File(filePath);
-            if (f.isDirectory()) {
-                //filePath = filePath.concat("/index.html");
-                filePath = filePath.concat(indexFileName);
-            }
-
-            f = new File(filePath);
-
-            if (filePath.lastIndexOf(".") > 0) {
-                fileExt = filePath.substring(filePath.lastIndexOf("."));
-            }
-
-            checkAccess(filePath);
-
-            byte[] b = readFile(f);
-            result.setPayload(b);
-            result.setFileExtension(fileExt);
-            result.setCode(HttpAdapter.SC_OK);
-            result.setModificationDate(new Date(f.lastModified()));
-            result.setMessage("");
-        } catch (Exception e) {
-            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter(3)", filePath + " not readable or not found"));
-            byte[] emptyContent = {};
-            result.setPayload(emptyContent);
-            result.setFileExtension(".html");
-            result.setCode(HttpAdapter.SC_NOT_FOUND);
-            result.setMessage("file not found");
-        }
-        return result;
-    }
-*/
-    
-    public Result getFile(RequestObject request, KeyValueCacheAdapterIface cache){
+    public Result getFile(RequestObject request, KeyValueCacheAdapterIface cache) {
         String filePath = getFilePath(request);
         byte[] content;
         ParameterMapResult result = new ParameterMapResult();
@@ -249,7 +165,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         // we can use cache if available
         FileObject fo = null;
         boolean fileReady = false;
-        if (cache!=null) {
+        if (cache != null) {
             try {
                 fo = (FileObject) cache.get(filePath);
                 if (fo != null) {
@@ -273,7 +189,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                 // file not found or empty file
                 result.setCode(HttpAdapter.SC_NOT_FOUND);
                 result.setMessage("file not found");
-                
+
                 result.setPayload("file not found".getBytes());
                 return result;
             }
@@ -282,7 +198,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             fo.modified = new Date(file.lastModified());
             fo.filePath = filePath;
             fo.fileExtension = getFileExt(filePath);
-            if (cache!=null && content.length > 0) {
+            if (cache != null && content.length > 0) {
                 cache.put(filePath, fo);
             }
         }
@@ -293,7 +209,67 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         result.setModificationDate(fo.modified);
         return result;
     }
-    
+
+    public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName) {
+        String filePath = getFilePath(request);
+        byte[] content;
+        ParameterMapResult result = new ParameterMapResult();
+        result.setData(request.parameters);
+
+        // we can use cache if available
+        FileObject fo = null;
+        boolean fileReady = false;
+        if (cache != null) {
+            try {
+                try {
+                    fo = (FileObject) cache.get(tableName, filePath);
+                } catch (KeyValueDBException e) {
+                }
+                if (fo != null) {
+                    fileReady = true;
+                    result.setCode(HttpAdapter.SC_OK);
+                    result.setMessage("");
+                    result.setPayload(fo.content);
+                    result.setFileExtension(fo.fileExtension);
+                    result.setModificationDate(fo.modified);
+                    handle(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
+                    return result;
+                }
+            } catch (ClassCastException e) {
+            }
+        }
+        // if not in cache
+        if (!fileReady) {
+            File file = new File(filePath);
+            content = getFileBytes(file, filePath);
+            if (content.length == 0) {
+                // file not found or empty file
+                result.setCode(HttpAdapter.SC_NOT_FOUND);
+                result.setMessage("file not found");
+
+                result.setPayload("file not found".getBytes());
+                return result;
+            }
+            fo = new FileObject();
+            fo.content = content;
+            fo.modified = new Date(file.lastModified());
+            fo.filePath = filePath;
+            fo.fileExtension = getFileExt(filePath);
+            if (cache != null && content.length > 0) {
+                try {
+                    cache.put(filePath, tableName, fo);
+                } catch (KeyValueDBException e) {
+                }
+            }
+        }
+        result.setCode(HttpAdapter.SC_OK);
+        result.setMessage("");
+        result.setPayload(fo.content);
+        result.setFileExtension(fo.fileExtension);
+        result.setModificationDate(fo.modified);
+        return result;
+    }
+
     private void checkAccess(String filePath) throws FileNotFoundException {
         if (filePath.indexOf("..") > 0) {
             throw new FileNotFoundException("");

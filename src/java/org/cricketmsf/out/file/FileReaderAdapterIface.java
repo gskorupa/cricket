@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.Result;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
+import org.cricketmsf.out.db.KeyValueDBIface;
 
 /**
  *
@@ -35,7 +36,6 @@ public interface FileReaderAdapterIface {
     //public ParameterMapResult getFile(String filePath, HashMap parameters);
     public String getFileExt(String filePath);
     public byte[] getFileBytes(File file, String filePath);
-    
     public Result getFile(RequestObject request, KeyValueCacheAdapterIface cache);
-    
+    public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName);
 }

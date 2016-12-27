@@ -11,4 +11,5 @@ package org.cricketmsf.out.file;
  */
 public interface CommandRunnerIface {
     public String execute();
+    public String getProperty(String name);
 }

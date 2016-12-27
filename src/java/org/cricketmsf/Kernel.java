@@ -123,14 +123,16 @@ public abstract class Kernel {
      *
      * @param event event object that should be processed
      */
-    public void handleEvent(Event event) {
+    public Object handleEvent(Event event) {
+        Object o = null;
         try {
             Method m = getClass()
                     .getMethod(getHookMethodNameForEvent(event.getCategory()), Event.class);
-            m.invoke(this, event);
+            o = m.invoke(this, event);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
+        return o;
     }
 
     /**
@@ -138,8 +140,8 @@ public abstract class Kernel {
      *
      * @param event event object that should be processed
      */
-    public static void handle(Event event) {
-        Kernel.getInstance().handleEvent(event);
+    public static Object handle(Event event) {
+        return Kernel.getInstance().handleEvent(event);
     }
 
     public HashMap<String, Object> getAdaptersMap() {
@@ -413,7 +415,7 @@ public abstract class Kernel {
             if (adapterEntry.getValue() instanceof org.cricketmsf.in.InboundAdapter) {
                 if (! (adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter)) {
                     (new Thread((InboundAdapter) adapterEntry.getValue())).start();
-                    System.out.println(adapterEntry.getValue().getClass().getSimpleName());
+                    System.out.println(adapterEntry.getKey()+" ("+adapterEntry.getValue().getClass().getSimpleName()+")");
                 }
             }
         }
