@@ -17,6 +17,8 @@ package org.cricketmsf.in.http;
 
 import java.util.List;
 import java.util.Map;
+import org.cricketmsf.Event;
+import org.cricketmsf.Kernel;
 
 /**
  *
@@ -37,6 +39,9 @@ public class TxtFormatter {
 
     public String format(Result r) {
         StringBuilder sb = new StringBuilder();
+        if (r.getData() == null) {
+            return "";
+        }
         try {
             if (r.getData() instanceof List) {
                 List list = (List) r.getData();
@@ -44,8 +49,8 @@ public class TxtFormatter {
                     List header = (List) list.get(0);
                     List row;
                     for (int i = 1; i < list.size(); i++) {
-                        row=(List) list.get(i);
-                        for(int j=0; j<header.size(); j++){
+                        row = (List) list.get(i);
+                        for (int j = 0; j < header.size(); j++) {
                             sb.append(header.get(j));
                             sb.append("=");
                             sb.append(row.get(j));
@@ -67,7 +72,8 @@ public class TxtFormatter {
                 sb.append("\r\n");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            Kernel.handle(Event.logSevere("TxtFormatter", e.getMessage()));
             sb.append(e.getMessage());
         }
         return sb.toString();

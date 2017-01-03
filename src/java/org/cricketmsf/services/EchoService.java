@@ -36,7 +36,6 @@ import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.HttpAdapterIface;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
-import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.file.FileReaderAdapterIface;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.monitor.EnvironmentMonitorIface;
@@ -118,66 +117,12 @@ public class EchoService extends Kernel {
      * @return ParameterMapResult with the file content as a byte array
      */
     @HttpAdapterHook(adapterName = "HtmlGenAdapterIface", requestMethod = "GET")
-    public Object doGet(Event event) {
-        RequestObject request = event.getRequest();
-        String filePath = fileReader.getFilePath(request);
-        byte[] content;
-        ParameterMapResult result = new ParameterMapResult();
+    public Object htmlGet(Event event) {
 
-        // we can use database if available
-        FileObject fo = null;
-        boolean fileReady = false;
-        if (htmlAdapter.useCache()) {
-            try {
-                try {
-                    fo = (FileObject) database.get("wwwcache", filePath);
-                } catch (KeyValueDBException e) {
-                    e.printStackTrace();
-                    fo = null;
-                }
-                if (fo != null) {
-                    fileReady = true;
-                    result.setCode(HttpAdapter.SC_OK);
-                    result.setMessage("");
-                    result.setPayload(fo.content);
-                    result.setFileExtension(fo.fileExtension);
-                    result.setModificationDate(fo.modified);
-                    handle(Event.logFine(this.getClass().getSimpleName(), "read from database"));
-                    return result;
-                }
-            } catch (ClassCastException e) {
-            }
-        }
-        // if not in database
-        if (!fileReady) {
-            File file = new File(filePath);
-            content = fileReader.getFileBytes(file, filePath);
-            if (content.length == 0) {
-                // file not found or empty file
-                result.setCode(HttpAdapter.SC_NOT_FOUND);
-                result.setMessage("file not found");
-                result.setData(request.parameters);
-                result.setPayload("file not found".getBytes());
-                return result;
-            }
-            fo = new FileObject();
-            fo.content = content;
-            fo.modified = new Date(file.lastModified());
-            fo.filePath = filePath;
-            fo.fileExtension = fileReader.getFileExt(filePath);
-            if (htmlAdapter.useCache() && content.length > 0) {
-                try {
-                    database.put("wwwcache", filePath, fo);
-                } catch (KeyValueDBException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        result.setCode(HttpAdapter.SC_OK);
-        result.setMessage("");
-        result.setPayload(fo.content);
-        result.setFileExtension(fo.fileExtension);
-        result.setModificationDate(fo.modified);
+        RequestObject request = event.getRequest();
+        ParameterMapResult result
+                = (ParameterMapResult) fileReader
+                        .getFile(request, htmlAdapter.useCache() ? (KeyValueDB) database : null, "webcache");
         return result;
     }
 
