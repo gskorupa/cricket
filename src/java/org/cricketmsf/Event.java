@@ -64,6 +64,7 @@ public class Event {
         createdAt = System.currentTimeMillis();
         serviceId = Kernel.getInstance().getId();
         serviceUuid = Kernel.getInstance().getUuid();
+        category = Event.CATEGORY_GENERIC;
     }
 
     /**

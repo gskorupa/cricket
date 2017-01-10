@@ -31,7 +31,8 @@ import org.cricketmsf.in.InboundAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import org.cricketmsf.config.HttpHeader;
+import java.util.concurrent.TimeUnit;
+import org.cricketmsf.Stopwatch;
 
 /**
  *
@@ -120,21 +121,21 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     }
 
     public void doHandle(HttpExchange exchange) throws IOException {
-        //int responseType = JSON;
+        
+        Stopwatch timer = new Stopwatch();
+        Event rootEvent = new Event();
         String acceptedResponseType = JSON;
         try {
-            //acceptedResponseType = exchange.getRequestHeaders().get("Accept").get(0);
             acceptedResponseType
                     = acceptedTypesMap.getOrDefault(exchange.getRequestHeaders().get("Accept").get(0), JSON);
-            //if (!acceptedTypesMap.containsKey(acceptedResponseType)) {
-            //    acceptedResponseType = JSON;
-            //}
+
         } catch (IndexOutOfBoundsException e) {
         }
-        //Result result = createResponse(exchange, acceptedResponseType);
-        Result result = createResponse(buildRequestObject(exchange, acceptedResponseType));
+        
+        Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEvent.getId());
 
         acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
+        
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData;
@@ -156,13 +157,6 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 //TODO: check 
             }
 
-            /*
-            HttpHeader h;
-            for (int i = 0; i < Kernel.getInstance().getCorsHeaders().size(); i++) {
-                h = (HttpHeader) Kernel.getInstance().getCorsHeaders().get(i);
-                headers.set(h.name, h.value);
-            }
-             */
             if (result.getCode() == 0) {
                 result.setCode(SC_OK);
             } else {
@@ -173,7 +167,11 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 }
             }
         }
-
+        
+        //TODO: format logs to have clear info about root event id
+        Kernel.handle(
+                Event.logFinest("HttpAdapter", "event " + rootEvent.getId() + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
+        );
         exchange.sendResponseHeaders(result.getCode(), responseData.length);
         sendLogEvent(exchange, responseData.length);
         try (OutputStream os = exchange.getResponseBody()) {
@@ -272,8 +270,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         return request;
     }
 
-    //private Result createResponse(HttpExchange exchange, String acceptedResponseType) {
-    private Result createResponse(RequestObject requestObject) {
+
+    private Result createResponse(RequestObject requestObject, long rootEventId) {
 
         Result result = new StandardResult();
         if (mode == WEBSITE_MODE) {
