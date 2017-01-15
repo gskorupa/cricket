@@ -31,6 +31,7 @@ public class FileResult implements Result {
     private String fileExt;
     private Date modificationDate;
     private String modificationDateFormatted;
+    private int maxAge = 0;
 
     /**
      * @return the data
@@ -115,5 +116,15 @@ public class FileResult implements Result {
 
     public String getModificationDateFormatted() {
         return modificationDateFormatted;
+    }
+    
+    @Override
+    public int getMaxAge(){
+        return maxAge;
+    }
+    
+    @Override
+    public void setMaxAge(int maxAge){
+        this.maxAge = maxAge;
     }
 }

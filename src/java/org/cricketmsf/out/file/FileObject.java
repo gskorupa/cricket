@@ -27,5 +27,5 @@ public class FileObject {
     public Date modified;
     public String filePath;
     public String fileExtension;
-    
+    public String modifiedString;
 }

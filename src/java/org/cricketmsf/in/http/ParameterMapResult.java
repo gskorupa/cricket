@@ -27,23 +27,25 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author greg
  */
-@XmlRootElement (name = "result")
-@XmlAccessorType (XmlAccessType.FIELD)
+@XmlRootElement(name = "result")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class ParameterMapResult implements Result {
 
     @XmlElement(name = "data")
     private HashMap<String, String> data;
-    
+
     private int code;
     private String message;
     private byte[] payload;
     private String fileExt;
     private Date modificationDate;
     private String modificationDateFormatted;
-    
+    private int maxAge;
+
     public ParameterMapResult() {
         setCode(HttpAdapter.SC_OK);
-        setModificationDate(new Date());        
+        setModificationDate(new Date());
+        maxAge = 0;
     }
 
     public void setCode(int code) {
@@ -59,9 +61,9 @@ public class ParameterMapResult implements Result {
     }
 
     public String getMessage() {
-        return null!=message ? message : "";
+        return null != message ? message : "";
     }
-    
+
     /**
      * @return the data
      */
@@ -100,7 +102,7 @@ public class ParameterMapResult implements Result {
     public String toCsvString() {
         return null;
     }
-*/
+     */
     /**
      * @return the payload
      */
@@ -142,5 +144,15 @@ public class ParameterMapResult implements Result {
 
     public String getModificationDateFormatted() {
         return modificationDateFormatted;
+    }
+
+    @Override
+    public int getMaxAge() {
+        return maxAge;
+    }
+
+    @Override
+    public void setMaxAge(int maxAge) {
+        this.maxAge = maxAge;
     }
 }

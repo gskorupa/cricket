@@ -67,4 +67,7 @@ public interface Result {
     
     public String getModificationDateFormatted();
     
+    public int getMaxAge();
+    public void setMaxAge(int maxAge);
+    
 }

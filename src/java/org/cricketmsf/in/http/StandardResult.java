@@ -36,16 +36,19 @@ public class StandardResult implements Result {
     private String fileExtension = null;
     private Date modificationDate;
     private String modificationDateFormatted;
+    private int maxAge;
 
     public StandardResult() {
         setCode(HttpAdapter.SC_OK);
-        setModificationDate(new Date());        
+        setModificationDate(new Date());
+        maxAge = 0;
     }
 
     public StandardResult(Object data) {
         setCode(HttpAdapter.SC_OK);
         setData(data);
         setModificationDate(new Date());
+        maxAge = 0;
     }
 
     /**
@@ -124,5 +127,14 @@ public class StandardResult implements Result {
     public String getModificationDateFormatted() {
         return modificationDateFormatted;
     }
-
+    
+    @Override
+    public int getMaxAge(){
+        return maxAge;
+    }
+    
+    @Override
+    public void setMaxAge(int maxAge){
+        this.maxAge = maxAge;
+    }
 }

@@ -24,6 +24,8 @@ import java.util.HashMap;
  */
 public class StandardHttpAdapter extends HttpAdapter implements HttpAdapterIface, Adapter {
     
+    private String defaultContentType;
+    
     /**
      * This method is executed while adapter is instantiated during the service start.
      * It's used to configure the adapter according to the configuration.
@@ -40,6 +42,8 @@ public class StandardHttpAdapter extends HttpAdapter implements HttpAdapterIface
         setExtendedResponse(properties.getOrDefault("extended-response","false"));
         System.out.println("\textended-response=" + isExtendedResponse());
         setDateFormat(properties.get("date-format"));
+        System.out.println("\tdate-format=" + dateFormat);
+        defaultContentType = properties.getOrDefault("content-type", "application/json");
         System.out.println("\tdate-format=" + dateFormat);
     }
 

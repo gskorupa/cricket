@@ -23,6 +23,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -121,7 +122,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     }
 
     public void doHandle(HttpExchange exchange) throws IOException {
-        
+
         Stopwatch timer = new Stopwatch();
         Event rootEvent = new Event();
         String acceptedResponseType = JSON;
@@ -131,18 +132,18 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
         } catch (IndexOutOfBoundsException e) {
         }
-        
+
         Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEvent.getId());
 
         acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
-        
+
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData;
 
         if (result.getCode() == SC_MOVED_PERMANENTLY) {
             headers.set("Location", result.getMessage());
-            responseData = ("moved to " + result.getMessage()).getBytes();
+            responseData = ("moved to " + result.getMessage()).getBytes("UTF-8");
         } else {
             if (acceptedTypesMap.containsKey(acceptedResponseType)) {
                 headers.set("Content-Type", acceptedResponseType + "; charset=UTF-8");
@@ -152,6 +153,14 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 responseData = result.getPayload();
             }
             headers.set("Last-Modified", result.getModificationDateFormatted());
+
+            //TODO: get max age and no-cache info from the result object
+            if (result.getMaxAge() > 0) {
+                headers.set("Cache-Control", "max-age=" + result.getMaxAge());  // 1 hour
+            } else {
+                headers.set("Pragma", "no-cache");
+            }
+
             if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
                 CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
                 //TODO: check 
@@ -162,22 +171,33 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             } else {
                 if (responseData.length == 0) {
                     if (result.getMessage() != null) {
-                        responseData = result.getMessage().getBytes();
+                        responseData = result.getMessage().getBytes("UTF-8");
                     }
                 }
             }
         }
-        
+        /*
+        headers.set("Connection", "Keep-Alive");
+        headers.set("Server", "Cricket/1.0");
+        headers.set("ETag", ""+rootEvent.getId());
+        */
         //TODO: format logs to have clear info about root event id
         Kernel.handle(
                 Event.logFinest("HttpAdapter", "event " + rootEvent.getId() + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
         );
-        exchange.sendResponseHeaders(result.getCode(), responseData.length);
-        sendLogEvent(exchange, responseData.length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(responseData);
-            os.flush();
+        
+        //exchange.sendResponseHeaders(result.getCode(), responseData.length);
+        if (responseData.length > 0) {
+            exchange.sendResponseHeaders(result.getCode(), responseData.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                //os.write("\r\n".getBytes("UTF-8"));
+                os.write(responseData);
+                //os.flush();
+            }
+        }else{
+            exchange.sendResponseHeaders(result.getCode(), -1);
         }
+        sendLogEvent(exchange, responseData.length);
         exchange.close();
     }
 
@@ -217,6 +237,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     }
 
     public byte[] formatResponse(String type, Result result) {
+        byte[] r = {};
         String formattedResponse;
         switch (type) {
             case JSON:
@@ -238,7 +259,12 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 break;
         }
         formattedResponse = formattedResponse;
-        return formattedResponse.getBytes();
+        try{
+            r = formattedResponse.getBytes("UTF-8");
+        }catch(UnsupportedEncodingException e){
+            Kernel.handle(Event.logSevere("HttpAdapter", e.getMessage()));
+        }
+        return r;
     }
 
     RequestObject buildRequestObject(HttpExchange exchange, String acceptedResponseType) {
@@ -269,7 +295,6 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     protected RequestObject preprocess(RequestObject request) {
         return request;
     }
-
 
     private Result createResponse(RequestObject requestObject, long rootEventId) {
 
