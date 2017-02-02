@@ -5,7 +5,7 @@
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <property name="version" value="1.0.0"/>
+    <property name="version" value="1.1.0-SNAPSHOT"/>
     <property name="src" location="src/java"/>
     <property name="build" location="build/classes"/>
     <property name="dist" location="dist"/>
@@ -16,6 +16,17 @@
     <property name="war-name" value="cricket-${version}.war"/>
     <property name="tomcat-home" value="/home/greg/apache-tomcat" />
     -->
+    
+    <!-- define Maven coordinates -->
+    <property name="groupId" value="org.cricketmsf" />
+    <property name="artifactId" value="cricket" />
+    <!-- define artifacts' name, which follows the convention of Maven -->
+    <property name="jar" value="${dist}/${artifactId}-${version}.jar" />
+    <property name="javadoc-jar" value="${dist}/${artifactId}-${version}-javadoc.jar" />
+    <property name="sources-jar" value="${dist}/${artifactId}-${version}-sources.jar" />
+    
+    
+    
     <path id="project-classpath">
         <pathelement location="${lib}/json-io-4.3.0.jar"/>
         <pathelement location="${lib}/commons-csv-1.2.jar"/>
@@ -50,18 +61,19 @@
         <javadoc packagenames="org.cricketmsf.*"
                  sourcepath="${src}"
                  defaultexcludes="yes"
-                 destdir="docs/api"
+                 destdir="docs/javadoc"
                  author="true"
                  version="true"
                  use="true"
-                 windowtitle="Cricket MSF API">
+                 windowtitle="Cricket Microservices Framework">
             <doctitle><![CDATA[<h1>Cricket Microservices Framework</h1>]]></doctitle>
             <bottom><![CDATA[<i>Copyright &#169; 2016 Grzegorz Skorupa.</i>]]></bottom>
             <tag name="todo" scope="all" description="To do:"/>
             <link offline="true" href="http://docs.oracle.com/javase/8/docs/api/" packagelistLoc="C:\tmp"/>
             <link href="http://docs.oracle.com/javase/8/docs/api/"/>
         </javadoc>
-        <zip basedir="docs/api" destfile="${dist}/CricketDoc.zip"/>
+        <!-- <zip basedir="docs/javadoc" destfile="${dist}/CricketDoc.zip"/> -->
+        <jar basedir="docs/javadoc" destfile="${javadoc-jar}" />
     </target>
 
     <target name="dist" depends="clean, compile"
@@ -70,6 +82,7 @@
         <mkdir dir="${dist}"/>
         <antcall inheritall="true" target="jar"/>
         <antcall inheritall="true" target="doc"/>
+        <jar basedir="src" destfile="${sources-jar}"/>
     </target>
 
     <target name="clean" description="clean up">

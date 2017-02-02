@@ -59,3 +59,4 @@ hs_err_pid*
 /data/echo.echo.db
 /data/echo.db
 /data/echo.counters.db
+/docs/javadoc/

@@ -77,6 +77,9 @@ public class ParameterFilter extends Filter {
             throws IOException {
 
         String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+        if (contentType.indexOf(";") > 0) {
+            contentType = contentType.substring(0, contentType.indexOf(";"));
+        }
 
         @SuppressWarnings("unchecked")
         Map<String, Object> parameters = new HashMap<>();
@@ -85,52 +88,55 @@ public class ParameterFilter extends Filter {
         BufferedReader br = new BufferedReader(isr);
         String query;
         StringBuilder content = new StringBuilder();
-        if (contentType.startsWith("multipart/form-data;")) {
-            parameters=parseForm(contentType.substring(30), br);
-        } else {
-            switch (contentType.toLowerCase()) {
-                case "text/plain":
-                case "text/csv":
-                case "application/json":
-                case "text/xml":
-                    while ((query = br.readLine()) != null) {
-                        content.append(query);
-                        content.append("\r\n");
-                    }
-                    parameters.put("data", content.toString());
-                    break;
-                default:
-                    while ((query = br.readLine()) != null) {
-                        parseQuery(query, parameters);
-                    }
-            }
+
+        switch (contentType.toLowerCase()) {
+            case "multipart/form-data":
+                parameters = parseForm(contentType.substring(30), br);
+                break;
+            case "text/plain":
+            case "text/csv":
+            case "application/json":
+            case "text/xml":
+                while ((query = br.readLine()) != null) {
+                    content.append(query);
+                    content.append("\r\n");
+                }
+                //TODO: remove "data" parameter
+                parameters.put("data", content.toString());
+                exchange.setAttribute("body", content.toString());
+                break;
+            default:
+                while ((query = br.readLine()) != null) {
+                    parseQuery(query, parameters);
+                }
         }
+
         isr.close();
         exchange.setAttribute("parameters", parameters);
     }
-    
+
     private HashMap<String, Object> parseForm(String boundary, BufferedReader br)
-        throws IOException{
-        
+            throws IOException {
+
         HashMap<String, Object> parameters = new HashMap<>();
         String line;
         String contentDisposition;
         String paramName;
         String value;
-        line=br.readLine();
+        line = br.readLine();
         do {
             //first line is boundary
             //read next
-            contentDisposition=br.readLine();
-            paramName=contentDisposition.substring(38, contentDisposition.length()-1);
+            contentDisposition = br.readLine();
+            paramName = contentDisposition.substring(38, contentDisposition.length() - 1);
             //empty line
             line = br.readLine();
-            value="";
-            while(!(line=br.readLine()).startsWith("--"+boundary)){
-                value=value.concat(line);
+            value = "";
+            while (!(line = br.readLine()).startsWith("--" + boundary)) {
+                value = value.concat(line);
             }
             parameters.put(paramName, value);
-        }while(!line.equals("--"+boundary+"--"));
+        } while (!line.equals("--" + boundary + "--"));
         return parameters;
     }
 

@@ -133,8 +133,12 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         } catch (IndexOutOfBoundsException e) {
         }
 
+        
+        
+// cerating Result object
         Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEvent.getId());
 
+        
         acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
 
         //set content type and print response to string format as JSON if needed
@@ -180,12 +184,12 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         headers.set("Connection", "Keep-Alive");
         headers.set("Server", "Cricket/1.0");
         headers.set("ETag", ""+rootEvent.getId());
-        */
+         */
         //TODO: format logs to have clear info about root event id
         Kernel.handle(
                 Event.logFinest("HttpAdapter", "event " + rootEvent.getId() + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
         );
-        
+
         //exchange.sendResponseHeaders(result.getCode(), responseData.length);
         if (responseData.length > 0) {
             exchange.sendResponseHeaders(result.getCode(), responseData.length);
@@ -194,7 +198,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 os.write(responseData);
                 //os.flush();
             }
-        }else{
+        } else {
             exchange.sendResponseHeaders(result.getCode(), -1);
         }
         sendLogEvent(exchange, responseData.length);
@@ -259,15 +263,17 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 break;
         }
         formattedResponse = formattedResponse;
-        try{
+        try {
             r = formattedResponse.getBytes("UTF-8");
-        }catch(UnsupportedEncodingException e){
+        } catch (UnsupportedEncodingException e) {
             Kernel.handle(Event.logSevere("HttpAdapter", e.getMessage()));
         }
         return r;
     }
 
     RequestObject buildRequestObject(HttpExchange exchange, String acceptedResponseType) {
+        
+        // Remember that "parameters" attribute is created by filter
         Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
         String method = exchange.getRequestMethod();
         //String adapterContext = exchange.getHttpContext().getPath();
@@ -282,13 +288,13 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         //
         RequestObject requestObject = new RequestObject();
         requestObject.method = method;
-        requestObject.parameters = parameters;
+        requestObject.parameters = parameters; 
         requestObject.uri = exchange.getRequestURI().toString();
         requestObject.pathExt = pathExt;
         requestObject.headers = exchange.getRequestHeaders();
         requestObject.clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
         requestObject.acceptedResponseType = acceptedResponseType;
-
+        requestObject.body = (String)exchange.getAttribute("body");
         return requestObject;
     }
 
