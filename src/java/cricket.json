@@ -50,7 +50,7 @@
                     "classFullName": "org.cricketmsf.out.db.KeyValueDB",
                     "properties": {
                         "path": "./data",
-                        "name": "echo"
+                        "name": "local"
                     }
                 },
                 "SchedulerIface": {

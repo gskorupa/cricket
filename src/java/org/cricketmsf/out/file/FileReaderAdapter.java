@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import org.cricketmsf.Event;
@@ -32,7 +34,7 @@ import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.http.Result;
-import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
+import org.cricketmsf.out.db1.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
 
@@ -56,9 +58,9 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setRootPath(properties.get("root"));
-        System.out.println("\troot path: " + getRootPath());
+        //System.out.println("\troot path: " + getRootPath());
         indexFileName = properties.getOrDefault("index-file", "index.html");
-        System.out.println("\tindex-file: " + indexFileName);
+        //System.out.println("\tindex-file: " + indexFileName);
     }
 
     /**
@@ -156,12 +158,24 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         }
     }
 
+    @Deprecated
+    @Override
     public Result getFile(RequestObject request, KeyValueCacheAdapterIface cache) {
         String filePath = getFilePath(request);
         byte[] content;
         ParameterMapResult result = new ParameterMapResult();
         result.setData(request.parameters);
-
+        String modificationString = request.headers.getFirst("If-Modified-Since");
+        Date modificationPoint = null;
+        if (modificationString != null) {
+            SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
+            try {
+                modificationPoint = dt1.parse(modificationString);
+            }catch(ParseException e){
+                e.printStackTrace();
+            }
+        }
+        
         // we can use cache if available
         FileObject fo = null;
         boolean fileReady = false;
@@ -175,6 +189,11 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                     result.setPayload(fo.content);
                     result.setFileExtension(fo.fileExtension);
                     result.setModificationDate(fo.modified);
+                    if (!isModifiedSince(fo.modified, modificationPoint)) {
+                        //System.out.println("NOT MODIFIED");
+                        result.setPayload("".getBytes());
+                        result.setCode(HttpAdapter.SC_NOT_MODIFIED);
+                    }
                     handle(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
                     return result;
                 }
@@ -207,14 +226,54 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         result.setPayload(fo.content);
         result.setFileExtension(fo.fileExtension);
         result.setModificationDate(fo.modified);
+        if (!isModifiedSince(fo.modified, modificationPoint)) {
+            //System.out.println("NOT MODIFIED");
+            result.setPayload("".getBytes());
+            result.setCode(HttpAdapter.SC_NOT_MODIFIED);
+        } else {
+            result.setCode(HttpAdapter.SC_OK);
+            result.setPayload(fo.content);
+        }
         return result;
     }
 
+    private boolean isModifiedSince(Date modified, Date since) {
+        if(since == null){
+            //System.out.println("IF-MODIFIED-SINCE NULL");
+            return true;
+        }
+        //System.out.println("CHECKING MODIFICATION");
+        
+        boolean modif = modified.after(since);
+        //System.out.println("MODIFIED "+modif);
+        //System.out.println("MOD "+modified);
+        //System.out.println("SINCE "+since);
+        return modif;
+    }
+
+    /**
+     *
+     * @param request
+     * @param cache
+     * @param tableName
+     * @return
+     */
+    @Override
     public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName) {
         String filePath = getFilePath(request);
         byte[] content;
         ParameterMapResult result = new ParameterMapResult();
         result.setData(request.parameters);
+        String modificationString = request.headers.getFirst("If-Modified-Since");
+        Date modificationPoint = null;
+        if (modificationString != null) {
+            SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
+            try {
+                modificationPoint = dt1.parse(modificationString);
+            }catch(ParseException e){
+                e.printStackTrace();
+            }
+        }
 
         // we can use cache if available
         FileObject fo = null;
@@ -232,6 +291,11 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                     result.setPayload(fo.content);
                     result.setFileExtension(fo.fileExtension);
                     result.setModificationDate(fo.modified);
+                    if (!isModifiedSince(fo.modified, modificationPoint)) {
+                        //System.out.println("NOT MODIFIED");
+                        result.setPayload("".getBytes());
+                        result.setCode(HttpAdapter.SC_NOT_MODIFIED);
+                    }
                     handle(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
                     return result;
                 }
@@ -246,7 +310,6 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                 // file not found or empty file
                 result.setCode(HttpAdapter.SC_NOT_FOUND);
                 result.setMessage("file not found");
-
                 result.setPayload("file not found".getBytes());
                 return result;
             }
@@ -262,11 +325,17 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                 }
             }
         }
-        result.setCode(HttpAdapter.SC_OK);
         result.setMessage("");
-        result.setPayload(fo.content);
         result.setFileExtension(fo.fileExtension);
         result.setModificationDate(fo.modified);
+        if (!isModifiedSince(fo.modified, modificationPoint)) {
+            //System.out.println("NOT MODIFIED");
+            result.setPayload("".getBytes());
+            result.setCode(HttpAdapter.SC_NOT_MODIFIED);
+        } else {
+            result.setCode(HttpAdapter.SC_OK);
+            result.setPayload(fo.content);
+        }
         return result;
     }
 

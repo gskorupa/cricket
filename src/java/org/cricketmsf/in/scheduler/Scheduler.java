@@ -18,7 +18,7 @@ package org.cricketmsf.in.scheduler;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.out.db.KeyValueStore;
+import org.cricketmsf.out.db1.KeyValueStore;
 import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.scheduler.Delay;
 import java.text.ParseException;

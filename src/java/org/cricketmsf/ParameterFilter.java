@@ -47,7 +47,7 @@ public class ParameterFilter extends Filter {
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
         String method = exchange.getRequestMethod().toUpperCase();
-
+        //System.out.println("ParameterFilter: doFilter");
         switch (method) {
             case "GET":
                 parseGetParameters(exchange);
@@ -60,6 +60,7 @@ public class ParameterFilter extends Filter {
             default:
                 parseGetParameters(exchange);
         }
+        //System.out.println("ParameterFilter: doFilter ended");
         chain.doFilter(exchange);
     }
 
@@ -70,15 +71,19 @@ public class ParameterFilter extends Filter {
         URI requestedUri = exchange.getRequestURI();
         String query = requestedUri.getRawQuery();
         parseQuery(query, parameters);
+        //System.out.println("ParameterFilter URI: "+requestedUri);
         exchange.setAttribute("parameters", parameters);
     }
 
     private void parsePostParameters(HttpExchange exchange)
             throws IOException {
 
-        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
-        if (contentType.indexOf(";") > 0) {
-            contentType = contentType.substring(0, contentType.indexOf(";"));
+        String contentTypeHeader = exchange.getRequestHeaders().getFirst("Content-Type");
+        String contentType;
+        if (contentTypeHeader.indexOf(";") > 0) {
+            contentType = contentTypeHeader.substring(0, contentTypeHeader.indexOf(";"));
+        }else{
+            contentType = contentTypeHeader;
         }
 
         @SuppressWarnings("unchecked")
@@ -88,10 +93,10 @@ public class ParameterFilter extends Filter {
         BufferedReader br = new BufferedReader(isr);
         String query;
         StringBuilder content = new StringBuilder();
-
+        //System.out.println("ParameterFilter: "+contentType);
         switch (contentType.toLowerCase()) {
             case "multipart/form-data":
-                parameters = parseForm(contentType.substring(30), br);
+                parameters = parseForm(contentTypeHeader.substring(30), br);
                 break;
             case "text/plain":
             case "text/csv":
@@ -113,17 +118,19 @@ public class ParameterFilter extends Filter {
 
         isr.close();
         exchange.setAttribute("parameters", parameters);
+        //System.out.println("ParameterFilter: "+parameters.size());
     }
 
     private HashMap<String, Object> parseForm(String boundary, BufferedReader br)
             throws IOException {
-
+        //System.out.println("parsing form");
         HashMap<String, Object> parameters = new HashMap<>();
         String line;
         String contentDisposition;
         String paramName;
         String value;
         line = br.readLine();
+        try{
         do {
             //first line is boundary
             //read next
@@ -137,14 +144,18 @@ public class ParameterFilter extends Filter {
             }
             parameters.put(paramName, value);
         } while (!line.equals("--" + boundary + "--"));
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        //System.out.println("ParameterFilter.parseForm: "+parameters.size());
         return parameters;
     }
 
     @SuppressWarnings("unchecked")
     private void parseQuery(String query, Map<String, Object> parameters)
             throws UnsupportedEncodingException {
-
-        if (query != null) {
+        //System.out.println("parseQuery");
+        if (query != null && !query.isEmpty()) {
             String pairs[] = query.split("[&]");
 
             for (String pair : pairs) {

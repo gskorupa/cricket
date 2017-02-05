@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.out.db;
+package org.cricketmsf.out.db1;
 
 import org.cricketmsf.out.OutboundAdapter;
 import java.beans.XMLDecoder;
@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.cricketmsf.Adapter;
+import org.cricketmsf.out.db.ComparatorIface;
+import org.cricketmsf.out.db.LimitedMap;
 
 /**
  *

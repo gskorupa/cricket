@@ -93,7 +93,7 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
 
         if (result.getData() != null && result.getPayload()!=null) {
             HashMap map = (HashMap) result.getData();
-            if (!map.isEmpty()) {
+            if (result.getPayload().length>0 && !map.isEmpty()) {
                 //output = result.getPayload();
                 // replace using regex
                 Pattern p = Pattern.compile("(\\$\\w+)");

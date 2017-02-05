@@ -105,7 +105,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 requestMethod = ah.requestMethod();
                 if (ah.adapterName().equals(adapterName)) {
                     addHookMethodNameForMethod(requestMethod, m.getName());
-                    System.out.println("hook method for http method " + requestMethod + " : " + m.getName());
+                    //System.out.println("hook method for http method " + requestMethod + " : " + m.getName());
                 }
             }
         }
@@ -116,7 +116,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         new Thread(() -> {
             try {
                 doHandle(exchange);
-            } catch (IOException e) {
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }).start();
     }
@@ -126,18 +127,19 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         Stopwatch timer = new Stopwatch();
         Event rootEvent = new Event();
         String acceptedResponseType = JSON;
+        //System.out.println("doHandle requestHeaders "+exchange.getRequestHeaders());
         try {
             acceptedResponseType
                     = acceptedTypesMap.getOrDefault(exchange.getRequestHeaders().get("Accept").get(0), JSON);
 
-        } catch (IndexOutOfBoundsException e) {
+        } catch (Exception e) {
         }
 
         
         
-// cerating Result object
+        // cerating Result object
         Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEvent.getId());
-
+        //System.out.println("RESPONSE CREATED ");
         
         acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
 
@@ -157,7 +159,6 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 responseData = result.getPayload();
             }
             headers.set("Last-Modified", result.getModificationDateFormatted());
-
             //TODO: get max age and no-cache info from the result object
             if (result.getMaxAge() > 0) {
                 headers.set("Cache-Control", "max-age=" + result.getMaxAge());  // 1 hour
@@ -306,7 +307,9 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
         Result result = new StandardResult();
         if (mode == WEBSITE_MODE) {
+            //System.out.println("requestObject.uri: "+requestObject.uri);
             if (!requestObject.uri.endsWith("/")) {
+                
                 if (requestObject.uri.lastIndexOf("/") > requestObject.uri.lastIndexOf(".")) {
                     // redirect to index.file but only if property index.file is not null
                     result.setCode(SC_MOVED_PERMANENTLY);

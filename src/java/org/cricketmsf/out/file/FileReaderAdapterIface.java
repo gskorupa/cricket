@@ -20,7 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.Result;
-import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
+import org.cricketmsf.out.db1.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.db.KeyValueDBIface;
 
 /**
