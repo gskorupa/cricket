@@ -1,0 +1,13 @@
+Warning!
+
+When you have:
+
+a) HttpAdapter-A on context "/"
+b) HttpAdapter-B on context "/login"
+
+then
+
+request "/login.html" is handled by HttpAdapter-B instead of HttpAdapter-A.
+
+It looks like error (or undocumented feature) of sun.net.httpserver.HttpServer
+
