@@ -60,3 +60,6 @@ hs_err_pid*
 /data/echo.db
 /data/echo.counters.db
 /docs/javadoc/
+/data/local.db
+/data/local.counters.db
+/dist/cricket-1.1.0-SNAPSHOT.bin

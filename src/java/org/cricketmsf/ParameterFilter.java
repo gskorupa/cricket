@@ -79,11 +79,13 @@ public class ParameterFilter extends Filter {
             throws IOException {
 
         String contentTypeHeader = exchange.getRequestHeaders().getFirst("Content-Type");
-        String contentType;
-        if (contentTypeHeader.indexOf(";") > 0) {
-            contentType = contentTypeHeader.substring(0, contentTypeHeader.indexOf(";"));
-        }else{
-            contentType = contentTypeHeader;
+        String contentType = "";
+        if (contentTypeHeader != null) {
+            if (contentTypeHeader.indexOf(";") > 0) {
+                contentType = contentTypeHeader.substring(0, contentTypeHeader.indexOf(";"));
+            } else {
+                contentType = contentTypeHeader;
+            }
         }
 
         @SuppressWarnings("unchecked")
@@ -130,21 +132,21 @@ public class ParameterFilter extends Filter {
         String paramName;
         String value;
         line = br.readLine();
-        try{
-        do {
-            //first line is boundary
-            //read next
-            contentDisposition = br.readLine();
-            paramName = contentDisposition.substring(38, contentDisposition.length() - 1);
-            //empty line
-            line = br.readLine();
-            value = "";
-            while (!(line = br.readLine()).startsWith("--" + boundary)) {
-                value = value.concat(line);
-            }
-            parameters.put(paramName, value);
-        } while (!line.equals("--" + boundary + "--"));
-        }catch(IOException e){
+        try {
+            do {
+                //first line is boundary
+                //read next
+                contentDisposition = br.readLine();
+                paramName = contentDisposition.substring(38, contentDisposition.length() - 1);
+                //empty line
+                line = br.readLine();
+                value = "";
+                while (!(line = br.readLine()).startsWith("--" + boundary)) {
+                    value = value.concat(line);
+                }
+                parameters.put(paramName, value);
+            } while (!line.equals("--" + boundary + "--"));
+        } catch (IOException e) {
             e.printStackTrace();
         }
         //System.out.println("ParameterFilter.parseForm: "+parameters.size());

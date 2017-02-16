@@ -1,0 +1,7 @@
+How to send redirect from handler method?
+
+
+response.setCode(302);
+response.setMessage(newURL); //it will cerate "Location: newURL" response header
+
+
