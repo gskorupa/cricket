@@ -17,6 +17,7 @@ package org.cricketmsf.in.http;
 
 import org.cricketmsf.Adapter;
 import java.util.HashMap;
+import org.cricketmsf.Kernel;
 
 /**
  *
@@ -38,9 +39,9 @@ public class ScriptingAdapter extends HttpAdapter implements HttpAdapterIface, A
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
-        System.out.println("\tcontext=" + getContext());
+        Kernel.getInstance().getLogger().print("\tcontext=" + getContext());
         setResponseType(properties.getOrDefault("response-type","application/json"));
-        System.out.println("\tresponse-type=" + getResponseType());
+        Kernel.getInstance().getLogger().print("\tresponse-type=" + getResponseType());
     }
 
     /**

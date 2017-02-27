@@ -17,6 +17,7 @@ package org.cricketmsf.in.http;
 
 import org.cricketmsf.Adapter;
 import java.util.HashMap;
+import org.cricketmsf.Kernel;
 
 /**
  *
@@ -38,13 +39,13 @@ public class StandardHttpAdapter extends HttpAdapter implements HttpAdapterIface
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
-        System.out.println("\tcontext=" + getContext());
+        Kernel.getInstance().getLogger().print("\tcontext=" + getContext());
         setExtendedResponse(properties.getOrDefault("extended-response","false"));
-        System.out.println("\textended-response=" + isExtendedResponse());
+        Kernel.getInstance().getLogger().print("\textended-response=" + isExtendedResponse());
         setDateFormat(properties.get("date-format"));
-        System.out.println("\tdate-format=" + dateFormat);
+        Kernel.getInstance().getLogger().print("\tdate-format=" + dateFormat);
         defaultContentType = properties.getOrDefault("content-type", "application/json");
-        System.out.println("\tdate-format=" + dateFormat);
+        Kernel.getInstance().getLogger().print("\tdate-format=" + dateFormat);
     }
 
 }

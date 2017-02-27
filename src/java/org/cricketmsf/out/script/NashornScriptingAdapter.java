@@ -57,7 +57,7 @@ public class NashornScriptingAdapter extends OutboundAdapter implements Adapter,
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         scriptLocation = properties.get("script-file");
-        System.out.println("script location: " + scriptLocation);
+        Kernel.getInstance().getLogger().print("\tscript location: " + scriptLocation);
         script = readScript(scriptLocation);
         if (script != null) {
             manager = new ScriptEngineManager();
@@ -65,12 +65,12 @@ public class NashornScriptingAdapter extends OutboundAdapter implements Adapter,
             try {
                 engine.eval(script);
                 invocable = (Invocable) engine;
-                System.out.println("script OK");
+                Kernel.getInstance().getLogger().print("\tscript OK");
             } catch (ScriptException e) {
-                System.out.println(e.getMessage());
+                Kernel.getInstance().getLogger().print(e.getMessage());
             }
         } else {
-            System.out.println("script not found");
+            Kernel.getInstance().getLogger().print("\tscript not found");
         }
     }
 
@@ -102,7 +102,7 @@ public class NashornScriptingAdapter extends OutboundAdapter implements Adapter,
              */
 
         } catch (Exception e) {
-            System.out.println("ERROR: " + e.getClass().getName() + " " + e.getMessage());
+            Kernel.getInstance().getLogger().print("ERROR: " + e.getClass().getName() + " " + e.getMessage());
             return null;
         } finally {
             if (input != null) {

@@ -34,6 +34,8 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
 import org.cricketmsf.config.HttpHeader;
+import org.cricketmsf.out.log.LoggerAdapterIface;
+import org.cricketmsf.out.log.StandardLogger;
 
 /**
  * Microkernel.
@@ -44,6 +46,8 @@ public abstract class Kernel {
 
     // emergency LOGGER
     private static final Logger LOGGER = Logger.getLogger(org.cricketmsf.Kernel.class.getName());
+    // standard logger
+    protected static LoggerAdapterIface logger = new StandardLogger().getDefault();
 
     // singleton
     private static Object instance = null;
@@ -95,7 +99,7 @@ public abstract class Kernel {
     private void getEventHooks() {
         EventHook ah;
         String eventCategory;
-        System.out.println("REGISTERING EVENT HOOKS");
+        getLogger().print("REGISTERING EVENT HOOKS");
         // for every method of a Kernel instance (our service class extending Kernel)
         for (Method m : this.getClass().getMethods()) {
             ah = (EventHook) m.getAnnotation(EventHook.class);
@@ -103,10 +107,10 @@ public abstract class Kernel {
             if (ah != null) {
                 eventCategory = ah.eventCategory();
                 addHookMethodNameForEvent(eventCategory, m.getName());
-                System.out.println("hook method for event category " + eventCategory + " : " + m.getName());
+                getLogger().print("hook method for event category " + eventCategory + " : " + m.getName());
             }
         }
-        System.out.println("END REGISTERING EVENT HOOKS");
+        getLogger().print("END REGISTERING EVENT HOOKS");
     }
 
     private String getHookMethodNameForEvent(String eventCategory) {
@@ -197,11 +201,11 @@ public abstract class Kernel {
     }
 
     private void printHeader(String version) {
-        System.out.println();
-        System.out.println("   __|   \\  |  __|");
-        System.out.println("  (     |\\/ |  _|   Cricket Microservices Framework");
-        System.out.println(" \\___| _|  _| _|    version " + version);
-        System.out.println();
+        getLogger().print("");
+        getLogger().print("  __|  \\  | __|  Cricket");
+        getLogger().print(" (    |\\/ | _|   Microservices Framework");
+        getLogger().print("\\___|_|  _|_|    version " + version);
+        getLogger().print("");
         // big text generated using http://patorjk.com/software/taag
     }
 
@@ -214,24 +218,24 @@ public abstract class Kernel {
     private synchronized void loadAdapters(Configuration config) throws Exception {
         setHttpHandlerLoaded(false);
         setInboundAdaptersLoaded(false);
-        System.out.println("LOADING SERVICE PROPERTIES FOR " + config.getService());
-        System.out.println("\tUUID=" + getUuid().toString());
-        System.out.println("\tenv name=" + getName());
-        //setHost(config.getHost());
+        getLogger().print("LOADING SERVICE PROPERTIES FOR " + config.getService());
+        getLogger().print("\tUUID=" + getUuid().toString());
+        getLogger().print("\tenv name=" + getName());
+            //setHost(config.getHost());
         setHost(config.getProperty("host", "0.0.0.0"));
-        System.out.println("\thost=" + getHost());
+        getLogger().print("\thost=" + getHost());
         try {
-            //setPort(Integer.parseInt(config.getPort()));
+            setPort(Integer.parseInt(config.getPort()));
             setPort(Integer.parseInt(config.getProperty("port", "8080")));
         } catch (Exception e) {
         }
-        System.out.println("\tport=" + getPort());
+        getLogger().print("\tport=" + getPort());
         setSecurityFilter(config.getProperty("filter"));
-        System.out.println("\tfilter=" + getSecurityFilter().getClass().getName());
+        getLogger().print("\tfilter=" + getSecurityFilter().getClass().getName());
         setCorsHeaders(config.getProperty("cors"));
-        System.out.println("\tCORS=" + getCorsHeaders());
-        System.out.println("Extended properties: "+getProperties().toString());
-        System.out.println("LOADING ADAPTERS");
+        getLogger().print("\tCORS=" + getCorsHeaders());
+        getLogger().print("\tExtended properties: "+getProperties().toString());
+        getLogger().print("LOADING ADAPTERS");
         String adapterName = null;
         AdapterConfiguration ac = null;
         try {
@@ -239,7 +243,7 @@ public abstract class Kernel {
             for (Map.Entry<String, AdapterConfiguration> adapterEntry : adcm.entrySet()) {
                 adapterName = adapterEntry.getKey();
                 ac = adapterEntry.getValue();
-                System.out.println("ADAPTER: " + adapterName);
+                getLogger().print("ADAPTER: " + adapterName);
                 try {
                     Class c = Class.forName(ac.getClassFullName());
                     adaptersMap.put(adapterName, c.newInstance());
@@ -253,15 +257,15 @@ public abstract class Kernel {
                     loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                     adaptersMap.put(adapterName, null);
-                    System.out.println("ERROR: " + adapterName + " configuration: " + ex.getClass().getSimpleName());
+                    getLogger().print("ERROR: " + adapterName + " configuration: " + ex.getClass().getSimpleName());
                 }
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterName);
             throw new Exception(e);
         }
-        System.out.println("END LOADING ADAPTERS");
-        System.out.println();
+        getLogger().print("END LOADING ADAPTERS");
+        getLogger().print("");
     }
 
     private void setSecurityFilter(String filterName) {
@@ -365,30 +369,30 @@ public abstract class Kernel {
                 }
             });
 
-            System.out.println("Running initialization tasks");
+            getLogger().print("Running initialization tasks");
             runInitTasks();
 
-            System.out.println("Starting listeners ...");
+            getLogger().print("Starting listeners ...");
             // run listeners for inbound adapters
             runListeners();
 
-            System.out.println("Starting http listener ...");
+            getLogger().print("Starting http listener ...");
             setHttpd(new Httpd(this));
             getHttpd().run();
 
             long startedIn = System.currentTimeMillis() - startedAt;
             printHeader(Kernel.getInstance().configSet.getKernelVersion());
-            System.out.println("# Service " + getId() + " is running");
-            System.out.println("#");
-            System.out.println("# HTTP listening on port " + getPort());
-            System.out.println("#");
-            System.out.println("# Started in " + startedIn + "ms. Press Ctrl-C to stop");
-            System.out.println();
+            getLogger().print("# Service " + getId() + " is running");
+            getLogger().print("#");
+            getLogger().print("# HTTP listening on port " + getPort());
+            getLogger().print("#");
+            getLogger().print("# Started in " + startedIn + "ms. Press Ctrl-C to stop");
+            getLogger().print("");
             runFinalTasks();
             Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
             started = true;
         } else {
-            System.out.println("Couldn't find any http request hook method. Exiting ...");
+            getLogger().print("Couldn't find any http request hook method. Exiting ...");
             System.exit(MIN_PRIORITY);
         }
     }
@@ -415,7 +419,7 @@ public abstract class Kernel {
             if (adapterEntry.getValue() instanceof org.cricketmsf.in.InboundAdapter) {
                 if (! (adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter)) {
                     (new Thread((InboundAdapter) adapterEntry.getValue())).start();
-                    System.out.println(adapterEntry.getKey()+" ("+adapterEntry.getValue().getClass().getSimpleName()+")");
+                    getLogger().print(adapterEntry.getKey()+" ("+adapterEntry.getValue().getClass().getSimpleName()+")");
                 }
             }
         }
@@ -423,7 +427,7 @@ public abstract class Kernel {
 
     public void shutdown() {
 
-        System.out.println("\nShutting down ...");
+        getLogger().print("Shutting down ...");
         for (Map.Entry<String, Object> adapterEntry : getAdaptersMap().entrySet()) {
             if (adapterEntry.getValue() instanceof org.cricketmsf.in.InboundAdapter) {
                 ((InboundAdapter) adapterEntry.getValue()).destroy();
@@ -431,7 +435,7 @@ public abstract class Kernel {
                 ((OutboundAdapter) adapterEntry.getValue()).destroy();
             }
         }
-        System.out.println("Kernel stopped");
+        System.out.println("Kernel stopped\n");
     }
 
     /**
@@ -552,6 +556,13 @@ public abstract class Kernel {
         }catch(Exception e){
         }
         this.name = tmp!=null?tmp:"CricketService";
+    }
+
+    /**
+     * @return the logger
+     */
+    public static LoggerAdapterIface getLogger() {
+        return logger;
     }
 
 }

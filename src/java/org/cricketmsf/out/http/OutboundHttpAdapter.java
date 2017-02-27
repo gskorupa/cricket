@@ -52,14 +52,14 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         endpointURL = properties.get("url");
         properties.put("url", endpointURL);
-        System.out.println("\turl: " + endpointURL);
+        Kernel.getInstance().getLogger().print("\turl: " + endpointURL);
         try {
             properties.put("timeout", properties.getOrDefault("timeout", "120000"));
             timeout = Integer.parseInt(properties.getOrDefault("timeout", "120000"));
         } catch (NumberFormatException e) {
 
         }
-        System.out.println("\ttimeout: " + timeout);
+        Kernel.getInstance().getLogger().print("\ttimeout: " + timeout);
 
     }
 

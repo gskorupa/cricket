@@ -49,9 +49,9 @@ public class CommandReader extends InboundAdapter implements Adapter, WatchdogIf
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setFile(properties.getOrDefault("path", ""));
-        System.out.println("\tpath=" + fileName);
+        Kernel.getInstance().getLogger().print("\tpath=" + fileName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
-        System.out.println("\tsampling-interval=" + samplingInterval);
+        Kernel.getInstance().getLogger().print("\tsampling-interval=" + samplingInterval);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class CommandReader extends InboundAdapter implements Adapter, WatchdogIf
         try {
             this.samplingInterval = Integer.parseInt(samplingInterval);
         } catch (NumberFormatException e) {
-            System.out.println(e.getMessage());
+            Kernel.getInstance().getLogger().print(e.getMessage());
         }
     }
 
@@ -95,13 +95,13 @@ public class CommandReader extends InboundAdapter implements Adapter, WatchdogIf
         try {
             if (!file.exists()) {
                 file = null;
-                System.out.println("file not found");
+                Kernel.getInstance().getLogger().print("file not found");
             } else if (file.isDirectory()) {
-                System.out.println("directory found");
+                Kernel.getInstance().getLogger().print("directory found");
                 file = null;
             }
         } catch (SecurityException e) {
-            System.out.println(e.getMessage());
+            Kernel.getInstance().getLogger().print(e.getMessage());
         }
     }
 

@@ -61,6 +61,7 @@ public class EchoService extends Kernel {
     @Override
     public void getAdapters() {
         logAdapter = (LoggerAdapterIface) getRegistered("LoggerAdapterIface");
+        logger=logAdapter;
         httpAdapter = (EchoHttpAdapterIface) getRegistered("EchoAdapter");
         database = (KeyValueDB) getRegistered("nosql");
         scheduler = (SchedulerIface) getRegistered("SchedulerIface");

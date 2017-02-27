@@ -40,7 +40,9 @@
                     "properties": {
                         "name": "EchoService",
                         "level": "FINEST",
-                        "log-file-name": "./data/cricket.log",
+                        "log-file-name": "./data/cricket%g.log",
+                        "max-size": "1000000",
+                        "count": "10",
                         "console": "true"
                     }
                 },

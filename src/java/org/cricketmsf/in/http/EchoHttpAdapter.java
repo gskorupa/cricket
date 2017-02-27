@@ -17,6 +17,7 @@ package org.cricketmsf.in.http;
 
 import org.cricketmsf.Adapter;
 import java.util.HashMap;
+import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 
 /**
@@ -39,9 +40,9 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
-        System.out.println("\tcontext=" + getContext());
+        Kernel.getInstance().getLogger().print("\tcontext=" + getContext());
         setSilent(properties.get("silent-mode"));
-        System.out.println("\tsilent-mode=" + isSilent());
+        Kernel.getInstance().getLogger().print("\tsilent-mode=" + isSilent());
     }
     
     @Override

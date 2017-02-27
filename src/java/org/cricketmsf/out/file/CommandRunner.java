@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
+import org.cricketmsf.Kernel;
 import org.cricketmsf.in.InboundAdapter;
 
 /**
@@ -42,7 +43,7 @@ public class CommandRunner extends InboundAdapter implements Adapter, CommandRun
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
         command = properties.getOrDefault("command", "");
-        System.out.println("\tcommand=" + command);
+        Kernel.getInstance().getLogger().print("\tcommand=" + command);
 
     }
 

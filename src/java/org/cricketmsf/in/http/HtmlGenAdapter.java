@@ -19,6 +19,7 @@ import org.cricketmsf.Adapter;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.cricketmsf.Kernel;
 
 /**
  *
@@ -46,11 +47,11 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
-        System.out.println("\tcontext=" + getContext());
+        Kernel.getInstance().getLogger().print("\tcontext=" + getContext());
         useCache = properties.getOrDefault("use-cache", "false").equalsIgnoreCase("true");
-        System.out.println("\tuse-cache=" + useCache());
+        Kernel.getInstance().getLogger().print("\tuse-cache=" + useCache());
         processingVariables= (properties.getOrDefault("page-processor", "false").equalsIgnoreCase("true"));
-        System.out.println("\tpage-processor=" + processingVariables);
+        Kernel.getInstance().getLogger().print("\tpage-processor=" + processingVariables);
     }
 
     @Override

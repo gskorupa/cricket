@@ -61,9 +61,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
 
         setStoragePath(properties.get("path"));
-        System.out.println("\tpath: " + getStoragePath());
+        Kernel.getInstance().getLogger().print("\tpath: " + getStoragePath());
         setEnvVariable(properties.get("envVariable"));
-        System.out.println("\tenvVAriable name: " + getEnvVariable());
+        Kernel.getInstance().getLogger().print("\tenvVAriable name: " + getEnvVariable());
         if (System.getenv(getEnvVariable()) != null) {
             setStoragePath(System.getenv(getEnvVariable()));
         }
@@ -72,14 +72,14 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
             setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
         }
         setFileName(properties.get("file"));
-        System.out.println("\tfile: " + getFileName());
+        Kernel.getInstance().getLogger().print("\tfile: " + getFileName());
         String pathSeparator = System.getProperty("file.separator");
         setStoragePath(
                 getStoragePath().endsWith(pathSeparator)
                 ? getStoragePath() + getFileName()
                 : getStoragePath() + pathSeparator + getFileName()
         );
-        System.out.println("\tscheduler database file location: " + getStoragePath());
+        Kernel.getInstance().getLogger().print("\tscheduler database file location: " + getStoragePath());
         database = new KeyValueStore();
         database.setStoragePath(getStoragePath());
         database.read();
@@ -206,7 +206,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
             d.setDelay(getDelay(dateDefinition));
         }
         if (wrongFormat) {
-            System.out.println("WARNING unsuported delay format: "+dateDefinition);
+            Kernel.getInstance().getLogger().print("WARNING unsuported delay format: "+dateDefinition);
             return null;
         }
         return d;
@@ -224,10 +224,10 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
 
     @Override
     public void destroy() {
-        System.out.print("Stopping scheduler ... ");
+        Kernel.getInstance().getLogger().print("Stopping scheduler ... ");
         List<Runnable> activeEvents = scheduler.shutdownNow();
         database.write();
-        System.out.println("done");
+        Kernel.getInstance().getLogger().print("done");
     }
 
     /**

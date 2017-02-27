@@ -24,5 +24,6 @@ import org.cricketmsf.Event;
 public interface LoggerAdapterIface {
     
     public void log(Event event);
+    public void print(String message);
     
 }

@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
+import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
 
 /**
@@ -29,20 +30,20 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     @Override
     public void loadProperties(HashMap properties, String name) {
         storagePath = (String) properties.getOrDefault("path", "./");
-        System.out.println("\tpath: " + storagePath);
+        Kernel.getInstance().getLogger().print("\tpath: " + storagePath);
         // fix to handle '.'
         if (storagePath.startsWith(".")) {
             storagePath = System.getProperty("user.dir") + storagePath.substring(1);
         }
         dbName = (String) properties.get("name");
-        System.out.println("\tdatabase name: " + dbName);
+        Kernel.getInstance().getLogger().print("\tdatabase name: " + dbName);
         String pathSeparator = System.getProperty("file.separator");
         if (!storagePath.endsWith(pathSeparator)) {
             storagePath = storagePath + pathSeparator + dbName;
         }
         filePath
                 = storagePath + ".db";
-        System.out.println("\tdatabase file: " + filePath);
+        Kernel.getInstance().getLogger().print("\tdatabase file: " + filePath);
         try {
             start();
         } catch (KeyValueDBException e) {

@@ -99,7 +99,7 @@ public class Runner {
             e.printStackTrace();
             System.exit(-1);
         }
-        System.out.println("RUNNER");
+        System.out.println("CRICKET RUNNER");
         try {
             service = (Kernel) Kernel.getInstanceWithProperties(serviceClass, configuration);
             service.configSet = configSet;
@@ -108,7 +108,7 @@ public class Runner {
                 service.start();
             } else {
                 //service.setScheduler(new Scheduler());
-                System.out.println("Executing runOnce method");
+                //System.out.println("Executing runOnce method");
                 service.runOnce();
                 service.shutdown();
             }

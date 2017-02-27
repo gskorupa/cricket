@@ -18,6 +18,7 @@ package org.cricketmsf.in.cli;
 import java.io.Console;
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
+import org.cricketmsf.Kernel;
 import org.cricketmsf.in.InboundAdapter;
 
 /**
@@ -62,7 +63,7 @@ public class Cli extends InboundAdapter implements Adapter, CliIface {
                 Thread.sleep(samplingInterval);
             }
         } catch (InterruptedException e) {
-            System.out.println("CLI interrupted");
+            Kernel.getInstance().getLogger().print("CLI interrupted");
         }
         if (started) {
             try {
@@ -71,7 +72,7 @@ public class Cli extends InboundAdapter implements Adapter, CliIface {
                     Thread.sleep(samplingInterval);
                 }
             } catch (InterruptedException e) {
-                System.out.println("CLI interrupted");
+                Kernel.getInstance().getLogger().print("CLI interrupted");
             }
         }
     }
@@ -83,7 +84,7 @@ public class Cli extends InboundAdapter implements Adapter, CliIface {
         try {
             this.samplingInterval = Integer.parseInt(samplingInterval);
         } catch (NumberFormatException e) {
-            System.out.println(e.getMessage());
+            Kernel.getInstance().getLogger().print(e.getMessage());
         }
     }
 

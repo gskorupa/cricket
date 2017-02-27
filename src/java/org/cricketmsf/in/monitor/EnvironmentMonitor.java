@@ -51,13 +51,13 @@ public class EnvironmentMonitor extends InboundAdapter implements Adapter, Envir
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
-        System.out.println("\tsampling-interval: "+samplingInterval+" miliseconds");
+        Kernel.getInstance().getLogger().print("\tsampling-interval: "+samplingInterval+" miliseconds");
         setDisk(properties.getOrDefault("disk-path", "."));
-        System.out.println("\tdisk-path: "+diskPath);
+        Kernel.getInstance().getLogger().print("\tdisk-path: "+diskPath);
         setMemoryLimit((properties.getOrDefault("memory-limit", "5M")));
-        System.out.println("\tmemory-limit: "+memoryLimitConfig);
+        Kernel.getInstance().getLogger().print("\tmemory-limit: "+memoryLimitConfig);
         setDiskLimit((properties.getOrDefault("disk-limit", "10M")));
-        System.out.println("\tdisk-limit: "+diskLimitConfig);
+        Kernel.getInstance().getLogger().print("\tdisk-limit: "+diskLimitConfig);
     }
 
     @Override

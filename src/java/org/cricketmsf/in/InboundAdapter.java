@@ -87,7 +87,7 @@ public class InboundAdapter implements Runnable{
                 requestMethod = ah.inputMethod();
                 if (ah.adapterName().equals(adapterName)) {
                     addHookMethodNameForMethod(requestMethod, m.getName());
-                    System.out.println("kernel hook for method " + requestMethod + " : " + m.getName());
+                    Kernel.getInstance().getLogger().print("\tservice hook for method " + requestMethod + " : " + m.getName());
                 }
             }
         }

@@ -55,8 +55,7 @@ public class Httpd {
         HttpContext context;
         for (Map.Entry<String, Object> adapterEntry : service.getAdaptersMap().entrySet()) {
             if(adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter){
-                System.out.print("creating context: ");
-                System.out.println(((HttpAdapter) adapterEntry.getValue()).getContext());
+                Kernel.getLogger().print("context: "+((HttpAdapter) adapterEntry.getValue()).getContext());
                 context = server.createContext(((HttpAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
                 context.getFilters().add(new ParameterFilter());
                 context.getFilters().add(service.getSecurityFilter());

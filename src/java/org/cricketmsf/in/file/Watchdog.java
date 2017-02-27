@@ -45,7 +45,7 @@ public class Watchdog extends InboundAdapter implements Adapter, WatchdogIface {
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.getServiceHooks(adapterName);
         setFolder(properties.getOrDefault("path", ""));
-        System.out.println("path=" + folderName);
+        Kernel.getInstance().getLogger().print("path=" + folderName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
     }
 
@@ -83,7 +83,7 @@ public class Watchdog extends InboundAdapter implements Adapter, WatchdogIface {
         try {
             this.samplingInterval = Integer.parseInt(samplingInterval);
         } catch (NumberFormatException e) {
-            System.out.println(e.getMessage());
+            Kernel.getInstance().getLogger().print(e.getMessage());
         }
     }
 
@@ -96,7 +96,7 @@ public class Watchdog extends InboundAdapter implements Adapter, WatchdogIface {
         try {
             if (!folder.exists()) {
                 folder = null;
-                System.out.println("folder not found");
+                Kernel.getInstance().getLogger().print("folder not found");
             } else if (folder.isDirectory()) {
                 File[] children = folder.listFiles();
                 for (File child : children) {
@@ -106,7 +106,7 @@ public class Watchdog extends InboundAdapter implements Adapter, WatchdogIface {
                 files.put(folder.getPath(), folder.lastModified());
             }
         } catch (SecurityException e) {
-            System.out.println(e.getMessage());
+            Kernel.getInstance().getLogger().print(e.getMessage());
         }
     }
 

@@ -25,6 +25,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.cricketmsf.Kernel;
 
 /**
  *
@@ -39,6 +40,17 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
     private boolean muted = false;
     private boolean consoleHandler = true;
     private Logger logger = null;
+    protected int maxSize = 0;
+    protected int count = 0;
+
+    public StandardLogger getDefault() {
+        logger = Logger.getLogger("Kernel");
+        logger.setUseParentHandlers(false);
+        Handler systemOut = new ConsoleHandler();
+        systemOut.setFormatter(new StandardLoggerFormatter());
+        logger.addHandler(systemOut);
+        return this;
+    }
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -51,11 +63,11 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setName(properties.get("name"));
-        System.out.println("\tlogger name: " + getName());
+        Kernel.getInstance().getLogger().print("\tlogger name: " + getName());
         setFileLocation(properties.get("log-file-name"));
-        System.out.println("\tlog-file-name: " + getFileLocation());
+        Kernel.getInstance().getLogger().print("\tlog-file-name: " + getFileLocation());
         setConsoleHandler(properties.getOrDefault("console", "true"));
-        System.out.println("\tlog to console: " + isConsoleHandler());
+        Kernel.getInstance().getLogger().print("\tlog to console: " + isConsoleHandler());
         setLoggingLevel(properties.get("level"));
         Handler systemOut = new ConsoleHandler();
         systemOut.setLevel(level);
@@ -66,18 +78,28 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         if (isConsoleHandler()) {
             logger.addHandler(systemOut);
         }
+        setMaxSize(properties.get("max-size"));
+        Kernel.getInstance().getLogger().print("\tmax-size: " + maxSize);
+        setCount(properties.get("count"));
+        Kernel.getInstance().getLogger().print("\tfile count: " + count);
+        
         if (null != getFileLocation() && !getFileLocation().isEmpty()) {
             try {
-                Handler fileOut = new FileHandler(getFileLocation());
+                
+                Handler fileOut;
+                fileOut = new FileHandler(getFileLocation(), false);
+                if(count>0 && maxSize>0 && getFileLocation().indexOf("%g")>0){
+                    fileOut = new FileHandler(getFileLocation(), 1000000, 10, true);
+                }
                 fileOut.setLevel(level);
                 fileOut.setFormatter(new StandardLoggerFormatter());
                 logger.addHandler(fileOut);
             } catch (IOException e) {
-                System.out.println(e.getMessage());
+                Kernel.getInstance().getLogger().print(e.getMessage());
             }
         }
         logger.setLevel(level);
-        System.out.println("\tlogging level: " + logger.getLevel().getName());
+        Kernel.getInstance().getLogger().print("\tlogging level: " + logger.getLevel().getName());
     }
 
     @Override
@@ -85,7 +107,7 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         if (isMuted()) {
             return;
         }
-        
+
         new Thread(() -> {
             Level tmpLevel;
             switch (event.getType()) {
@@ -120,6 +142,13 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
             logger.log(tmpLevel, event.toLogString());
         }).start();
 
+    }
+
+    @Override
+    public void print(String message) {
+        if (logger != null) {
+            logger.log(Level.INFO, message);
+        }
     }
 
     private void setLoggingLevel(String level) {
@@ -201,4 +230,27 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
     public void setConsoleHandler(String useConsole) {
         this.consoleHandler = useConsole.equalsIgnoreCase("true");
     }
+
+    /**
+     * @param maxSize the maxSize to set
+     */
+    public void setMaxSize(String maxSize) {
+        try{
+            this.maxSize = Integer.parseInt(maxSize);
+        }catch(NumberFormatException e){
+            
+        }
+    }
+
+    /**
+     * @param count the count to set
+     */
+    public void setCount(String count) {
+        try{
+            this.count = Integer.parseInt(count);
+        }catch(NumberFormatException e){
+            
+        }
+    }
+
 }
