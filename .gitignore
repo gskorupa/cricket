@@ -63,3 +63,4 @@ hs_err_pid*
 /data/local.db
 /data/local.counters.db
 /dist/cricket-1.1.0-SNAPSHOT.bin
+!/lib/json-io-4.9.7.jar
