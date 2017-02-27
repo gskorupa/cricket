@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.in.http;
 
+import com.sun.net.httpserver.Headers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,11 +42,13 @@ public class ParameterMapResult implements Result {
     private Date modificationDate;
     private String modificationDateFormatted;
     private int maxAge;
+    private Headers headers;
 
     public ParameterMapResult() {
         setCode(HttpAdapter.SC_OK);
         setModificationDate(new Date());
         maxAge = 0;
+        headers = new Headers();
     }
 
     public void setCode(int code) {
@@ -154,5 +157,15 @@ public class ParameterMapResult implements Result {
     @Override
     public void setMaxAge(int maxAge) {
         this.maxAge = maxAge;
+    }
+    
+    @Override
+    public void setHeader(String name, String value){
+        headers.add(name, value);
+    }
+    
+    @Override
+    public Headers getHeaders(){
+        return headers;
     }
 }

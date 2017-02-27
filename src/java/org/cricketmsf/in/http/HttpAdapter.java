@@ -147,6 +147,10 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData;
 
+        result.getHeaders().keySet().forEach((key) -> {
+            headers.set(key, result.getHeaders().getFirst(key));
+        });
+        
         if (result.getCode() == SC_MOVED_PERMANENTLY) {
             headers.set("Location", result.getMessage());
             responseData = ("moved to " + result.getMessage()).getBytes("UTF-8");

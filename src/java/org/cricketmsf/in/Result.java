@@ -15,6 +15,8 @@
  */
 package org.cricketmsf.in;
 
+import com.sun.net.httpserver.Headers;
+
 /**
  *
  * @author greg
@@ -46,4 +48,8 @@ public interface Result {
     public void setPayload(byte[] payload);
     
     public void buildPayload(String payload);
+    
+    public void setHeader(String name, String value);
+    
+    public Headers getHeaders();
 }

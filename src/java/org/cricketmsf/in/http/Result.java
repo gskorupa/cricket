@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.in.http;
 
+import com.sun.net.httpserver.Headers;
 import java.util.Date;
 
 /**
@@ -69,5 +70,9 @@ public interface Result {
     
     public int getMaxAge();
     public void setMaxAge(int maxAge);
+    
+    public void setHeader(String name, String value);
+    
+    public Headers getHeaders();
     
 }

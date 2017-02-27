@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.in.http;
 
+import com.sun.net.httpserver.Headers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -32,6 +33,11 @@ public class FileResult implements Result {
     private Date modificationDate;
     private String modificationDateFormatted;
     private int maxAge = 0;
+    private Headers headers;
+    
+    public FileResult(){
+        headers = new Headers();
+    }
 
     /**
      * @return the data
@@ -123,7 +129,16 @@ public class FileResult implements Result {
         return maxAge;
     }
     
+    
     @Override
+    public Headers getHeaders(){
+        return headers;
+    }
+    public void setHeader(String name, String value){
+        headers.add(name, value);
+    }
+    
+    
     public void setMaxAge(int maxAge){
         this.maxAge = maxAge;
     }

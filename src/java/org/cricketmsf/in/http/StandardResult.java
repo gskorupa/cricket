@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.in.http;
 
+import com.sun.net.httpserver.Headers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -37,11 +38,13 @@ public class StandardResult implements Result {
     private Date modificationDate;
     private String modificationDateFormatted;
     private int maxAge;
+    private Headers headers;
 
     public StandardResult() {
         setCode(HttpAdapter.SC_OK);
         setModificationDate(new Date());
         maxAge = 0;
+        headers = new Headers();
     }
 
     public StandardResult(Object data) {
@@ -49,6 +52,7 @@ public class StandardResult implements Result {
         setData(data);
         setModificationDate(new Date());
         maxAge = 0;
+        headers = new Headers();
     }
 
     /**
@@ -136,5 +140,15 @@ public class StandardResult implements Result {
     @Override
     public void setMaxAge(int maxAge){
         this.maxAge = maxAge;
+    }
+    
+    @Override
+    public void setHeader(String name, String value){
+        headers.add(name, value);
+    }
+    
+    @Override
+    public Headers getHeaders(){
+        return headers;
     }
 }
