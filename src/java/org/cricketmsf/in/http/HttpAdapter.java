@@ -53,6 +53,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     public final static int SC_CREATED = 201;
 
     public final static int SC_MOVED_PERMANENTLY = 301;
+    public final static int SC_MOVED_TEMPORARY = 302;
     public final static int SC_NOT_MODIFIED = 304;
 
     public final static int SC_BAD_REQUEST = 400;
@@ -157,7 +158,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             }
         });
         
-        if (result.getCode() == SC_MOVED_PERMANENTLY) {
+        if (result.getCode() == SC_MOVED_PERMANENTLY || result.getCode() == SC_MOVED_TEMPORARY) {
             headers.set("Location", result.getMessage());
             responseData = ("moved to " + result.getMessage()).getBytes("UTF-8");
         } else {
