@@ -32,6 +32,7 @@ import org.cricketmsf.in.InboundAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.cricketmsf.Stopwatch;
 
@@ -128,6 +129,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         Event rootEvent = new Event();
         String acceptedResponseType = JSON;
         //System.out.println("doHandle requestHeaders "+exchange.getRequestHeaders());
+        
         try {
             acceptedResponseType
                     = acceptedTypesMap.getOrDefault(exchange.getRequestHeaders().get("Accept").get(0), JSON);
@@ -146,9 +148,13 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData;
-
+        
+        
         result.getHeaders().keySet().forEach((key) -> {
-            headers.set(key, result.getHeaders().getFirst(key));
+            List<String> values = result.getHeaders().get(key);
+            for(int i=0; i<values.size(); i++){
+                headers.set(key, values.get(i));
+            }
         });
         
         if (result.getCode() == SC_MOVED_PERMANENTLY) {

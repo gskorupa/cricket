@@ -5,7 +5,7 @@
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <property name="version" value="1.2.2"/>
+    <property name="version" value="1.2.3"/>
     <property name="src" location="src/java"/>
     <property name="build" location="build/classes"/>
     <property name="dist" location="dist"/>

@@ -18,6 +18,7 @@ package org.cricketmsf.in.http;
 import com.sun.net.httpserver.Headers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -134,8 +135,15 @@ public class FileResult implements Result {
     public Headers getHeaders(){
         return headers;
     }
+    
+    @Override
     public void setHeader(String name, String value){
         headers.add(name, value);
+    }
+    
+    @Override
+    public void setHeader(String name, List values){
+        headers.put(name, values);
     }
     
     
