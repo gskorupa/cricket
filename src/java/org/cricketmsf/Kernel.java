@@ -225,9 +225,10 @@ public abstract class Kernel {
         setHost(config.getProperty("host", "0.0.0.0"));
         getLogger().print("\thost=" + getHost());
         try {
-            setPort(Integer.parseInt(config.getPort()));
+            //setPort(Integer.parseInt(config.getPort()));
             setPort(Integer.parseInt(config.getProperty("port", "8080")));
         } catch (Exception e) {
+            e.printStackTrace();
         }
         getLogger().print("\tport=" + getPort());
         setSecurityFilter(config.getProperty("filter"));
