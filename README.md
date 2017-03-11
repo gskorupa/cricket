@@ -2,7 +2,7 @@
 
 ## Quick start
 
-You need:
+To build you need:
 * Java 1.8
 * Apache Ant
 
@@ -14,7 +14,7 @@ Compile and build distribution package (Cricket.jar) with command:
 
 Run example service:
 
-`java -jar cricket-1.0.0.jar --run`
+`java -jar cricket-version-number.jar --run`
 
 The http interface will be available at `http://localhost:8080/` To request the build in example service you can use curl:
 
@@ -22,16 +22,13 @@ The http interface will be available at `http://localhost:8080/` To request the 
 
 To stop the service press `Ctrl-C`
 
-## Building a service with Cricket
+## Building a services with Cricket
 
-Use the service template as the starting point. Clone https://github.com/gskorupa/cricket-starter
+It's highly recommended to use the service template as a starting point: https://github.com/gskorupa/cricket-starter
 
 ## Documentation
 
-For project status and the roadmap look at https://github.com/gskorupa/Cricket/wiki
-
-Development guide (preview): https://www.gitbook.com/book/gskorupa/building-microservices-with-cricket/
-
 Additional information: http://gskorupa.blogspot.com/
+
 
 *The project is under development. Please stay tuned for changes and more documentation.*

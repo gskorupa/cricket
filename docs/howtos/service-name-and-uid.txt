@@ -1,0 +1,37 @@
+1. Service name:
+
+a) can be defined in the operting system environment variable
+b) environment variable name can be configured in cricket.json
+c) if nor configured, Cricket will look at CRICKET_SERVICE environment variable
+d) if environment variable is not set then service name will be set to "CricketService"
+
+Example a):
+
+export CRICKET_NAME="MyService1"; java -jar dist/cricketms-1.1.1.jar -r
+...
+INFO:2017-03-11 20:32:08 +0000: 
+INFO:2017-03-11 20:32:08 +0000:   __|  \  | __|  Cricket
+INFO:2017-03-11 20:32:08 +0000:  (    |\/ | _|   Microservices Framework
+INFO:2017-03-11 20:32:08 +0000: \___|_|  _|_|    version 1.2.7
+INFO:2017-03-11 20:32:08 +0000: 
+INFO:2017-03-11 20:32:08 +0000: # Service BasicService is running
+INFO:2017-03-11 20:32:08 +0000: # UUID: 5f3aee6c-7417-4231-8653-45b75af56c47
+INFO:2017-03-11 20:32:08 +0000: # NAME: asdfg
+INFO:2017-03-11 20:32:08 +0000: #
+INFO:2017-03-11 20:32:08 +0000: # HTTP listening on port 8080
+...
+
+2. UUID
+UUID is a random identifier generated on service start.
+
+3. ID
+The service ID is configured in cricket.json
+
+
+4. ID vs. UUID vs. Service name
+
+Every service started using the same configuration (cricket.json) have the same ID.
+
+The service will got different UUID on every restart.
+
+The service will got the same Service name regardles of the number of restarts

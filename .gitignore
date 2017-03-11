@@ -67,3 +67,7 @@ hs_err_pid*
 /data/cricket0.log.lck
 /data/cricket0.log
 /data/cricket0.log.1
+/data/cricket0.log.2
+/db/
+/dist/
+/log/

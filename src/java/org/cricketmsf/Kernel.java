@@ -384,6 +384,8 @@ public abstract class Kernel {
             long startedIn = System.currentTimeMillis() - startedAt;
             printHeader(Kernel.getInstance().configSet.getKernelVersion());
             getLogger().print("# Service " + getId() + " is running");
+            getLogger().print("# UUID: "+getUuid());
+            getLogger().print("# NAME: "+getName());
             getLogger().print("#");
             getLogger().print("# HTTP listening on port " + getPort());
             getLogger().print("#");
