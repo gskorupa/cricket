@@ -140,7 +140,8 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
             con = (HttpURLConnection) urlObj.openConnection();
             con.setReadTimeout(timeout);
             con.setConnectTimeout(timeout);
-            //TODO: this adapter can block entire service waiting for timeout
+            //TODO: this adapter can block entire service waiting for timeout.
+            //TODO: probably not a problem after multithreading have been introduced
             con.setRequestMethod(request.method);
             for (String key : request.properties.keySet()) {
                 con.setRequestProperty(key, request.properties.get(key));

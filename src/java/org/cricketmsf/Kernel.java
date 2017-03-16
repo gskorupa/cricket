@@ -56,6 +56,7 @@ public abstract class Kernel {
     private HashMap<String, String> eventHookMethods = new HashMap<>();
     private String id; //identifying service 
     private String name; // name identifying service deployment (various names will have the same id)
+    public boolean liftMode = false;
 
     // adapters
     public HashMap<String, Object> adaptersMap = new HashMap<>();
@@ -154,6 +155,10 @@ public abstract class Kernel {
 
     protected Object getRegistered(String adapterName) {
         return adaptersMap.get(adapterName);
+    }
+    
+    protected Object registerAdapter(String adapterName, Object adapter) {
+        return adaptersMap.put(adapterName, adapter);
     }
 
     /**
@@ -383,7 +388,11 @@ public abstract class Kernel {
 
             long startedIn = System.currentTimeMillis() - startedAt;
             printHeader(Kernel.getInstance().configSet.getKernelVersion());
-            getLogger().print("# Service " + getId() + " is running");
+            if(liftMode){
+                getLogger().print("# Service: " + getClass().getName());
+            }else{
+                getLogger().print("# Service: " + getId());
+            }
             getLogger().print("# UUID: "+getUuid());
             getLogger().print("# NAME: "+getName());
             getLogger().print("#");
@@ -438,7 +447,7 @@ public abstract class Kernel {
                 ((OutboundAdapter) adapterEntry.getValue()).destroy();
             }
         }
-        System.out.println("Kernel stopped\n");
+        System.out.println("Kernel stopped\r\n");
     }
 
     /**

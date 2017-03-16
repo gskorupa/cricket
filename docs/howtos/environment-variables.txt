@@ -1,0 +1,24 @@
+Cricket service behavior can be tuned by two OS environment variables:
+
+1. CMF_PARAM
+Acts same as -f command line option (overwrites -f option)
+
+2. CRICKET_NAME
+Can be used to set the service name. Defaults to "CricketService"
+
+The name of this enironment variable can be configured in cricket.jason.
+Example:
+...
+"@type": "org.cricketmsf.config.Configuration",
+"id": "echo",
+"service": "org.cricketmsf.services.BasicService",
+"properties": {
+    "host": "0.0.0.0",
+    "port": "8080",
+    "threads": "0",
+    "filter": "org.cricketmsf.SecurityFilter",
+    "cors": "Access-Control-Allow-Origin:*",
+    "time-zone": "GMT",
+    "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME"
+}
+...

@@ -2,33 +2,113 @@
 
 ## Quick start
 
-To build you need:
+Get latest Cricket distribution from [GitHub](https://github.com/gskorupa/Cricket/releases):
+
+    wget https://github.com/gskorupa/Cricket/releases/download/1.2.8/cricket-1.2.8.jar
+
+Run default service:
+
+    java -jar cricket-1.2.8.jar -r
+
+Test built-in echo API using web browser or cURL:
+
+    curl -i http://localhost:8080/api/echo 
+    curl -i http://localhost:8080/api/echo?myparam=abcd
+
+You can also try built-in webserver by creating files in www subfolder (this is preconfigured location):
+
+    mkdir www
+    echo "Hello World" > www/index.html
+    java -jar cricket-1.2.8.jar -r
+    curl http://localhost:8080
+
+## Rapid prototyping of microservices
+
+Cricket MSF can be used for rapid prototyping of microservices by giving basic 
+building blocka to developers so they can focus on required business logic.
+
+As an example lets build simple Hello World service by extending built-in BasicService. 
+What we need to to is overriding getAdapters() method and to provice minimum one 
+handler method with expected logic.
+
+    // MyService.java
+    import java.util.HashMap;
+    import java.util.ArrayList;
+    import org.cricketmsf.Event;
+    import org.cricketmsf.annotation.HttpAdapterHook;
+    import org.cricketmsf.in.http.StandardHttpAdapter;
+    import org.cricketmsf.in.http.StandardResult;
+    import org.cricketmsf.services.BasicService;
+    
+    public class MyService extends BasicService {
+    
+        StandardHttpAdapter myAdapter = null;
+        
+        @Override
+        public void getAdapters() {
+            super.getAdapters();      
+            myAdapter = new StandardHttpAdapter();
+            myAdapter.loadProperties(new HashMap<>(), "myadapter");
+            myAdapter.setContext("/test");
+            registerAdapter("myadapter", myAdapter);
+        }
+        
+        @HttpAdapterHook(adapterName = "myadapter", requestMethod = "GET")
+        @Override
+        public Object doGetScript(Event requestEvent) {
+            ArrayList al = new ArrayList();
+            al.add("Hello");
+            al.add("World");
+            StandardResult r = new StandardResult();
+            r.setData(al);
+            return r;
+        }    
+    }
+
+After compiling the class:
+
+    javac -classpath cricket-1.2.8.jar MyService.java
+
+We can run the service using Cricket's "lift" mode:
+
+    java -cp .:cricket-1.2.8.jar org.cricketmsf.Runner -r -l MyService
+
+Our service will be accessible on localhost so we can request it on it's defined 
+context "/test":
+
+    curl -i http://localhost:8080/test
+    
+    HTTP/1.1 200 OK
+    Pragma: no-cache
+    Date: Thu, 16 Mar 2017 12:31:17 GMT
+    Last-modified: Cz, 16 mar 2017 13:31:17 CET
+    Content-type: application/json; charset=UTF-8
+    Content-length: 26
+    
+    [
+    "Hello",
+    "World"
+    ]
+
+
+## Cricket development quick start
+To build Cricket you will need:
 * Java 1.8
 * Apache Ant
 
 Edit build.xml to modify properties and file paths according to your system. 
-Modify properties in cricket.json.
-Compile and build distribution package (Cricket.jar) with command:
 
-`ant dist`
+Compile and build distribution packages (cricket-version-number.jar) with command:
 
-Run example service:
+    ant distribution
 
-`java -jar cricket-version-number.jar --run`
 
-The http interface will be available at `http://localhost:8080/` To request the build in example service you can use curl:
-
-`curl -i -H "Accept:application/json" "http://localhost:8080?name=John&surname=Smith"`
-
-To stop the service press `Ctrl-C`
-
-## Building a services with Cricket
+## Building services with Cricket
 
 It's highly recommended to use the service template as a starting point: https://github.com/gskorupa/cricket-starter
 
-## Documentation
+## More information
 
-Additional information: http://gskorupa.blogspot.com/
+In case of problems or questions please create issue in the project Github repository.
+You can also find a list of articles on my blog: http://gskorupa.blogspot.com/
 
-
-*The project is under development. Please stay tuned for changes and more documentation.*

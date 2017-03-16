@@ -67,7 +67,7 @@ public class Runner {
         Configuration configuration = null;
         if (arguments.containsKey("service")) {
             // if service name provided as command line option
-            serviceId = (String)arguments.get("service");
+            serviceId = (String) arguments.get("service");
         } else {
             // otherwise get first configured service
             serviceId = configSet.getDefault().getId();
@@ -79,6 +79,9 @@ public class Runner {
         if (configuration == null) {
             System.out.println("Configuration not found for id=" + serviceId);
             System.exit(-1);
+        } else if (arguments.containsKey("lift")) {
+            serviceName = (String) arguments.get("lift");
+            System.out.println("LIFT service " + serviceName);
         } else {
             serviceName = configuration.getService();
         }
@@ -103,6 +106,7 @@ public class Runner {
         try {
             service = (Kernel) Kernel.getInstanceWithProperties(serviceClass, configuration);
             service.configSet = configSet;
+            service.liftMode = arguments.containsKey("lift");
             if (arguments.containsKey("run")) {
                 service.setStartedAt(runAt);
                 service.start();
@@ -178,7 +182,7 @@ public class Runner {
             types.put("java.utils.HashMap", "properties");
             args.put(JsonReader.TYPE_NAME_MAP, types);
             try {
-                InputStream propertyFile = new FileInputStream(new File((String)arguments.get("config")));
+                InputStream propertyFile = new FileInputStream(new File((String) arguments.get("config")));
                 String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
                 cs = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
             } catch (Exception e) {
@@ -202,12 +206,13 @@ public class Runner {
                 if (inputStream != null) {
                     prop.load(inputStream);
                 }
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
             cs.setKernelVersion(prop.getProperty("version", "unknown"));
             // force property changes based on command line --force param
-            if(arguments.containsKey("force")){
-                ArrayList<String> forcedProps = (ArrayList)arguments.get("force");
-                for(int i=0; i<forcedProps.size(); i++){
+            if (arguments.containsKey("force")) {
+                ArrayList<String> forcedProps = (ArrayList) arguments.get("force");
+                for (int i = 0; i < forcedProps.size(); i++) {
                     cs.forceProperty(forcedProps.get(i));
                 }
             }

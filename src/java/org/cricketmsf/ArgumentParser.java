@@ -103,6 +103,11 @@ public class ArgumentParser {
                         confToRead = true;
                         option="config";
                         break;
+                    case "--lift":
+                    case "-l":
+                        confToRead = true;
+                        option="lift";
+                        break;
                     case "--service":
                     case "-s":
                         confToRead = true;
@@ -122,6 +127,9 @@ public class ArgumentParser {
             switch(option){
                 case "config":
                     map.put("error", "-c or --config option requires an argument");
+                    break;
+                case "lift":
+                    map.put("error", "-l or --lift option requires an argument");
                     break;
                 case "service":
                     map.put("error", "-s or --service option requires an argument");

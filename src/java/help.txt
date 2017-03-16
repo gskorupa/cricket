@@ -7,7 +7,8 @@ Options:
 --help | -h                Print this usage information and exit
 --run | -r                 Run the configured service with embedded http server
 --config | -c path         Use external configuration file
---service | -s serviceID   Run selected service
+--service | -s serviceID   Run selected, configured service
 --print | -p               Print configuration and exit
+--lift | -l ServiceClass   Run specified class as a service (lift mode)              
 
-Without -r option, the runOnce() service method will be executed.
+Without -r option, the runOnce() method of the service will be executed.

@@ -71,3 +71,4 @@ hs_err_pid*
 /db/
 /dist/
 /log/
+/test/
