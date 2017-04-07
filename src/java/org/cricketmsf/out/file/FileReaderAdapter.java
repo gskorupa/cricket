@@ -58,9 +58,9 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setRootPath(properties.get("root"));
-        //System.out.println("\troot path: " + getRootPath());
+        Kernel.getInstance().getLogger().print("\troot: " + getRootPath());
         indexFileName = properties.getOrDefault("index-file", "index.html");
-        //System.out.println("\tindex-file: " + indexFileName);
+        Kernel.getInstance().getLogger().print("\tindex-file: " + indexFileName);
     }
 
     /**

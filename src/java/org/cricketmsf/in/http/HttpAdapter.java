@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DateFormat;
 import java.util.Map;
 import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
@@ -449,6 +450,10 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         if (dateFormat != null) {
             this.dateFormat = new SimpleDateFormat(dateFormat);
         }
+    }
+    
+    public DateFormat getDateFormat(){
+        return dateFormat;
     }
 
 }

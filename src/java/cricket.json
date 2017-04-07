@@ -72,7 +72,8 @@
                     "interfaceName": "FileReaderAdapterIface",
                     "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
-                        "root": "./www/"
+                        "root": "./www/",
+                        "index-file": "index.html"
                     }
                 }
             }
