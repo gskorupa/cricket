@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -194,5 +195,12 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         } catch (NullPointerException e) {
             throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS);
         }
+    }
+
+    @Override
+    public List<String> getTableNames() throws KeyValueDBException {
+        ArrayList<String> result = new ArrayList<>();
+        tables.keySet().forEach(key -> result.add((String)key));
+        return result;
     }
 }

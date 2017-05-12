@@ -21,6 +21,8 @@ public interface KeyValueDBIface {
     public void addTable(String name, int capacity, boolean persistent) throws KeyValueDBException;
 
     public void deleteTable(String name) throws KeyValueDBException;
+    
+    public List<String> getTableNames() throws KeyValueDBException;
 
     public void put(String tableName, String key, Object value) throws KeyValueDBException;
 
