@@ -69,7 +69,6 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
                 if (!line.startsWith("#")) {
                     params = line.split(",");
                     addTable(params[0], Integer.parseInt(params[1]), Boolean.valueOf(params[2]).booleanValue());
-                    line = bufr.readLine();
                 }
                 line = bufr.readLine();
             }

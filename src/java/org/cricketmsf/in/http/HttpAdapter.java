@@ -58,6 +58,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     public final static int SC_NOT_MODIFIED = 304;
 
     public final static int SC_BAD_REQUEST = 400;
+    public final static int SC_UNAUTHORIZED = 401;
+    public final static int SC_SESSION_EXPIRED = 401;
     public final static int SC_FORBIDDEN = 403;
     public final static int SC_NOT_FOUND = 404;
     public final static int SC_METHOD_NOT_ALLOWED = 405;
