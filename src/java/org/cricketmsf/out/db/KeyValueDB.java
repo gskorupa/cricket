@@ -181,7 +181,11 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     @Override
     public boolean remove(String tableName, String key) throws KeyValueDBException {
         try {
-            return tables.get(tableName).remove(key);
+            if(containsKey(tableName, key)){
+                return tables.get(tableName).remove(key);
+            }else{
+                throw new KeyValueDBException(KeyValueDBException.CANNOT_DELETE);
+            }
         } catch (NullPointerException e) {
             throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS);
         }

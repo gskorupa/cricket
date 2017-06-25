@@ -585,5 +585,24 @@ public class Event {
         //return null;
         return request;
     }
+    
+    @Override
+    public Event clone(){
+        Event clon = new Event();
+        clon.calculatedTimePoint = calculatedTimePoint;
+        clon.category = category;
+        clon.createdAt = createdAt;
+        clon.origin = origin;
+        clon.payload = payload;
+        clon.rootEventId = rootEventId;
+        clon.serviceId = serviceId;
+        clon.serviceUuid = serviceUuid;
+        clon.timePoint = timePoint;
+        clon.type = type;
+        // NOT CLONED:
+        //clon.request = null;
+        //clon.id = id;
+        return clon;
+    }
 
 }
