@@ -129,6 +129,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
     public void doHandle(HttpExchange exchange) throws IOException {
 
+        //System.out.println("HANDLE query exchange "+exchange.toString());
         Stopwatch timer = new Stopwatch();
         Event rootEvent = new Event();
         String acceptedResponseType = JSON;
@@ -140,8 +141,6 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
         } catch (Exception e) {
         }
-
-        
         
         // cerating Result object
         Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEvent.getId());
@@ -290,6 +289,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         
         // Remember that "parameters" attribute is created by filter
         Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
+        //System.out.println("queryInRequest=["+parameters.get("query")+"]");
         String method = exchange.getRequestMethod();
         //String adapterContext = exchange.getHttpContext().getPath();
         String pathExt = exchange.getRequestURI().getPath();

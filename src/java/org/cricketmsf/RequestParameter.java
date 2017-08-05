@@ -22,4 +22,8 @@ package org.cricketmsf;
 public class RequestParameter {
     public String name=null;
     public String value=null;
+    public RequestParameter(String name, String value){
+        this.name=name;
+        this.value=value;
+    }
 }

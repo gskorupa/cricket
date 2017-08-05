@@ -34,6 +34,7 @@ public class FileTailer extends InboundAdapter implements Adapter, WatchdogIface
 
     private String fileName;
     File file;
+    boolean directory = false;
     long lastKnownPosition = 1;
     private int samplingInterval = 1000;
     private boolean continuing = false;
@@ -57,23 +58,27 @@ public class FileTailer extends InboundAdapter implements Adapter, WatchdogIface
 
     @Override
     public void checkStatus() {
-        long fileLength = file.length();
-        if ((!continuing) || (fileLength > lastKnownPosition)) {
-            try (RandomAccessFile readWriteFileAccess = new RandomAccessFile(file, "rw")) {
-                readWriteFileAccess.seek(lastKnownPosition-1);
-                String newLine;
-                while ((newLine = readWriteFileAccess.readLine()) != null) {
-                    // create event
-                    if (!newLine.isEmpty() && continuing) {
-                        handle(INBOUND_METHOD_NAME, newLine);
+        if (file == null) {
+            return;
+        }
+        if (!directory) {
+            long fileLength = file.length();
+            if ((!continuing) || (fileLength > lastKnownPosition)) {
+                try (RandomAccessFile readWriteFileAccess = new RandomAccessFile(file, "rw")) {
+                    readWriteFileAccess.seek(lastKnownPosition - 1);
+                    String newLine;
+                    while ((newLine = readWriteFileAccess.readLine()) != null) {
+                        // create event
+                        if (!newLine.isEmpty() && continuing) {
+                            handle(INBOUND_METHOD_NAME, newLine);
+                        }
                     }
+                    continuing = true;
+                    lastKnownPosition = readWriteFileAccess.getFilePointer();
+                } catch (IOException e) {
                 }
-                continuing = true;
-                lastKnownPosition = readWriteFileAccess.getFilePointer();
-            } catch (IOException e) {
             }
         }
-
     }
 
     @Override
@@ -111,6 +116,7 @@ public class FileTailer extends InboundAdapter implements Adapter, WatchdogIface
                 file = null;
                 Kernel.getInstance().getLogger().print("file not found");
             } else if (file.isDirectory()) {
+                directory = true;
                 Kernel.getInstance().getLogger().print("directory found");
             }
         } catch (SecurityException e) {

@@ -110,7 +110,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     @Override
     public void addTable(String name, int capacity, boolean persistent) throws KeyValueDBException {
         if (tables.containsKey(name)) {
-            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE);
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "unable to create table "+name);
         }
         tables.put(name, new KeyValueTable(name, capacity, persistent, storagePath));
     }
@@ -118,7 +118,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     @Override
     public void deleteTable(String name) throws KeyValueDBException {
         if (!tables.containsKey(name)) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+name);
         }
         tables.remove(name);
     }
@@ -128,7 +128,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             tables.get(tableName).put(key, value);
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
         }
     }
 
@@ -137,7 +137,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             return tables.get(tableName).get(key);
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
         }
     }
 
@@ -146,7 +146,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             return tables.get(tableName).get(key, defaultValue);
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
         }
     }
 
@@ -156,7 +156,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             return tables.get(tableName).getAll();
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
         }
     }
 
@@ -165,7 +165,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             return tables.get(tableName).search(comparator, pattern);
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
         }
     }
 
@@ -174,7 +174,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             return tables.get(tableName).containsKey(key);
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
         }
     }
 
@@ -187,7 +187,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
                 throw new KeyValueDBException(KeyValueDBException.CANNOT_DELETE);
             }
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
         }
     }
 
@@ -196,7 +196,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             tables.get(tableName).clear();
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
         }
     }
 

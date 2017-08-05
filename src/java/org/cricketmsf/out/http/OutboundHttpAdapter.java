@@ -218,7 +218,12 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
     }
 
     protected String translateToJson(Object data) {
-        return null;
+        if(data instanceof String){
+            return (String)data;
+        }else{
+            //TODO: serialize to JSON?
+            return "";
+        }
     }
 
     /**
