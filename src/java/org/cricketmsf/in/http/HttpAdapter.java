@@ -235,6 +235,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
                 return "text/css";
             case ".js":
                 return "text/javascript";
+            case ".svg":
+                return "image/svg+xml";
             case ".json":
                 return JSON;
             default:

@@ -25,5 +25,5 @@ public interface SchedulerIface {
     
     public boolean handleEvent(Event event);
     public boolean isRestored();
-    
+    public long getThreadsCount();
 }

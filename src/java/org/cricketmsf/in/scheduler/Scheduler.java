@@ -43,6 +43,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     private String fileName;
     private KeyValueStore database;
     protected boolean restored = false;
+    long threadsCounter = 0;
 
     private long MINIMAL_DELAY = 5000;
     
@@ -128,6 +129,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
                 }
                 Kernel.getInstance().handleEvent(ev);
                 database.remove("" + ev.getId());
+                threadsCounter--;
             }
 
             public Runnable init(Event event) {
@@ -141,6 +143,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
             if (!restored) {
                 database.put("" + event.getId(), event);
             }
+            threadsCounter++;
             final ScheduledFuture<?> workerHandle
                     = scheduler.schedule(runnable, delay.getDelay(), delay.getUnit());
         }
@@ -256,6 +259,11 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
      */
     public void setRestored(boolean restored) {
         this.restored = restored;
+    }
+
+    @Override
+    public long getThreadsCount() {
+        return threadsCounter;
     }
 
 }
