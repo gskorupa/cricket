@@ -28,4 +28,5 @@ public class FileObject {
     public String filePath;
     public String fileExtension;
     public String modifiedString;
+    public String mimeType;
 }

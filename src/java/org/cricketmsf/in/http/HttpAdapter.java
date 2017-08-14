@@ -134,41 +134,44 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         Event rootEvent = new Event();
         String acceptedResponseType = JSON;
         //System.out.println("doHandle requestHeaders "+exchange.getRequestHeaders());
-        
+
         try {
             acceptedResponseType
                     = acceptedTypesMap.getOrDefault(exchange.getRequestHeaders().get("Accept").get(0), JSON);
 
         } catch (Exception e) {
         }
-        
+
         // cerating Result object
         Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEvent.getId());
         //System.out.println("RESPONSE CREATED ");
-        
+
         acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
 
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData;
-        
-        
+
         result.getHeaders().keySet().forEach((key) -> {
             List<String> values = result.getHeaders().get(key);
-            for(int i=0; i<values.size(); i++){
+            for (int i = 0; i < values.size(); i++) {
                 headers.set(key, values.get(i));
             }
         });
-        
+
         if (result.getCode() == SC_MOVED_PERMANENTLY || result.getCode() == SC_MOVED_TEMPORARY) {
             headers.set("Location", result.getMessage());
             responseData = ("moved to " + result.getMessage()).getBytes("UTF-8");
         } else {
-            if (acceptedTypesMap.containsKey(acceptedResponseType)) {
-                headers.set("Content-Type", acceptedResponseType + "; charset=UTF-8");
-                responseData = formatResponse(acceptedResponseType, result);
-            } else {
-                headers.set("Content-Type", getMimeType(result.getFileExtension()));
+            if (!headers.containsKey("Content-type")) {
+                if (acceptedTypesMap.containsKey(acceptedResponseType)) {
+                    headers.set("Content-type", acceptedResponseType + "; charset=UTF-8");
+                    responseData = formatResponse(acceptedResponseType, result);
+                } else {
+                    headers.set("Content-type", getMimeType(result.getFileExtension()));
+                    responseData = result.getPayload();
+                }
+            }else{
                 responseData = result.getPayload();
             }
             headers.set("Last-Modified", result.getModificationDateFormatted());
@@ -288,7 +291,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
     }
 
     RequestObject buildRequestObject(HttpExchange exchange, String acceptedResponseType) {
-        
+
         // Remember that "parameters" attribute is created by filter
         Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
         //System.out.println("queryInRequest=["+parameters.get("query")+"]");
@@ -305,13 +308,13 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         //
         RequestObject requestObject = new RequestObject();
         requestObject.method = method;
-        requestObject.parameters = parameters; 
+        requestObject.parameters = parameters;
         requestObject.uri = exchange.getRequestURI().toString();
         requestObject.pathExt = pathExt;
         requestObject.headers = exchange.getRequestHeaders();
         requestObject.clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
         requestObject.acceptedResponseType = acceptedResponseType;
-        requestObject.body = (String)exchange.getAttribute("body");
+        requestObject.body = (String) exchange.getAttribute("body");
         return requestObject;
     }
 
@@ -325,7 +328,7 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
         if (mode == WEBSITE_MODE) {
             //System.out.println("requestObject.uri: "+requestObject.uri);
             if (!requestObject.uri.endsWith("/")) {
-                
+
                 if (requestObject.uri.lastIndexOf("/") > requestObject.uri.lastIndexOf(".")) {
                     // redirect to index.file but only if property index.file is not null
                     result.setCode(SC_MOVED_PERMANENTLY);
@@ -455,8 +458,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
             this.dateFormat = new SimpleDateFormat(dateFormat);
         }
     }
-    
-    public DateFormat getDateFormat(){
+
+    public DateFormat getDateFormat() {
         return dateFormat;
     }
 
