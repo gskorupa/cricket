@@ -64,6 +64,7 @@ public class SecurityFilter extends Filter {
             exchange.sendResponseHeaders(result.code, result.message.length());
             exchange.getResponseBody().write(result.message.getBytes());
             exchange.getResponseBody().close();
+            exchange.close();
         } else {
             chain.doFilter(exchange);
         }

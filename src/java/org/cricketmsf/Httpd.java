@@ -57,8 +57,8 @@ public class Httpd {
             if(adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter){
                 Kernel.getLogger().print("context: "+((HttpAdapter) adapterEntry.getValue()).getContext());
                 context = server.createContext(((HttpAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
-                context.getFilters().add(new ParameterFilter());
                 context.getFilters().add(service.getSecurityFilter());
+                context.getFilters().add(new ParameterFilter());
             }
         }
     }
