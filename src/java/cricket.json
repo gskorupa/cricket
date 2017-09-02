@@ -25,6 +25,15 @@
                         "silent-mode": "false"
                     }
                 },
+                "StatusService": {
+                    "name": "StatusService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.StandardHttpAdapter",
+                    "properties": {
+                        "context": "/api/status",
+                        "silent-mode": "true"
+                    }
+                },
                 "Logger": {
                     "name": "Logger",
                     "interfaceName": "LoggerAdapterIface",
@@ -47,7 +56,7 @@
                         "name": "local"
                     }
                 },
-                "SchedulerI": {
+                "Scheduler": {
                     "name": "Scheduler",
                     "interfaceName": "SchedulerIface",
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",

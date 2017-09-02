@@ -16,6 +16,7 @@
 package org.cricketmsf;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -32,5 +33,8 @@ public interface Adapter {
      *  from the interface and class name.
      */
     public void loadProperties(HashMap<String,String> properties, String adapterName);
+    
+    public Map<String,String> getStatus(String name);
+    public void updateStatusItem(String key, String value);
     
 }

@@ -21,13 +21,13 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.in.InboundAdapter;
+import org.cricketmsf.out.OutboundAdapter;
 
 /**
  *
  * @author greg
  */
-public class CommandRunner extends InboundAdapter implements Adapter, CommandRunnerIface {
+public class CommandRunner extends OutboundAdapter implements Adapter, CommandRunnerIface {
 
     private String command;
 

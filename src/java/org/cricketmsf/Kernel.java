@@ -15,6 +15,7 @@
  */
 package org.cricketmsf;
 
+import com.cedarsoftware.util.io.JsonWriter;
 import org.cricketmsf.annotation.EventHook;
 import com.sun.net.httpserver.Filter;
 import org.cricketmsf.config.AdapterConfiguration;
@@ -85,10 +86,10 @@ public abstract class Kernel {
     public Kernel() {
     }
 
-    public boolean isStarted(){
+    public boolean isStarted() {
         return started;
     }
-    
+
     void setStartedAt(long time) {
         startedAt = time;
     }
@@ -156,7 +157,7 @@ public abstract class Kernel {
     protected Object getRegistered(String adapterName) {
         return adaptersMap.get(adapterName);
     }
-    
+
     protected Object registerAdapter(String adapterName, Object adapter) {
         return adaptersMap.put(adapterName, adapter);
     }
@@ -188,7 +189,7 @@ public abstract class Kernel {
             instance = c.newInstance();
             ((Kernel) instance).setUuid(UUID.randomUUID());
             ((Kernel) instance).setId(config.getId());
-            ((Kernel) instance).setName((String)config.getProperties().getOrDefault("SRVC_NAME_ENV_VARIABLE", "CRICKET_NAME"));
+            ((Kernel) instance).setName((String) config.getProperties().getOrDefault("SRVC_NAME_ENV_VARIABLE", "CRICKET_NAME"));
             ((Kernel) instance).setProperties(config.getProperties());
             ((Kernel) instance).configureTimeFormat(config);
             ((Kernel) instance).loadAdapters(config);
@@ -226,7 +227,7 @@ public abstract class Kernel {
         getLogger().print("LOADING SERVICE PROPERTIES FOR " + config.getService());
         getLogger().print("\tUUID=" + getUuid().toString());
         getLogger().print("\tenv name=" + getName());
-            //setHost(config.getHost());
+        //setHost(config.getHost());
         setHost(config.getProperty("host", "0.0.0.0"));
         getLogger().print("\thost=" + getHost());
         try {
@@ -240,7 +241,7 @@ public abstract class Kernel {
         getLogger().print("\tfilter=" + getSecurityFilter().getClass().getName());
         setCorsHeaders(config.getProperty("cors"));
         getLogger().print("\tCORS=" + getCorsHeaders());
-        getLogger().print("\tExtended properties: "+getProperties().toString());
+        getLogger().print("\tExtended properties: " + getProperties().toString());
         getLogger().print("LOADING ADAPTERS");
         String adapterName = null;
         AdapterConfiguration ac = null;
@@ -388,13 +389,13 @@ public abstract class Kernel {
 
             long startedIn = System.currentTimeMillis() - startedAt;
             printHeader(Kernel.getInstance().configSet.getKernelVersion());
-            if(liftMode){
+            if (liftMode) {
                 getLogger().print("# Service: " + getClass().getName());
-            }else{
+            } else {
                 getLogger().print("# Service: " + getId());
             }
-            getLogger().print("# UUID: "+getUuid());
-            getLogger().print("# NAME: "+getName());
+            getLogger().print("# UUID: " + getUuid());
+            getLogger().print("# NAME: " + getName());
             getLogger().print("#");
             getLogger().print("# HTTP listening on port " + getPort());
             getLogger().print("#");
@@ -411,27 +412,27 @@ public abstract class Kernel {
 
     /**
      * Could be overriden in a service implementation to run required code at
-     * the service start. As the last step of the service starting procedure before
-     * HTTP service.
+     * the service start. As the last step of the service starting procedure
+     * before HTTP service.
      */
     protected void runInitTasks() {
     }
-    
+
     /**
      * Could be overriden in a service implementation to run required code at
-     * the service start. As the last step of the service starting procedure after 
-     * HTTP service.
+     * the service start. As the last step of the service starting procedure
+     * after HTTP service.
      */
     protected void runFinalTasks() {
-        
+
     }
 
     protected void runListeners() {
         for (Map.Entry<String, Object> adapterEntry : getAdaptersMap().entrySet()) {
             if (adapterEntry.getValue() instanceof org.cricketmsf.in.InboundAdapter) {
-                if (! (adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter)) {
+                if (!(adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter)) {
                     (new Thread((InboundAdapter) adapterEntry.getValue())).start();
-                    getLogger().print(adapterEntry.getKey()+" ("+adapterEntry.getValue().getClass().getSimpleName()+")");
+                    getLogger().print(adapterEntry.getKey() + " (" + adapterEntry.getValue().getClass().getSimpleName() + ")");
                 }
             }
         }
@@ -559,15 +560,16 @@ public abstract class Kernel {
     }
 
     /**
-     * @param variableName system environment variable name which holds the name of this service 
+     * @param variableName system environment variable name which holds the name
+     * of this service
      */
     public void setName(String variableName) {
         String tmp = null;
-        try{
-            tmp=System.getenv(variableName);
-        }catch(Exception e){
+        try {
+            tmp = System.getenv(variableName);
+        } catch (Exception e) {
         }
-        this.name = tmp!=null?tmp:"CricketService";
+        this.name = tmp != null ? tmp : "CricketService";
     }
 
     /**
@@ -575,6 +577,43 @@ public abstract class Kernel {
      */
     public static LoggerAdapterIface getLogger() {
         return logger;
+    }
+
+    /**
+     * Returns map of the current service properties along with list of statuses reported by all registered (running) adapters
+     * 
+     * @return status map
+     */
+    public Map reportStatus() {
+        HashMap status = new HashMap();
+        
+        status.put("name", getName());
+        status.put("id", getId());
+        status.put("uuid", getUuid().toString());
+        status.put("class", getClass().getName());
+        status.put("totalMemory", Runtime.getRuntime().totalMemory());
+        status.put("maxMemory", Runtime.getRuntime().maxMemory());
+        status.put("freeMemory", Runtime.getRuntime().freeMemory());
+        ArrayList adapters = new ArrayList();
+
+        adaptersMap.keySet().forEach(key -> {
+            adapters.add(((Adapter)adaptersMap.get(key)).getStatus(key));
+        });
+        status.put("adapters",adapters);
+        return status;
+    }
+    
+    /**
+     * Returns status map formated as JSON
+     * 
+     * @return JSON representation of the statuses map
+     */
+    public String printStatus(){
+        HashMap args = new HashMap();
+        args.put(JsonWriter.PRETTY_PRINT, true);
+        args.put(JsonWriter.DATE_FORMAT, "dd/MMM/yyyy:kk:mm:ss Z");
+        args.put(JsonWriter.TYPE, false);
+        return JsonWriter.objectToJson(reportStatus(), args);
     }
 
 }

@@ -18,6 +18,7 @@ package org.cricketmsf.in;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Map;
 import org.cricketmsf.Event;
 import org.cricketmsf.annotation.InboundAdapterHook;
 import org.cricketmsf.Kernel;
@@ -30,9 +31,11 @@ public class InboundAdapter implements Runnable{
     
     protected HashMap<String, String> hookMethodNames;
     private HashMap<String, String> properties;
+    protected HashMap<String,String> statusMap=null;
     
     public void loadProperties(HashMap<String,String> properties, String adapterName){
-        this.properties = (HashMap<String,String>)properties.clone();
+        this.properties = (HashMap<String,String>)properties.clone();        
+        getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
     }
     
     public String getProperty(String name){
@@ -104,5 +107,18 @@ public class InboundAdapter implements Runnable{
             result = hookMethodNames.get("*");
         }
         return result;
+    }
+    
+        public Map<String,String> getStatus(String name){
+        if(statusMap==null){
+            statusMap = new HashMap();
+            statusMap.put("name", name);
+            statusMap.put("class", getClass().getName());
+        }
+        return statusMap;
+    }
+    
+    public void updateStatusItem(String key, String value){
+        statusMap.put(key, value);
     }
 }

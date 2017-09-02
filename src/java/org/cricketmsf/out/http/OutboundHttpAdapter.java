@@ -29,13 +29,14 @@ import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.http.Result;
 import org.cricketmsf.in.http.StandardResult;
+import org.cricketmsf.out.OutboundAdapter;
 
 /**
  * HttpClient will be better name
  *
  * @author greg
  */
-public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
+public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttpAdapterIface, Adapter {
 
     private final String JSON = "application/json";
     private final String CSV = "text/csv";
@@ -46,10 +47,11 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
     private String endpointURL;
     protected int timeout = 0;
 
-    public HashMap<String, String> properties = new HashMap<>();
+    //public HashMap<String, String> properties = new HashMap<>();
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        super.loadProperties(properties, adapterName);
         endpointURL = properties.get("url");
         properties.put("url", endpointURL);
         Kernel.getInstance().getLogger().print("\turl: " + endpointURL);
@@ -226,11 +228,10 @@ public class OutboundHttpAdapter implements OutboundHttpAdapterIface, Adapter {
         }
     }
 
-    /**
-     * @return the properties
-     */
+/*
     public HashMap<String, String> getProperties() {
         return properties;
     }
+*/
 
 }

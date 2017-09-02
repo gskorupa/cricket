@@ -30,5 +30,5 @@ public interface OutboundHttpAdapterIface {
     public Result send(String url, Request request, Object data);
     public Result send(Object data, boolean transform);
     public Result send(String url, Request request, Object data, boolean transform);
-    public HashMap getProperties();
+    //public HashMap getProperties();
 }

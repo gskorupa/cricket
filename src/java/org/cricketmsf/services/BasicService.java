@@ -19,6 +19,7 @@ import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import java.util.HashMap;
+import java.util.Map;
 import static org.cricketmsf.Kernel.handle;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.annotation.HttpAdapterHook;
@@ -77,6 +78,7 @@ public class BasicService extends Kernel {
             database.addTable("counters", 1, false);
         } catch (KeyValueDBException e) {
         }
+        System.out.println(printStatus());
     }
 
     @Override
@@ -111,6 +113,14 @@ public class BasicService extends Kernel {
                         .getFile(request, htmlAdapter.useCache() ? database : null, "webcache");
         // caching policy 
         result.setMaxAge(120);
+        return result;
+    }
+
+    @HttpAdapterHook(adapterName = "StatusService", requestMethod = "GET")
+    public Object handleStatusRequest(Event requestEvent) {
+        StandardResult result = new StandardResult();
+        result.setCode(HttpAdapter.SC_OK);
+        result.setData(reportStatus());
         return result;
     }
 
@@ -166,7 +176,7 @@ public class BasicService extends Kernel {
                 }
                 r.setData(data);
                 r.setHeader("x-echo-greeting", "hello");
-            }else{
+            } else {
                 handle(Event.logFine("BasicService", "echo service is silent"));
             }
         } catch (KeyValueDBException e) {
@@ -175,4 +185,3 @@ public class BasicService extends Kernel {
         return r;
     }
 }
-

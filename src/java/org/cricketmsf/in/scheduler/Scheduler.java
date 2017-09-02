@@ -27,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -60,7 +61,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
-
+        super.loadProperties(properties, adapterName);
         setStoragePath(properties.get("path"));
         Kernel.getInstance().getLogger().print("\tpath: " + getStoragePath());
         setEnvVariable(properties.get("envVariable"));
@@ -86,6 +87,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         database.read();
         setRestored(database.getSize()>0);
         processDatabase();
+        
     }
 
     private void setStoragePath(String storagePath) {
@@ -265,5 +267,11 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     public long getThreadsCount() {
         return threadsCounter;
     }
-
+    
+    @Override
+    public Map<String,String> getStatus(String name){
+        Map m=super.getStatus(name);
+        m.put("threads", ""+getThreadsCount());
+        return m;
+    }
 }
