@@ -14,14 +14,31 @@ import org.cricketmsf.config.HttpHeader;
  * @author greg
  */
 public class CorsProcessor {
-    
-    public static Headers getResponseHeaders(Headers responseHeaders, Headers requestHeaders, ArrayList corsConfig){
+
+    public static Headers getResponseHeaders(Headers responseHeaders, Headers requestHeaders, ArrayList corsConfig) {
+        String origin = requestHeaders.getFirst("Origin");
+        boolean withCredentials = "true".equals(requestHeaders.getFirst("Access-Control-Allow-Credentials"));
         HttpHeader h;
-        for(int i=0; i<corsConfig.size(); i++){
-            h = (HttpHeader) corsConfig.get(i);
-            responseHeaders.set(h.name, h.value);
+        if (!withCredentials) {
+            for (int i = 0; i < corsConfig.size(); i++) {
+                h = (HttpHeader) corsConfig.get(i);
+                responseHeaders.set(h.name, h.value);
+            }
+        }else{
+            for (int i = 0; i < corsConfig.size(); i++) {
+                h = (HttpHeader) corsConfig.get(i);
+                if("Access-Control-Allow-Origin".equals(h.name)){
+                    if("*".equals(h.value)){
+                        responseHeaders.set(h.name, origin);
+                    }else{
+                        responseHeaders.set(h.name, h.value);
+                    }
+                }else{
+                    responseHeaders.set(h.name, h.value);
+                }
+            }
         }
         return responseHeaders;
     }
-    
+
 }
