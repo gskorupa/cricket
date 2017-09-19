@@ -594,6 +594,7 @@ public abstract class Kernel {
         status.put("totalMemory", Runtime.getRuntime().totalMemory());
         status.put("maxMemory", Runtime.getRuntime().maxMemory());
         status.put("freeMemory", Runtime.getRuntime().freeMemory());
+        status.put("threads", Thread.activeCount());
         ArrayList adapters = new ArrayList();
 
         adaptersMap.keySet().forEach(key -> {

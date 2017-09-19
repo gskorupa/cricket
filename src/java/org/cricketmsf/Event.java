@@ -164,6 +164,7 @@ public class Event {
         return e;
     }
 
+    
     /**
      * Creates an Event used for logging (category LOG)
      *
@@ -292,6 +293,74 @@ public class Event {
                 Event.LOG_FINEST,
                 null,
                 message);
+    }    
+    
+
+    /**
+     * Creates an Event used for logging (category LOG) of SEVERE level
+     *
+     * @param source the Event origin name
+     * @param message log message
+     * @return created Event
+     */
+    public static Event logSevere(Object source, String message) {
+        
+        return logSevere(source.getClass().getSimpleName(), message);
+    }
+
+    /**
+     * Creates an Event used for logging (category LOG) of WARNING level
+     *
+     * @param source the Event origin name
+     * @param message log message
+     * @return created Event
+     */
+    public static Event logWarning(Object source, String message) {
+        return logWarning(source.getClass().getSimpleName(), message);
+    }
+
+    /**
+     * Creates an Event used for logging (category LOG) of INFO level
+     *
+     * @param source the Event origin name
+     * @param message log message
+     * @return created Event
+     */
+    public static Event logInfo(Object source, String message) {
+        return logInfo(source.getClass().getSimpleName(), message);
+    }
+
+    /**
+     * Creates an Event used for logging (category LOG) of FINE level
+     *
+     * @param source the Event origin name
+     * @param message log message
+     * @return created Event
+     */
+    public static Event logFine(Object source, String message) {
+        return logFine(source.getClass().getSimpleName(), message);
+    }
+
+    /**
+     * Creates an Event used for logging (category LOG) of FINER level
+     *
+     * @param source the Event origin name
+     * @param message log message
+     * @return created Event
+     */
+    public static Event logFiner(Object source, String message) {
+        return logFiner(source.getClass().getSimpleName(), message);
+    }
+
+    /**
+     * Creates an Event used for logging (category LOG) of FINEST level
+     *
+     * @param source the Event origin name
+     * @param message log message
+     * @return created Event
+     */
+    public static Event logFinest(Object source, String message) {
+        return logFinest(source.getClass().getSimpleName(), message);
     }
 
     /**

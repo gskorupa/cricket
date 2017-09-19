@@ -26,7 +26,7 @@ public class KeyValueDBException extends Exception {
                 message = "unable to create table";
                 break;
             case 2:
-                message = "unable to delete table";
+                message = "unable to delete key";
                 break;
             case 3:
                 message = "table does not exists";
