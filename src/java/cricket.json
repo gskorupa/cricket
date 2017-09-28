@@ -9,6 +9,9 @@
             "properties": {
                 "host": "0.0.0.0",
                 "port": "8080",
+                "ssl": "false",
+                "keystore": "./data/cricket_publickeystore.jks",
+                "keystore-password": "cricket15$#17",
                 "threads": "0",
                 "filter": "org.cricketmsf.SecurityFilter",
                 "cors": "Access-Control-Allow-Origin:*",
@@ -41,7 +44,7 @@
                     "properties": {
                         "name": "EchoService",
                         "level": "FINEST",
-                        "log-file-name": "./cricket%g.log",
+                        "log-file-name": "./log/cricket%g.log",
                         "max-size": "1000000",
                         "count": "10",
                         "console": "true"
@@ -52,7 +55,7 @@
                     "interfaceName": "KeyValueDBIface",
                     "classFullName": "org.cricketmsf.out.db.KeyValueDB",
                     "properties": {
-                        "path": "./",
+                        "path": "./data",
                         "name": "local"
                     }
                 },
@@ -61,7 +64,7 @@
                     "interfaceName": "SchedulerIface",
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
-                        "path": "./",
+                        "path": "./data",
                         "envVariable": "SCHEDULER_DB_PATH",
                         "file": "scheduler.xml"
                     }

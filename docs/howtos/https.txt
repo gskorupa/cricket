@@ -1,0 +1,22 @@
+How to run HTTPS server?
+
+1. Configure SSL by setting "port" and "ssl" server properties in cricket.json as follows:
+
+"properties": {
+    "host": "0.0.0.0",
+    "port": "443",
+    "ssl": "true",
+    "keystore": "./data/cricket_publickeystore.jks",
+    "keystore-password": "cricket15$#17",
+    "threads": "0",
+    "filter": "org.cricketmsf.SecurityFilter",
+    "cors": "Access-Control-Allow-Origin:*",
+    "time-zone": "GMT",
+    "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME"
+}
+
+When you set "ssl":"false" the "keystore" and "keystore-password" will be ignored.
+
+The default keystore with the self signed certificate for "localhost" is generated 
+during building Cricket distribution with
+"ant dist" command.

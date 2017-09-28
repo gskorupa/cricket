@@ -397,7 +397,11 @@ public abstract class Kernel {
             getLogger().print("# UUID: " + getUuid());
             getLogger().print("# NAME: " + getName());
             getLogger().print("#");
-            getLogger().print("# HTTP listening on port " + getPort());
+            if(getHttpd().isSsl()){
+                getLogger().print("# HTTPS listening on port " + getPort());
+            }else{
+                getLogger().print("# HTTP listening on port " + getPort());
+            }
             getLogger().print("#");
             getLogger().print("# Started in " + startedIn + "ms. Press Ctrl-C to stop");
             getLogger().print("");

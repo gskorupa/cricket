@@ -184,7 +184,8 @@ public class HttpAdapter extends InboundAdapter implements HttpHandler {
 
             if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
                 CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
-                //TODO: check 
+            }else if(exchange.getRequestURI().getPath().startsWith("/api/")){ //TODO: this is workaround
+                CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
             }
 
             if (result.getCode() == 0) {

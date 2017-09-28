@@ -5,7 +5,7 @@
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <property name="version" value="1.2.19"/>
+    <property name="version" value="1.2.20"/>
     <property name="src" location="src/java"/>
     <property name="build" location="build/classes"/>
     <property name="dist" location="dist"/>
@@ -79,6 +79,19 @@
             description="generate the distribution">
         <!-- Create the distribution directory -->
         <mkdir dir="${dist}"/>
+        <delete file="./data/cricket_publickeystore.jks" failonerror="false"></delete>
+        <genkey alias="cricket" 
+                keystore="./data/cricket_publickeystore.jks" 
+                storepass="cricket15$#17" 
+                keypass="cricket15$#17" 
+                keyalg="RSA" 
+                keysize="2048" 
+                validity="720">
+            <dname>
+                <param name="CN" value="localhost"/>
+                <param name="OU" value="Cricket MSF"/>
+            </dname>
+        </genkey>
         <antcall inheritall="true" target="jar"/>
     </target>
     

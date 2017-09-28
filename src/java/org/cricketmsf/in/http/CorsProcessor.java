@@ -17,18 +17,24 @@ public class CorsProcessor {
 
     public static Headers getResponseHeaders(Headers responseHeaders, Headers requestHeaders, ArrayList corsConfig) {
         String origin = requestHeaders.getFirst("Origin");
-        boolean withCredentials = "true".equals(requestHeaders.getFirst("Access-Control-Allow-Credentials"));
+        if(origin==null){
+            origin = requestHeaders.getFirst("Referer"); //TODO: this is workaround - see HttpAdapter 188
+        }
+        if(origin==null){
+            
+        }
+        // boolean withCredentials = "true".equals(requestHeaders.getFirst("Access-Control-Allow-Credentials"));
         HttpHeader h;
-        if (!withCredentials) {
-            for (int i = 0; i < corsConfig.size(); i++) {
-                h = (HttpHeader) corsConfig.get(i);
-                responseHeaders.set(h.name, h.value);
-            }
-        }else{
+        //if (!withCredentials) {
+        //    for (int i = 0; i < corsConfig.size(); i++) {
+        //        h = (HttpHeader) corsConfig.get(i);
+        //        responseHeaders.set(h.name, h.value);
+        //    }
+        //}else{
             for (int i = 0; i < corsConfig.size(); i++) {
                 h = (HttpHeader) corsConfig.get(i);
                 if("Access-Control-Allow-Origin".equals(h.name)){
-                    if("*".equals(h.value)){
+                    if("*".equals(h.value) && origin!=null){
                         responseHeaders.set(h.name, origin);
                     }else{
                         responseHeaders.set(h.name, h.value);
@@ -37,7 +43,7 @@ public class CorsProcessor {
                     responseHeaders.set(h.name, h.value);
                 }
             }
-        }
+        //}
         return responseHeaders;
     }
 

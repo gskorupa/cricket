@@ -70,5 +70,8 @@ hs_err_pid*
 /data/cricket0.log.2
 /db/
 /dist/
-/log/
 /test/
+/log/cricket0.log.1
+/log/cricket0.log
+/log/cricket0.log.lck
+/data/cricket_publickeystore.jks
