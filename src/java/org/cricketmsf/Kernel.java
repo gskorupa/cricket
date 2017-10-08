@@ -452,6 +452,7 @@ public abstract class Kernel {
                 ((OutboundAdapter) adapterEntry.getValue()).destroy();
             }
         }
+        getHttpd().stop();
         System.out.println("Kernel stopped\r\n");
     }
 

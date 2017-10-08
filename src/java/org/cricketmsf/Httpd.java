@@ -44,9 +44,8 @@ public class Httpd {
     private boolean ssl = false;
     String keystore;
     String password;
-    
-    //For SSL see: https://www.sothawo.com/2011/10/java-webservice-using-https/
 
+    //For SSL see: https://www.sothawo.com/2011/10/java-webservice-using-https/
     public Httpd(Kernel service) {
         String host = service.getHost();
         int backlog = 0;
@@ -57,7 +56,7 @@ public class Httpd {
         keystore = (String) service.getProperties().getOrDefault("keystore", "");
         password = (String) service.getProperties().getOrDefault("keystore-password", "");
         ssl = "true".equalsIgnoreCase("" + service.getProperties().getOrDefault("ssl", "false"));
-        if(ssl && (keystore.isEmpty() || password.isEmpty())){
+        if (ssl && (keystore.isEmpty() || password.isEmpty())) {
             System.out.println("SSL not configured properly");
             System.exit(100);
         }
@@ -93,9 +92,9 @@ public class Httpd {
                         scontext = SSLContext.getInstance("TLS");
                         // keystore
                         char[] keystorePassword = password.toCharArray();
-                        KeyStore ks = KeyStore.getInstance( "JKS");
-                        ks.load(new FileInputStream( keystore), keystorePassword);
-                        KeyManagerFactory kmf = KeyManagerFactory.getInstance( "SunX509");
+                        KeyStore ks = KeyStore.getInstance("JKS");
+                        ks.load(new FileInputStream(keystore), keystorePassword);
+                        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
                         kmf.init(ks, keystorePassword);
 
                         scontext.init(kmf.getKeyManagers(), null, null);
@@ -121,12 +120,19 @@ public class Httpd {
     public void run() {
         //Create a default executor
         if (isSsl()) {
-            System.out.println("STARTING SSL");
             //sserver.setExecutor(null);
             sserver.start();
         } else {
             server.setExecutor(null);
             server.start();
+        }
+    }
+
+    public void stop() {
+        if (isSsl()) {
+            sserver.stop(5);
+        } else {
+            server.stop(5);
         }
     }
 
