@@ -351,7 +351,29 @@ public abstract class Kernel {
     public void runOnce() {
         getEventHooks();
         getAdapters();
+        setKeystores();
         printHeader(Kernel.getInstance().configSet.getKernelVersion());
+    }
+
+    private void setKeystores() {
+        String keystore;
+        String keystorePass;
+        String truststore;
+        String truststorePass;
+
+        keystore = (String) getProperties().getOrDefault("keystore", "");
+        keystorePass = (String) getProperties().get("keystore-password");
+        truststore = (String) getProperties().getOrDefault("keystore", "");
+        truststorePass = (String) getProperties().get("keystore-password");
+
+        if (!keystore.isEmpty() && !keystorePass.isEmpty()) {
+            System.setProperty("javax.net.ssl.keyStore", keystore);
+            System.setProperty("javax.net.ssl.keyStorePassword", keystorePass);
+        }
+        if (!truststore.isEmpty() && !truststorePass.isEmpty()) {
+            System.setProperty("javax.net.ssl.trustStore", truststore);
+            System.setProperty("javax.net.ssl.trustStorePassword", truststorePass);
+        }
     }
 
     /**
@@ -362,6 +384,7 @@ public abstract class Kernel {
     public void start() throws InterruptedException {
         getAdapters();
         getEventHooks();
+        setKeystores();
         if (isHttpHandlerLoaded() || isInboundAdaptersLoaded()) {
 
             Runtime.getRuntime().addShutdownHook(
@@ -397,9 +420,9 @@ public abstract class Kernel {
             getLogger().print("# UUID: " + getUuid());
             getLogger().print("# NAME: " + getName());
             getLogger().print("#");
-            if(getHttpd().isSsl()){
+            if (getHttpd().isSsl()) {
                 getLogger().print("# HTTPS listening on port " + getPort());
-            }else{
+            } else {
                 getLogger().print("# HTTP listening on port " + getPort());
             }
             getLogger().print("#");
@@ -452,7 +475,10 @@ public abstract class Kernel {
                 ((OutboundAdapter) adapterEntry.getValue()).destroy();
             }
         }
-        getHttpd().stop();
+        try{
+            getHttpd().stop();
+        }catch(NullPointerException e){
+        }
         System.out.println("Kernel stopped\r\n");
     }
 
@@ -585,13 +611,14 @@ public abstract class Kernel {
     }
 
     /**
-     * Returns map of the current service properties along with list of statuses reported by all registered (running) adapters
-     * 
+     * Returns map of the current service properties along with list of statuses
+     * reported by all registered (running) adapters
+     *
      * @return status map
      */
     public Map reportStatus() {
         HashMap status = new HashMap();
-        
+
         status.put("name", getName());
         status.put("id", getId());
         status.put("uuid", getUuid().toString());
@@ -603,18 +630,18 @@ public abstract class Kernel {
         ArrayList adapters = new ArrayList();
 
         adaptersMap.keySet().forEach(key -> {
-            adapters.add(((Adapter)adaptersMap.get(key)).getStatus(key));
+            adapters.add(((Adapter) adaptersMap.get(key)).getStatus(key));
         });
-        status.put("adapters",adapters);
+        status.put("adapters", adapters);
         return status;
     }
-    
+
     /**
      * Returns status map formated as JSON
-     * 
+     *
      * @return JSON representation of the statuses map
      */
-    public String printStatus(){
+    public String printStatus() {
         HashMap args = new HashMap();
         args.put(JsonWriter.PRETTY_PRINT, true);
         args.put(JsonWriter.DATE_FORMAT, "dd/MMM/yyyy:kk:mm:ss Z");

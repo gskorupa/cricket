@@ -22,10 +22,10 @@ import java.util.Map;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class OutboundAdapter {
+public class OutboundAdapter implements OutboundAdapterIface{
     
     protected HashMap<String,String> statusMap=null;
-    private HashMap<String, String> properties;
+    protected HashMap<String, String> properties;
     
     public OutboundAdapter(){
     }

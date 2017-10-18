@@ -15,10 +15,12 @@
  */
 package org.cricketmsf.in.http;
 
+import org.cricketmsf.in.InboundAdapterIface;
+
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public interface HttpAdapterIface {
+public interface HttpAdapterIface extends InboundAdapterIface{
 
 }

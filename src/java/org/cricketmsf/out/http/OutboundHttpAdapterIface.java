@@ -17,13 +17,14 @@ package org.cricketmsf.out.http;
 
 import java.util.HashMap;
 import org.cricketmsf.in.http.Result;
+import org.cricketmsf.out.OutboundAdapterIface;
 
 /**
  * HttpClient will be better name
  *
  * @author greg
  */
-public interface OutboundHttpAdapterIface {
+public interface OutboundHttpAdapterIface extends OutboundAdapterIface{
 
     public Result send(Object data);
     public Result send(Request request,  boolean transform);

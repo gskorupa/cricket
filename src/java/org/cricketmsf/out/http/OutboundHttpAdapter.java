@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import javax.net.ssl.HttpsURLConnection;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
@@ -139,7 +140,11 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
             URL urlObj = new URL(url);
             HttpURLConnection con;
             // TODO: Proxy proxy = new Proxy(Proxy.Type.HTTP, sa);
-            con = (HttpURLConnection) urlObj.openConnection();
+            if(url.toUpperCase().startsWith("HTTPS")){
+                con = (HttpsURLConnection) urlObj.openConnection();
+            }else{
+                con = (HttpURLConnection) urlObj.openConnection();
+            }
             con.setReadTimeout(timeout);
             con.setConnectTimeout(timeout);
             //TODO: this adapter can block entire service waiting for timeout.
