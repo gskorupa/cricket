@@ -200,23 +200,24 @@ public class Runner {
             types.put("java.utils.HashMap", "properties");
             args.put(JsonReader.TYPE_NAME_MAP, types);
             cs = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
-            // read Kernel version
-            Properties prop = new Properties();
-            try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cricket.properties")) {
-                if (inputStream != null) {
-                    prop.load(inputStream);
-                }
-            } catch (IOException e) {
+        }
+        // read Kernel version
+        Properties prop = new Properties();
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cricket.properties")) {
+            if (inputStream != null) {
+                prop.load(inputStream);
             }
-            cs.setKernelVersion(prop.getProperty("version", "unknown"));
-            // force property changes based on command line --force param
-            if (arguments.containsKey("force")) {
-                ArrayList<String> forcedProps = (ArrayList) arguments.get("force");
-                for (int i = 0; i < forcedProps.size(); i++) {
-                    cs.forceProperty(forcedProps.get(i));
-                }
+        } catch (IOException e) {
+        }
+        cs.setKernelVersion(prop.getProperty("version", "unknown"));
+        // force property changes based on command line --force param
+        if (arguments.containsKey("force")) {
+            ArrayList<String> forcedProps = (ArrayList) arguments.get("force");
+            for (int i = 0; i < forcedProps.size(); i++) {
+                cs.forceProperty(forcedProps.get(i));
             }
         }
+
         return cs;
     }
 
