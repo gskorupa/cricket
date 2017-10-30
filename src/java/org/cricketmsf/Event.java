@@ -42,6 +42,7 @@ public class Event {
     public static final String LOG_SEVERE = "SEVERE";
 
     private long id = -1;
+    private String name = null;
     private String category;
     private String type;
     private String origin;
@@ -53,6 +54,7 @@ public class Event {
     private UUID serviceUuid;
     private long rootEventId = -1;
     private RequestObject request = null;
+    private boolean cyclic = false;
 
     /**
      * Creates new Event instance. Sets new id and createdAt parameters.
@@ -494,6 +496,12 @@ public class Event {
     public void setTimePoint(String timePoint) {
         this.timePoint = timePoint;
     }
+    
+    public void reschedule(){
+        if(isCyclic()){
+            calculateTimePoint();
+        }
+    }
 
     private void calculateTimePoint() {
         String dateDefinition = getTimePoint();
@@ -502,7 +510,8 @@ public class Event {
             return;
         }
         long delay;
-        if (dateDefinition.startsWith("+")) {
+        setCyclic(dateDefinition.startsWith("*"));
+        if (dateDefinition.startsWith("+")||dateDefinition.startsWith("*")) {
             try {
                 delay = Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1));
             } catch (NumberFormatException e) {
@@ -528,7 +537,11 @@ public class Event {
                     setCalculatedTimePoint(-1);
                     return;
             }
-            setCalculatedTimePoint(multiplicator * delay + getCreatedAt());
+            if(isCyclic()){
+                setCalculatedTimePoint(multiplicator * delay + System.currentTimeMillis());
+            }else{
+                setCalculatedTimePoint(multiplicator * delay + getCreatedAt());
+            }
         } else {
             //parse date and replace with delay from now
             Date target;
@@ -673,6 +686,35 @@ public class Event {
         //clon.request = null;
         //clon.id = id;
         return clon;
+    }
+
+    /**
+     * @return the cyclic
+     */
+    public boolean isCyclic() {
+        return cyclic;
+    }
+
+    /**
+     * @param cyclic the cyclic to set
+     */
+    public void setCyclic(boolean cyclic) {
+        this.cyclic = cyclic;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public Event setName(String name) {
+        this.name = name;
+        return this;
     }
 
 }

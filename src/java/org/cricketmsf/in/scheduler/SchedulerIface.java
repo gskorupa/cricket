@@ -24,6 +24,9 @@ import org.cricketmsf.Event;
 public interface SchedulerIface {
     
     public boolean handleEvent(Event event);
+    //public boolean forceHandleEvent(Event event);
     public boolean isRestored();
     public long getThreadsCount();
+    public boolean isScheduled(String eventID);
+    public String getProperty(String name);
 }

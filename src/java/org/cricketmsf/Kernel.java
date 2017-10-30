@@ -475,9 +475,9 @@ public abstract class Kernel {
                 ((OutboundAdapter) adapterEntry.getValue()).destroy();
             }
         }
-        try{
+        try {
             getHttpd().stop();
-        }catch(NullPointerException e){
+        } catch (NullPointerException e) {
         }
         System.out.println("Kernel stopped\r\n");
     }
@@ -630,7 +630,12 @@ public abstract class Kernel {
         ArrayList adapters = new ArrayList();
 
         adaptersMap.keySet().forEach(key -> {
-            adapters.add(((Adapter) adaptersMap.get(key)).getStatus(key));
+            try {
+                adapters.add(
+                        ((Adapter) adaptersMap.get(key)).getStatus(key));
+            } catch (Exception e) {
+                handle(Event.logFine(this, key + " adapter is not registered"));
+            }
         });
         status.put("adapters", adapters);
         return status;

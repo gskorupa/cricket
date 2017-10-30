@@ -45,6 +45,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     private KeyValueStore database;
     protected boolean restored = false;
     long threadsCounter = 0;
+    private String initialTasks;
 
     private long MINIMAL_DELAY = 5000;
     
@@ -82,6 +83,12 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
                 : getStoragePath() + pathSeparator + getFileName()
         );
         Kernel.getInstance().getLogger().print("\tscheduler database file location: " + getStoragePath());
+        
+        initialTasks = properties.getOrDefault("init", "");
+        Kernel.getInstance().getLogger().print("\tinit: " + initialTasks);
+        
+        properties.put("init", initialTasks);
+        
         database = new KeyValueStore();
         database.setStoragePath(getStoragePath());
         database.read();
@@ -120,6 +127,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
 
             public void run() {
                 // we should reset timepoint to prevent sending this event back from the service
+                String remembered=ev.getTimePoint();
                 ev.setTimePoint(null);
                 // we should wait until Kernel finishes initialization process
                 while(!Kernel.getInstance().isStarted()){
@@ -130,8 +138,14 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
                     }
                 }
                 Kernel.getInstance().handleEvent(ev);
-                database.remove("" + ev.getId());
+                
                 threadsCounter--;
+                database.remove("" + ev.getId());
+                if(ev.isCyclic()){
+                    ev.setTimePoint(remembered);
+                    ev.reschedule();
+                    Kernel.getInstance().handleEvent(ev);
+                }
             }
 
             public Runnable init(Event event) {
@@ -143,7 +157,11 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         Delay delay = getDelayForEvent(event, restored);
         if (delay.getDelay() >= 0) {
             if (!restored) {
-                database.put("" + event.getId(), event);
+                if(event.getName()!=null && !event.getName().isEmpty()){
+                    database.put(event.getName(), event);
+                }else{
+                    database.put("" + event.getId(), event);
+                }
             }
             threadsCounter++;
             final ScheduledFuture<?> workerHandle
@@ -164,7 +182,11 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         String key;
         while (it.hasNext()) {
             key = (String) it.next();
-            handleEvent((Event) database.get(key), true);
+            //restore only events without name == not these created using 
+            //scheduler properties
+            if(((Event) database.get(key)).getName()==null){
+                handleEvent((Event) database.get(key), true);                
+            }
         }
     }
 
@@ -182,7 +204,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
 
         boolean wrongFormat = false;
         String dateDefinition = ev.getTimePoint();
-        if (dateDefinition.startsWith("+")) {
+        if (dateDefinition.startsWith("+")||dateDefinition.startsWith("*")) {
             try {
                 d.setDelay(Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1)));
             } catch (NumberFormatException e) {
@@ -273,5 +295,10 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         Map m=super.getStatus(name);
         m.put("threads", ""+getThreadsCount());
         return m;
+    }
+    
+    @Override
+    public boolean isScheduled(String eventID){
+        return database.containsKey(eventID);
     }
 }
