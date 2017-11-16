@@ -47,6 +47,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     protected boolean restored = false;
     long threadsCounter = 0;
     private String initialTasks;
+    private HashMap<String,String> killList;
 
     private long MINIMAL_DELAY = 5000;
 
@@ -95,6 +96,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         database.read();
         setRestored(database.getSize() > 0);
         processDatabase();
+        killList=new HashMap<>();
 
     }
 
@@ -117,7 +119,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     public boolean handleEvent(Event event) {
         return handleEvent(event, false, false);
     }
-    
+
     public boolean handleEvent(Event event, boolean restored) {
         return handleEvent(event, restored, false);
     }
@@ -125,6 +127,22 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
         if (event.getTimePoint() == null) {
             return false;
+        }
+        if (systemStart) {
+            String oldCopy="";
+            //when events initialized on the service start, we are created new instances of these events
+            if (event.getName() != null && !event.getName().isEmpty()) {
+                if(database.containsKey(event.getName())){
+                    oldCopy=((Event)database.get(event.getName())).getId()+"";
+                }
+            } else {
+                if(database.containsKey(""+event.getId())){
+                    oldCopy=((Event)database.get(""+event.getId())).getId()+"";
+                }
+            }
+            if(!oldCopy.isEmpty()){
+                killList.put(oldCopy,oldCopy);
+            }
         }
         final Runnable runnable;
         runnable = new Runnable() {
@@ -142,8 +160,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
 
                     }
                 }
-                Kernel.getInstance().handleEvent(ev);
-
+                if(!killList.containsKey(""+ev.getId())){
+                    Kernel.getInstance().handleEvent(ev);
+                }
                 threadsCounter--;
                 database.remove("" + ev.getId());
                 try {
