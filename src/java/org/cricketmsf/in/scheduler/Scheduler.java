@@ -23,6 +23,7 @@ import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.scheduler.Delay;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,17 +49,17 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     private String initialTasks;
 
     private long MINIMAL_DELAY = 5000;
-    
+
     public final ScheduledExecutorService scheduler
             = Executors.newScheduledThreadPool(1);
 
     /**
-     * This method is executed while adapter is instantiated during the service start.
-     * It's used to configure the adapter according to the configuration.
-     * 
-     * @param properties    map of properties readed from the configuration file
-     * @param adapterName   name of the adapter set in the configuration file (can be different
-     *  from the interface and class name.
+     * This method is executed while adapter is instantiated during the service
+     * start. It's used to configure the adapter according to the configuration.
+     *
+     * @param properties map of properties readed from the configuration file
+     * @param adapterName name of the adapter set in the configuration file (can
+     * be different from the interface and class name.
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -83,18 +84,18 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
                 : getStoragePath() + pathSeparator + getFileName()
         );
         Kernel.getInstance().getLogger().print("\tscheduler database file location: " + getStoragePath());
-        
+
         initialTasks = properties.getOrDefault("init", "");
         Kernel.getInstance().getLogger().print("\tinit: " + initialTasks);
-        
+
         properties.put("init", initialTasks);
-        
+
         database = new KeyValueStore();
         database.setStoragePath(getStoragePath());
         database.read();
-        setRestored(database.getSize()>0);
+        setRestored(database.getSize() > 0);
         processDatabase();
-        
+
     }
 
     private void setStoragePath(String storagePath) {
@@ -127,24 +128,33 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
 
             public void run() {
                 // we should reset timepoint to prevent sending this event back from the service
-                String remembered=ev.getTimePoint();
+                String remembered = ev.getTimePoint();
                 ev.setTimePoint(null);
                 // we should wait until Kernel finishes initialization process
-                while(!Kernel.getInstance().isStarted()){
+                while (!Kernel.getInstance().isStarted()) {
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ex) {
-                        
+
                     }
                 }
                 Kernel.getInstance().handleEvent(ev);
-                
+
                 threadsCounter--;
                 database.remove("" + ev.getId());
-                if(ev.isCyclic()){
-                    ev.setTimePoint(remembered);
-                    ev.reschedule();
-                    Kernel.getInstance().handleEvent(ev);
+                try {
+                    if (ev.isCyclic()) {
+                        //if timePoint has form dateformatted|*cyclicdelay
+                        int pos = remembered.indexOf("|*");
+                        if (pos > 0) {
+                            remembered = remembered.substring(pos + 1);
+                        }
+                        ev.setTimePoint(remembered);
+                        ev.reschedule();
+                        Kernel.getInstance().handleEvent(ev);
+                    }
+                } catch (Exception e) {
+                    Kernel.getLogger().log(Event.logWarning(this, "malformed event time definition - unable to reschedule"));
                 }
             }
 
@@ -155,11 +165,14 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         }.init(event);
 
         Delay delay = getDelayForEvent(event, restored);
+        if ((delay.getDelay() / 1000) > 0) {
+            Kernel.getLogger().log(Event.logInfo(this, "event " + event.getName() + " will start in " + (delay.getDelay() / 1000) + " seconds"));
+        }
         if (delay.getDelay() >= 0) {
             if (!restored) {
-                if(event.getName()!=null && !event.getName().isEmpty()){
+                if (event.getName() != null && !event.getName().isEmpty()) {
                     database.put(event.getName(), event);
-                }else{
+                } else {
                     database.put("" + event.getId(), event);
                 }
             }
@@ -184,8 +197,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
             key = (String) it.next();
             //restore only events without name == not these created using 
             //scheduler properties
-            if(((Event) database.get(key)).getName()==null){
-                handleEvent((Event) database.get(key), true);                
+            if (((Event) database.get(key)).getName() == null) {
+                handleEvent((Event) database.get(key), true);
             }
         }
     }
@@ -204,7 +217,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
 
         boolean wrongFormat = false;
         String dateDefinition = ev.getTimePoint();
-        if (dateDefinition.startsWith("+")||dateDefinition.startsWith("*")) {
+        if (dateDefinition.startsWith("+") || dateDefinition.startsWith("*")) {
             try {
                 d.setDelay(Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1)));
             } catch (NumberFormatException e) {
@@ -233,20 +246,41 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
             d.setDelay(getDelay(dateDefinition));
         }
         if (wrongFormat) {
-            Kernel.getInstance().getLogger().print("WARNING unsuported delay format: "+dateDefinition);
+            Kernel.getLogger().print("WARNING unsuported delay format: " + dateDefinition);
             return null;
         }
         return d;
     }
 
     private long getDelay(String dateStr) {
+        long result = 0;
         Date target;
-        try {
-            target = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss Z").parse(dateStr);
-        } catch (ParseException e) {
-            return -1;
+        String dateStrNoRepeat;
+        int pos = dateStr.indexOf("|");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss Z");
+        if (pos > 0) {
+            dateStrNoRepeat = dateStr.substring(0, pos);
+        } else {
+            dateStrNoRepeat = dateStr;
         }
-        return target.getTime() - System.currentTimeMillis();
+        try {
+            target = dateFormat.parse(dateStrNoRepeat);
+            result = target.getTime() - System.currentTimeMillis();
+        } catch (ParseException e) {
+            try {
+                String today = java.time.LocalDate.now(ZoneId.of("UTC")).toString();
+                //String today = new SimpleDateFormat("yyy.MM.dd ").format(new Date());
+                target = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").parse(today + " " + dateStrNoRepeat);
+                result = target.getTime() - System.currentTimeMillis();
+                if (result < 0) {
+                    result = result + 24 * 60 * 60 * 1000;
+                }
+            } catch (ParseException ex) {
+                Kernel.getLogger().log(Event.logWarning(this, ex.getMessage()));
+                return -1;
+            }
+        }
+        return result;
     }
 
     @Override
@@ -289,16 +323,16 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     public long getThreadsCount() {
         return threadsCounter;
     }
-    
+
     @Override
-    public Map<String,String> getStatus(String name){
-        Map m=super.getStatus(name);
-        m.put("threads", ""+getThreadsCount());
+    public Map<String, String> getStatus(String name) {
+        Map m = super.getStatus(name);
+        m.put("threads", "" + getThreadsCount());
         return m;
     }
-    
+
     @Override
-    public boolean isScheduled(String eventID){
+    public boolean isScheduled(String eventID) {
         return database.containsKey(eventID);
     }
 }

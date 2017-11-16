@@ -510,7 +510,7 @@ public class Event {
             return;
         }
         long delay;
-        setCyclic(dateDefinition.startsWith("*"));
+        setCyclic(dateDefinition.startsWith("*") || dateDefinition.indexOf("|*")>0);
         if (dateDefinition.startsWith("+")||dateDefinition.startsWith("*")) {
             try {
                 delay = Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1));
