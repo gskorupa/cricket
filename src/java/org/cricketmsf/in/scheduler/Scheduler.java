@@ -115,10 +115,14 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     }
 
     public boolean handleEvent(Event event) {
-        return handleEvent(event, false);
+        return handleEvent(event, false, false);
+    }
+    
+    public boolean handleEvent(Event event, boolean restored) {
+        return handleEvent(event, restored, false);
     }
 
-    public boolean handleEvent(Event event, boolean restored) {
+    public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
         if (event.getTimePoint() == null) {
             return false;
         }
@@ -151,7 +155,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
                         }
                         ev.setTimePoint(remembered);
                         ev.reschedule();
-                        Kernel.getInstance().handleEvent(ev);
+                        handleEvent(ev);
                     }
                 } catch (Exception e) {
                     Kernel.getLogger().log(Event.logWarning(this, "malformed event time definition - unable to reschedule"));
@@ -165,7 +169,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         }.init(event);
 
         Delay delay = getDelayForEvent(event, restored);
-        if ((delay.getDelay() / 1000) > 0) {
+        if ((delay.getDelay() >= 0) && systemStart) {
             Kernel.getLogger().log(Event.logInfo(this, "event " + event.getName() + " will start in " + (delay.getDelay() / 1000) + " seconds"));
         }
         if (delay.getDelay() >= 0) {
