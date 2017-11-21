@@ -51,6 +51,11 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
             e.printStackTrace();
         }
     }
+    
+    @Override
+    public String getName(){
+        return dbName;
+    }
 
     @Override
     public void start() throws KeyValueDBException {
@@ -81,25 +86,30 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     @Override
     public void stop() {
         try {
+            backup(filePath);
+            /*
+            try {
             FileWriter fw = new FileWriter(filePath);
             fw.write("# "+this.getClass().getName()+"\r\n");
             fw.write("# DO NOT MODIFY\r\n");
             fw.write("#\r\n");
             tables.keySet().forEach((key) -> {
-                if (tables.get(key).persistent) {
-                    tables.get(key).write();
-                }
-                try {
-                    fw.write(tables.get(key).name + "," + tables.get(key).capacity + "," + tables.get(key).persistent + "\r\n");
-                } catch (IOException e) {
-                }
+            if (tables.get(key).persistent) {
+            tables.get(key).write();
+            }
+            try {
+            fw.write(tables.get(key).name + "," + tables.get(key).capacity + "," + tables.get(key).persistent + "\r\n");
+            } catch (IOException e) {
+            }
             });
             fw.close();
-        } catch (IOException e) {
+            } catch (IOException e) {
             e.printStackTrace();
+            }
+            */
+        } catch (KeyValueDBException ex) {
+            ex.printStackTrace();
         }
-
-        //write db file
     }
 
     @Override
@@ -205,5 +215,32 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         ArrayList<String> result = new ArrayList<>();
         tables.keySet().forEach(key -> result.add((String)key));
         return result;
+    }
+
+    @Override
+    public void backup(String fileLocation) throws KeyValueDBException {
+        try {
+            FileWriter fw = new FileWriter(fileLocation);
+            fw.write("# "+this.getClass().getName()+"\r\n");
+            fw.write("# DO NOT MODIFY\r\n");
+            fw.write("#\r\n");
+            tables.keySet().forEach((key) -> {
+                if (tables.get(key).persistent) {
+                    tables.get(key).write();
+                }
+                try {
+                    fw.write(tables.get(key).name + "," + tables.get(key).capacity + "," + tables.get(key).persistent + "\r\n");
+                } catch (IOException e) {
+                }
+            });
+            fw.close();
+        } catch (IOException e) {
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_WRITE, e.getMessage());
+        }
+    }
+
+    @Override
+    public String getBackupFileName() {
+        return getName()+".db";
     }
 }

@@ -672,6 +672,7 @@ public class Event {
     @Override
     public Event clone(){
         Event clon = new Event();
+        clon.name = name;
         clon.calculatedTimePoint = calculatedTimePoint;
         clon.category = category;
         clon.createdAt = createdAt;

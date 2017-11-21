@@ -23,17 +23,37 @@ import java.util.Map;
  * @author greg
  */
 public interface KeyValueDBIface {
+    
+    /**
+     * Returns database name (from adapter configuration)
+     * @return name database name
+     */
+    public String getName();
+    
+    /**
+     * Returns default name of the backup file
+     * @return name backup file name
+     */
+    public String getBackupFileName();
 
     /**
      * Starts the database
      * @throws KeyValueDBException
      */
-    public void start() throws KeyValueDBException;;
+    public void start() throws KeyValueDBException;
 
     /**
      * Stops the database
      */
     public void stop();
+    
+    /**
+     * Backups all database tables to the specified file on disk
+     * 
+     * @param fileLocation
+     * @throws KeyValueDBException 
+     */
+    public void backup(String fileLocation) throws KeyValueDBException;
 
     /**
      * Creates new table within the database
