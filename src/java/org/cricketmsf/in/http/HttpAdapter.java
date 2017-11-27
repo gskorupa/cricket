@@ -384,7 +384,11 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
     @Override
     public String getHookMethodNameForMethod(String requestMethod) {
         String result = null;
-        result = hookMethodNames.get(requestMethod);
+        if("HEAD".equalsIgnoreCase(requestMethod)){
+            result = hookMethodNames.get("GET");
+        }else{
+            result = hookMethodNames.get(requestMethod);
+        }
         if (null == result) {
             result = hookMethodNames.get("*");
         }
