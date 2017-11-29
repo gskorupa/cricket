@@ -713,8 +713,13 @@ public class Event {
     /**
      * @param name the name to set
      */
-    public Event setName(String name) {
+    public void setName(String name) {
         this.name = name;
+        //return this;
+    }
+    
+    public Event putName(String name){
+        this.name=name;
         return this;
     }
 

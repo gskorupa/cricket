@@ -128,9 +128,10 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         if (event.getTimePoint() == null) {
             return false;
         }
+        
         if (systemStart) {
             String oldCopy="";
-            //when events initialized on the service start, we are created new instances of these events
+            //when events initialized on the service start, we need to create new instances of these events
             if (event.getName() != null && !event.getName().isEmpty()) {
                 if(database.containsKey(event.getName())){
                     oldCopy=((Event)database.get(event.getName())).getId()+"";
@@ -144,6 +145,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
                 killList.put(oldCopy,oldCopy);
             }
         }
+        
         final Runnable runnable;
         runnable = new Runnable() {
             Event ev;
@@ -160,9 +162,11 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
 
                     }
                 }
+                
                 if(!killList.containsKey(""+ev.getId())){
                     Kernel.getInstance().handleEvent(ev);
                 }
+                
                 threadsCounter--;
                 database.remove("" + ev.getId());
                 try {
