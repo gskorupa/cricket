@@ -1,0 +1,328 @@
+/*
+ * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package org.cricketmsf.out.db;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.cricketmsf.Adapter;
+import org.cricketmsf.Event;
+import org.cricketmsf.Kernel;
+import org.cricketmsf.microsite.cms.CmsException;
+import org.cricketmsf.microsite.cms.Document;
+import org.cricketmsf.microsite.cms.DocumentPathComparator;
+
+/**
+ *
+ * @author greg
+ */
+public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
+
+    @Override
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        super.loadProperties(properties, adapterName);
+    }
+
+    @Override
+    public void addTable(String tableName, int maxSize, boolean persistent) throws KeyValueDBException {
+        String docQuery;
+        StringBuilder sb = new StringBuilder();
+        sb.append(" (")
+                .append("uid varchar primary key,")
+                .append("name varchar,")
+                .append("author varchar,")
+                .append("type varchar,")
+                .append("path varchar,")
+                .append("title varchar,")
+                .append("summary varchar,")
+                .append("content varchar,")
+                .append("tags varchar,")
+                .append("language varchar,")
+                .append("mimetype varchar,")
+                .append("status varchar,")
+                .append("createdby varchar,")
+                .append("size bigint,")
+                .append("commentable boolean,")
+                .append("created timestamp,")
+                .append("modified timestamp,")
+                .append("published timestamp)");
+        docQuery = sb.toString();
+        try (Connection conn = getConnection()) {
+            PreparedStatement pst;
+            if (tableName.startsWith("published_") || tableName.startsWith("wip_")) {
+                pst = conn.prepareStatement("create table " + tableName + docQuery);
+            } else if (tableName.equals("paths")) {
+                pst = conn.prepareStatement("create table paths (path varchar primary key)");
+            } else {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+            boolean updated = pst.execute();
+            pst.close();
+            conn.close();
+            if (!updated) {
+                throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "unable to create table " + tableName);
+            }
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public void put(String tableName, String key, Object o) throws KeyValueDBException {
+        if (tableName.startsWith("published_") || tableName.startsWith("wip_")) {
+            try {
+                putDocument(tableName, key, (Document) o);
+            } catch (ClassCastException e) {
+                throw new KeyValueDBException(KeyValueDBException.UNKNOWN, "object is not a Document ");
+            }
+        } else if (tableName.equals("paths")) {
+            putPath(key);
+        }
+    }
+
+    private void putDocument(String tableName, String key, Document doc) throws KeyValueDBException {
+        try (Connection conn = getConnection()) {
+            String query = "merge into ?? (uid,name,author,type,path,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published) key (uid) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            query = query.replaceFirst("\\?\\?", tableName);
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, doc.getUid());
+            pstmt.setString(2, doc.getName());
+            pstmt.setString(3, doc.getAuthor());
+            pstmt.setString(4, doc.getType());
+            pstmt.setString(5, doc.getPath());
+            pstmt.setString(6, doc.getTitle());
+            pstmt.setString(7, doc.getSummary());
+            pstmt.setString(8, doc.getContent());
+            pstmt.setString(9, doc.getTags());
+            pstmt.setString(10, doc.getLanguage());
+            pstmt.setString(11, doc.getMimeType());
+            pstmt.setString(12, doc.getStatus());
+            pstmt.setString(13, doc.getCreatedBy());
+            pstmt.setLong(14, doc.getSize());
+            pstmt.setBoolean(15, doc.isCommentable());
+            pstmt.setTimestamp(16, new Timestamp(doc.getCreated().toEpochMilli()));
+            pstmt.setTimestamp(17, new Timestamp(doc.getModified().toEpochMilli()));
+            if (doc.getPublished() == null) {
+                pstmt.setNull(18, java.sql.Types.TIMESTAMP, "TIMESTAMP");
+            } else {
+                pstmt.setTimestamp(18, new Timestamp(doc.getPublished().toEpochMilli()));
+            }
+            int updated = pstmt.executeUpdate();
+            //check?
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+    }
+
+    private void putPath(String path) throws KeyValueDBException {
+        try (Connection conn = getConnection()) {
+            String query = "merge into paths values (?)";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, path);
+            int updated = pstmt.executeUpdate();
+            //check?
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public Object get(String tableName, String key) throws KeyValueDBException {
+        return get(tableName, key, null);
+    }
+
+    @Override
+    public Object get(String tableName, String key, Object o) throws KeyValueDBException {
+        if (tableName.startsWith("wip_") || tableName.startsWith("published_")) {
+            return getDocument(tableName, key, o);
+        } else if (tableName.equals("path")) {
+            return getPath("paths", key, o);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Map getAll(String tableName) throws KeyValueDBException {
+        String query = "select path from paths";
+        HashMap<String, String> map = new HashMap<>();
+        if (tableName.equals("paths")) {
+            try (Connection conn = getConnection()) {
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    map.put(rs.getString(1), rs.getString(1));
+                }
+            } catch (SQLException e) {
+                throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+            }
+        }
+        return map;
+    }
+
+    @Override
+    public boolean containsKey(String tableName, String key) throws KeyValueDBException {
+        String query;
+        if (tableName.startsWith("published_") || tableName.startsWith("wip_")) {
+            query = "select uid from " + tableName + " where uid=?";
+        } else if (tableName.equals("paths")) {
+            query = "select path from " + tableName + " where path=?";
+        } else {
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unsupported table " + tableName);
+        }
+        try (Connection conn = getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, key);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return true;
+            }
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+        return false;
+    }
+
+    @Override
+    public boolean remove(String tableName, String key) throws KeyValueDBException {
+        String docQuery = "delete from ?? where uid = ?".replaceFirst("\\?\\?", tableName);
+        String pathQuery = "delete from paths where path = ?";
+        String query;
+        boolean updated = false;
+        if (tableName.startsWith("published_") || tableName.startsWith("wip_")) {
+            query = docQuery;
+        } else if (tableName.equals("paths")) {
+            query = pathQuery;
+        } else {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        try (Connection conn = getConnection()) {
+            PreparedStatement pst;
+            pst = conn.prepareStatement(query);
+            pst.setString(1, key);
+            updated = pst.execute();
+            pst.close();
+            conn.close();
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+        return updated;
+    }
+
+    @Override
+    public List search(String tableName, String statement, String[] parameters) throws KeyValueDBException {
+        //TODO
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List search(String tableName, ComparatorIface ci, Object o) throws KeyValueDBException {
+        if (ci instanceof DocumentPathComparator) {
+            String path = ((Document) o).getPath();
+            String query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from ?? where path = ?";
+            query = query.replaceFirst("\\?\\?", tableName);
+            ArrayList list = new ArrayList();
+            try (Connection conn = getConnection()) {
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                pstmt.setString(1, path);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    list.add(buildDocument(rs));
+                }
+                conn.close();
+            } catch (SQLException | CmsException e) {
+                throw new KeyValueDBException(KeyValueDBException.UNKNOWN, e.getMessage());
+            }
+            return list;
+        } else {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+    }
+
+    Document buildDocument(ResultSet rs) throws CmsException, SQLException {
+        Document doc = new Document();
+        doc.setUid(rs.getString(1));
+        doc.setAuthor(rs.getString(2));
+        doc.setType(rs.getString(3));
+        doc.setTitle(rs.getString(4));
+        doc.setSummary(rs.getString(5));
+        doc.setContent(rs.getString(6));
+        doc.setTags(rs.getString(7));
+        doc.setLanguage(rs.getString(8));
+        doc.setMimeType(rs.getString(9));
+        doc.setStatus(rs.getString(10));
+        doc.setCreatedBy(rs.getString(11));
+        doc.setSize(rs.getLong(12));
+        doc.setCommentable(rs.getBoolean(13));
+        doc.setCreated(rs.getTimestamp(14).toInstant());
+        doc.setModified(rs.getTimestamp(15).toInstant());
+        try {
+            doc.setPublished(rs.getTimestamp(16).toInstant());
+        } catch (NullPointerException e) {
+        }
+        return doc;
+    }
+
+    private Object getDocument(String tableName, String key, Object defaultResult) throws KeyValueDBException {
+        Document doc = null;
+        try (Connection conn = getConnection()) {
+            String query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from " + tableName + " where uid=?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, key);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                doc = buildDocument(rs);
+            }
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        } catch (CmsException ex) {
+            Kernel.handle(Event.logSevere(this, "unable to restore UID"));
+        }
+        if (doc == null) {
+            return defaultResult;
+        } else {
+            return doc;
+        }
+    }
+
+    private Object getPath(String tableName, String key, Object defaultResult) throws KeyValueDBException {
+        String path = null;
+        try (Connection conn = getConnection()) {
+            String query = "select * from paths where path=?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, key);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                path = rs.getString(1);
+            }
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+        if (path == null) {
+            return defaultResult;
+        } else {
+            return path;
+        }
+    }
+
+}

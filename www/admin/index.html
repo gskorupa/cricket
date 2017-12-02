@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <title>Signomix</title>
+        <link rel="icon" href="/resources/signode-icon.png">
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="/resources/css/font-awesome.min.css">
+        <!-- Style -->
+        <link rel="stylesheet" href="resources/style.css">
+    </head>
+    <body>
+    <app_header></app_header>
+    <app_content></app_content>
+    <app_footer></app_footer>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <!-- Riot scripts we need -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/riot/3.7.3/riot+compiler.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/riot-route@3.1.2/dist/route.min.js"></script>
+    <!-- Application scripts -->
+    <script src="js/routing.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/data-api.js"></script>
+    <script src="js/auth-api.js"></script>
+
+    <!-- loading tags -->
+    <script data-src="/tags/raw.tag" type="riot/tag"></script>
+    <script data-src="/tags/cs_article.tag" type="riot/tag"></script>
+    <script data-src="components/app_header.tag" type="riot/tag"></script>
+    <script data-src="components/app_login.tag" type="riot/tag"></script>
+    <script data-src="components/app_logout.tag" type="riot/tag"></script>
+    <script data-src="components/app_main.tag" type="riot/tag"></script>
+    <script data-src="components/app_content.tag" type="riot/tag"></script>
+    <script data-src="components/app_footer.tag" type="riot/tag"></script>
+    <script data-src="components/cm_documents.tag" type="riot/tag"></script>
+    <script data-src="components/cm_document_form.tag" type="riot/tag"></script>
+    <script data-src="components/cm_tags.tag" type="riot/tag"></script>
+    <script data-src="components/app_users.tag" type="riot/tag"></script>
+    <script data-src="components/user_form.tag" type="riot/tag"></script>
+
+    <script>
+<!-- dynamic configuration. Look at cricket.json - service propertises -->
+        app.authAPI = "$serviceurl" + "/api/auth";
+        app.userAPI = "$serviceurl" + "/api/user";
+        app.csAPI = "$serviceurl" + "/api/cs";
+        app.cmAPI = "$serviceurl" + "/api/cm";
+<!-- -->
+        riot.compile(function () {
+            riot.mount('raw');
+            riot.mount('app_header');
+            riot.mount('app_footer');
+            riot.mount('app_login');
+            riot.mount('app_logout');
+            riot.mount('app_main');
+            riot.mount('cm_documents');
+            riot.mount('cm_document_form');
+            riot.mount('cm_tags');
+            riot.mount('app_users');
+            riot.mount('user_form');
+            riot.mount('app_content');
+            riot.mount('cs_article');
+            route.start(true);
+        })
+    </script>
+</body>
+</html>
