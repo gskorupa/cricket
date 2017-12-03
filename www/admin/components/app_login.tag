@@ -13,7 +13,7 @@
                     <input class="form-control" id="password" name="password" type="password" 
                                placeholder={ labels.l_password[app.language] } required>
                 </div>
-                <button type="submit" class="btn btn-block btn-default">{ labels.l_save[app.language] }</button>
+                <button type="submit" class="btn btn-block btn-primary">{ labels.l_save[app.language] }</button>
             </form>
         </div>
     </div>
@@ -45,8 +45,8 @@
 
         this.labels = {
             "l_title": {
-                "en": "Signomix",
-                "pl": "Signomix"
+                "en": "Cricket Microsite",
+                "pl": "Cricket Microsite"
             },"l_name": {
                 "en": "Name",
                 "pl": "Nazwa"

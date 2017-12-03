@@ -2,7 +2,220 @@
     "@type": "org.cricketmsf.config.ConfigSet",
     "description": "This is sample configuration",
     "services": [
-        {
+    	{
+            "@type": "org.cricketmsf.config.Configuration",
+            "id": "Microsite",
+            "service": "org.cricketmsf.services.Microsite",
+            "properties": {
+                "host": "0.0.0.0",
+                "port": "8080",
+                "ssl": "false",
+                "keystore": "./data/cricket_publickeystore.jks",
+                "keystore-password": "cricket15$#17",
+                "threads": 0,
+                "filter": "org.cricketmsf.microsite.auth.SecurityFilter",
+                "cors": "Access-Control-Allow-Origin:*|Access-Control-Allow-Credentials:true|Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT|Access-Control-Allow-Headers:Authentication|Access-Control-Max-Age: 1728000",
+                "time-zone": "GMT",
+                "default-language": "en",
+                "user-confirm": "true",
+                "initial-admin-email": "g.skorupa@gmail.com",
+                "initial-admin-secret": "test123",
+                "admin-notification-email": "g.skorupa@gmail.com",
+                "restricted-resources": "DELETE@/api/auth PUT@/api/auth GET@/api/user PUT@/api/user DELETE@/api/user *@/api/cm",
+                "file.upload.maxsize": "5000000",
+                "backup-folder": "",
+                "backup-daily": "true",
+                "serviceurl": "http://localhost:8080",
+                "SRVC_NAME_ENV_VARIABLE": "MICROSITE_ENVIRONMENT_NAME",
+                "SRVC_URL_ENV_VARIABLE": "MICROSITE_URL"
+            },
+            "adapters": {
+                "UserService": {
+                    "name": "UserService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.microsite.in.http.UserApi",
+                    "properties": {
+                        "context": "/api/user",
+                        "silent-mode": "false"
+                    }
+                },
+                "AuthService": {
+                    "name": "AuthService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.microsite.in.http.AuthApi",
+                    "properties": {
+                        "context": "/api/auth",
+                        "silent-mode": "false"
+                    }
+                },
+                "ContentManager": {
+                    "name": "ContentManager",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.microsite.in.http.ContentApi",
+                    "properties": {
+                        "context": "/api/cm",
+                        "silent-mode": "false"
+                    }
+                },
+                "ContentService": {
+                    "name": "ContentService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.microsite.in.http.ContentApi",
+                    "properties": {
+                        "context": "/api/cs",
+                        "silent-mode": "false"
+                    }
+                },
+                "logger": {
+                    "name": "logger",
+                    "interfaceName": "LoggerAdapterIface",
+                    "classFullName": "org.cricketmsf.out.log.StandardLogger",
+                    "properties": {
+                        "name": "Microsite",
+                        "level": "FINEST",
+                        "log-file-name": "./log/cricket%g.log",
+                        "max-size": "1000000",
+                        "count": "10",
+                        "console": "true"
+                    }
+                },
+                "database": {
+                    "name": "database",
+                    "interfaceName": "KeyValueDBIface",
+                    "classFullName": "org.cricketmsf.out.db.KeyValueDB",
+                    "description": "web cache, platform config",
+                    "properties": {
+                        "path": "./data",
+                        "name": "local"
+                    }
+                },
+                "scheduler": {
+                    "name": "scheduler",
+                    "interfaceName": "SchedulerIface",
+                    "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
+                    "properties": {
+                        "path": "./data",
+                        "envVariable": "SCHEDULER_DB_PATH",
+                        "file": "scheduler.xml",
+                        "init":""
+                    }
+                },
+                "FileReader": {
+                    "name": "FileReader",
+                    "interfaceName": "FileReaderAdapterIface",
+                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
+                    "properties": {
+                        "root": "./www/",
+                        "index-file": "index.html"
+                    }
+                },
+                "CMS": {
+                    "name": "CMS",
+                    "interfaceName": "HtmlGenAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
+                    "properties": {
+                        "context": "/cms",
+                        "use-cache": "true",
+                        "page-processor": "true"
+                    }
+                },
+                "WwwService": {
+                    "name": "WwwService",
+                    "interfaceName": "HtmlGenAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
+                    "properties": {
+                        "context": "/",
+                        "use-cache": "true",
+                        "page-processor": "true"
+                    }
+                },
+                "userAdapter": {
+                    "name": "userAdapter",
+                    "interfaceName": "UserAdapterIface",
+                    "classFullName": "org.cricketmsf.microsite.out.user.UserEmbededAdapter",
+                    "properties": {
+                        "helper-name": "userDB"
+                    }
+                },
+                "authAdapter": {
+                    "name": "authAdapter",
+                    "interfaceName": "AuthAdapterIface",
+                    "classFullName": "org.cricketmsf.microsite.out.auth.AuthEmbededAdapter",
+                    "properties": {
+                        "helper-name": "authDB",
+                        "helper-name-2": "userAdapter",
+                        "token-timeout": "1800"
+                    }
+                },
+                "cmsDB": {
+                    "name": "cmsDB",
+                    "interfaceName": "SqlDBIface",
+                    "classFullName": "org.cricketmsf.out.db.H2CmsDB",
+                    "properties": {
+                        "path": "./data",
+                        "file": "cms",
+                        "test-query": "select * from serviceversion",
+                        "version": "1",
+                        "name": "content",
+                        "user": "sa",
+                        "password": ""
+                    }
+                },
+                "userDB": {
+                    "name": "userDB",
+                    "interfaceName": "SqlDBIface",
+                    "classFullName": "org.cricketmsf.out.db.H2UserDB",
+                    "properties": {
+                        "path": "./data",
+                        "file": "user",
+                        "test-query": "select * from serviceversion",
+                        "version": "1",
+                        "name": "user",
+                        "user": "sa",
+                        "password": ""
+                    }
+                },
+                "authDB": {
+                    "name": "authDB",
+                    "interfaceName": "SqlDBIface",
+                    "classFullName": "org.cricketmsf.out.db.H2AuthDB",
+                    "properties": {
+                        "path": "./data",
+                        "file": "auth",
+                        "test-query": "select * from serviceversion",
+                        "version": "1",
+                        "name": "auth",
+                        "user": "sa",
+                        "password": ""
+                    }
+                },
+                "cms": {
+                    "name": "cms",
+                    "interfaceName": "CmsIface",
+                    "classFullName": "org.cricketmsf.microsite.cms.CmsEmbededAdapter",
+                    "properties": {
+                        "helper-name": "cmsDB",
+                        "root-path": "./www/",
+                        "file-path": "./files/",
+                        "file-path-published": "./www/assets/",
+                        "index-file": "index.html"
+                    }
+                },
+                "emailSender": {
+                    "name": "emailSender",
+                    "interfaceName": "EmailSenderIface",
+                    "classFullName": "org.cricketmsf.microsite.out.notification.SmtpSender",
+                    "properties": {
+                        "from": "test@signocom.com",
+                        "mailhost": "85.128.192.150",
+                        "user": "test@signocom.com",
+                        "password": "Ypsylon#2017#",
+                        "debug-session": "false"
+                    }
+                }
+            }
+        }
+        ,{
             "@type": "org.cricketmsf.config.Configuration",
             "id": "echo",
             "service": "org.cricketmsf.services.BasicService",

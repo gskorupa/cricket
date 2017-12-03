@@ -32,8 +32,8 @@
 
         self.labels = {
             "description": {
-                "en": "Content management module for <b>SignoMix</b>",
-                "pl": "Moduł zarządzania treścią dla platformy <b>SignoMix</b>"
+                "en": "Microsite management module",
+                "pl": "Microsite -moduł administracyjny"
             }
         }
     </script>
