@@ -40,8 +40,8 @@
 
         this.labels = {
             "name": {
-                "en": "Signomix : Management",
-                "pl": "Signomix : Administracja"
+                "en": "Cricket Microsite: Management",
+                "pl": "Cricket Microsite : Administracja"
             },
             "users": {
                 "en": "Users",

@@ -199,19 +199,19 @@
             },
             "cancel": {
                 "en": "Cancel",
-                        "pl": "Porzuć"
+                "pl": "Porzuć"
             },
             "remove_question": {
                 "en": "Do you want to remove selected user?",
-                        "pl": "Czy chcesz usunąć wybranego użytkownika?"
+                 "pl": "Czy chcesz usunąć wybranego użytkownika?"
             },
             "remove_info": {
-                "en": "Did you remove or transfer user's data and devices?",
-                        "pl": "Czy usunąłeś lub przekazałeś dane oraz urządzenia użytkownika?"
+                "en": "Are you sure?",
+                 "pl": "Na pewno?"
             },
             "remove_title": {
                 "en": "Removing user",
-                        "pl": "Usuwanie użytkownika"
+                "pl": "Usuwanie użytkownika"
             }
         }
     </script>

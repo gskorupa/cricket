@@ -304,7 +304,7 @@
         },
                 "t_title": {
                 "en": "TITLE",
-                        "pl": "TYTUŁ"
+                 "pl": "TYTUŁ"
                 },
                 "t_status": {
                 "en": "STATUS",
