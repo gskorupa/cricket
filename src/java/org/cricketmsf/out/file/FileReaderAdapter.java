@@ -208,7 +208,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                 // file not found or empty file
                 result.setCode(HttpAdapter.SC_NOT_FOUND);
                 result.setMessage("file not found");
-
+                result.setHeader("Content-type", "text-html");
                 result.setPayload("file not found".getBytes());
                 return result;
             }
@@ -311,6 +311,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                 result.setCode(HttpAdapter.SC_NOT_FOUND);
                 result.setMessage("file not found");
                 result.setPayload("file not found".getBytes());
+                result.setHeader("Content-type", "text/html");
                 return result;
             }
             fo = new FileObject();

@@ -23,7 +23,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
     <!-- Riot scripts we need -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/riot/3.7.3/riot+compiler.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/riot/3.7.4/riot+compiler.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/riot-route@3.1.2/dist/route.min.js"></script>
     <!-- Application scripts -->
     <script src="js/routing.js"></script>
@@ -47,28 +47,13 @@
     <script data-src="components/user_form.tag" type="riot/tag"></script>
 
     <script>
-<!-- dynamic configuration. Look at cricket.json - service propertises -->
+        <!-- dynamic configuration. Look at cricket.json - service propertises -->
         app.authAPI = "$serviceurl" + "/api/auth";
         app.userAPI = "$serviceurl" + "/api/user";
         app.csAPI = "$serviceurl" + "/api/cs";
         app.cmAPI = "$serviceurl" + "/api/cm";
-<!-- -->
-        riot.compile(function () {
-            riot.mount('raw');
-            riot.mount('app_header');
-            riot.mount('app_footer');
-            riot.mount('app_login');
-            riot.mount('app_logout');
-            riot.mount('app_main');
-            riot.mount('cm_documents');
-            riot.mount('cm_document_form');
-            riot.mount('cm_tags');
-            riot.mount('app_users');
-            riot.mount('user_form');
-            riot.mount('app_content');
-            riot.mount('cs_article');
-            route.start(true);
-        })
+        riot.mount('*');
+        route.start(true);
     </script>
 </body>
 </html>

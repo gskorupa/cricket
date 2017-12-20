@@ -5,7 +5,7 @@
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <property name="version" value="1.2.30"/>
+    <property name="version" value="1.2.31"/>
     <property name="src" location="src/java"/>
     <property name="build" location="build/classes"/>
     <property name="dist" location="dist"/>
@@ -24,11 +24,13 @@
     <!-- used external libraries -->
     <property name="json-io-lib" value="json-io-4.9.7.jar"/>
     <property name="commons-csv-lib" value="commons-csv-1.2.jar"/>
+    <property name="h2-lib" value="h2-1.4.196.jar"/>
     
     
     <path id="project-classpath">
         <pathelement location="${lib}/${json-io-lib}"/>
         <pathelement location="${lib}/${commons-csv-lib}"/>
+        <pathelement location="${lib}/${h2-lib}"/>
     </path>
 
     <target name="init">
@@ -46,7 +48,7 @@
     <target name="compile" depends="init" description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
         <javac 
-            target="9" 
+            target="8" 
             source="1.8" 
             srcdir="${src}" 
             destdir="${build}"
@@ -124,6 +126,7 @@
             <fileset dir="${build}"/>
             <zipfileset src="${lib}/${json-io-lib}" includes="com/**/*"/>
             <zipfileset src="${lib}/${commons-csv-lib}" includes="org/**/*"/>
+            <!--<zipfileset src="${lib}/${h2-lib}" includes="org/**/*"/>-->
         </jar>
     </target>
     

@@ -231,6 +231,9 @@ public class SecurityFilter extends Filter {
         } else {
             try {
                 user = getUser(tokenID, tokenID.startsWith(PERMANENT_TOKEN_PREFIX));
+                if("public".equalsIgnoreCase(user.getUid())){
+                    issuer = getIssuer(tokenID);
+                }
             } catch (AuthException e) {
                 result.code = e.getCode();
                 result.message = e.getMessage();
