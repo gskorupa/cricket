@@ -26,11 +26,13 @@
     <property name="json-io-lib" value="json-io-4.9.7.jar"/>
     <property name="commons-csv-lib" value="commons-csv-1.2.jar"/>
     <property name="h2-lib" value="h2-1.4.196.jar"/>
+    <property name="javamail-lib" value="javax.mail.jar"/>
     
     <path id="project-classpath">
         <pathelement location="${lib}/${json-io-lib}"/>
         <pathelement location="${lib}/${commons-csv-lib}"/>
         <pathelement location="${lib}/${h2-lib}"/>
+        <pathelement location="${lib}/${javamail-lib}"/>
     </path>
 
     <target name="init">

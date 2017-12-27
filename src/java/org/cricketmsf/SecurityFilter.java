@@ -20,8 +20,8 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 
 /**
- * This is default filter used to check required request conditions. Does
- * nothing. Could be used as a starting point to implement required filter.
+ * This is default filter used to check required request conditions. 
+ * It does nothing but could be used as a starting point to implement required filter.
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */

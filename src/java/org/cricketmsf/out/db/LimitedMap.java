@@ -50,6 +50,15 @@ public class LimitedMap extends LinkedHashMap{
         super.clear();
     }
     
+    @Override
+    public Object clone(){
+        LimitedMap result = (LimitedMap)super.clone();
+        /*super.keySet().forEach( key -> {
+            result.put(key, super.get(key));
+        });*/
+        return result;
+    }
+    
     public synchronized Object remove(String key) {
         return super.remove(key);
     }
