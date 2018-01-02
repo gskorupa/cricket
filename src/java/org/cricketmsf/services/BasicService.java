@@ -19,7 +19,6 @@ import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import java.util.HashMap;
-import java.util.Map;
 import static org.cricketmsf.Kernel.handle;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.annotation.HttpAdapterHook;

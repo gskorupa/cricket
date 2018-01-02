@@ -4,7 +4,94 @@
     "services": [
         {
             "@type": "org.cricketmsf.config.Configuration",
-            "id": "echo",
+            "id": "SimpleService",
+            "service": "org.cricketmsf.services.SimpleService",
+            "properties": {
+                "host": "0.0.0.0",
+                "port": "8080",
+                "ssl": "false",
+                "keystore": "./work/data/cricket_publickeystore.jks",
+                "keystore-password": "cricket15$#17",
+                "threads": "0",
+                "filter": "org.cricketmsf.SecurityFilter",
+                "cors": "Access-Control-Allow-Origin:*",
+                "time-zone": "GMT",
+                "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME"
+            },
+            "adapters": {
+                "StatusService": {
+                    "name": "StatusService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.StandardHttpAdapter",
+                    "properties": {
+                        "context": "/api/status",
+                        "silent-mode": "true"
+                    }
+                },
+                "WWWService": {
+                    "name": "WWWService",
+                    "interfaceName": "HtmlGenAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
+                    "properties": {
+                        "context": "/",
+                        "use-cache": "false",
+                        "page-processor": "false"
+                    }
+                },
+                "FileReader": {
+                    "name": "FileReader",
+                    "interfaceName": "FileReaderAdapterIface",
+                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
+                    "properties": {
+                        "root": "./work/www/",
+                        "index-file": "index.html"
+                    }
+                },
+                "Logger": {
+                    "name": "Logger",
+                    "interfaceName": "LoggerAdapterIface",
+                    "classFullName": "org.cricketmsf.out.log.StandardLogger",
+                    "properties": {
+                        "name": "SimpleService",
+                        "level": "FINEST",
+                        "log-file-name": "./work/log/cricket%g.log",
+                        "max-size": "1000000",
+                        "count": "10",
+                        "console": "true"
+                    }
+                },
+                "Database": {
+                    "name": "Database",
+                    "interfaceName": "KeyValueDBIface",
+                    "classFullName": "org.cricketmsf.out.db.KeyValueDB",
+                    "properties": {
+                        "path": "./work/data",
+                        "name": "local"
+                    }
+                },
+                "Scheduler": {
+                    "name": "Scheduler",
+                    "interfaceName": "SchedulerIface",
+                    "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
+                    "properties": {
+                        "path": "./work/data",
+                        "envVariable": "SCHEDULER_DB_PATH",
+                        "file": "scheduler.xml"
+                    }
+                },
+                "Dispatcher": {
+                    "name": "Dispatcher",
+                    "interfaceName": "DispatcherIface",
+                    "classFullName": "org.cricketmsf.out.EventDispatcherAdapter",
+                    "description": "default dispatcher does nothing",
+                    "properties": {
+                    }
+                }
+            }
+        },
+        {
+            "@type": "org.cricketmsf.config.Configuration",
+            "id": "BasicService",
             "service": "org.cricketmsf.services.BasicService",
             "properties": {
                 "host": "0.0.0.0",
@@ -42,7 +129,7 @@
                     "interfaceName": "LoggerAdapterIface",
                     "classFullName": "org.cricketmsf.out.log.StandardLogger",
                     "properties": {
-                        "name": "EchoService",
+                        "name": "BasicService",
                         "level": "FINEST",
                         "log-file-name": "./work/log/cricket%g.log",
                         "max-size": "1000000",
@@ -67,6 +154,14 @@
                         "path": "./work/data",
                         "envVariable": "SCHEDULER_DB_PATH",
                         "file": "scheduler.xml"
+                    }
+                },
+                "Dispatcher": {
+                    "name": "Dispatcher",
+                    "interfaceName": "DispatcherIface",
+                    "classFullName": "org.cricketmsf.out.EventDispatcherAdapter",
+                    "description": "default dispatcher does nothing",
+                    "properties": {
                     }
                 },
                 "WWWService": {

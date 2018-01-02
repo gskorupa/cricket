@@ -35,6 +35,9 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
 import org.cricketmsf.config.HttpHeader;
+import org.cricketmsf.out.DispatcherException;
+import org.cricketmsf.out.DispatcherIface;
+import org.cricketmsf.out.EventDispatcherAdapter;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import org.cricketmsf.out.log.StandardLogger;
 
@@ -61,6 +64,9 @@ public abstract class Kernel {
 
     // adapters
     public HashMap<String, Object> adaptersMap = new HashMap<>();
+    
+    // event dispatcher
+    private DispatcherIface eventDispatcher = null;
 
     // user defined properties
     public HashMap<String, Object> properties = new HashMap<>();
@@ -140,6 +146,22 @@ public abstract class Kernel {
         }
         return o;
     }
+    
+    /**
+     * Sends event object to the event queue using registered dispatcher adapter. In case the dispatcher adapter is not registered or throws exception,
+     * the Kernel.handle(event) method will be called. 
+     * 
+     * @param event the event object that should be send to the event queue 
+     * @return null if dispatcher adapter is registered, otherwise returns result of the Kernel.handle(event) method
+     */
+    public Object dispatchEvent(Event event){
+            try {
+                eventDispatcher.dispatch(event);
+                return null;
+            } catch (NullPointerException | DispatcherException ex) {
+                return handleEvent(event);
+            }
+    }
 
     /**
      * Invokes the service method annotated as dedicated to this event category
@@ -158,9 +180,9 @@ public abstract class Kernel {
         return adaptersMap.get(adapterName);
     }
 
-    protected Object registerAdapter(String adapterName, Object adapter) {
-        return adaptersMap.put(adapterName, adapter);
-    }
+    //protected Object registerAdapter(String adapterName, Object adapter) {
+    //    return adaptersMap.put(adapterName, adapter);
+    //}
 
     /**
      * Returns next unique identifier for Event.
@@ -259,6 +281,9 @@ public abstract class Kernel {
                     } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.InboundAdapter) {
                         setInboundAdaptersLoaded(true);
                     }
+                    if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.EventDispatcherAdapter) {
+                        setEventDispatcher(adaptersMap.get(adapterName));
+                    }
                     // loading properties
                     java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class, String.class);
                     loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
@@ -273,6 +298,10 @@ public abstract class Kernel {
         }
         getLogger().print("END LOADING ADAPTERS");
         getLogger().print("");
+    }
+    
+    private void setEventDispatcher(Object adapter){
+        eventDispatcher = (EventDispatcherAdapter)adapter;
     }
 
     private void setSecurityFilter(String filterName) {
