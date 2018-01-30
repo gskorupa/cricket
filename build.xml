@@ -5,7 +5,7 @@
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <property name="version" value="1.2.34"/>
+    <property name="version" value="1.2.35"/>
     <property name="src" location="src/java"/>
     <property name="src-other" location="src/other"/>
     <property name="build" location="build/classes"/>
@@ -83,16 +83,17 @@
             description="generate the distribution">
         <!-- Create the distribution directory -->
         <mkdir dir="${dist}"/>
+        <mkdir dir="${dist}/work"/>
         <antcall inheritall="true" target="jar"/>
-        <mkdir dir="${dist}/config"/>
-        <mkdir dir="${dist}/files"/>
-        <mkdir dir="${dist}/data"/>
-        <mkdir dir="${dist}/www"/>
-        <mkdir dir="${dist}/www/assets"/>
-        <mkdir dir="${dist}/log"/>
-        <delete file="./data/cricket_publickeystore.jks" failonerror="false"></delete>
+        <mkdir dir="${dist}/work/config"/>
+        <mkdir dir="${dist}/work/files"/>
+        <mkdir dir="${dist}/work/data"/>
+        <mkdir dir="${dist}/work/www"/>
+        <mkdir dir="${dist}/work/www/assets"/>
+        <mkdir dir="${dist}/work/log"/>
+        <delete file="${dist}/work/data/cricket_publickeystore.jks" failonerror="false"></delete>
         <genkey alias="cricket" 
-                keystore="./data/cricket_publickeystore.jks" 
+                keystore="${dist}/work/data/cricket_publickeystore.jks" 
                 storepass="cricket15$#17" 
                 keypass="cricket15$#17" 
                 keyalg="RSA" 
@@ -103,14 +104,14 @@
                 <param name="OU" value="Cricket MSF"/>
             </dname>
         </genkey>
-        <copy todir="${dist}/www">
+        <copy todir="${dist}/work/www">
             <fileset dir="www"/>
         </copy>
         <echo message="Building distribution package"/>
-        <copy todir="${dist}/config" file="${src}/cricket.json"/>
+        <copy todir="${dist}/work/config" file="${src}/cricket.json"/>
         <copy todir="${dist}" file="${src-other}/run.sh"/>
         <replace file="${dist}/run.sh" token="{{distribution}}" value="${jar-name}"/>
-        <replace file="${dist}/www/admin/components/app_main.tag" token="cricket-version" value="${version}"/>
+        <replace file="${dist}/work/www/admin/components/app_main.tag" token="cricket-version" value="${version}"/>
         <zip basedir="dist" destfile="microsite.zip"/>
     </target>
     
@@ -143,6 +144,8 @@
             <fileset dir="${build}"/>
             <zipfileset src="${lib}/${json-io-lib}" includes="com/**/*"/>
             <zipfileset src="${lib}/${commons-csv-lib}" includes="org/**/*"/>
+            <zipfileset src="${lib}/${h2-lib}" includes="org/**/*"/>
+            <zipfileset src="${lib}/${javamail-lib}" includes="com/**/*,javax/**/*"/>
         </jar>
     </target>
     

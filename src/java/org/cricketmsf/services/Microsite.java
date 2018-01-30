@@ -23,7 +23,6 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import java.util.HashMap;
 import org.cricketmsf.annotation.HttpAdapterHook;
-import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
@@ -41,7 +40,6 @@ import java.util.List;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.microsite.auth.AuthBusinessLogic;
 import org.cricketmsf.microsite.in.http.ContentRequestProcessor;
-import org.cricketmsf.microsite.out.auth.AuthException;
 import org.cricketmsf.microsite.user.UserEvent;
 import org.cricketmsf.microsite.out.notification.*;
 import org.cricketmsf.microsite.*;
@@ -55,7 +53,7 @@ public class Microsite extends Kernel {
 
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
-    EchoHttpAdapterIface echoAdapter = null;
+    //EchoHttpAdapterIface echoAdapter = null;
     KeyValueDBIface database = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
@@ -76,15 +74,15 @@ public class Microsite extends Kernel {
     @Override
     public void getAdapters() {
         // standard Cricket adapters
-        logAdapter = (LoggerAdapterIface) getRegistered("logger");
-        database = (KeyValueDBIface) getRegistered("database");
-        scheduler = (SchedulerIface) getRegistered("scheduler");
+        logAdapter = (LoggerAdapterIface) getRegistered("Logger");
+        database = (KeyValueDBIface) getRegistered("Database");
+        scheduler = (SchedulerIface) getRegistered("Scheduler");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
         fileReader = (FileReaderAdapterIface) getRegistered("FileReader");
         //cms
         cmsFileReader = (FileReaderAdapterIface) getRegistered("CmsFileReader");
         cmsDatabase = (KeyValueDBIface) getRegistered("cmsDB");
-        cms = (CmsIface) getRegistered("cms");
+        cms = (CmsIface) getRegistered("cmsAdapter");
         //user
         userAdapter = (UserAdapterIface) getRegistered("userAdapter");
         userDB = (KeyValueDBIface) getRegistered("userDB");
@@ -132,7 +130,7 @@ public class Microsite extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
-        handleEvent(Event.logInfo("Service.runOnce()", "executed"));
+        handle(Event.logInfo("Microsite.runOnce()", "executed"));
     }
 
     @Override
@@ -142,23 +140,6 @@ public class Microsite extends Kernel {
                 "Microsite shutdown", "Microsite service is going down."
         );
         super.shutdown();
-    }
-
-    /**
-     * Event dispatcher method. Depending on the event category and Microsite service 
-     * configurations dispatches event to Scheduler or
-     * Kernel handler method.
-     *
-     * @param event Event object to dispatch
-     * @return
-     */
-    @Override
-    public Object handleEvent(Event event) {
-        if (scheduler != null && event.getTimePoint() != null) {
-            scheduler.handleEvent(event);
-            return null;
-        }
-        return super.handleEvent(event);
     }
 
     /**
@@ -383,14 +364,14 @@ public class Microsite extends Kernel {
     }
 
     @HttpAdapterHook(adapterName = "ContentManager", requestMethod = "OPTIONS")
-    public Object contentServiceCors(Event requestEvent) {
+    public Object contentManagerCors(Event requestEvent) {
         StandardResult result = new StandardResult();
         result.setCode(HttpAdapter.SC_OK);
         return result;
     }
 
     @HttpAdapterHook(adapterName = "ContentManager", requestMethod = "*")
-    public Object contentServiceHandle(Event event) {
+    public Object contentManagerHandle(Event event) {
         return new ContentRequestProcessor().processRequest(event, cms);
     }
 

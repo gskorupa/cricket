@@ -48,10 +48,6 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
                 .append("role varchar,")
                 .append("secret varchar,")
                 .append("password varchar,")
-                .append("generalchannel varchar,")
-                .append("infochannel varchar,")
-                .append("warningchannel varchar,")
-                .append("alertchannel varchar,")
                 .append("confirmed boolean,")
                 .append("unregisterreq boolean,")
                 .append("authstatus int,")
@@ -93,7 +89,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     private void putUser(String tableName, String key, User user) throws KeyValueDBException {
         try (Connection conn = getConnection()) {
-            String query = "merge into ?? (uid,type,email,role,secret,password,generalchannel,infochannel,warningchannel,alertchannel,confirmed,unregisterreq,authstatus,created) key (uid) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            String query = "merge into ?? (uid,type,email,role,secret,password,confirmed,unregisterreq,authstatus,created) key (uid) values (?,?,?,?,?,?,?,?,?,?)";
             query = query.replaceFirst("\\?\\?", tableName);
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, user.getUid());
@@ -102,14 +98,10 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
             pstmt.setString(4, user.getRole());
             pstmt.setString(5, user.getConfirmString());
             pstmt.setString(6, user.getPassword());
-            pstmt.setString(7, user.getGeneralNotificationChannel());
-            pstmt.setString(8, user.getInfoNotificationChannel());
-            pstmt.setString(9, user.getWarningNotificationChannel());
-            pstmt.setString(10, user.getAlertNotificationChannel());
-            pstmt.setBoolean(11, user.isConfirmed());
-            pstmt.setBoolean(12, user.isUnregisterRequested());
-            pstmt.setInt(13, user.getStatus());
-            pstmt.setTimestamp(14, new Timestamp(user.getCreatedAt()));
+            pstmt.setBoolean(7, user.isConfirmed());
+            pstmt.setBoolean(8, user.isUnregisterRequested());
+            pstmt.setInt(9, user.getStatus());
+            pstmt.setTimestamp(10, new Timestamp(user.getCreatedAt()));
             int updated = pstmt.executeUpdate();
             //check?
         } catch (SQLException e) {
@@ -138,7 +130,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
         HashMap<String, User> map = new HashMap<>();
         //TODO: nie używać, zastąpić konkretnymi search'ami
         if (tableName.equals("users")) {
-            String query = "select uid,type,email,role,secret,password,generalchannel,infochannel,warningchannel,alertchannel,confirmed,unregisterreq,authstatus,created from users";
+            String query = "select uid,type,email,role,secret,password,confirmed,unregisterreq,authstatus,created from users";
             try (Connection conn = getConnection()) {
                 PreparedStatement pstmt = conn.prepareStatement(query);
                 ResultSet rs = pstmt.executeQuery();
@@ -204,28 +196,6 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
     @Override
     public List search(String tableName, ComparatorIface ci, Object o) throws KeyValueDBException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        /*
-        if (ci instanceof UserComparator) {
-            String path = ((Document) o).getPath();
-            String query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from ?? where path = ?";
-            query = query.replaceFirst("\\?\\?", tableName);
-            ArrayList list = new ArrayList();
-            try (Connection conn = getConnection()) {
-                PreparedStatement pstmt = conn.prepareStatement(query);
-                pstmt.setString(1, path);
-                ResultSet rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    list.add(buildDocument(rs));
-                }
-                conn.close();
-            } catch (SQLException | CmsException e) {
-                throw new KeyValueDBException(KeyValueDBException.UNKNOWN, e.getMessage());
-            }
-            return list;
-        } else {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-        */
     }
 
     User buildUser(ResultSet rs) throws SQLException {
@@ -237,21 +207,17 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
         user.setRole(rs.getString(4));
         user.setConfirmString(rs.getString(5));
         user.setPassword(rs.getString(6));
-        user.setGeneralNotificationChannel(rs.getString(7));
-        user.setInfoNotificationChannel(rs.getString(8));
-        user.setWarningNotificationChannel(rs.getString(9));
-        user.setAlertNotificationChannel(rs.getString(10));
-        user.setConfirmed(rs.getBoolean(11));
-        user.setUnregisterRequested(rs.getBoolean(12));
-        user.setStatus(rs.getInt(13));
-        user.setCreatedAt(rs.getTimestamp(14).getTime());
+        user.setConfirmed(rs.getBoolean(7));
+        user.setUnregisterRequested(rs.getBoolean(8));
+        user.setStatus(rs.getInt(9));
+        user.setCreatedAt(rs.getTimestamp(10).getTime());
         return user;
     }
 
     private Object getUser(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         User user = null;
         try (Connection conn = getConnection()) {
-            String query = "select uid,type,email,role,secret,password,generalchannel,infochannel,warningchannel,alertchannel,confirmed,unregisterreq,authstatus,created from " + tableName + " where uid=?";
+            String query = "select uid,type,email,role,secret,password,confirmed,unregisterreq,authstatus,created from " + tableName + " where uid=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
             ResultSet rs = pstmt.executeQuery();

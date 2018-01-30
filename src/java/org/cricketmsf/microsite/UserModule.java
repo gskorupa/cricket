@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.microsite;
 
+import java.util.List;
 import org.cricketmsf.microsite.user.*;
 import java.util.Map;
 import org.cricketmsf.Event;
@@ -40,20 +41,27 @@ public class UserModule extends UserBusinessLogic {
         return self;
     }
 
+    private boolean isAdmin(RequestObject request) {
+        boolean isAdmin = false;
+        List requesterRoles = request.headers.get("X-user-role");
+        if (requesterRoles != null && requesterRoles.contains("admin")) {
+            isAdmin = true;
+        }
+        return isAdmin;
+    }
+
     @Override
     public Object handleGetRequest(Event event, UserAdapterIface userAdapter) {
         RequestObject request = event.getRequest();
-        //handle(Event.logFinest(this.getClass().getSimpleName(), request.pathExt));
         String uid = request.pathExt;
         String requesterID = request.headers.getFirst("X-user-id");
-        String requesterRole = request.headers.getFirst("X-user-role");
-
+        boolean isAdmin = isAdmin(request);
         StandardResult result = new StandardResult();
         try {
-            if (uid.isEmpty() && "admin".equals(requesterRole)) {
+            if (uid.isEmpty() && isAdmin) {
                 Map m = userAdapter.getAll();
                 result.setData(m);
-            } else if (uid.equals(requesterID) || "admin".equals(requesterRole)) {
+            } else if (uid.equals(requesterID) || isAdmin) {
                 User u = (User) userAdapter.get(uid);
                 result.setData(u);
             } else {
@@ -69,31 +77,35 @@ public class UserModule extends UserBusinessLogic {
     @Override
     public Object handleRegisterRequest(Event event, UserAdapterIface userAdapter, boolean withConfirmation) {
         //TODO: check requester rights
-        //only admin can set: role or type differ than default (plus APPLICATION type)
+        //only admin can set: role or type differ than default
         RequestObject request = event.getRequest();
-        //handle(Event.logFinest(this.getClass().getSimpleName(), request.pathExt));
-        //System.out.println("X-cms-user="+request.headers.getFirst("X-user-id"));
         StandardResult result = new StandardResult();
         String uid = request.pathExt;
         if (uid != null && !uid.isEmpty()) {
             result.setCode(HttpAdapter.SC_BAD_REQUEST);
             return result;
         }
+        boolean isAdmin = isAdmin(request);
         try {
             User newUser = new User();
             newUser.setUid(event.getRequestParameter("uid"));
             newUser.setEmail(event.getRequestParameter("email"));
             newUser.setType(User.USER);
-            newUser.setRole("");
+            if (isAdmin) {
+                newUser.setRole(event.getRequestParameter("role"));
+            } else {
+                newUser.setRole("");
+            }
             newUser.setPassword(HashMaker.md5Java(event.getRequestParameter("password")));
             String type = event.getRequestParameter("type");
             if (null != type) {
                 switch (type.toUpperCase()) {
-                    case "APPLICATION":
-                        newUser.setType(User.APPLICATION);
-                        break;
                     case "OWNER":
-                        newUser.setType(User.OWNER);
+                        if (isAdmin) {
+                            newUser.setType(User.OWNER);
+                        } else {
+                            newUser.setType(User.USER);
+                        }
                         break;
                     default:
                         newUser.setType(User.USER);
@@ -102,10 +114,6 @@ public class UserModule extends UserBusinessLogic {
             } else {
                 newUser.setType(User.USER);
             }
-            newUser.setGeneralNotificationChannel(event.getRequestParameter("generalNotifications"));
-            newUser.setInfoNotificationChannel(event.getRequestParameter("infoNotifications"));
-            newUser.setWarningNotificationChannel(event.getRequestParameter("warningNotifications"));
-            newUser.setAlertNotificationChannel(event.getRequestParameter("alertNotifications"));
             // validate
             boolean valid = true;
             if (!(newUser.getUid() != null && !newUser.getUid().isEmpty())) {
@@ -151,12 +159,17 @@ public class UserModule extends UserBusinessLogic {
 
     @Override
     public Object handleDeleteRequest(Event event, UserAdapterIface userAdapter, boolean withConfirmation) {
-        //TODO: check requester rights
-        //only admin can do this and user status must be IS_UNREGISTERING
+        //TODO: only admin can do this and user status must be IS_UNREGISTERING
         RequestObject request = event.getRequest();
         String uid = request.pathExt;
         StandardResult result = new StandardResult();
-        if (uid == null) {
+        String requesterID = request.headers.getFirst("X-user-id");
+        boolean isAdmin = isAdmin(request);
+        if (!isAdmin) {
+            result.setCode(HttpAdapter.SC_FORBIDDEN);
+            return result;
+        }
+        if (uid == null || uid.equals(requesterID)) {
             result.setCode(HttpAdapter.SC_BAD_REQUEST);
             return result;
         }
@@ -173,20 +186,23 @@ public class UserModule extends UserBusinessLogic {
 
     @Override
     public Object handleUpdateRequest(Event event, UserAdapterIface userAdapter) {
-        //TODO: check requester rights
-        //only admin can set: role or type differ than default
         RequestObject request = event.getRequest();
+        String requesterID = request.headers.getFirst("X-user-id");
         String uid = request.pathExt;
         StandardResult result = new StandardResult();
         if (uid == null || uid.contains("/")) {
             result.setCode(HttpAdapter.SC_BAD_REQUEST);
             return result;
         }
+        boolean isAdmin = isAdmin(request);
         try {
             User user = userAdapter.get(uid);
             if (user == null) {
                 result.setCode(HttpAdapter.SC_NOT_FOUND);
                 result.setData("user not found");
+                return result;
+            } else if (!isAdmin && user.getUid() != requesterID) {
+                result.setCode(HttpAdapter.SC_FORBIDDEN);
                 return result;
             }
             String email = event.getRequestParameter("email");
@@ -194,34 +210,28 @@ public class UserModule extends UserBusinessLogic {
             String role = event.getRequestParameter("role");
             String password = event.getRequestParameter("password");
             String confirmed = event.getRequestParameter("confirmed");
-            String generalNotifications = event.getRequestParameter("generalNotifications");
-            String infoNotifications = event.getRequestParameter("infoNotifications");
-            String warningNotifications = event.getRequestParameter("warningNotifications");
-            String alertNotifications = event.getRequestParameter("alertNotifications");
             String unregisterRequested = event.getRequestParameter("unregisterRequested");
             if (email != null) {
                 user.setEmail(email);
             }
-            if (role != null) {
+            if (isAdmin && role != null) {
                 user.setRole(role);
+            }
+            if (isAdmin && type != null) {
+                try {
+                    int userType = Integer.parseInt(type);
+                    if (userType == User.USER || userType == User.OWNER) {
+                        user.setType(userType);
+                    }
+                } catch (NumberFormatException e) {
+                    //TODO
+                }
             }
             if (password != null) {
                 user.setPassword(HashMaker.md5Java(event.getRequestParameter("password")));
             }
             if (confirmed != null) {
                 user.setConfirmed("true".equalsIgnoreCase(confirmed));
-            }
-            if (generalNotifications != null) {
-                user.setGeneralNotificationChannel(generalNotifications);
-            }
-            if (infoNotifications != null) {
-                user.setInfoNotificationChannel(infoNotifications);
-            }
-            if (warningNotifications != null) {
-                user.setWarningNotificationChannel(warningNotifications);
-            }
-            if (alertNotifications != null) {
-                user.setAlertNotificationChannel(alertNotifications);
             }
             if (unregisterRequested != null) {
                 //is this new request?

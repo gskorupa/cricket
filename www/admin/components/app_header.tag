@@ -40,8 +40,8 @@
 
         this.labels = {
             "name": {
-                "en": "Cricket Microsite: Management",
-                "pl": "Cricket Microsite : Administracja"
+                "en": "Cricket \u00B5Site",
+                "pl": "Cricket \u00B5Site"
             },
             "users": {
                 "en": "Users",

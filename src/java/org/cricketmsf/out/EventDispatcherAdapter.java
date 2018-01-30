@@ -16,48 +16,33 @@
 package org.cricketmsf.out;
 
 import java.util.HashMap;
-import java.util.Map;
 import org.cricketmsf.Event;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class EventDispatcherAdapter implements OutboundAdapterIface, DispatcherIface{
+public class EventDispatcherAdapter extends OutboundAdapter implements OutboundAdapterIface, DispatcherIface{
     
-    protected HashMap<String,String> statusMap=null;
-    protected HashMap<String, String> properties;
+    //protected HashMap<String,String> statusMap=null;
+    //protected HashMap<String, String> properties;
     
     public EventDispatcherAdapter(){
     }
     
+    @Override
     public void dispatch(Event event) throws DispatcherException{
-        throw new DispatcherException(1);
+        throw new DispatcherException(DispatcherException.NOT_IMPLEMENTED);
     } 
     
+    @Override
     public void destroy(){   
     }
     
+    @Override
     public void loadProperties(HashMap<String,String> properties, String adapterName){
-        this.properties = (HashMap<String,String>)properties.clone();        
-        getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
+        super.loadProperties(properties, adapterName);
+        //this.properties = (HashMap<String,String>)properties.clone();        
+        //getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
     }
-    
-    public Map<String,String> getStatus(String name){
-        if(statusMap==null){
-            statusMap = new HashMap();
-            statusMap.put("name", name);
-            statusMap.put("class", getClass().getName());
-        }
-        return statusMap;
-    }
-    
-    public void updateStatusItem(String key, String value){
-        statusMap.put(key, value);
-    }
-    
-    public String getProperty(String name){
-        return properties.get(name);
-    }
-
 }

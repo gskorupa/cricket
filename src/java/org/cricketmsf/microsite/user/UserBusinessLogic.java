@@ -108,10 +108,6 @@ public class UserBusinessLogic {
             } else {
                 newUser.setType(User.USER);
             }
-            newUser.setGeneralNotificationChannel(event.getRequestParameter("generalNotifications"));
-            newUser.setInfoNotificationChannel(event.getRequestParameter("infoNotifications"));
-            newUser.setWarningNotificationChannel(event.getRequestParameter("warningNotifications"));
-            newUser.setAlertNotificationChannel(event.getRequestParameter("alertNotifications"));
             // validate
             boolean valid = true;
             if (!(newUser.getUid() != null && !newUser.getUid().isEmpty())) {
@@ -197,10 +193,6 @@ public class UserBusinessLogic {
             String role = event.getRequestParameter("role");
             String password = event.getRequestParameter("password");
             String confirmed = event.getRequestParameter("confirmed");
-            String generalNotifications = event.getRequestParameter("generalNotifications");
-            String infoNotifications = event.getRequestParameter("infoNotifications");
-            String warningNotifications = event.getRequestParameter("warningNotifications");
-            String alertNotifications = event.getRequestParameter("alertNotifications");
             String unregisterRequested = event.getRequestParameter("unregisterRequested");
             if (email != null) {
                 user.setEmail(email);
@@ -213,18 +205,6 @@ public class UserBusinessLogic {
             }
             if (confirmed != null) {
                 user.setConfirmed("true".equalsIgnoreCase(confirmed));
-            }
-            if (generalNotifications != null) {
-                user.setGeneralNotificationChannel(generalNotifications);
-            }
-            if (infoNotifications != null) {
-                user.setInfoNotificationChannel(infoNotifications);
-            }
-            if (warningNotifications != null) {
-                user.setWarningNotificationChannel(warningNotifications);
-            }
-            if (alertNotifications != null) {
-                user.setAlertNotificationChannel(alertNotifications);
             }
             if (unregisterRequested != null) {
                 //is this new request?

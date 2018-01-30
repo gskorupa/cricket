@@ -24,6 +24,7 @@ public class DispatcherException extends Exception {
     
     public static int UNKNOWN = 999;
     public static int NOT_IMPLEMENTED = 1;
+    public static int UNKNOWN_EVENT = 2;
 
     private int code = NOT_IMPLEMENTED;
     private String message;
@@ -33,6 +34,9 @@ public class DispatcherException extends Exception {
         switch (code){
             case 1:
                 message = "operation not implemented";
+                break;
+            case 2:
+                message = "event category/type not handled";
                 break;
             case 999:
                 message = "unknown error";

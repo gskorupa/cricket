@@ -70,30 +70,9 @@
                     <label for="file">{ labels.selectFile[app.language]}</label><br />
                     <input class="form-control-file" type="file" name="file" id="file">
                 </div>
-                <button type="button" onclick={ close } class="btn btn-default pull-right">{ labels.cancel[app.language] }</button>
-                <span>&nbsp;</span>
-                <button type="submit" class="btn btn-default" disabled={ !allowEdit }>{ labels.save[app.language] }</button>
+                <button type="button" onclick={ close } class="btn btn-secondary">{ labels.cancel[app.language] }</button>
+                <button type="submit" class="btn btn-primary" disabled={ !allowEdit }>{ labels.save[app.language] }</button>
             </form>
-<!--
-            <form class="container" id="form1" enctype="multipart/form-data" method="post" action="Upload.aspx" onsubmit={ self.uploadFile }>
-                <div class="row setup-content" id="step-1">
-                    <div class="col-xs-12">
-                        <div class="col-md-12 well text-center">
-                            <label for="fileToUpload">Select a File to Upload</label><br />
-                            <input type="file" name="fileToUpload" id="fileToUpload" onchange={self.fileSelected}/>
-                        </div>
-                        <div id="fileName"></div>
-                        <div id="fileSize"></div>
-                        <div id="fileType"></div>
-                        <div class="row">
-                            <input type="submit" value="Upload" />
-                        </div>
-                        <div id="progressNumber"></div>
-
-                    </div>
-                </div>
-            </form>
--->
         </div>
 </div>
 <script>
@@ -159,7 +138,15 @@
             self.selectedStatus = 'wip'
             self.doc.status = 'wip'
         }
-
+        $(function() {
+            $("textarea").htmlarea({
+                loaded: function() {
+                this.updateTextArea();
+                this.updateHtmlArea();
+                this.showHTMLView();
+                }
+            })
+        })
     }
     
 /*
@@ -212,7 +199,10 @@
         fd.set('name', name)
         fd.set('uid',pth+name)
         //var c=fd.get('content').replace(/\r\n|\r|\n/g,"&#10;")
-        var c=escape(fd.get('content'))
+        //var c=escape(fd.get('content'))
+        var summ=encodeURIComponent(fd.get('summary'))
+        fd.set('summary',summ)
+        var c=encodeURIComponent(fd.get('content'))
         fd.set('content',c)
         console.log(c)
         sendFormData(fd, self.method, app.cmAPI + docPath, app.user.token, self.close, globalEvents, 'submit:OK', 'submit:ERROR', app.debug, null)
@@ -228,6 +218,8 @@
             alert(text)
         } else if (text.startsWith('[object MouseEvent')) {
             self.callbackListener.trigger('cancelled')
+        } else if (text.startsWith('error:409')){
+                alert('This UID is already defined!')
         }
     }
 
@@ -237,7 +229,17 @@
         //console.log(self.doc.content)
         //self.doc.content = atou(self.doc.content)
         //console.log(self.doc.content)
-        self.doc.content=unescape(self.doc.content)
+        //self.doc.content=unescape(self.doc.content)
+        try{
+            self.doc.summary=decodeURIComponent(self.doc.summary)
+        }catch(e){
+            self.doc.summary=unescape(self.doc.summary)
+        }
+        try{
+            self.doc.content=decodeURIComponent(self.doc.content)
+        }catch(e){
+            self.doc.content=unescape(self.doc.content)
+        }
         riot.update();
     }
 

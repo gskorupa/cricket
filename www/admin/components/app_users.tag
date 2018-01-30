@@ -7,10 +7,11 @@
     <div class="row" if={ !selected }>
         <div class="col-md-12">
             <h2>{labels.title[app.language]} 
-                <i class="fa fa-refresh" aria-hidden="true" onclick={ refreshUsers() }>&nbsp;</i>
-                <i class="fa fa-plus" aria-hidden="true" onclick={ editUser('NEW', true) }>&nbsp;</i>
+                <i class="material-icons clickable" onclick={ refreshUsers() }>refresh</i>
+                <i class="material-icons clickable" onclick={ editUser('NEW', true) }>add</i>
             </h2>
-            <table id="doclist" class="table table-condensed">
+            <div class="table-responsive-sm">
+            <table id="doclist" class="table table-sm">
                 <thead>
                     <tr>
                         <th>{labels.t_uid[app.language]}</th>
@@ -18,7 +19,7 @@
                         <th>{labels.t_role[app.language]}</th>
                         <th>{labels.t_status[app.language]}</th>
                         <th class="text-right">
-                            <i class="fa fa-plus" aria-hidden="true" onclick={ editUser('NEW', true) }></i>
+                            <i class="material-icons clickable" onclick={ editUser('NEW', true) }>add</i>
                         </th>
                     </tr>
                 </thead>
@@ -29,13 +30,14 @@
                         <td>{ user.role }</td>
                         <td>{ user.authStatus }</td>
                         <td class="text-right">
-                            <i class="fa fa-eye" aria-hidden="true" onclick={ editUser(user.uid, false) }>&nbsp;</i>
-                            <i class="fa fa-pencil" aria-hidden="true" onclick={ editUser(user.uid, true) }>&nbsp;</i>
-                            <i class="fa fa-trash" aria-hidden="true" onclick={ select(user.uid) } data-toggle="modal" data-target="#removeDialog">&nbsp;</i>
+                            <i class="material-icons clickable" onclick={ editUser(user.uid, false) }>open_in_browser</i>
+                            <i class="material-icons clickable" onclick={ editUser(user.uid, true) }>mode_edit</i>
+                            <i class="material-icons clickable" onclick={ select(user.uid) } data-toggle="modal" data-target="#removeDialog">delete</i>
                         </td>
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
     <div class="row" >
@@ -80,6 +82,7 @@
         case 'submitted':
                 self.selected = ''
                 //readMyDevices()  //this line results in logout,login error
+                readUserList()
                 break
                 case 'cancelled':
                 self.selected = ''

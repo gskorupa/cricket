@@ -21,8 +21,6 @@ import org.cricketmsf.in.http.StandardResult;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,10 +28,8 @@ import java.util.Random;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.scheduler.SchedulerIface;
-import org.cricketmsf.microsite.out.auth.AuthAdapterIface;
 import org.cricketmsf.microsite.out.auth.Token;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
-import org.cricketmsf.microsite.out.user.UserException;
 import org.cricketmsf.microsite.user.HashMaker;
 import org.cricketmsf.microsite.user.User;
 import org.cricketmsf.out.db.KeyValueDBException;
@@ -48,9 +44,17 @@ public class SiteAdministrationModule {
     private static SiteAdministrationModule module;
     private String backupFolder = null;
     private boolean backupDaily = false;
+    private final int maxCacheSize = 1000;
+    private final int maxUsers = 100;
     
-    private int maxCacheSize = 1000;
-    private int maxUsers = 100;
+    private final String ADMIN = "admin";
+    
+    private boolean hasAccessRights(String userID, List<String> roles) {
+        if (userID == null || userID.isEmpty()) {
+            return false;
+        }
+        return roles.contains(ADMIN);
+    }
 
     /**
      * Returns the class instance
@@ -77,7 +81,15 @@ public class SiteAdministrationModule {
         StandardResult result = new StandardResult();
         if ("OPTIONS".equalsIgnoreCase(method)) {
             result.setCode(HttpAdapter.SC_OK);
-        } else if ("GET".equalsIgnoreCase(method)) {
+            return result;
+        }
+        String userID = request.headers.getFirst("X-user-id");
+        List<String> roles = request.headers.get("X-user-role");
+        if (!hasAccessRights(userID, roles)) {
+            result.setCode(HttpAdapter.SC_FORBIDDEN);
+            return result;
+        }
+        if ("GET".equalsIgnoreCase(method)) {
             switch (moduleName.toLowerCase()) {
                 case "status":
                     result = getServiceInfo();

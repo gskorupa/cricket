@@ -43,13 +43,13 @@ import java.util.Map;
  */
 public class ParameterFilter extends Filter {
 
-    private String fileEncoding;
+    private String parameterEncoding;
     private long fileSizeLimit;
 
     public ParameterFilter() {
         super();
-        fileEncoding = System.getProperty("file.encoding");
-        setFileSizeLimit(System.getProperty("file.upload.maxsize"));
+        parameterEncoding = "UTF-8";
+        setFileSizeLimit((String)Kernel.getInstance().properties.getOrDefault("file.upload.maxsize",""));
     }
 
     @Override
@@ -386,11 +386,11 @@ public class ParameterFilter extends Filter {
             String value = null;
             if (param.length > 0) {
                 key = URLDecoder.decode(param[0],
-                        fileEncoding);
+                        parameterEncoding);
             }
             if (param.length > 1) {
                 value = URLDecoder.decode(param[1],
-                        fileEncoding);
+                        parameterEncoding);
             }
             //System.out.println("parseQuery:[" + key + "][" + value + "]");
             list.add(new RequestParameter(key, value));
@@ -414,11 +414,11 @@ public class ParameterFilter extends Filter {
             String value = null;
             if (param.length > 0) {
                 key = URLDecoder.decode(param[0],
-                        fileEncoding); //TODO: static
+                        parameterEncoding); //TODO: static
             }
             if (param.length > 1) {
                 value = URLDecoder.decode(param[1],
-                        fileEncoding);
+                        parameterEncoding);
             }
             //System.out.println("parseQuery:[" + key + "][" + value + "]" + parameters.containsKey(key));
             list.add(new RequestParameter(key, value));

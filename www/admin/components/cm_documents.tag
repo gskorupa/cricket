@@ -10,28 +10,34 @@
                 <virtual each={ lang, i in app.languages}>
                     <button type="button" class="btn btn-sm { lang==selectedLanguage?'btn-primary':'btn-default' }" onclick={ selectLanguage(lang) }>{ lang }</button>
                 </virtual>
-                <i class="fa fa-refresh" aria-hidden="true" onclick={ refreshDocs() }>&nbsp;</i>
-                <i class="fa fa-plus" aria-hidden="true" onclick={ editDocument('NEW', true) }>&nbsp;</i>
+                <i class="material-icons clickable" onclick={ refreshDocs() }>refresh</i>
+                <i class="material-icons clickable" onclick={ editDocument('NEW', true) }>add</i>
             </h2>
+        </div>
+    </div>
+    <div class="row" if={ !selected }>
+        <div class="col-md-12">
             <form class="form-inline">
-                <div class="form-group">
-                    <label for="pathDropdown">{ labels.path_status[app.language] } </label>
-                    <select id="pathsDropdown" onchange={ selectPath } class="form-control">
-                        <option each={ tmpPath, index in paths }>{ tmpPath }</option>
-                    </select>
-                    <select id="statusesDropdown" onchange={ selectStatus } class="form-control">
-                        <option each={ tmpStatus, index in statuses }>{ tmpStatus }</option>
-                    </select>
-                </div>
+                <label class="mr-2" for="pathsDropdown">{ labels.path_status[app.language] }</label>
+                <select class="select mr-2" id="pathsDropdown" onchange={ selectPath }>
+                    <option each={ tmpPath, index in paths }>{ tmpPath }</option>
+                </select>
+                <select class="select" id="statusesDropdown" onchange={ selectStatus }>
+                    <option each={ tmpStatus, index in statuses }>{ tmpStatus }</option>
+                </select>
             </form>
+        </div>
+    </div>
+    <div class="row" if={ !selected }>
+        <div class="col-md-12">
             <table id="doclist" class="table table-condensed">
                 <thead>
                     <tr>
                         <th>{labels.t_name[app.language]}</th>
                         <th>{labels.t_title[app.language]}</th>
-                        <th>{labels.t_status[app.language]}</th>
+                        <!--<th>{labels.t_status[app.language]}</th>-->
                         <th class="text-right">
-                            <i class="fa fa-plus" aria-hidden="true" onclick={ editDocument('NEW', true) }></i>
+                            <i class="material-icons clickable" onclick={ editDocument('NEW', true) }>add</i>
                         </th>
                     </tr>
                 </thead>
@@ -39,13 +45,13 @@
                     <tr each={doc in documents}>
                         <td>{ doc.name }</td>
                         <td>{ doc.title }</td>
-                        <td>{ doc.status }</td>
-                        <td class="text-right">                              
-                            <i class="fa fa-eye separated" aria-hidden="true" onclick={ editDocument(doc.uid, false) }>&nbsp;</i>
-                            <i class="fa fa-pencil-square-o separated" aria-hidden="true" onclick={ editDocument(doc.uid, true) }>&nbsp;</i>
-                            <i class="fa fa-play separated" aria-hidden="true" if={ doc.status=='wip'} onclick={ setPublished(doc.uid, true) }>&nbsp;</i>
-                            <i class="fa fa-stop separated" aria-hidden="true" if={ doc.status=='published'} onclick={ setPublished(doc.uid, false) }>&nbsp;</i>
-                            <i class="fa fa-trash-o separated" onclick={ select(doc.uid) } aria-hidden="true" data-toggle="modal" data-target="#removeDialog">&nbsp;</i>
+                        <!--<td>{ doc.status }</td>-->
+                        <td class="text-right">
+                            <i class="material-icons clickable" onclick={ editDocument(doc.uid, false) }>open_in_browser</i>
+                            <i class="material-icons clickable" onclick={ editDocument(doc.uid, true) }>mode_edit</i>
+                            <i class="material-icons clickable" if={ doc.status=='wip'} onclick={ setPublished(doc.uid, true) }>visibility</i>
+                            <i class="material-icons clickable" if={ doc.status=='published'} onclick={ setPublished(doc.uid, false) }>visibility_off</i>
+                            <i class="material-icons clickable" onclick={ select(doc.uid) } data-toggle="modal" data-target="#removeDialog">delete</i>
                         </td>
                     </tr>
                 </tbody>

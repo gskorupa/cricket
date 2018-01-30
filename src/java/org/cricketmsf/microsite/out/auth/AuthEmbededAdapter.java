@@ -159,7 +159,7 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
                     User user = getUserAdapter().get(t.getUid());
                     return user;
                 } else {
-                    throw new AuthException(AuthException.EXPIRED);
+                    throw new AuthException(AuthException.EXPIRED,"token expired");
                 }
             } else {
                 return null;

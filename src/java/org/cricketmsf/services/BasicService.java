@@ -50,8 +50,8 @@ public class BasicService extends Kernel {
     HtmlGenAdapterIface htmlAdapter = null;
     FileReaderAdapterIface fileReader = null;
     // optional
-    HttpAdapterIface scriptingService = null;
-    ScriptingAdapterIface scriptingEngine = null;
+    //HttpAdapterIface scriptingService = null;
+    //ScriptingAdapterIface scriptingEngine = null;
 
     @Override
     public void getAdapters() {
@@ -90,12 +90,14 @@ public class BasicService extends Kernel {
         handleEvent(Event.logInfo("BasicService.runOnce()", "executed"));
     }
 
+    /*
     @HttpAdapterHook(adapterName = "ScriptingService", requestMethod = "*")
     public Object doGetScript(Event requestEvent) {
         StandardResult r = scriptingEngine.processRequest(requestEvent.getRequest());
         return r;
     }
-
+    */
+    
     /**
      * Process requests from simple web server implementation given by
      * HtmlGenAdapter access web web resources

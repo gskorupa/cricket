@@ -36,7 +36,6 @@ public class ContentRequestProcessor {
     private static String REDACTOR = "redactor";
 
     private boolean hasAccessRights(String userID, List<String> roles) {
-        boolean hasRights = false;
         if (userID == null || userID.isEmpty()) {
             return false;
         }
@@ -71,7 +70,6 @@ public class ContentRequestProcessor {
         String language = (String) request.parameters.getOrDefault("language", "");
 
         String pathExt = request.pathExt;
-        //System.out.println("PATHEXT:" + pathExt);
         Document doc;
         if (pathExt != null && !pathExt.isEmpty()) {
             try {
@@ -90,8 +88,6 @@ public class ContentRequestProcessor {
         } else {
             //find
             String path = (String) request.parameters.getOrDefault("path", "");
-            //System.out.println("SEARCHING DOC WITH PATH=[" + path + "]");
-            //String tags = (String) request.parameters.getOrDefault("tags", "");
             try {
                 result.setData(adapter.findByPath(path, language, "published"));
             } catch (CmsException ex) {
@@ -139,8 +135,6 @@ public class ContentRequestProcessor {
             //find
             String path = (String) request.parameters.getOrDefault("path", "");
             String pathsOnly = (String) request.parameters.getOrDefault("pathsonly", "false");
-            //System.out.println("SEARCHING DOC WITH PATH=[" + path + "]");
-            //String tags = (String) request.parameters.getOrDefault("tags", "");
             try {
                 if ("true".equalsIgnoreCase(pathsOnly)) {
                     result.setData(adapter.getPaths());
@@ -169,9 +163,7 @@ public class ContentRequestProcessor {
             result.setCode(HttpAdapter.SC_FORBIDDEN);
             return result;
         }
-//request.parameters.keySet().forEach(key -> {
-//    System.out.println("PARAM "+key+": "+request.parameters.get(key));
-//});
+
         String contentType = request.headers.getFirst("Content-Type");
         try{
         if ("application/json".equalsIgnoreCase(contentType)) {
@@ -248,16 +240,10 @@ public class ContentRequestProcessor {
             String contentType = request.headers.getFirst("Content-Type");
 
             Document doc = null;
-            /*try {
-            doc = adapter.getDocument(uid, null, "wip");           
-        } catch (CmsException ex) {
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), "document not found"));
-        }*/
 
             if ("application/json".equalsIgnoreCase(contentType)) {
                 //create new document and adapter.modify(document)
                 String jsonString = request.body;
-                //System.out.println(jsonString);
                 jsonString
                         = "{\"@type\":\"org.cricketmsf.microsite.cms.Document\","
                         + jsonString.substring(jsonString.indexOf("{") + 1);
@@ -279,8 +265,6 @@ public class ContentRequestProcessor {
                     result.setCode(HttpAdapter.SC_BAD_REQUEST);
                 }
             } else {
-                //System.out.println("PARAMETERS");
-                //System.out.println("STATUS: " + request.parameters.get("status"));
                 try {
                     adapter.updateDocument(uid, (String) request.parameters.get("language"), request.parameters);
                     result.setData(adapter.getDocument(uid, (String) request.parameters.get("language")));

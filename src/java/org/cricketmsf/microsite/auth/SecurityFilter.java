@@ -205,7 +205,7 @@ public class SecurityFilter extends Filter {
                     result.user = getUser(inParamsToken, true);
                     result.issuer = getIssuer(inParamsToken);
                 } catch (AuthException e) {
-                    e.printStackTrace();
+                    e.printStackTrace(); // eg. expired token
                 }
             }
             result.code = 200;

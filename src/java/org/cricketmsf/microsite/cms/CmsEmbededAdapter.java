@@ -104,7 +104,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         } catch (KeyValueDBException e) {
             Kernel.handle(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
         }
-        */
+         */
         try { // document paths
             database.addTable("paths", 100, true);
         } catch (KeyValueDBException e) {
@@ -607,9 +607,9 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             } else if (doc != null && Document.CODE.equals(doc.getType())) {
                 try {
                     //content = Base64.getDecoder().decode(doc.getContent());
-                    content = URLDecoder.decode(doc.getContent(),"UTF-8").getBytes();
+                    content = URLDecoder.decode(doc.getContent(), "UTF-8").getBytes();
                 } catch (UnsupportedEncodingException ex) {
-                    content="".getBytes();
+                    content = "".getBytes();
                 }
             } else {
                 // do nothing
@@ -780,7 +780,11 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
      * @param fileRoot the fileRoot to set
      */
     public void setFileRoot(String fileRoot) {
-        this.fileRoot = fileRoot;
+        if (fileRoot.startsWith(".")) {
+            this.fileRoot = System.getProperty("user.dir") + fileRoot.substring(1);
+        } else {
+            this.fileRoot = fileRoot;
+        }
     }
 
     /**
@@ -794,7 +798,11 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
      * @param publishedFilesRoot the publishedFilesRoot to set
      */
     public void setPublishedFilesRoot(String publishedFilesRoot) {
-        this.publishedFilesRoot = publishedFilesRoot;
+        if(publishedFilesRoot.startsWith(".")){
+            this.publishedFilesRoot = System.getProperty("user.dir")+publishedFilesRoot.substring(1);
+        }else{
+            this.publishedFilesRoot = publishedFilesRoot;
+        }
     }
 
     private String moveFile(String sourcePath, String targetRoot, String uid) {
@@ -803,7 +811,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         }
         try {
             //String targetLocation = System.getProperty("user.dir") + targetRoot.substring(1) + uid.substring(1) + getFileExt(sourcePath);
-            String targetLocation = System.getProperty("user.dir") + targetRoot.substring(1) + Kernel.getEventId() + getFileExt(sourcePath);
+            //String targetLocation = System.getProperty("user.dir") + targetRoot.substring(1) + Kernel.getEventId() + getFileExt(sourcePath);
+            String targetLocation = targetRoot + Kernel.getEventId() + getFileExt(sourcePath);
             Files.move(Paths.get(sourcePath), Paths.get(targetLocation), REPLACE_EXISTING);
             return targetLocation;
         } catch (IOException e) {

@@ -11,34 +11,6 @@ package org.cricketmsf.microsite.user;
  */
 public class User {
 
-    /**
-     * @return the generalNotificationChannel
-     */
-    public String getGeneralNotificationChannel() {
-        return generalNotificationChannel;
-    }
-
-    /**
-     * @return the infoNotificationChannel
-     */
-    public String getInfoNotificationChannel() {
-        return infoNotificationChannel;
-    }
-
-    /**
-     * @return the warningNotificationChannel
-     */
-    public String getWarningNotificationChannel() {
-        return warningNotificationChannel;
-    }
-
-    /**
-     * @return the alertNotificationChannel
-     */
-    public String getAlertNotificationChannel() {
-        return alertNotificationChannel;
-    }
-
     public static final int USER = 0; // default type, normal user
     public static final int OWNER = 1; // 
     public static final int APPLICATION = 2; // application
@@ -60,10 +32,6 @@ public class User {
     private boolean unregisterRequested;
     private String confirmString;
     private String password;
-    private String generalNotificationChannel = "";
-    private String infoNotificationChannel = "";
-    private String warningNotificationChannel = "";
-    private String alertNotificationChannel = "";
     private int authStatus;
     private long createdAt;
 
@@ -196,52 +164,6 @@ public class User {
 
     public boolean checkPassword(String passToCheck) {
         return getPassword() != null && getPassword().equals(HashMaker.md5Java(passToCheck));
-    }
-
-    public String[] getChannelConfig(String eventTypeName) {
-        String channel = "";
-        switch (eventTypeName) {
-            case "GENERAL":
-                channel = getGeneralNotificationChannel();
-            case "INFO":
-                channel = getInfoNotificationChannel();
-            case "WARNING":
-                channel = getWarningNotificationChannel();
-            case "ALERT":
-                channel = getAlertNotificationChannel();
-        }
-        if(channel==null){
-            channel="";
-        }
-        return channel.split(":");
-    }
-
-    /**
-     * @param generalNotificationChannel the generalNotificationChannel to set
-     */
-    public void setGeneralNotificationChannel(String generalNotificationChannel) {
-        this.generalNotificationChannel = generalNotificationChannel;
-    }
-
-    /**
-     * @param infoNotificationChannel the infoNotificationChannel to set
-     */
-    public void setInfoNotificationChannel(String infoNotificationChannel) {
-        this.infoNotificationChannel = infoNotificationChannel;
-    }
-
-    /**
-     * @param warningNotificationChannel the warningNotificationChannel to set
-     */
-    public void setWarningNotificationChannel(String warningNotificationChannel) {
-        this.warningNotificationChannel = warningNotificationChannel;
-    }
-
-    /**
-     * @param alertNotificationChannel the alertNotificationChannel to set
-     */
-    public void setAlertNotificationChannel(String alertNotificationChannel) {
-        this.alertNotificationChannel = alertNotificationChannel;
     }
 
     /**
