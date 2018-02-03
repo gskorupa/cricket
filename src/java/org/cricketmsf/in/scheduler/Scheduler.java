@@ -164,7 +164,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
                 }
                 
                 if(!killList.containsKey(""+ev.getId())){
-                    Kernel.getInstance().handleEvent(ev);
+                    Kernel.getInstance().dispatchEvent(ev);
                 }
                 
                 threadsCounter--;

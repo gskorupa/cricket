@@ -117,7 +117,7 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
                     requestData = translateToHtml(request.data);
                     break;
                 default:
-                    Kernel.handle(
+                    Kernel.getInstance().dispatchEvent(
                             Event.logSevere(this.getClass().getSimpleName(),
                                     "unsupported content type: " + request.properties.get("Content-Type"))
                     );
@@ -134,7 +134,7 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
         result.setCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
         try {
 
-            Kernel.handle(Event.logFine(this.getClass().getSimpleName(), "sending to " + url));
+            Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "sending to " + url));
 
             long startPoint = System.currentTimeMillis();
             URL urlObj = new URL(url);
@@ -183,7 +183,7 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
             }
         } catch (IOException e) {
             String message = e.getMessage();
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), message));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), message));
             result.setCode(500);
             result.setMessage(message);
         }

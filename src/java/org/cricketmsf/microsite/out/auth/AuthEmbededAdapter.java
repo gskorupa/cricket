@@ -84,7 +84,7 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
                 return null;
             }
         } catch (UserException e) {
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), e.getMessage()));
             throw new AuthException(AuthException.ACCESS_DENIED, e.getMessage());
         }
     }

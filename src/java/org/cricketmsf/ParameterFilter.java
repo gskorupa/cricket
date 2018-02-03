@@ -48,8 +48,8 @@ public class ParameterFilter extends Filter {
 
     public ParameterFilter() {
         super();
-        parameterEncoding = "UTF-8";
-        setFileSizeLimit((String)Kernel.getInstance().properties.getOrDefault("file.upload.maxsize",""));
+        setParameterEncoding((String)Kernel.getInstance().properties.getOrDefault("request-encoding","UTF-8"));
+        setFileSizeLimit((String)Kernel.getInstance().properties.getOrDefault("file.upload.maxsize","1000000"));
     }
 
     @Override
@@ -262,7 +262,6 @@ public class ParameterFilter extends Filter {
             if (b != -1) {
                 buffer[pos] = (byte) b;
                 pos++;
-
                 if (pos > endLineLength1) {
                     //check
                     try {
@@ -331,7 +330,7 @@ public class ParameterFilter extends Filter {
                 //System.out.println("EOF at "+pos);
                 break;
             }
-        } while (!startLineFound);
+        } while (!startLineFound && !fileTooLarge);
         if (output != null) {
             output.close();
         }
@@ -341,6 +340,7 @@ public class ParameterFilter extends Filter {
             try {
                 Files.delete(filePath);
             } catch (Exception e) {
+                Kernel.getInstance().dispatchEvent(Event.logWarning(this, e.getMessage()));
             }
         } else {
             fileParameter.fileSize = totalSize;
@@ -385,12 +385,10 @@ public class ParameterFilter extends Filter {
             String key = null;
             String value = null;
             if (param.length > 0) {
-                key = URLDecoder.decode(param[0],
-                        parameterEncoding);
+                key = URLDecoder.decode(param[0], getParameterEncoding());
             }
             if (param.length > 1) {
-                value = URLDecoder.decode(param[1],
-                        parameterEncoding);
+                value = URLDecoder.decode(param[1], getParameterEncoding());
             }
             //System.out.println("parseQuery:[" + key + "][" + value + "]");
             list.add(new RequestParameter(key, value));
@@ -413,12 +411,10 @@ public class ParameterFilter extends Filter {
             String key = null;
             String value = null;
             if (param.length > 0) {
-                key = URLDecoder.decode(param[0],
-                        parameterEncoding); //TODO: static
+                key = URLDecoder.decode(param[0], getParameterEncoding()); //TODO: static
             }
             if (param.length > 1) {
-                value = URLDecoder.decode(param[1],
-                        parameterEncoding);
+                value = URLDecoder.decode(param[1], getParameterEncoding());
             }
             //System.out.println("parseQuery:[" + key + "][" + value + "]" + parameters.containsKey(key));
             list.add(new RequestParameter(key, value));
@@ -438,9 +434,30 @@ public class ParameterFilter extends Filter {
      */
     public void setFileSizeLimit(String sizeLimit) {
         try {
-            this.fileSizeLimit = Long.parseLong(sizeLimit);
+            this.setFileSizeLimit(Long.parseLong(sizeLimit));
         } catch (NumberFormatException | NullPointerException e) {
-            this.fileSizeLimit = 1000000; // 1MB (SI)
+            this.setFileSizeLimit(1000000); // 1MB (SI)
         }
+    }
+
+    /**
+     * @return the parameterEncoding
+     */
+    public String getParameterEncoding() {
+        return parameterEncoding;
+    }
+
+    /**
+     * @param parameterEncoding the parameterEncoding to set
+     */
+    public void setParameterEncoding(String parameterEncoding) {
+        this.parameterEncoding = parameterEncoding;
+    }
+
+    /**
+     * @param fileSizeLimit the fileSizeLimit to set
+     */
+    public void setFileSizeLimit(long fileSizeLimit) {
+        this.fileSizeLimit = fileSizeLimit;
     }
 }

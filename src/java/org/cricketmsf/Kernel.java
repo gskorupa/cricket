@@ -663,7 +663,7 @@ public abstract class Kernel {
                 adapters.add(
                         ((Adapter) adaptersMap.get(key)).getStatus(key));
             } catch (Exception e) {
-                handle(Event.logFine(this, key + " adapter is not registered"));
+                getInstance().dispatchEvent(Event.logFine(this, key + " adapter is not registered"));
             }
         });
         status.put("adapters", adapters);

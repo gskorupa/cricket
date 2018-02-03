@@ -64,7 +64,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         try {
             start();
         } catch (KeyValueDBException ex) {
-            Kernel.handle(Event.logSevere(this, ex.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, ex.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -78,7 +78,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     @Override
     public void createDatabase(Connection conn, String version) {
         if (conn == null || getTestQuery() == null || getTestQuery().isEmpty()) {
-            Kernel.handle(Event.logSevere(this, "problem connecting to the database"));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "problem connecting to the database"));
             return;
         }
         String createQuery
@@ -88,7 +88,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
             conn.createStatement().execute(createQuery);
             conn.close();
         } catch (SQLException e) {
-            Kernel.handle(Event.logSevere(this, e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, e.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -110,7 +110,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
             }
             conn.close();
         } catch (SQLException ex) {
-            Kernel.handle(Event.logSevere(this, ex.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, ex.getMessage()));
         }
         return version;
     }
@@ -368,7 +368,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
             conn.createStatement().execute(query);
             conn.close();
         } catch (SQLException e) {
-            Kernel.handle(Event.logSevere(this, e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, e.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
         }

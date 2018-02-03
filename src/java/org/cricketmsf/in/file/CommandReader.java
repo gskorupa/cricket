@@ -71,7 +71,7 @@ public class CommandReader extends InboundAdapter implements Adapter, WatchdogIf
                 //Thread.yield();
             }
         } catch (InterruptedException e) {
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), "interrupted"));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "interrupted"));
         }
     }
 

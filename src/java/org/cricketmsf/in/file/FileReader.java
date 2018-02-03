@@ -60,7 +60,7 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
         if (file != null) {
             byte[] content = readFile();
             Kernel.getInstance().
-                    handleEvent(
+                    dispatchEvent(
                             Event.logFine(this.getClass().getSimpleName(), "reading " + fileName)
                     );
             if (content.length > 0) {
@@ -78,7 +78,7 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
                 //Thread.yield();
             }
         } catch (InterruptedException e) {
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), "interrupted"));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "interrupted"));
         }
     }
 

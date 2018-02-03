@@ -19,7 +19,7 @@ import java.util.List;
 import org.cricketmsf.microsite.user.*;
 import java.util.Map;
 import org.cricketmsf.Event;
-import static org.cricketmsf.Kernel.handle;
+import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.StandardResult;
@@ -134,12 +134,12 @@ public class UserModule extends UserBusinessLogic {
             if (withConfirmation) {
                 result.setCode(HttpAdapter.SC_ACCEPTED);
                 //fire event to send "need confirmation" email
-                handle(new UserEvent(UserEvent.USER_REGISTERED, newUser.getUid()));
+                Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_REGISTERED, newUser.getUid()));
             } else {
                 userAdapter.confirmRegistration(newUser.getUid());
                 result.setCode(HttpAdapter.SC_CREATED);
                 //fire event to send "welcome" email
-                handle(new UserEvent(UserEvent.USER_REG_CONFIRMED, newUser.getUid()));
+                Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_REG_CONFIRMED, newUser.getUid()));
             }
             result.setData(newUser.getUid());
         } catch (UserException e) {
@@ -175,7 +175,7 @@ public class UserModule extends UserBusinessLogic {
         }
         try {
             userAdapter.remove(uid);
-            handle(new UserEvent(UserEvent.USER_DELETED, uid));
+            Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_DELETED, uid));
             result.setCode(HttpAdapter.SC_OK);
             result.setData(uid);
         } catch (UserException e) {
@@ -237,14 +237,14 @@ public class UserModule extends UserBusinessLogic {
                 //is this new request?
                 if (!user.isUnregisterRequested() && "true".equalsIgnoreCase(unregisterRequested)) {
                     //fire event
-                    handle(new UserEvent(UserEvent.USER_DEL_SHEDULED, user.getUid()));
+                    Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_DEL_SHEDULED, user.getUid()));
                     user.setStatus(User.IS_UNREGISTERING);
                 }
                 user.setUnregisterRequested("true".equalsIgnoreCase(unregisterRequested));
             }
             userAdapter.modify(user);
             //fire event
-            handle(new UserEvent(UserEvent.USER_UPDATED, user.getUid()));
+            Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_UPDATED, user.getUid()));
             result.setCode(HttpAdapter.SC_OK);
             result.setData(user);
         } catch (NullPointerException | UserException e) {

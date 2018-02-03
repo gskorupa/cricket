@@ -75,7 +75,7 @@ public class EchoService extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
-        handleEvent(Event.logInfo("EchoService.runOnce()", "executed"));
+        dispatchEvent(Event.logInfo("EchoService.runOnce()", "executed"));
         Event e = new Event("EchoService.runOnce()", "beep", "", "+5s", "I'm event from runOnce() processed by scheduler. Hello!");
         processEvent(e);
     }
@@ -85,12 +85,12 @@ public class EchoService extends Kernel {
         try {
             database.addTable("wwwcache", 100, false);
         } catch (KeyValueDBException e) {
-            handle(Event.logFinest("EchoService.runInitTasks", "table wwwcache exists"));
+            Kernel.getInstance().dispatchEvent(Event.logFinest("EchoService.runInitTasks", "table wwwcache exists"));
         }
         try {
             database.addTable("counters", 10, true);
         } catch (KeyValueDBException e) {
-            handle(Event.logFinest("EchoService.runInitTasks", "table counters exists"));
+            Kernel.getInstance().dispatchEvent(Event.logFinest("EchoService.runInitTasks", "table counters exists"));
         }
     }
 
@@ -103,7 +103,7 @@ public class EchoService extends Kernel {
         if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
         } else {
-            handleEvent(Event.logInfo("EchoService", event.getPayload().toString()));
+            dispatchEvent(Event.logInfo("EchoService", event.getPayload().toString()));
         }
     }
 
@@ -152,7 +152,7 @@ public class EchoService extends Kernel {
 
     @InboundAdapterHook(adapterName = "EnvironmentAdapter", inputMethod = "*")
     public Object processMonitoringEvent(Event event) {
-        handleEvent(Event.logInfo(this.getClass().getSimpleName(), (String) event.getPayload()));
+        dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), (String) event.getPayload()));
         return null;
     }
 

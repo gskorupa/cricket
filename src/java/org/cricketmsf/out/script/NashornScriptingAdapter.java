@@ -118,7 +118,7 @@ public class NashornScriptingAdapter extends OutboundAdapter implements Adapter,
     @Override
     public StandardResult processRequest(RequestObject request) {
         StandardResult result = new StandardResult();
-        Kernel.getInstance().handleEvent(Event.logFinest("NashornScriptAdapter", "evaluating"));
+        Kernel.getInstance().dispatchEvent(Event.logFinest("NashornScriptAdapter", "evaluating"));
         String scriptResult = "";
         try {
             if (script != null && invocable != null) {

@@ -72,7 +72,7 @@ public class Watchdog extends InboundAdapter implements Adapter, WatchdogIface {
                 Thread.yield();
             }
         } catch (InterruptedException e) {
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), "interrupted"));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "interrupted"));
         }
     }
 

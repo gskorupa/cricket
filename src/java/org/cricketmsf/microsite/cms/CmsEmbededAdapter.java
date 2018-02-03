@@ -26,7 +26,6 @@ import java.util.Map;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
-import static org.cricketmsf.Kernel.handle;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
@@ -83,14 +82,14 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             try {
                 database.addTable("published_" + supportedLanguages.get(i), 1000, true);
             } catch (KeyValueDBException e) {
-                Kernel.handle(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
+                Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
             }
         }
         for (int i = 0; i < supportedLanguages.size(); i++) {
             try {
                 database.addTable("wip_" + supportedLanguages.get(i), 1000, true);
             } catch (KeyValueDBException e) {
-                Kernel.handle(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
+                Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
             }
         }
         /*
@@ -108,7 +107,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         try { // document paths
             database.addTable("paths", 100, true);
         } catch (KeyValueDBException e) {
-            Kernel.handle(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
         }
         status = OK;
     }
@@ -209,7 +208,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             doc.setModified(Instant.now());
             getDatabase().put("paths", doc.getPath(), doc.getPath());
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
-            Kernel.getInstance().handleEvent(
+            Kernel.getInstance().dispatchEvent(
                     new Event(this.getClass().getSimpleName(), Event.CATEGORY_GENERIC, "CONTENT", null, doc.getUid())
             );
         } catch (KeyValueDBException e) {
@@ -266,7 +265,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             }
             getDatabase().put("paths", doc.getPath(), doc.getPath());
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
-            Kernel.getInstance().handleEvent(
+            Kernel.getInstance().dispatchEvent(
                     new Event(this.getClass().getSimpleName(), Event.CATEGORY_GENERIC, "CONTENT", null, doc.getUid())
             );
         } catch (KeyValueDBException ex) {
@@ -286,7 +285,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         doc.setCreated(original.getCreated());
         doc.setModified(Instant.now());
         if (original == null) {
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), "original document uid=" + doc.getUid() + " not found"));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "original document uid=" + doc.getUid() + " not found"));
             throw new CmsException(CmsException.NOT_FOUND, "original document not found");
         }
         try {
@@ -295,10 +294,10 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             }
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
         } catch (KeyValueDBException e) {
-            Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), "error while moving document uid=" + doc.getUid() + " database will be inconsistent"));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), "error while moving document uid=" + doc.getUid() + " database will be inconsistent"));
             throw new CmsException(CmsException.HELPER_EXCEPTION, e.getMessage());
         }
-        Kernel.getInstance().handleEvent(
+        Kernel.getInstance().dispatchEvent(
                 new Event(this.getClass().getSimpleName(), Event.CATEGORY_GENERIC, "CONTENT", null, doc.getUid())
         );
     }
@@ -308,7 +307,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         boolean statusChanged = false;
         Document doc = getDocument(uid, (String) parameters.get("language"));
         if (doc == null) {
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), "original document uid=" + uid + ", language=" + language + " not found"));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "original document uid=" + uid + ", language=" + language + " not found"));
             throw new CmsException(CmsException.NOT_FOUND, "original document not found");
         }
         try {
@@ -389,10 +388,10 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             doc.setModified(Instant.now());
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
         } catch (KeyValueDBException e) {
-            Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), "error while moving document uid=" + doc.getUid() + " database will be inconsistent"));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), "error while moving document uid=" + doc.getUid() + " database will be inconsistent"));
             throw new CmsException(CmsException.HELPER_EXCEPTION, e.getMessage());
         }
-        Kernel.getInstance().handleEvent(
+        Kernel.getInstance().dispatchEvent(
                 new Event(this.getClass().getSimpleName(), Event.CATEGORY_GENERIC, "CONTENT", null, doc.getUid())
         );
     }
@@ -419,7 +418,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         if (!removed) {
             throw new CmsException(CmsException.HELPER_EXCEPTION, "not found");
         } else {
-            Kernel.getInstance().handleEvent(
+            Kernel.getInstance().dispatchEvent(
                     new Event(this.getClass().getSimpleName(), Event.CATEGORY_GENERIC, "CONTENT", null, doc.getUid())
             );
             //TODO: remove path if thera are no more documents with this path 
@@ -587,7 +586,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                         result.setPayload("".getBytes());
                         result.setCode(HttpAdapter.SC_NOT_MODIFIED);
                     }
-                    handle(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
+                    Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
                     return result;
                 }
             } catch (ClassCastException e) {
@@ -638,7 +637,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                     try {
                         cache.put(tableName, filePath, fo);
                     } catch (KeyValueDBException e) {
-                        Kernel.handle(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
+                        Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
                     }
                 }
                 result.setMessage("");
@@ -648,7 +647,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 result.setCode(HttpAdapter.SC_OK);
                 result.setPayload(fo.content);
 
-                handle(Event.logFine(this.getClass().getSimpleName(), "read from CMS"));
+                Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "read from CMS"));
                 return result;
             }
         } catch (CmsException ex) {
@@ -678,7 +677,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                     cache.put(tableName, filePath, fo);
                 } catch (KeyValueDBException e) {
                     e.printStackTrace();
-                    Kernel.handle(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
+                    Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
                 }
             }
         }
@@ -694,7 +693,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             result.setCode(HttpAdapter.SC_OK);
             result.setPayload(fo.content);
         }
-        handle(Event.logFine(this.getClass().getSimpleName(), "read from disk"));
+        Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "read from disk"));
         return result;
     }
 

@@ -174,7 +174,7 @@ public class SecurityFilter extends Filter {
 
         String path = exchange.getRequestURI().getPath();
         //System.out.println("CHECK REQUEST FOR PATH:" + path);
-        Kernel.handle(Event.logInfo(getClass().getSimpleName(), "PATH="+path));
+        Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), "PATH="+path));
         boolean authorizationNotRequired = true;
         try {
             authorizationNotRequired = !isRestrictedPath(exchange.getRequestMethod(), path);
@@ -243,7 +243,7 @@ public class SecurityFilter extends Filter {
         if (user == null) {
             result.code = 403; // FORBIDDEN // in case of timeout 401 UNAUTHORIZED should be send
             result.message = "request blocked by security filter\r\n";
-            Kernel.handle(Event.logInfo(this.getClass().getSimpleName(), "not authorized " + path));
+            Kernel.getInstance().dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), "not authorized " + path));
             return result;
         } else {
             result.user = user;

@@ -35,7 +35,7 @@ public class HashMaker {
             }
             digest = sb.toString();
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
-            Kernel.handle(Event.logSevere(HashMaker.class.getSimpleName(), ex.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(HashMaker.class.getSimpleName(), ex.getMessage()));
         }
         return digest;
 

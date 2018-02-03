@@ -80,7 +80,7 @@ public class ContentRequestProcessor {
                     result.setCode(HttpAdapter.SC_NOT_FOUND);
                 }
             } catch (CmsException ex) {
-                Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
+                Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
                 result.setCode(HttpAdapter.SC_NOT_FOUND);
                 result.setMessage(ex.getMessage());
                 result.setData(ex.getMessage());
@@ -91,7 +91,7 @@ public class ContentRequestProcessor {
             try {
                 result.setData(adapter.findByPath(path, language, "published"));
             } catch (CmsException ex) {
-                Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
+                Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
                 result.setCode(HttpAdapter.SC_NOT_FOUND);
                 result.setMessage(ex.getMessage());
                 result.setData(ex.getMessage());
@@ -127,7 +127,7 @@ public class ContentRequestProcessor {
                     System.out.println("doc is null");
                 }
             } catch (CmsException ex) {
-                Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
+                Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
                 result.setCode(HttpAdapter.SC_NOT_FOUND);
                 result.setMessage(ex.getMessage());
             }
@@ -142,7 +142,7 @@ public class ContentRequestProcessor {
                     result.setData(adapter.findByPath(path, language, requiredStatus));
                 }
             } catch (CmsException ex) {
-                Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
+                Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
                 result.setCode(HttpAdapter.SC_NOT_FOUND);
                 result.setMessage(ex.getMessage());
                 result.setData(ex.getMessage());
@@ -177,7 +177,7 @@ public class ContentRequestProcessor {
             try {
                 doc = (Document) JsonReader.jsonToJava(jsonString);
             } catch (Exception e) {
-                Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), "deserialization problem - check @type declaration"));
+                Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), "deserialization problem - check @type declaration"));
                 e.printStackTrace();
             }
             try {
@@ -190,7 +190,7 @@ public class ContentRequestProcessor {
                     try {
                         adapter.addDocument(doc);
                     } catch (CmsException ex) {
-                        Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
+                        Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
                     }
                     result.setData(doc);
                 }
@@ -202,7 +202,7 @@ public class ContentRequestProcessor {
                     adapter.addDocument(request.parameters);
                     result.setData(adapter.getDocument((String) request.parameters.get("uid"), (String) request.parameters.get("language")));
                 } catch (CmsException ex) {
-                    Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
+                    Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
                     if(ex.getCode()>=400 && ex.getCode()<600){
                         result.setCode(ex.getCode());
                     }else{
@@ -252,7 +252,7 @@ public class ContentRequestProcessor {
                     doc = (Document) JsonReader.jsonToJava(jsonString);
                     doc.setUid(uid); //overwrite uid and path from JSON representation
                 } catch (Exception e) {
-                    Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), "deserialization problem - check @type declaration"));
+                    Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), "deserialization problem - check @type declaration"));
                     e.printStackTrace();
                     result.setCode(HttpAdapter.SC_BAD_REQUEST);
                     return result;
@@ -261,7 +261,7 @@ public class ContentRequestProcessor {
                     adapter.updateDocument(doc);
                     result.setData(doc);
                 } catch (CmsException ex) {
-                    Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
+                    Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
                     result.setCode(HttpAdapter.SC_BAD_REQUEST);
                 }
             } else {
@@ -269,7 +269,7 @@ public class ContentRequestProcessor {
                     adapter.updateDocument(uid, (String) request.parameters.get("language"), request.parameters);
                     result.setData(adapter.getDocument(uid, (String) request.parameters.get("language")));
                 } catch (CmsException ex) {
-                    Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
+                    Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
                     result.setCode(HttpAdapter.SC_BAD_REQUEST);
                 }
                 //read original document, update parameters and adapter.modify(original)
@@ -303,7 +303,7 @@ public class ContentRequestProcessor {
         } catch (CmsException ex) {
             result.setCode(HttpAdapter.SC_NOT_FOUND);
             result.setData(ex.getMessage());
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
         }
         return result;
     }

@@ -83,7 +83,7 @@ public class SimpleService extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
-        handleEvent(Event.logInfo("SimpleService.runOnce()", "executed"));
+        dispatchEvent(Event.logInfo("SimpleService.runOnce()", "executed"));
     }
 
     @EventHook(eventCategory = Event.CATEGORY_LOG)
@@ -101,7 +101,7 @@ public class SimpleService extends Kernel {
         if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
         } else {
-            handleEvent(Event.logInfo("SimpleService", event.getPayload().toString()));
+            dispatchEvent(Event.logInfo("SimpleService", event.getPayload().toString()));
         }
     }
 }

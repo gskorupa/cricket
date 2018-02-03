@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.HashMap;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
-import static org.cricketmsf.Kernel.handle;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
@@ -152,7 +151,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             byte[] b = readFile(file);
             return b;
         } catch (Exception e) {
-            Kernel.getInstance().handleEvent(Event.logWarning("FileReaderAdapter(1)", filePath + " not readable or not found"));
+            Kernel.getInstance().dispatchEvent(Event.logWarning("FileReaderAdapter(1)", filePath + " not readable or not found"));
             byte[] emptyContent = {};
             return emptyContent;
         }
@@ -194,7 +193,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                         result.setPayload("".getBytes());
                         result.setCode(HttpAdapter.SC_NOT_MODIFIED);
                     }
-                    handle(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
+                    Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
                     return result;
                 }
             } catch (ClassCastException e) {
@@ -296,7 +295,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                         result.setPayload("".getBytes());
                         result.setCode(HttpAdapter.SC_NOT_MODIFIED);
                     }
-                    handle(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
+                    Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
                     return result;
                 }
             } catch (ClassCastException e) {

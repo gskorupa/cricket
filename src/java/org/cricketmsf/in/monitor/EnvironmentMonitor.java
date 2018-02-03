@@ -94,7 +94,7 @@ public class EnvironmentMonitor extends InboundAdapter implements Adapter, Envir
                 Thread.yield();
             }
         } catch (InterruptedException e) {
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(),"interrupted"));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(),"interrupted"));
         }
     }
 
@@ -105,7 +105,7 @@ public class EnvironmentMonitor extends InboundAdapter implements Adapter, Envir
         try {
             this.samplingInterval = Integer.parseInt(samplingInterval);
         } catch (NumberFormatException e) {
-            Kernel.getInstance().handleEvent(Event.logWarning("loadProperties", e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logWarning("loadProperties", e.getMessage()));
         }
     }
 

@@ -78,7 +78,7 @@ public class SmtpSender implements EmailSenderIface, Adapter {
     @Override
     public String send(String recipient, String topic, String content) {
         if (!ready) {
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), "not configured"));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "not configured"));
             return "ERROR: not configured";
         }
         if(recipient == null || recipient.isEmpty()){
@@ -151,7 +151,7 @@ public class SmtpSender implements EmailSenderIface, Adapter {
 
         } catch (Exception e) {
             //e.printStackTrace();
-            Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), e.getMessage()));
             result = "ERROR: " + e.getMessage();
         }
 

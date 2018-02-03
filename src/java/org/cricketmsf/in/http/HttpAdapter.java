@@ -205,7 +205,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         headers.set("ETag", ""+rootEvent.getId());
          */
         //TODO: format logs to have clear info about root event id
-        Kernel.handle(
+        Kernel.getInstance().dispatchEvent(
                 Event.logFinest("HttpAdapter", "event " + rootEvent.getId() + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
         );
 
@@ -287,7 +287,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         try {
             r = formattedResponse.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
-            Kernel.handle(Event.logSevere("HttpAdapter", e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere("HttpAdapter", e.getMessage()));
         }
         return r;
     }
@@ -425,7 +425,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 Event.LOG_INFO,
                 null,
                 sb.toString());
-        Kernel.getInstance().handleEvent(event);
+        Kernel.getInstance().dispatchEvent(event);
     }
 
     protected void sendLogEvent(String type, String message) {
@@ -435,7 +435,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 type,
                 null,
                 message);
-        Kernel.getInstance().handleEvent(event);
+        Kernel.getInstance().dispatchEvent(event);
     }
 
     protected void sendLogEvent(String message) {

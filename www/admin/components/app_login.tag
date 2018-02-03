@@ -39,7 +39,7 @@
         submitLoginForm = function(e){
             e.preventDefault()
             app.log("submitting ..."+e.target)
-            loginSubmit(e.target, globalEvents, 'auth:loggedin', 'auth.error', app.debug);
+            loginSubmit(e.target, globalEvents, 'auth:loggedin', 'auth.error');
             e.target.reset()
         }
 

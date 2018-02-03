@@ -57,12 +57,12 @@ public class InboundAdapter implements Runnable{
         String hookMethodName = getHookMethodNameForMethod(method);
         Result result = null;
         if (hookMethodName == null) {
-            Kernel.handle(
+            Kernel.getInstance().dispatchEvent(
                     Event.logWarning(this.getClass().getSimpleName(), "hook is not defined for " + method)
             );
         }
         try {
-            Kernel.handle(
+            Kernel.getInstance().dispatchEvent(
                 Event.logFine(this.getClass().getSimpleName(), "sending event to hook " + method)
             );
             Event event = new Event();

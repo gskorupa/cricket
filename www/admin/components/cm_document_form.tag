@@ -148,24 +148,7 @@
             })
         })
     }
-    
-/*
-    self.fileSelected = function(e) {
-        e.preventDefault()
-        var file = document.getElementById('fileToUpload').files[0];
-        if (file) {
-          var fileSize = 0;
-          if (file.size > 1024 * 1024)
-            fileSize = (Math.round(file.size * 100 / (1024 * 1024)) / 100).toString() + 'MB';
-          else
-            fileSize = (Math.round(file.size * 100 / 1024) / 100).toString() + 'KB';
 
-          //document.getElementById('fileName').innerHTML = 'Name: ' + file.name;
-          //document.getElementById('fileSize').innerHTML = 'Size: ' + fileSize;
-          //document.getElementById('fileType').innerHTML = 'Type: ' + file.type;
-        }
-      }
-*/
     self.changeType = function(e){
         e.preventDefault()
         self.doc.type = e.target.value
@@ -198,38 +181,31 @@
         }
         fd.set('name', name)
         fd.set('uid',pth+name)
-        //var c=fd.get('content').replace(/\r\n|\r|\n/g,"&#10;")
-        //var c=escape(fd.get('content'))
         var summ=encodeURIComponent(fd.get('summary'))
         fd.set('summary',summ)
         var c=encodeURIComponent(fd.get('content'))
         fd.set('content',c)
-        console.log(c)
-        sendFormData(fd, self.method, app.cmAPI + docPath, app.user.token, self.close, globalEvents, 'submit:OK', 'submit:ERROR', app.debug, null)
+        sendFormData(fd, self.method, app.cmAPI + docPath, app.user.token, self.close, null, 'submit:OK', 'submit:ERROR', app.debug, null)
     }
 
     self.close = function (object) {
         var text = '' + object
-        console.log('CALBACK: ' + object)
+        app.log('CALBACK: ' + object)
         if (text.startsWith('{')) {
             var tmpDoc = self.doc = JSON.parse(text)
             self.callbackListener.trigger('submitted:'+tmpDoc.path)
-        } else if (text.startsWith('error')) {
-            alert(text)
         } else if (text.startsWith('[object MouseEvent')) {
             self.callbackListener.trigger('cancelled')
         } else if (text.startsWith('error:409')){
                 alert('This UID is already defined!')
+        } else if (text.startsWith('error')) {
+            alert(text)
         }
     }
 
     var update = function (text) {
         app.log("DOC: " + text)
         self.doc = JSON.parse(text);
-        //console.log(self.doc.content)
-        //self.doc.content = atou(self.doc.content)
-        //console.log(self.doc.content)
-        //self.doc.content=unescape(self.doc.content)
         try{
             self.doc.summary=decodeURIComponent(self.doc.summary)
         }catch(e){

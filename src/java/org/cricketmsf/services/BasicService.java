@@ -19,7 +19,6 @@ import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import java.util.HashMap;
-import static org.cricketmsf.Kernel.handle;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
@@ -87,7 +86,7 @@ public class BasicService extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
-        handleEvent(Event.logInfo("BasicService.runOnce()", "executed"));
+        Kernel.getInstance().dispatchEvent(Event.logInfo("BasicService.runOnce()", "executed"));
     }
 
     /*
@@ -145,7 +144,7 @@ public class BasicService extends Kernel {
         if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
         } else {
-            handleEvent(Event.logInfo("BasicService", event.getPayload().toString()));
+            Kernel.getInstance().dispatchEvent(Event.logInfo("BasicService", event.getPayload().toString()));
         }
     }
 
@@ -178,10 +177,10 @@ public class BasicService extends Kernel {
                 r.setData(data);
                 r.setHeader("x-echo-greeting", "hello");
             } else {
-                handle(Event.logFine("BasicService", "echo service is silent"));
+                Kernel.getInstance().dispatchEvent(Event.logFine("BasicService", "echo service is silent"));
             }
         } catch (KeyValueDBException e) {
-            handle(Event.logSevere(this.getClass().getSimpleName(), e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), e.getMessage()));
         }
         return r;
     }

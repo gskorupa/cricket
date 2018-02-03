@@ -18,7 +18,6 @@ package org.cricketmsf.microsite.auth;
 import java.util.Base64;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
-import static org.cricketmsf.Kernel.handle;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.StandardResult;
@@ -51,7 +50,7 @@ public class AuthBusinessLogic {
                 result.setCode(HttpAdapter.SC_OK);
             }
         } catch (AuthException ex) {
-            Kernel.handle(Event.logFine(this.getClass().getSimpleName(), ex.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), ex.getMessage()));
             if (ex.getCode() == AuthException.EXPIRED) {
                 result.setCode(401);
             }
@@ -85,7 +84,7 @@ public class AuthBusinessLogic {
                     }
                 }
             } catch (Exception e) {
-                handle(Event.logInfo(this.getClass().getSimpleName(), e.getMessage()));
+                Kernel.getInstance().dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), e.getMessage()));
             }
         }
         return result;        
@@ -101,7 +100,7 @@ public class AuthBusinessLogic {
                 result.setCode(HttpAdapter.SC_OK);
             }
         } catch (AuthException ex) {
-            Kernel.handle(Event.logFine(this.getClass().getSimpleName(), ex.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), ex.getMessage()));
         }
         return result;    
     }
@@ -116,7 +115,7 @@ public class AuthBusinessLogic {
             result.setCode(HttpAdapter.SC_OK);
         } catch (AuthException ex) {
             ex.printStackTrace();
-            Kernel.handle(Event.logFine(this, ex.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logFine(this, ex.getMessage()));
         } catch(Exception e){
             e.printStackTrace();
         }

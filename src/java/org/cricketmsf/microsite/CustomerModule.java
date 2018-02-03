@@ -85,7 +85,7 @@ public class CustomerModule {
             // create link
             Token token = authAdapter.createPermanentToken(userID, userID, false, null);
             String tokenID = URLEncoder.encode(token.getToken(), "UTF-8");
-            Kernel.handle(new UserEvent(UserEvent.USER_RESET_PASSWORD, tokenID + ":" + email));
+            Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_RESET_PASSWORD, tokenID + ":" + email));
 
         } catch (NullPointerException | UserException | AuthException | UnsupportedEncodingException e) {
             //e.printStackTrace();
@@ -122,7 +122,7 @@ public class CustomerModule {
             Token token = authAdapter.createPermanentToken(publicUserID, userID, true, null);
             String tokenID = URLEncoder.encode(token.getToken(), "UTF-8");
             link=link+tokenID;
-            Kernel.handle(new UserEvent(UserEvent.USER_NEW_PERMALINK, link));
+            Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_NEW_PERMALINK, link));
             result.setData(link+tokenID);
         } catch (NullPointerException | UserException | AuthException | UnsupportedEncodingException e) {
             //e.printStackTrace();

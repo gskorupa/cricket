@@ -73,7 +73,7 @@ public class TxtFormatter {
             }
         } catch (Exception e) {
             //e.printStackTrace();
-            Kernel.handle(Event.logSevere("TxtFormatter", e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere("TxtFormatter", e.getMessage()));
             sb.append(e.getMessage());
         }
         return sb.toString();

@@ -16,7 +16,9 @@
                 "filter": "org.cricketmsf.SecurityFilter",
                 "cors": "Access-Control-Allow-Origin:*",
                 "time-zone": "GMT",
-                "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME"
+                "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME",
+                "request-encoding": "UTF-8",
+                "file-upload-maxsize": "1000000"
             },
             "adapters": {
                 "Echo": {
@@ -113,11 +115,12 @@
                 "cors": "Access-Control-Allow-Origin:*|Access-Control-Allow-Credentials:true|Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT|Access-Control-Allow-Headers:Authentication|Access-Control-Max-Age: 1728000",
                 "time-zone": "GMT",
                 "user-confirm": "true",
-                "initial-admin-email": "g.skorupa@gmail.com",
-                "initial-admin-secret": "test123",
-                "admin-notification-email": "admin.signomix.demo@signocom.com",
+                "initial-admin-email": "user@domain",
+                "initial-admin-password": "cricket",
+                "admin-notification-email": "",
                 "restricted-resources": "DELETE@/api/auth GET@/api/user PUT@/api/user DELETE@/api/user *@/api/cm *@/api/alert *@/api/system",
-                "file.upload.maxsize": "5000000",
+                "file.upload.maxsize": "1000000",
+                "request-encoding": "UTF-8",
                 "serviceurl": "http://localhost:8080",
                 "SRVC_NAME_ENV_VARIABLE": "CRICKET_SERVICE_NAME",
                 "SRVC_URL_ENV_VARIABLE": "CRICKET_URL"

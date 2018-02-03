@@ -97,7 +97,7 @@ public class SiteAdministrationModule {
                 case "shutdown":
                     result.setCode(HttpAdapter.SC_ACCEPTED);
                     result.setData("the service will be stopped within few seconds");
-                    Kernel.getInstance().handleEvent(
+                    Kernel.getInstance().dispatchEvent(
                             new Event(
                                     this.getClass().getSimpleName(),
                                     Event.CATEGORY_GENERIC,
@@ -149,20 +149,20 @@ public class SiteAdministrationModule {
         try {
             database.addTable("webcache", maxCacheSize, false);
         } catch (ClassCastException | KeyValueDBException e) {
-            Kernel.handle(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
         }
 
         // USERS DB
         try {
             userDB.addTable("users", maxUsers, true);
         } catch (KeyValueDBException e) {
-            Kernel.handle(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
         }
         try {
             String initialAdminEmail = (String) Kernel.getInstance().getProperties().getOrDefault("initial-admin-email", "");
-            String initialAdminPassword = (String) Kernel.getInstance().getProperties().getOrDefault("initial-admin-secret", "");
+            String initialAdminPassword = (String) Kernel.getInstance().getProperties().getOrDefault("initial-admin-password", "");
             if (initialAdminEmail.isEmpty() || initialAdminPassword.isEmpty()) {
-                Kernel.handle(Event.logSevere(this.getClass().getSimpleName(), "initial-admin-email or initial-admin-secret properties not set. Stop the server now!"));
+                Kernel.getInstance().dispatchEvent(Event.logSevere(this, "initial-admin-email or initial-admin-secret properties not set. Stop the server now!"));
             }
             User newUser;
             //create admin account
@@ -180,19 +180,6 @@ public class SiteAdministrationModule {
                 System.out.println("CREATING admin");
                 userDB.put("users", newUser.getUid(), newUser);
                 System.out.println("CREATING admin DONE");
-            }
-            //create test account
-            if (!userDB.containsKey("users", "tester1")) {
-                newUser = new User();
-                newUser.setUid("tester1");
-                newUser.setEmail(initialAdminEmail);
-                newUser.setType(User.USER);
-                newUser.setRole("user");
-                newUser.setPassword(HashMaker.md5Java("signocom"));
-                newUser.setConfirmString("6022140857");
-                // no confirmation necessary for test account
-                newUser.setConfirmed(true);
-                userDB.put("users", newUser.getUid(), newUser);
             }
             //create user demo
             if (Kernel.getInstance().getName().toLowerCase(Locale.getDefault()).contains("demo")) {
@@ -222,7 +209,7 @@ public class SiteAdministrationModule {
             }
 
         } catch (ClassCastException | KeyValueDBException e) {
-            Kernel.handle(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -231,7 +218,7 @@ public class SiteAdministrationModule {
         try {
             authDB.addTable("tokens", 2 * maxUsers, false);
         } catch (ClassCastException | KeyValueDBException e) {
-            Kernel.handle(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
         }
 
         // CMS
@@ -283,29 +270,29 @@ public class SiteAdministrationModule {
         try {
             database.backup(backupFolder + prefix + database.getBackupFileName());
         } catch (KeyValueDBException ex) {
-            Kernel.handle(Event.logSevere(this, "backup error - " + ex.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "backup error - " + ex.getMessage()));
         }
         try {
             cmsDB.backup(backupFolder + prefix + cmsDB.getBackupFileName());
         } catch (KeyValueDBException ex) {
-            Kernel.handle(Event.logSevere(this, "backup error - " + ex.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "backup error - " + ex.getMessage()));
         }
         try {
             userDB.backup(backupFolder + prefix + userDB.getBackupFileName());
         } catch (KeyValueDBException ex) {
-            Kernel.handle(Event.logSevere(this, "backup error - " + ex.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "backup error - " + ex.getMessage()));
         }
         try {
             authDB.backup(backupFolder + prefix + authDB.getBackupFileName());
         } catch (KeyValueDBException ex) {
-            Kernel.handle(Event.logSevere(this, "backup error - " + ex.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "backup error - " + ex.getMessage()));
         }
         //TODO: scheduler
-        Kernel.handle(Event.logInfo(this, "database backup done"));
+        Kernel.getInstance().dispatchEvent(Event.logInfo(this, "database backup done"));
     }
 
     public void clearUserData(String userId) {
-        Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), "method clearUserData not implemented"));
+        Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "method clearUserData not implemented"));
     }
 
     public void clearData(

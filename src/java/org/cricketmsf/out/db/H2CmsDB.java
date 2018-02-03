@@ -296,7 +296,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
         } catch (SQLException e) {
             throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
         } catch (CmsException ex) {
-            Kernel.handle(Event.logSevere(this, "unable to restore UID"));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "unable to restore UID"));
         }
         if (doc == null) {
             return defaultResult;

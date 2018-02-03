@@ -46,7 +46,7 @@ public class Exchange extends HttpExchange {
         ArrayList<String> al = new ArrayList<>();
         al.add(user.getUid());
         headers.put("X-user-id", al);
-        List<String> roles = new ArrayList();;
+        List<String> roles = new ArrayList();
         if (issuer != null) {
             ArrayList<String> al2 = new ArrayList<>();
             al2.add(issuer.getUid());

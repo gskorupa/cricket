@@ -130,7 +130,7 @@ public class Microsite extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
-        handle(Event.logInfo("Microsite.runOnce()", "executed"));
+        dispatchEvent(Event.logInfo("Microsite.runOnce()", "executed"));
     }
 
     @Override
@@ -153,7 +153,7 @@ public class Microsite extends Kernel {
     public Object wwwGet(Event event) {
 
         //TODO: to nie jest optymalne rozwiązanie
-        handle(Event.logFinest(this.getClass().getSimpleName(), event.getRequest().uri));
+        dispatchEvent(Event.logFinest(this.getClass().getSimpleName(), event.getRequest().uri));
         ParameterMapResult result = null;
         try {
             result = (ParameterMapResult) cms
@@ -336,7 +336,7 @@ public class Microsite extends Kernel {
                     result.setPayload(pageContent.getBytes());
                 }
             } catch (UserException ex) {
-                Kernel.handle(Event.logWarning(this.getClass().getSimpleName(), "confirmation error " + ex.getMessage()));
+                Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "confirmation error " + ex.getMessage()));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -417,7 +417,7 @@ public class Microsite extends Kernel {
                     
                 } catch (Exception e) {
                     e.printStackTrace();
-                    handle(Event.logSevere(this.getClass().getSimpleName(), e.getMessage() + " while sending confirmation emai"));
+                    dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), e.getMessage() + " while sending confirmation emai"));
                 }
                 break;
             case UserEvent.USER_DEL_SHEDULED:   //send confirmation email
@@ -439,7 +439,7 @@ public class Microsite extends Kernel {
                     
                 } catch (Exception e) {
                     e.printStackTrace();
-                    handle(Event.logSevere(this.getClass().getSimpleName(), e.getMessage() + " while sending confirmation emai"));
+                    dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), e.getMessage() + " while sending confirmation emai"));
                 }
                 break;
             case UserEvent.USER_DELETED:        //TODO: authorization
@@ -458,15 +458,15 @@ public class Microsite extends Kernel {
                         String passResetLink = properties.getOrDefault("serviceurl", "") + "?tid=" + params[0] + "#account";
                         emailSender.send(params[1], "Password Reset Request", "Click here to change password: <a href=\"" + passResetLink + "\">" + passResetLink + "</a>");
                     } else {
-                        handle(Event.logWarning("UserEvent.USER_RESET_PASSWORD", "Malformed payload->" + payload));
+                        dispatchEvent(Event.logWarning("UserEvent.USER_RESET_PASSWORD", "Malformed payload->" + payload));
                     }
                 } else {
-                    handle(Event.logWarning("UserEvent.USER_RESET_PASSWORD", "Malformed payload->" + payload));
+                    dispatchEvent(Event.logWarning("UserEvent.USER_RESET_PASSWORD", "Malformed payload->" + payload));
                 }
             case UserEvent.USER_REG_CONFIRMED:  //TODO: update user
             case UserEvent.USER_UPDATED:
             default:
-                handleEvent(Event.logInfo(this.getClass().getSimpleName(), "Event recived: " + event.getType()));
+                dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), "Event recived: " + event.getType()));
                 break;
         }
     }
@@ -490,7 +490,7 @@ public class Microsite extends Kernel {
                 try {
                     database.clear("webcache");
                 } catch (KeyValueDBException ex) {
-                    handleEvent(Event.logWarning(this, "Problem while clearing web cache - " + ex.getMessage()));
+                    dispatchEvent(Event.logWarning(this, "Problem while clearing web cache - " + ex.getMessage()));
                 }
                 break;
             case "STATUS":
@@ -500,7 +500,7 @@ public class Microsite extends Kernel {
                 SiteAdministrationModule.getInstance().backupDatabases(database, userDB, authDB, cmsDatabase);
                 break;
             default:
-                handleEvent(Event.logWarning("Don't know how to handle type " + event.getType(), event.getPayload().toString()));
+                dispatchEvent(Event.logWarning("Don't know how to handle type " + event.getType(), event.getPayload().toString()));
         }
     }
 
@@ -514,7 +514,7 @@ public class Microsite extends Kernel {
         if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
         } else {
-            handleEvent(Event.logWarning("Don't know how to handle category " + event.getCategory(), event.getPayload().toString()));
+            dispatchEvent(Event.logWarning("Don't know how to handle category " + event.getCategory(), event.getPayload().toString()));
         }
     }
 
