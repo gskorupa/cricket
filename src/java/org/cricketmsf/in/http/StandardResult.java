@@ -40,6 +40,7 @@ public class StandardResult implements Result {
     private String modificationDateFormatted;
     private int maxAge;
     private Headers headers;
+    private long responseTime = 0;
 
     public StandardResult() {
         setCode(HttpAdapter.SC_OK);
@@ -156,5 +157,15 @@ public class StandardResult implements Result {
     @Override
     public Headers getHeaders(){
         return headers;
+    }
+
+    @Override
+    public void setResponseTime(long time) {
+        this.responseTime=time;
+    }
+
+    @Override
+    public long getResponseTime() {
+        return responseTime;
     }
 }

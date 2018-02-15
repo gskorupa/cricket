@@ -44,6 +44,7 @@ public class ParameterMapResult implements Result {
     private String modificationDateFormatted;
     private int maxAge;
     private Headers headers;
+    private long responseTime = 0;
 
     public ParameterMapResult() {
         setCode(HttpAdapter.SC_OK);
@@ -159,19 +160,29 @@ public class ParameterMapResult implements Result {
     public void setMaxAge(int maxAge) {
         this.maxAge = maxAge;
     }
-    
+
     @Override
-    public void setHeader(String name, String value){
+    public void setHeader(String name, String value) {
         headers.add(name, value);
     }
-    
+
     @Override
-    public void setHeader(String name, List values){
+    public void setHeader(String name, List values) {
         headers.put(name, values);
     }
-    
+
     @Override
-    public Headers getHeaders(){
+    public Headers getHeaders() {
         return headers;
+    }
+
+    @Override
+    public void setResponseTime(long time) {
+        this.responseTime = time;
+    }
+
+    @Override
+    public long getResponseTime() {
+        return responseTime;
     }
 }

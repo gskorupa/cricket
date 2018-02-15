@@ -76,5 +76,6 @@ public interface Result {
     public void setHeader(String name, List values);
     
     public Headers getHeaders();
-    
+    public void setResponseTime(long time);
+    public long getResponseTime();   
 }

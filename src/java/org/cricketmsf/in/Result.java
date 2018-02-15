@@ -52,4 +52,7 @@ public interface Result {
     public void setHeader(String name, String value);
     
     public Headers getHeaders();
+    public void setResponseTime(long time);
+    public long getResponseTime();
+    
 }

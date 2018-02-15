@@ -25,7 +25,7 @@ import java.util.List;
  * @author greg
  */
 public class FileResult implements Result {
-    
+
     private Object data;
     private String message;
     private int code;
@@ -35,8 +35,9 @@ public class FileResult implements Result {
     private String modificationDateFormatted;
     private int maxAge = 0;
     private Headers headers;
-    
-    public FileResult(){
+    private long responseTime = 0;
+
+    public FileResult() {
         headers = new Headers();
     }
 
@@ -109,7 +110,7 @@ public class FileResult implements Result {
     public void setFileExtension(String fileExt) {
         this.fileExt = fileExt;
     }
-    
+
     public void setModificationDate(Date date) {
         modificationDate = date;
         SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
@@ -124,30 +125,38 @@ public class FileResult implements Result {
     public String getModificationDateFormatted() {
         return modificationDateFormatted;
     }
-    
+
     @Override
-    public int getMaxAge(){
+    public int getMaxAge() {
         return maxAge;
     }
-    
-    
+
     @Override
-    public Headers getHeaders(){
+    public Headers getHeaders() {
         return headers;
     }
-    
+
     @Override
-    public void setHeader(String name, String value){
+    public void setHeader(String name, String value) {
         headers.add(name, value);
     }
-    
+
     @Override
-    public void setHeader(String name, List values){
+    public void setHeader(String name, List values) {
         headers.put(name, values);
     }
-    
-    
-    public void setMaxAge(int maxAge){
+
+    public void setMaxAge(int maxAge) {
         this.maxAge = maxAge;
+    }
+
+    @Override
+    public void setResponseTime(long time) {
+        this.responseTime = time;
+    }
+
+    @Override
+    public long getResponseTime() {
+        return responseTime;
     }
 }

@@ -18,6 +18,8 @@ package org.cricketmsf.out.http;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -31,6 +33,17 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.in.http.Result;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.out.OutboundAdapter;
+
+import java.security.cert.X509Certificate;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.Certificate;
 
 /**
  * HttpClient will be better name
@@ -47,9 +60,9 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
 
     private String endpointURL;
     protected int timeout = 0;
+    private boolean ignoreCertificateCheck = false;
 
     //public HashMap<String, String> properties = new HashMap<>();
-
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
@@ -63,6 +76,9 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
 
         }
         Kernel.getInstance().getLogger().print("\ttimeout: " + timeout);
+        ignoreCertificateCheck = Boolean.parseBoolean(properties.getOrDefault("ignore-certificate-check", "false"));
+        properties.put("ignore-certificate-check", "" + ignoreCertificateCheck);
+        Kernel.getInstance().getLogger().print("\tignore-certificate-check: " + ignoreCertificateCheck);
 
     }
 
@@ -139,52 +155,110 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
             long startPoint = System.currentTimeMillis();
             URL urlObj = new URL(url);
             HttpURLConnection con;
+            HttpsURLConnection scon;
             // TODO: Proxy proxy = new Proxy(Proxy.Type.HTTP, sa);
-            if(url.toUpperCase().startsWith("HTTPS")){
-                con = (HttpsURLConnection) urlObj.openConnection();
-            }else{
-                con = (HttpURLConnection) urlObj.openConnection();
-            }
-            con.setReadTimeout(timeout);
-            con.setConnectTimeout(timeout);
-            //TODO: this adapter can block entire service waiting for timeout.
-            //TODO: probably not a problem after multithreading have been introduced
-            con.setRequestMethod(request.method);
-            for (String key : request.properties.keySet()) {
-                con.setRequestProperty(key, request.properties.get(key));
-            }
-
-            if (requestData.length() > 0) {
-                con.setDoOutput(true);
-                con.setFixedLengthStreamingMode(requestData.getBytes().length);
-                try (PrintWriter out = new PrintWriter(con.getOutputStream())) {
-                    out.print(requestData);
+            if (url.toUpperCase().startsWith("HTTPS")) {
+                if (ignoreCertificateCheck) {
+                    HttpsURLConnection.setDefaultSSLSocketFactory(getTrustAllSocketFactory());
                 }
-            }
-            con.connect();
-            result.setCode(con.getResponseCode());
-            //System.out.println(result.getCode());
-            //result.setResponseTime(System.currentTimeMillis() - startPoint);
-            if (isRequestSuccessful(result.getCode())) {
-                StringBuilder response;
-                try ( // success
-                        BufferedReader in = new BufferedReader(new InputStreamReader(
-                                con.getInputStream()))) {
-                    String inputLine;
-                    response = new StringBuilder();
-                    while ((inputLine = in.readLine()) != null) {
-                        response.append(inputLine);
+                scon = (HttpsURLConnection) urlObj.openConnection();
+                //print_https_cert(scon);
+                scon.setReadTimeout(timeout);
+                scon.setConnectTimeout(timeout);
+                //TODO: this adapter can block entire service waiting for timeout.
+                //TODO: probably not a problem after multithreading have been introduced
+                scon.setRequestMethod(request.method);
+                for (String key : request.properties.keySet()) {
+                    scon.setRequestProperty(key, request.properties.get(key));
+                }
+                if (requestData.length() > 0) {
+                    scon.setDoOutput(true);
+                    scon.setFixedLengthStreamingMode(requestData.getBytes().length);
+                    try (PrintWriter out = new PrintWriter(scon.getOutputStream())) {
+                        out.print(requestData);
+                        out.flush();
+                        out.close();
                     }
                 }
-                //result.setContentLength(response.length());
-                result.setPayload(response.toString().getBytes());
+                scon.connect();
+                //print_https_cert(scon);
+                result.setCode(scon.getResponseCode());
+                result.setResponseTime(System.currentTimeMillis() - startPoint);
+                if (isRequestSuccessful(result.getCode())) {
+                    StringBuilder response;
+                    try ( // success
+                            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                    scon.getInputStream()))) {
+                        String inputLine;
+                        response = new StringBuilder();
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                    }
+                    result.setPayload(response.toString().getBytes());
+                } else {
+                    //result.setContent("");
+                }
             } else {
-                //result.setContent("");
+                con = (HttpURLConnection) urlObj.openConnection();
+                con.setReadTimeout(timeout);
+                con.setConnectTimeout(timeout);
+                //TODO: this adapter can block entire service waiting for timeout.
+                //TODO: probably not a problem after multithreading have been introduced
+                con.setRequestMethod(request.method);
+                for (String key : request.properties.keySet()) {
+                    con.setRequestProperty(key, request.properties.get(key));
+                }
+                if (requestData.length() > 0 || "POST".equals(request.method) || "PUT".equals(request.method) || "DELETE".equals(request.method)) {
+                    con.setDoOutput(true);
+                    OutputStream os = con.getOutputStream();
+                    OutputStreamWriter out = new OutputStreamWriter(os);
+                    try {
+                        out.write(requestData);
+                        out.flush();
+                        out.close();
+                        os.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                con.connect();
+                result.setCode(con.getResponseCode());
+                result.setResponseTime(System.currentTimeMillis() - startPoint);
+                try {
+                    StringBuilder response;
+                    try ( // success
+                            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                    con.getInputStream()))) {
+                        String inputLine;
+                        response = new StringBuilder();
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                    }
+                    result.setPayload(response.toString().getBytes());
+                } catch (Exception e) {
+                    StringBuilder response;
+                    try ( // success
+                            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                    con.getErrorStream()))) {
+                        String inputLine;
+                        response = new StringBuilder();
+                        while ((inputLine = in.readLine()) != null) {
+                            response.append(inputLine);
+                        }
+                    }
+                    result.setMessage(response.toString());
+                }
             }
         } catch (IOException e) {
             String message = e.getMessage();
             Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), message));
             result.setCode(500);
+            result.setMessage(message);
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            String message = e.getMessage();
+            result.setCode(426);
             result.setMessage(message);
         }
         return result;
@@ -225,18 +299,66 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
     }
 
     protected String translateToJson(Object data) {
-        if(data instanceof String){
-            return (String)data;
-        }else{
+        if (data instanceof String) {
+            return (String) data;
+        } else {
             //TODO: serialize to JSON?
             return "";
         }
     }
 
-/*
+    private SSLSocketFactory getTrustAllSocketFactory() throws NoSuchAlgorithmException, KeyManagementException {
+        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+            public X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+
+            public void checkClientTrusted(X509Certificate[] certs, String authType) {
+            }
+
+            public void checkServerTrusted(X509Certificate[] certs, String authType) {
+            }
+        }};
+
+        SSLContext sc = SSLContext.getInstance("TLS");
+        sc.init(null, trustAllCerts, new SecureRandom());
+        return sc.getSocketFactory();
+    }
+    
+    private void print_https_cert(HttpsURLConnection con) {
+
+        if (con != null) {
+
+            try {
+
+                System.out.println("Response Code : " + con.getResponseCode());
+                System.out.println("Cipher Suite : " + con.getCipherSuite());
+                System.out.println("\n");
+
+                Certificate[] certs = con.getServerCertificates();
+                for (Certificate cert : certs) {
+                    System.out.println("Cert Type : " + cert.getType());
+                    System.out.println("Cert Hash Code : " + cert.hashCode());
+                    System.out.println("Cert Public Key Algorithm : "
+                            + cert.getPublicKey().getAlgorithm());
+                    System.out.println("Cert Public Key Format : "
+                            + cert.getPublicKey().getFormat());
+                    System.out.println("\n");
+                }
+
+            } catch (SSLPeerUnverifiedException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    /*
     public HashMap<String, String> getProperties() {
         return properties;
     }
-*/
-
+     */
 }
