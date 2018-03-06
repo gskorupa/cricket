@@ -10,6 +10,15 @@ function getData(url, query, token, callback, eventListener, errorEventName) {
         app.log("onerror " + this.status + " " + oEvent.toString())
         eventListener.trigger("auth"+this.status);
     }
+    oReq.onloadend = function(oEvent){
+        app.requests--;
+    }
+    oReq.onabort = function(oEvent){
+        app.requests--;
+    }
+    oReq.timeout = function(oEvent){
+        app.requests--;
+    }
     oReq.onreadystatechange = function () {
         if (this.readyState == 4) {
             if (this.status == 200) {

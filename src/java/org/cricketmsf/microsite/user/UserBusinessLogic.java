@@ -40,11 +40,7 @@ public class UserBusinessLogic {
         return self;
     }
 
-    public Object handleGetRequest(Event event, UserAdapterIface userAdapter) {
-        RequestObject request = event.getRequest();
-        //handle(Event.logFinest(this.getClass().getSimpleName(), request.pathExt));
-        String uid = request.pathExt;
-        String requesterID = request.headers.getFirst("X-user-id");
+    private boolean isAdmin(RequestObject request) {
         List<String> requesterRoles = request.headers.get("X-user-role");
         //String requesterRole = request.headers.getFirst("X-user-role");
         boolean admin = false;
@@ -54,6 +50,14 @@ public class UserBusinessLogic {
                 break;
             }
         }
+        return admin;
+    }
+
+    public Object handleGetRequest(Event event, UserAdapterIface userAdapter) {
+        RequestObject request = event.getRequest();
+        String uid = request.pathExt;
+        String requesterID = request.headers.getFirst("X-user-id");
+        boolean admin = isAdmin(request);
 
         StandardResult result = new StandardResult();
         try {
@@ -77,8 +81,8 @@ public class UserBusinessLogic {
         //TODO: check requester rights
         //only admin can set: role or type differ than default (plus APPLICATION type)
         RequestObject request = event.getRequest();
-        //handle(Event.logFinest(this.getClass().getSimpleName(), request.pathExt));
         //System.out.println("X-cms-user="+request.headers.getFirst("X-user-id"));
+        boolean admin = isAdmin(request);
         StandardResult result = new StandardResult();
         String uid = request.pathExt;
         if (uid != null && !uid.isEmpty()) {
@@ -157,7 +161,7 @@ public class UserBusinessLogic {
         RequestObject request = event.getRequest();
         String uid = request.pathExt;
         StandardResult result = new StandardResult();
-        if (uid == null) {
+        if (uid == null || !isAdmin(request)) {
             result.setCode(HttpAdapter.SC_BAD_REQUEST);
             return result;
         }
@@ -197,8 +201,14 @@ public class UserBusinessLogic {
             if (email != null) {
                 user.setEmail(email);
             }
-            if (role != null) {
+            if (role != null && isAdmin(request)) {
                 user.setRole(role);
+            }
+            if (type != null && isAdmin(request)) {
+                try {
+                    user.setType(Integer.parseInt(type));
+                } catch (NumberFormatException e) {
+                }
             }
             if (password != null) {
                 user.setPassword(HashMaker.md5Java(event.getRequestParameter("password")));

@@ -33,27 +33,27 @@ import org.cricketmsf.microsite.user.User;
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class SecurityFilter extends Filter {
-    
+
     private static final String PERMANENT_TOKEN_PREFIX = "==";
-    
+
     private String[] restrictedPost = null;
     private String[] restrictedPut = null;
     private String[] restrictedGet = null;
     private String[] restrictedDelete = null;
-    
+
     private boolean authRequired = false;
-    
+
     @Override
     public String description() {
         return "Default security filter";
     }
-    
+
     private void initialize() {
         ArrayList<String> aPost = new ArrayList<>();
         ArrayList<String> aPut = new ArrayList<>();
         ArrayList<String> aGet = new ArrayList<>();
         ArrayList<String> aDelete = new ArrayList<>();
-        
+
         String restr = (String) Kernel.getInstance().getProperties().getOrDefault("restricted-resources", "");
         if (!restr.isEmpty()) {
             String r[] = restr.split(" ");
@@ -115,7 +115,7 @@ public class SecurityFilter extends Filter {
             }
         }
     }
-    
+
     private boolean isRestrictedPath(String method, String path) {
         if (restrictedPost == null) {
             initialize();
@@ -174,27 +174,27 @@ public class SecurityFilter extends Filter {
 
         String path = exchange.getRequestURI().getPath();
         //System.out.println("CHECK REQUEST FOR PATH:" + path);
-        Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), "PATH="+path));
+        Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), "PATH=" + path));
         boolean authorizationNotRequired = true;
         try {
             authorizationNotRequired = !isRestrictedPath(exchange.getRequestMethod(), path);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         Map parameters = (Map) exchange.getAttribute("parameters");
-        
+
         SecurityFilterResult result = new SecurityFilterResult();
         if (authorizationNotRequired) {
             //System.out.println("AUTHORIZATION NOT REQUIRED");
             String inParamsToken = null;
-            
+
             try {
                 if (parameters != null) {
                     inParamsToken = (String) parameters.get("tid");
                 }
-                    //System.out.println(">>> INPARAMSTOKEN="+inParamsToken);
-                
+                //System.out.println(">>> INPARAMSTOKEN="+inParamsToken);
+
             } catch (NullPointerException e) {
             }
             if (inParamsToken != null) {
@@ -231,11 +231,15 @@ public class SecurityFilter extends Filter {
         } else {
             try {
                 user = getUser(tokenID, tokenID.startsWith(PERMANENT_TOKEN_PREFIX));
-                if("public".equalsIgnoreCase(user.getUid())){
+                if ("public".equalsIgnoreCase(user.getUid())) {
                     issuer = getIssuer(tokenID);
                 }
             } catch (AuthException e) {
-                result.code = e.getCode();
+                result.code = 403;
+                result.message = e.getMessage();
+                return result;
+            } catch (Exception e) {
+                result.code = 403;
                 result.message = e.getMessage();
                 return result;
             }
@@ -252,7 +256,7 @@ public class SecurityFilter extends Filter {
         }
         return result;
     }
-    
+
     private User getUser(String token, boolean permanentToken) throws AuthException {
         //ask dedicated adapter
         AuthAdapterIface authAdapter = (AuthAdapterIface) Kernel.getInstance().getAdaptersMap().getOrDefault("authAdapter", null);
@@ -262,7 +266,7 @@ public class SecurityFilter extends Filter {
             return null;
         }
     }
-    
+
     private User getIssuer(String token) throws AuthException {
         //ask dedicated adapter
         AuthAdapterIface authAdapter = (AuthAdapterIface) Kernel.getInstance().getAdaptersMap().getOrDefault("authAdapter", null);
@@ -272,12 +276,23 @@ public class SecurityFilter extends Filter {
             return null;
         }
     }
-    
+
     @Override
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
-        SecurityFilterResult result = checkRequest(exchange);
+        SecurityFilterResult result = null;
+        try {
+            result = checkRequest(exchange);
+        } catch (Exception e) {
+            exchange.sendResponseHeaders(400, e.getMessage().length());
+            exchange.getResponseBody().write(e.getMessage().getBytes());
+            exchange.getResponseBody().close();
+            exchange.close();
+        }
         if (result.code != 200) {
+            if (result.message == null) {
+                result.message = "authentication error";
+            }
             exchange.sendResponseHeaders(result.code, result.message.length());
             exchange.getResponseBody().write(result.message.getBytes());
             exchange.getResponseBody().close();
@@ -297,5 +312,5 @@ public class SecurityFilter extends Filter {
             }
         }
     }
-    
+
 }

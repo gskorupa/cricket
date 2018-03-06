@@ -22,28 +22,19 @@ var app = {
         "name": "",
         "token": "",
         "status": "logged-out",
-        "alerts": [],
-        "dashboardID": '',
-        "dashboards": []
+        "alerts": []
     },
     "offline": false,
-    "authAPI": "http://signode.unicloud.pl/api/auth",
-    "csAPI": "http://signode.unicloud.pl/api/cs",
-    "cmAPI": "http://signode.unicloud.pl/api/cm",
-    "userAPI": "http://signode.unicloud.pl/api/user",
+    "authAPI": "http://localhost:8080/api/auth",
+    "csAPI": "http://localhost:8080/api/cs",
+    "cmAPI": "http://localhost:8080/api/cm",
+    "userAPI": "http://localhost:8080/api/user",
     "currentPage": "main",
     "language": "en",
     "languages": ["en", "pl", "fr"],
     "debug": false,
     "localUid": 0,
-    "dconf": {"widgets":[]}, // configurations of user's widgets on the dashboard page
-     //   {},{},{},{},{},{},{},{},{},{},{},{}
-    //],
-    "widgets": [ // widgets on the dashboard page - hardcoded structure
-        [{}, {}, {}, {}],
-        [{}, {}, {}, {}],
-        [{}, {}, {}, {}]
-    ],
+    "requests": 0,
     "log": function(message){if(app.debug){console.log(message)}}
 }
 
