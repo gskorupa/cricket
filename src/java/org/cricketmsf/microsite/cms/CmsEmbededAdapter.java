@@ -540,12 +540,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         return result;
     }
      */
-    public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName) {
+    public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName, String language) {
         String filePath = getFilePath(request);
-        String language = (String) request.parameters.get("language");
-        if (language == null || language.isEmpty()) {
-            language = "en";
-        }
         byte[] content;
         byte[] emptyContent = {};
         ParameterMapResult result = new ParameterMapResult();

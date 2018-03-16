@@ -133,19 +133,7 @@
             if (self.method == 'PUT'){
                 urlPath = '/' + formData.uid
             }
-            sendData(
-                formData,
-                self.method,
-                app.userAPI + urlPath,
-                app.user.token,
-                self.close,
-                null, //self.listener, 
-                'submit:OK',
-                'submit:ERROR',
-                app.debug,
-                null
-                )
-                //self.callbackListener.trigger('submitted')
+            sendData(formData,self.method,app.userAPI + urlPath,app.user.token,self.close,globalEvents)
         }
 
         self.close = function(object){
@@ -171,16 +159,7 @@
         }
 
         var readUser = function (uid) {
-            getData(app.userAPI + '/' + uid,
-                null,
-                app.user.token,
-                update,
-                self.listener, //globalEvents
-                'OK',
-                null, // in case of error send response code
-                app.debug,
-                globalEvents
-            );
+            getData(app.userAPI+'/'+uid,null,app.user.token,update,self.listener)
         }
 
         var generatePassword = function(){

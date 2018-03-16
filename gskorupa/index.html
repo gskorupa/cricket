@@ -9,18 +9,26 @@
         <link rel="icon" href="/resources/cricket-icon.png">
         <!-- Bootstrap -->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <!-- Style -->
+        <!-- Icon font -->
+        <link href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alice|Open+Sans:400,300,700">
         <!-- Custom styles -->
-        <link rel="stylesheet" href="/css/styles.css">
+        <link rel="stylesheet" href="/assets/css/styles.css">
         <!-- Global Site Tag (gtag.js) - Google Analytics - below-->
     </head>
     <body>
-        <app_navigation></app_navigation>
+        <header id="header">
+            <app_header></app_header>
+            <app_menu></app_menu>
+        </header>
         <app_main></app_main>
         <app_footer></app_footer>
     <!-- SCRIPTS -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="/resources/js/jquery-slim.min.js"><\/script>')</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <!-- Riot scripts we need -->
@@ -30,21 +38,18 @@
     <script src="/js/routing.js"></script>
     <script src="/js/app.js"></script>
     <script src="/js/data-api.js"></script>
+    
     <!-- loading tags -->
     <script data-src="/tags/raw.tag" type="riot/tag"></script>
     <script data-src="/tags/spinner.tag" type="riot/tag"></script>
     <script data-src="/tags/cs_article.tag" type="riot/tag"></script>
-    <script data-src="/tags/cs_article2.tag" type="riot/tag"></script>
+    <script data-src="components/app_header.tag" type="riot/tag"></script>
     <script data-src="components/app_main.tag" type="riot/tag"></script>
-    <script data-src="components/app_404.tag" type="riot/tag"></script>
-    <script data-src="components/app_home.tag" type="riot/tag"></script>
-    <script data-src="components/app_articles.tag" type="riot/tag"></script>
-    <script data-src="components/app_navigation.tag" type="riot/tag"></script>
+    <script data-src="components/app_menu.tag" type="riot/tag"></script>
     <script data-src="components/app_footer.tag" type="riot/tag"></script>
     <script>
         <!-- dynamic configuration. Look at cricket.json - service propertises -->
-        app.url = "$serviceurl"
-        app.csAPI = "$serviceurl"+"/api/cs"
+        app.csAPI = "$serviceurl"+"/api/cs";
         app.language = "$defaultLanguage"
         if(app.language.startsWith('$')){
             app.language = 'en'

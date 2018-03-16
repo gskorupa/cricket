@@ -1,0 +1,28 @@
+[
+    {
+        "name": "Home",
+        "link": "#"
+    },
+    {
+        "name": "About",
+        "link": "#articles,about"
+    },
+    {
+        "name": "Language",
+        "id": "lang",
+        "options": [
+            {
+                "name": "English",
+                "link": "#en"
+            },
+            {
+                "name": "French",
+                "link": "#fr"
+            },
+            {
+                "name": "Polish",
+                "link": "#pl"
+            }
+        ]
+    }
+]

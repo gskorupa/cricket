@@ -58,9 +58,9 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
     private final String TEXT = "text/plain";
     private final String XML = "text/xml";
 
-    private String endpointURL;
+    protected String endpointURL;
     protected int timeout = 0;
-    private boolean ignoreCertificateCheck = false;
+    protected boolean ignoreCertificateCheck = false;
 
     //public HashMap<String, String> properties = new HashMap<>();
     @Override

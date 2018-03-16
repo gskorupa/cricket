@@ -30,15 +30,7 @@
         }
         
         readDocument = function (path, language, callback) {
-            getData(app.csAPI + path+'?language='+language,
-                null,
-                null,
-                callback,
-                self.listener, //globalEvents
-                'OK',
-                null, // in case of error send response code
-                app.debug
-                )
+            getData(app.csAPI+path+'?language='+language,null,null,callback,self.listener)
         }
 
         self.showMe = function (response) {

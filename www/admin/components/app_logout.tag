@@ -11,15 +11,7 @@
         });
         
         sendLogout = function () {
-            deleteData(app.authAPI+'/'+app.user.token,
-                    app.user.token,
-                    self.redirect,
-                    globalEvents, //globalEvents
-                    'OK',
-                    null, // in case of error send response code
-                    app.debug,
-                    globalEvents
-                    );
+            deleteData(app.authAPI+'/'+app.user.token,app.user.token,self.redirect,globalEvents)
         }
 
         self.redirect = function (event) {

@@ -93,18 +93,8 @@
         riot.update()
         });
         var readUserList = function () {
-        //TODO
         app.log('reading docs ...')
-                getData(app.userAPI, // url
-                        null, // query
-                        app.user.token, // token
-                        updateList, // callback
-                        self.listener, // event listener
-                        'OK', // success event name
-                        null, // error event name
-                        app.debug, // debug switch
-                        globalEvents         // application event listener
-                        );
+            getData(app.userAPI,null,app.user.token,updateList,self.listener)
         }
 
         var updateList = function (text) {
@@ -114,7 +104,6 @@
         }
 
         editUser(uid, allowEdit){
-        //TODO
         return function(e){
         e.preventDefault()
                 self.selected = uid
@@ -148,16 +137,7 @@
         alert('Operation not permitted')
                 self.removing = ''
         } else{
-        deleteData(
-                app.userAPI + '/' + self.removing,
-                app.user.token,
-                self.closeRemove,
-                null, //self.listener, 
-                'submit:OK',
-                'submit:ERROR',
-                app.debug,
-                null //globalEvents
-                )
+        deleteData(app.userAPI+'/'+self.removing,app.user.token,self.closeRemove,globalEvents)
         }
         }
         }

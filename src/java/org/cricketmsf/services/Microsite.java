@@ -154,16 +154,21 @@ public class Microsite extends Kernel {
 
         //TODO: to nie jest optymalne rozwiązanie
         dispatchEvent(Event.logFinest(this.getClass().getSimpleName(), event.getRequest().uri));
+        String language = (String) event.getRequest().parameters.get("language");
+        if (language == null || language.isEmpty()) {
+            language = "en";
+        }
         ParameterMapResult result = null;
+        String cacheName = "webcache_"+language;
         try {
             result = (ParameterMapResult) cms
-                    .getFile(event.getRequest(), htmlAdapter.useCache() ? database : null, "webcache");
+                    .getFile(event.getRequest(), htmlAdapter.useCache() ? database : null, cacheName, language);
             if (result.getCode() == HttpAdapter.SC_NOT_FOUND) {
                 if (event.getRequest().pathExt.endsWith(".html")) {
                     //TODO: configurable index file params
                     RequestObject request = processRequest(event.getRequest(), ".html", "index_pl.html");
                     result = (ParameterMapResult) fileReader
-                            .getFile(request, htmlAdapter.useCache() ? database : null, "webcache");
+                            .getFile(request, htmlAdapter.useCache() ? database : null, cacheName);
                 }
             }
             //((HashMap) result.getData()).put("serviceurl", getProperties().get("serviceurl"));
@@ -488,7 +493,17 @@ public class Microsite extends Kernel {
                 break;
             case "CONTENT":
                 try {
-                    database.clear("webcache");
+                    database.clear("webcache_pl");
+                } catch (KeyValueDBException ex) {
+                    dispatchEvent(Event.logWarning(this, "Problem while clearing web cache - " + ex.getMessage()));
+                }
+                try {
+                    database.clear("webcache_en");
+                } catch (KeyValueDBException ex) {
+                    dispatchEvent(Event.logWarning(this, "Problem while clearing web cache - " + ex.getMessage()));
+                }
+                try {
+                    database.clear("webcache_fr");
                 } catch (KeyValueDBException ex) {
                     dispatchEvent(Event.logWarning(this, "Problem while clearing web cache - " + ex.getMessage()));
                 }

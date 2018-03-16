@@ -119,48 +119,17 @@
             }else{
                 app.log('DOCUMENTS: ' + eventName)
             }
-            /*switch (eventName){
-                case 'submitted':
-                self.selected = ''
-                readPaths()
-                //readMyDevices()  //this line results in logout,login error
-                break
-                case 'cancelled':
-                self.selected = ''
-                break
-                default:
-                app.log('DOCUMENTS: ' + eventName)
-            }
-            */
             riot.update()
         });
         
         var readPaths = function () {
             app.log('reading paths ...')
-            getData(app.cmAPI + '?pathsonly=true', // url
-                        null, // query
-                        app.user.token, // token
-                        updatePaths, // callback
-                        self.listener, // event listener
-                        'OK', // success event name
-                        null, // error event name
-                        app.debug, // debug switch
-                        globalEvents         // application event listener
-            );
+            getData(app.cmAPI+'?pathsonly=true',null,app.user.token,updatePaths,self.listener)
         }
 
         var readContentList = function () {
             app.log('reading docs ...')
-            getData(app.cmAPI + '?path=' + self.path + '&language=' + self.selectedLanguage + '&status=' + self.status, // url
-                        null, // query
-                        app.user.token, // token
-                        updateList, // callback
-                        self.listener, // event listener
-                        'OK', // success event name
-                        null, // error event name
-                        app.debug, // debug switch
-                        globalEvents         // application event listener
-            );
+            getData(app.cmAPI+'?path='+self.path+'&language='+self.selectedLanguage+'&status='+self.status,null,app.user.token,updateList,self.listener)
         }
 
         var updatePaths = function (text) {
@@ -206,19 +175,7 @@
                     'language': self.selectedLanguage,
                     'status': isPublished?'published':'wip'
                 }
-                sendData(
-                formData,
-                'PUT',
-                app.cmAPI + docId,
-                app.user.token,
-                self.afterPublish, //TODO
-                null,
-                'submit:OK',
-                'submit:ERROR',
-                app.debug,
-                null
-                )
-                app.log('SET PUBLISHED ' + isPublished)
+                sendData(formData,'PUT',app.cmAPI+docId,app.user.token,self.afterPublish,globalEvents)
                 riot.update()
             }
         }
@@ -277,16 +234,7 @@
             return function(e){
                 e.preventDefault()
                 console.log('REMOVING ' + self.removing + ' ...')
-                deleteData(
-                    app.cmAPI + self.removing,
-                    app.user.token,
-                    self.closeRemove,
-                    null, //self.listener, 
-                    'submit:OK',
-                    'submit:ERROR',
-                    app.debug,
-                    null //globalEvents
-                )
+                deleteData(app.cmAPI + self.removing,app.user.token,self.closeRemove,globalEvents)
             }
         }
         

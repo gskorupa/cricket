@@ -1,6 +1,7 @@
 <app_header>
         <nav class="navbar navbar-expand-md navbar-dark bg-primary fixed-top">
             <a class="navbar-brand" href="#">{ labels.name[app.language] }</a>
+            <span hidden={ app.requests<=0 }><spinner/></span>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -28,16 +29,20 @@
             </div>
         </nav>
     <script>
-
         var self = this
-
-        globalEvents.on('dataerror:401', function (eventName) {
-            app.user.name = '';
-            app.user.token = '';
-            app.user.status = 'logged-out';
-            riot.update();
+        globalEvents.on('*', function (event) {
+            if(event=='err:401'){
+                app.user.name = '';
+                app.user.token = '';
+                app.user.status = 'logged-out';
+                riot.update()
+            }else if(event&&(event=='sending'||event=='dataLoaded'||event.startsWith('err:'))){
+                app.log('HANDLING:'+event);
+                riot.update()
+            }else{
+                app.log(event)
+            }
         })
-
         this.labels = {
             "name": {
                 "en": "Cricket \u00B5Site",

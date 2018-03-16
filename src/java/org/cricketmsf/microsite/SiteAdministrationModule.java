@@ -147,7 +147,17 @@ public class SiteAdministrationModule {
         }
         // web moduleName CACHE
         try {
-            database.addTable("webcache", maxCacheSize, false);
+            database.addTable("webcache_pl", maxCacheSize, false);
+        } catch (ClassCastException | KeyValueDBException e) {
+            Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
+        }
+        try {
+            database.addTable("webcache_en", maxCacheSize, false);
+        } catch (ClassCastException | KeyValueDBException e) {
+            Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
+        }
+        try {
+            database.addTable("webcache_fr", maxCacheSize, false);
         } catch (ClassCastException | KeyValueDBException e) {
             Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
         }

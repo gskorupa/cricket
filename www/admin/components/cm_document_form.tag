@@ -185,7 +185,7 @@
         fd.set('summary',summ)
         var c=encodeURIComponent(fd.get('content'))
         fd.set('content',c)
-        sendFormData(fd, self.method, app.cmAPI + docPath, app.user.token, self.close, null, 'submit:OK', 'submit:ERROR', app.debug, null)
+        sendFormData(fd, self.method, app.cmAPI + docPath, app.user.token, self.close, globalEvents)
     }
 
     self.close = function (object) {
@@ -220,16 +220,7 @@
     }
 
     var readDocument = function (docUid) {
-        getData(app.cmAPI + docUid + '?language=' + self.selectedLanguage + '&status=' + self.selectedStatus,
-                null,
-                app.user.token,
-                update,
-                self.listener, //globalEvents
-                'OK',
-                null, // in case of error send response code
-                app.debug,
-                globalEvents
-                );
+        getData(app.cmAPI+docUid+'?language='+self.selectedLanguage+'&status='+self.selectedStatus,null,app.user.token,update,self.listener)
     }
 
 

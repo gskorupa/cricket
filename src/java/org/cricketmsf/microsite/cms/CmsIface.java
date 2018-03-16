@@ -33,5 +33,5 @@ public interface CmsIface {
     public void acceptComment(String documentUid, String commentUid) throws CmsException;
     public void removeComment(String documentUid, String commentUid) throws CmsException;
     //public Result getFile(String uid, String language) throws CmsException;
-    public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName);
+    public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName, String language);
 }

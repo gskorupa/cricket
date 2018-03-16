@@ -19,37 +19,33 @@
     </div>
     <script>
         self=this
-        
-        globalEvents.on('auth.error', function (event) {
-            app.log("Login error!")
+        globalEvents.on('*', function (event) {
+            if(event=='auth:loggedin'){
+                app.currentPage = 'main'
+                getData(app.userAPI+'/'+app.user.name, null, app.user.token, saveUserData, globalEvents)
+            }else if(event=='auth:error'){
+                alert(event)
+            }
         });
-        
-        globalEvents.on('auth:loggedin', function (event) {
-            app.log("Login success!")
-            app.currentPage = 'main'
-            getData(app.userAPI+'/'+app.user.name, null, app.user.token, saveUserData, globalEvents, 'user:ok', 'user.error', app.debug)
-        });
-        
         saveUserData = function(text){
             tmpUser = JSON.parse(text);
             app.user.role = tmpUser.role
             riot.update()
         }
-
         submitLoginForm = function(e){
             e.preventDefault()
             app.log("submitting ..."+e.target)
             loginSubmit(e.target, globalEvents, 'auth:loggedin', 'auth.error');
             e.target.reset()
         }
-
         this.labels = {
             "l_title": {
                 "en": "Cricket Microsite",
                 "pl": "Cricket Microsite"
-            },"l_name": {
-                "en": "Name",
-                "pl": "Nazwa"
+            },
+            "l_name": {
+                "en": "Login",
+                "pl": "Login"
             },
             "l_password": {
                 "en": "Pasword",
@@ -58,9 +54,12 @@
             "l_save": {
                 "en": "Sign In",
                 "pl": "Zaloguj się"
+            },
+            "l_error": {
+                "en": "Wrong login or password",
+                "pl": "Niepoprawny login lub hasło"
             }
         }
-        
     </script>
     <style>
         .form-login{
