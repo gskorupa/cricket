@@ -48,7 +48,6 @@ hs_err_pid*
 /data/cricket.log
 /www/kitty.jpg
 /data/echo.xml
-/data/scheduler.xml
 /www/test/test.txt
 /data/cricket.log.lck
 /docs/notes.txt
@@ -60,7 +59,6 @@ hs_err_pid*
 /data/echo.db
 /data/echo.counters.db
 /docs/javadoc/
-/data/local.db
 /data/local.counters.db
 /dist/cricket-1.1.0-SNAPSHOT.bin
 !/lib/json-io-4.9.7.jar
@@ -71,7 +69,5 @@ hs_err_pid*
 /db/
 /dist/
 /test/
-/log/cricket0.log.1
-/log/cricket0.log
-/log/cricket0.log.lck
 /data/cricket_publickeystore.jks
+/docs/todo/

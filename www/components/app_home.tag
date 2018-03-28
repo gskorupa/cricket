@@ -1,31 +1,64 @@
 <app_home>
     <!-- Main jumbotron for a primary marketing message or call to action -->
-      <div class="jumbotron">
+    <div class="jumbotron">
         <div class="container">
-          <h1 class="display-3">Hello, world!</h1>
-          <p>This is a template for a simple marketing or informational website. It includes a large callout called a jumbotron and three supporting pieces of content. Use it as a starting point to create something more unique.</p>
-          <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more &raquo;</a></p>
+            <cs_article3 title={doc.title} summary={doc.summary} uid={doc.uid} page='#articles'/>
         </div>
-      </div>
-
-      <div class="container">
+    </div>
+    <div class="container">
         <!-- Example row of columns -->
         <div class="row">
-          <div class="col-md-4">
-            <h2>Heading</h2>
-            <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-            <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
-          </div>
-          <div class="col-md-4">
-            <h2>Heading</h2>
-            <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-            <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
-          </div>
-          <div class="col-md-4">
-            <h2>Heading</h2>
-            <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-            <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
-          </div>
+            <virtual each={item in list}>
+                     <div class="col-md-4">
+                    <cs_article2 title={item.title} summary={item.summary} type='list' page='#articles' uid={ item.uid }></cs_article2>
+                </div>
+            </virtual>
         </div>
-      </div> <!-- /container -->
+    </div>
+    <script>
+        var self = this
+        self.mounted = false
+        self.doc = {title: 'Hello', summary: 'It seems that your application is not configured.'}
+        self.list = []
+        globalEvents.on('language', function (event) {
+            if(self.mounted){
+                loadDocs()
+            }
+        })
+        globalEvents.on('pageselected', function (event) {
+            if (self.mounted && app.currentPage == '') {
+                loadDocs()
+            }
+        })
+        self.on('*', function (event) {
+            switch (event) {
+                case 'err:404':
+                    self.notFound = true
+                    self.update()
+                    break
+                case 'mount':
+                    self.mounted = true
+                    loadDocs()
+                    break
+                case 'unmount':
+                    self.mounted = false
+            }
+        })
+        var loadDocs = function () {
+            getData(app.csAPI + '/home?language=' + app.language, null, null, setDocument, self, null)
+            getData(app.csAPI + '?path=/home/&language=' + app.language, null, null, setDocList, self, null)
+        }
+        var setDocument = function (text) {
+            self.doc = JSON.parse(text)
+            riot.mount('cs_article3', {title: self.doc.title, summary: self.doc.summary, page: '#articles', uid: self.doc.uid})
+            self.update()
+        }
+        var setDocList = function (text) {
+            self.list = JSON.parse(text)
+            if (self.list) {
+                self.list = self.list.slice(0, 3)
+            }
+            self.update()
+        }
+    </script>
 </app_home>

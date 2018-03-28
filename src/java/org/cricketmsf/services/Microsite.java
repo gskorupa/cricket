@@ -152,7 +152,7 @@ public class Microsite extends Kernel {
     @HttpAdapterHook(adapterName = "WwwService", requestMethod = "GET")
     public Object wwwGet(Event event) {
 
-        //TODO: to nie jest optymalne rozwiązanie
+        //TODO: optimization
         dispatchEvent(Event.logFinest(this.getClass().getSimpleName(), event.getRequest().uri));
         String language = (String) event.getRequest().parameters.get("language");
         if (language == null || language.isEmpty()) {
@@ -166,7 +166,7 @@ public class Microsite extends Kernel {
             if (result.getCode() == HttpAdapter.SC_NOT_FOUND) {
                 if (event.getRequest().pathExt.endsWith(".html")) {
                     //TODO: configurable index file params
-                    RequestObject request = processRequest(event.getRequest(), ".html", "index_pl.html");
+                    RequestObject request = processRequest(event.getRequest(), ".html", "index.html");
                     result = (ParameterMapResult) fileReader
                             .getFile(request, htmlAdapter.useCache() ? database : null, cacheName);
                 }
@@ -178,6 +178,7 @@ public class Microsite extends Kernel {
             rd.put("token", event.getRequestParameter("tid"));  // fake tokens doesn't pass SecurityFilter
             rd.put("user", event.getRequest().headers.getFirst("X-user-id"));
             rd.put("environmentName", getName());
+            rd.put("javaversion", System.getProperty("java.version"));
             List<String> roles = event.getRequest().headers.get("X-user-role");
             if (roles != null) {
                 StringBuilder sb = new StringBuilder("[");
@@ -312,6 +313,7 @@ public class Microsite extends Kernel {
         return AuthBusinessLogic.getInstance().refreshToken(event, authAdapter);
     }
 
+    /**
     @HttpAdapterHook(adapterName = "ConfirmationService", requestMethod = "GET")
     public Object userConfirm(Event event) {
         StandardResult result = new StandardResult();
@@ -325,7 +327,6 @@ public class Microsite extends Kernel {
                             user.setConfirmed(true);
                             userAdapter.modify(user);
                             result.setCode(200);
-                            //TODO: build default html page or redirect
                             String pageContent
                                     = "Registration confirmed.<br>You can go to <a href=/#login>login page</a> and sign in.";
                             result.setFileExtension("html");
@@ -335,7 +336,7 @@ public class Microsite extends Kernel {
                 } else {
                     result.setCode(401);
                     String pageContent
-                            = "Oops, something has gone wrong: confirmation token not found . We cannot confirm your <a href=/#>Signomix</a> registration. Please contact support.";
+                            = "Oops, something has gone wrong: confirmation token not found . We cannot confirm your <a href=/#>Cricket</a> registration. Please contact support.";
                     result.setFileExtension("html");
                     result.setHeader("Content-type", "text/html");
                     result.setPayload(pageContent.getBytes());
@@ -348,6 +349,7 @@ public class Microsite extends Kernel {
         }
         return result;
     }
+    */
 
     @HttpAdapterHook(adapterName = "ContentService", requestMethod = "OPTIONS")
     public Object contentCors(Event requestEvent) {
@@ -389,7 +391,7 @@ public class Microsite extends Kernel {
     public void logEvent(Event event) {
         logAdapter.log(event);
         if (event.getType().equals(Event.LOG_SEVERE)) {
-            emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Signomix - error", event.toString());
+            emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Cricket - error", event.toString());
         }
     }
 
@@ -418,7 +420,7 @@ public class Microsite extends Kernel {
                             + "<a href='" + getProperties().get("serviceurl") + "/api/confirm?key=" + user.getConfirmString() + "'>Click here to confirm your registration</a><br>"
                             + "If you received this email by mistake, simply delete it. You won't be registered if you don't click the confirmation link above."
                     );
-                    emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Signomix - registration", uid);
+                    emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Cricket - registration", uid);
                     
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -431,16 +433,12 @@ public class Microsite extends Kernel {
                     User user = userAdapter.get(uid);
                     emailSender.send(
                             user.getEmail(),
-                            "Signomix unregistration confirmed",
-                            "We received a request to remove your account from Signomix Platform with this email address.<br>"
+                            "Cricket unregistration confirmed",
+                            "We received a request to remove your account from Cricket Platform with this email address.<br>"
                             + "Your account is locked now and all data related to your account will be deleted to the end of next work day.<br>"
                             + "If you received this email by mistake, you can contact our support before this date to stop unregistration procedure."
-                            + "<br><br>"
-                            + "OtrzymaliĹmy proĹbÄ usuniÄcia konta z platformy Signomix z tym adresem email.<br>"
-                            + "Twoje konto zostaĹo zablokowane i wszystkie dane z nim zwiÄzane zostanÄ wykasowane z koĹcem nastÄpnego dnia roboczego.<br>"
-                            + "JeĹźeli otrzymaĹeĹ ten email przez pomyĹkÄ, moĹźesz skontaktowaÄ siÄ z nami przed tÄ datÄ w celu odwoĹania procesu wyrejestrowania."
                     );
-                    emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "signomix - unregister", uid);
+                    emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Cricket - unregister", uid);
                     
                 } catch (Exception e) {
                     e.printStackTrace();

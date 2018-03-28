@@ -46,6 +46,7 @@
     <script data-src="components/cm_tags.tag" type="riot/tag"></script>
     <script data-src="components/app_users.tag" type="riot/tag"></script>
     <script data-src="components/user_form.tag" type="riot/tag"></script>
+    <script data-src="components/app_password_form.tag" type="riot/tag"></script>
 
     <script>
         <!-- dynamic configuration. Look at cricket.json - service propertises -->
@@ -53,6 +54,7 @@
         app.userAPI = "$serviceurl" + "/api/user";
         app.csAPI = "$serviceurl" + "/api/cs";
         app.cmAPI = "$serviceurl" + "/api/cm";
+        app.jvm = "$javaversion";
         riot.mount('*');
         route.start(true);
     </script>

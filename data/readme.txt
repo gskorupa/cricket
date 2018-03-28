@@ -1,1 +1,0 @@
-Default folder for data files (logs, databases etc).

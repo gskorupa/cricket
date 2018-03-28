@@ -49,8 +49,10 @@
 
     <target name="compile" depends="init" description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
+        <copy file="${src}/BasicService-help.template" tofile="${src}/BasicService-help.txt" overwrite="true"/>
+        <replace file="${src}/BasicService-help.txt" token="{{version}}" value="${version}" summary="true"/>
         <javac 
-            target="8" 
+            target="1.10" 
             source="1.8" 
             srcdir="${src}" 
             destdir="${build}"
@@ -110,7 +112,9 @@
         <echo message="Building distribution package"/>
         <copy todir="${dist}/work/config" file="${src}/cricket.json"/>
         <copy todir="${dist}" file="${src-other}/run.sh"/>
-        <replace file="${dist}/run.sh" token="{{distribution}}" value="${jar-name}"/>
+        <copy file="Dockerfile.template" tofile="Dockerfile" overwrite="true"/>
+        <replace file="${dist}/run.sh" token="{{distribution}}" value="${jar-name}" summary="true"/>
+        <replace file="Dockerfile" token="{{version}}" value="${version}" summary="true"/>
         <replace file="${dist}/work/www/admin/components/app_main.tag" token="cricket-version" value="${version}"/>
         <zip basedir="dist" destfile="microsite.zip"/>
     </target>

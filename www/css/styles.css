@@ -2,7 +2,18 @@
 body {
   padding-top: 3.5rem;
 }
-
 .top-spacing {
     margin-top: 1rem;
+}
+h1 {
+    font-size: xx-large;
+    font-weight: bold;
+}
+article.homelist header h1 {
+    font-size: x-large;
+    font-weight: bold;
+}
+article.list header h1 {
+    font-size: x-large;
+    font-weight: bold;
 }

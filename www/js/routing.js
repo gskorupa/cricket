@@ -7,6 +7,7 @@ route(function (id) {
         app.language = id
         globalEvents.trigger('language')
         riot.mount('raw')
+        riot.update()
         return
     }
 
