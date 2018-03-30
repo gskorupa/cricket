@@ -14,16 +14,17 @@
     <property name="lib" location="lib"/>
     <property name="jar-name" value="cricket-${version}.jar"/>
     
-    <!-- define Maven repository coordinates -->
+    <!-- define parameters used by repositories -->
     <property name="groupId" value="org.cricketmsf" />
     <property name="artifactId" value="cricket" />
-    <!-- define artifacts' name, which follows the convention of Maven -->
+    <property name="docker-repository" value="gskorupa" />
     <property name="jar" value="${dist}/${artifactId}-${version}.jar" />
     <property name="javadoc-jar" value="${dist}/${artifactId}-${version}-javadoc.jar" />
     <property name="sources-jar" value="${dist}/${artifactId}-${version}-sources.jar" />
     
-    <!-- used external libraries -->
-    <property name="json-io-lib" value="json-io-4.9.7.jar"/>
+    <!-- external libraries used by Cricket-->
+    <!-- REMEMBER to download these libraries before building Cricket -->
+    <property name="json-io-lib" value="json-io-4.10.0.jar"/>
     <property name="commons-csv-lib" value="commons-csv-1.2.jar"/>
     <property name="h2-lib" value="h2-1.4.196.jar"/>
     <property name="javamail-lib" value="javax.mail.jar"/>
@@ -116,14 +117,11 @@
         <replace file="${dist}/run.sh" token="{{distribution}}" value="${jar-name}" summary="true"/>
         <replace file="Dockerfile" token="{{version}}" value="${version}" summary="true"/>
         <replace file="${dist}/work/www/admin/components/app_main.tag" token="cricket-version" value="${version}"/>
-        <zip basedir="dist" destfile="microsite.zip"/>
+        <zip basedir="dist" destfile="${artifactId}-microsite.zip"/>
     </target>
     
-    <target name="distribution" depends="clean, compile"
+    <target name="distribution" depends="dist"
             description="generate the distribution">
-        <!-- Create the distribution directory -->
-        <mkdir dir="${dist}"/>
-        <antcall inheritall="true" target="jar"/>
         <antcall inheritall="true" target="doc"/>
         <jar basedir="src" destfile="${sources-jar}"/>
     </target>
@@ -152,5 +150,22 @@
             <zipfileset src="${lib}/${javamail-lib}" includes="com/**/*,javax/**/*"/>
         </jar>
     </target>
+    
+        <target name="docker-build" depends="jar" description="create new tagged image">
+        <exec executable="docker">
+            <arg value="build"/>
+            <arg value="-t"/>
+            <arg value="${docker-repository}/${artifactId}-microsite:${version}"/>
+            <arg value="."/>
+        </exec>
+    </target>
+    
+    <target name="docker-push" description="push current image to the repository">
+        <exec executable="docker">
+            <arg value="push"/>
+            <arg value="${docker-repository}/${artifactId}-microsite:${version}"/>
+        </exec>
+    </target>
+
     
 </project>

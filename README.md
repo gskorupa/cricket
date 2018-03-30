@@ -4,11 +4,11 @@
 
 Get latest Cricket distribution from [GitHub](https://github.com/gskorupa/Cricket/releases):
 
-    wget https://github.com/gskorupa/Cricket/releases/download/1.2.8/cricket-1.2.8.jar
+    wget https://github.com/gskorupa/Cricket/releases/download/1.2.38/cricket-1.2.38.jar
 
 Run default service:
 
-    java -jar cricket-1.2.8.jar -r
+    java -jar cricket-1.2.38.jar -r
 
 Test built-in echo API using web browser or cURL:
 
@@ -19,16 +19,17 @@ You can also try built-in webserver by creating files in www subfolder (this is 
 
     mkdir www
     echo "Hello World" > www/index.html
-    java -jar cricket-1.2.8.jar -r
+    java -jar cricket-1.2.38.jar -r
     curl http://localhost:8080
 
 ## Rapid prototyping of microservices
 
 Cricket MSF can be used for rapid prototyping of microservices by giving basic 
-building blocka to developers so they can focus on required business logic.
+building blocks to developers so they can focus on required business logic. 
+This approach can be used eg. in the design phase to check the solution concept.
 
 As an example lets build simple Hello World service by extending built-in BasicService. 
-What we need to to is overriding getAdapters() method and to provice minimum one 
+What we need to to is overriding getAdapters() method and to provide minimum one 
 handler method with expected logic.
 
     // MyService.java
@@ -67,11 +68,11 @@ handler method with expected logic.
 
 After compiling the class:
 
-    javac -classpath cricket-1.2.8.jar MyService.java
+    javac -classpath cricket-1.2.38.jar MyService.java
 
 We can run the service using Cricket's "lift" mode:
 
-    java -cp .:cricket-1.2.8.jar org.cricketmsf.Runner -r -l MyService
+    java -cp .:cricket-1.2.38.jar org.cricketmsf.Runner -r -l MyService
 
 Our service will be accessible on localhost so we can request it on it's defined 
 context "/test":
@@ -90,6 +91,11 @@ context "/test":
     "World"
     ]
 
+## Fully functional microservices
+
+To see how to build a fully functional microservice, you can start by studying 
+org.cricketmsf.services.Microsite and org.cricketmsf.services.BasicService source code. 
+Then read the available documentation starting from https://cricketmsf.org
 
 ## Cricket development quick start
 To build Cricket you will need:
@@ -98,17 +104,14 @@ To build Cricket you will need:
 
 Edit build.xml to modify properties and file paths according to your system. 
 
-Compile and build distribution packages (cricket-version-number.jar) with command:
+Compile and build distribution packages with command:
 
     ant distribution
 
 
-## Building services with Cricket
-
-It's highly recommended to use the service template as a starting point: https://github.com/gskorupa/cricket-starter
-
 ## More information
 
+Go to https://cricketmsf.org to find more information about the platform.
+
 In case of problems or questions please create issue in the project Github repository.
-You can also find a list of articles on my blog: http://gskorupa.blogspot.com/
 

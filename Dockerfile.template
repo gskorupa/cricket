@@ -10,12 +10,12 @@ RUN mkdir /usr/cricket/work/data
 RUN mkdir /usr/cricket/work/files
 RUN mkdir /usr/cricket/work/backup
 COPY dist/cricket-{{version}}.jar /usr/cricket
-COPY dist/config/cricket.json /usr/cricket/work/config/
-COPY www /usr/cricket/work/www
-COPY dist/data/cricket_publickeystore.jks /usr/cricket/work/data
+COPY dist/work/config/cricket.json /usr/cricket/work/config/
+COPY dist/work/www /usr/cricket/work/www
+COPY dist/work/data/cricket_publickeystore.jks /usr/cricket/work/data
 VOLUME /usr/cricket/work
 WORKDIR /usr/cricket
 
 #CMD ["java", "-jar", "./cricket-{{version}}.jar", "-r", "-c", "work/config/cricket.json"]
 #CMD ["java", "-jar", "./cricket-{{version}}.jar", "-r"]
-CMD ["java", "--add-modules", "java.activation", "-jar", "cricket-{{version}}.jar", "-r", "-c", "/usr/cricket/work/config/cricket.json", "-s", "Microsite"]
+CMD ["java", "-illegal-access=deny", "--add-modules", "java.activation", "-jar", "cricket-{{version}}.jar", "-r", "-c", "/usr/cricket/work/config/cricket.json", "-s", "Microsite"]

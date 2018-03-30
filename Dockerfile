@@ -10,9 +10,9 @@ RUN mkdir /usr/cricket/work/data
 RUN mkdir /usr/cricket/work/files
 RUN mkdir /usr/cricket/work/backup
 COPY dist/cricket-1.2.38.jar /usr/cricket
-COPY dist/config/cricket.json /usr/cricket/work/config/
-COPY www /usr/cricket/work/www
-COPY dist/data/cricket_publickeystore.jks /usr/cricket/work/data
+COPY dist/work/config/cricket.json /usr/cricket/work/config/
+COPY dist/work/www /usr/cricket/work/www
+COPY dist/work/data/cricket_publickeystore.jks /usr/cricket/work/data
 VOLUME /usr/cricket/work
 WORKDIR /usr/cricket
 
