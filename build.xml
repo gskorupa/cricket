@@ -5,7 +5,7 @@
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <property name="version" value="1.2.38"/>
+    <property name="version" value="1.2.39"/>
     <property name="src" location="src/java"/>
     <property name="src-other" location="src/other"/>
     <property name="build" location="build/classes"/>
@@ -91,9 +91,9 @@
         <mkdir dir="${dist}/work/config"/>
         <mkdir dir="${dist}/work/files"/>
         <mkdir dir="${dist}/work/data"/>
-        <mkdir dir="${dist}/work/www"/>
-        <mkdir dir="${dist}/work/www/assets"/>
         <mkdir dir="${dist}/work/log"/>
+        <mkdir dir="${dist}/www"/>
+        <mkdir dir="${dist}/www/assets"/>
         <delete file="${dist}/work/data/cricket_publickeystore.jks" failonerror="false"></delete>
         <genkey alias="cricket" 
                 keystore="${dist}/work/data/cricket_publickeystore.jks" 
@@ -107,7 +107,7 @@
                 <param name="OU" value="Cricket MSF"/>
             </dname>
         </genkey>
-        <copy todir="${dist}/work/www">
+        <copy todir="${dist}/www">
             <fileset dir="www"/>
         </copy>
         <echo message="Building distribution package"/>
@@ -116,7 +116,7 @@
         <copy file="Dockerfile.template" tofile="Dockerfile" overwrite="true"/>
         <replace file="${dist}/run.sh" token="{{distribution}}" value="${jar-name}" summary="true"/>
         <replace file="Dockerfile" token="{{version}}" value="${version}" summary="true"/>
-        <replace file="${dist}/work/www/admin/components/app_main.tag" token="cricket-version" value="${version}"/>
+        <replace file="${dist}/www/admin/components/app_main.tag" token="cricket-version" value="${version}"/>
         <zip basedir="dist" destfile="${artifactId}-microsite.zip"/>
     </target>
     
@@ -156,6 +156,8 @@
             <arg value="build"/>
             <arg value="-t"/>
             <arg value="${docker-repository}/${artifactId}-microsite:${version}"/>
+            <arg value="-t"/>
+            <arg value="${docker-repository}/${artifactId}-microsite:latest"/>
             <arg value="."/>
         </exec>
     </target>
@@ -164,6 +166,10 @@
         <exec executable="docker">
             <arg value="push"/>
             <arg value="${docker-repository}/${artifactId}-microsite:${version}"/>
+        </exec>
+        <exec executable="docker">
+            <arg value="push"/>
+            <arg value="${docker-repository}/${artifactId}-microsite:latest"/>
         </exec>
     </target>
 

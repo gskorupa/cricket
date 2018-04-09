@@ -2,20 +2,21 @@
 
 #FROM java:8
 #FROM gskorupa/jdk-9-ea-alpine
-FROM openjdk:10-jdk
+FROM openjdk:10-jre-slim
 
-RUN mkdir /usr/cricket
-RUN mkdir /usr/cricket/work
-RUN mkdir /usr/cricket/work/data
-RUN mkdir /usr/cricket/work/files
-RUN mkdir /usr/cricket/work/backup
-COPY dist/cricket-1.2.38.jar /usr/cricket
-COPY dist/work/config/cricket.json /usr/cricket/work/config/
-COPY dist/work/www /usr/cricket/work/www
-COPY dist/work/data/cricket_publickeystore.jks /usr/cricket/work/data
-VOLUME /usr/cricket/work
-WORKDIR /usr/cricket
+RUN mkdir /cricket
+RUN mkdir /cricket/work
+RUN mkdir /cricket/work/data
+RUN mkdir /cricket/work/files
+RUN mkdir /cricket/work/backup
+COPY dist/cricket-1.2.39.jar /cricket
+COPY dist/work/config/cricket.json /cricket/work/config/
+COPY dist/www /cricket/www
+COPY dist/work/data/cricket_publickeystore.jks /cricket/work/data
+VOLUME /cricket/work
+volume /cricket/www
+WORKDIR /cricket
 
-#CMD ["java", "-jar", "./cricket-1.2.38.jar", "-r", "-c", "work/config/cricket.json"]
-#CMD ["java", "-jar", "./cricket-1.2.38.jar", "-r"]
-CMD ["java", "--add-modules", "java.activation", "-jar", "cricket-1.2.38.jar", "-r", "-c", "/usr/cricket/work/config/cricket.json", "-s", "Microsite"]
+#CMD ["java", "-jar", "./cricket-1.2.39.jar", "-r", "-c", "work/config/cricket.json"]
+#CMD ["java", "-jar", "./cricket-1.2.39.jar", "-r"]
+CMD ["java", "--illegal-access=deny", "--add-modules", "java.xml.bind", "--add-modules", "java.activation", "-jar", "cricket-1.2.39.jar", "-r", "-c", "/cricket/work/config/cricket.json", "-s", "Microsite"]

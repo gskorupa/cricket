@@ -178,42 +178,52 @@
         self.labels = {
         "title": {
         "en": "users",
+        "fr": "users",
         "pl": "użytkownicy"
         },
         "t_uid": {
         "en": "LOGIN",
+        "fr": "LOGIN",
         "pl": "LOGIN"
         },
         "t_type": {
         "en": "TYPE",
+        "fr": "TYPE",
         "pl": "TYP"
         },
         "t_role": {
         "en": "ROLE",
+        "fr": "ROLE",
         "pl": "ROLA"
         },
         "t_status": {
         "en": "STATUS",
+        "fr": "STATUS",
         "pl": "STATUS"
         },
         "remove": {
         "en": "Remove",
+        "fr": "Remove",
         "pl": "Usuń"
         },
         "cancel": {
         "en": "Cancel",
+        "fr": "Cancel",
         "pl": "Porzuć"
         },
         "remove_question": {
         "en": "Do you want to remove selected user?",
+        "fr": "Do you want to remove selected user?",
         "pl": "Czy chcesz usunąć wybranego użytkownika?"
         },
         "remove_info": {
         "en": "Are you sure?",
+        "fr": "Are you sure?",
         "pl": "Na pewno?"
         },
         "remove_title": {
         "en": "Removing user",
+        "fr": "Removing user",
         "pl": "Usuwanie użytkownika"
         }
         }

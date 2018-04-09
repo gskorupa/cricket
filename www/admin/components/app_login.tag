@@ -41,21 +41,26 @@
         this.labels = {
             "l_title": {
                 "en": "Cricket Microsite",
+                "fr": "Cricket Microsite",
                 "pl": "Cricket Microsite"
             },
             "l_name": {
                 "en": "Login",
+                "fr": "Login",
                 "pl": "Login"
             },
             "l_password": {
                 "en": "Pasword",
+                "fr": "Pasword",
                 "pl": "Hasło"
             },
             "l_save": {
                 "en": "Sign In",
+                "fr": "Sign In",
                 "pl": "Zaloguj się"
             },
             "l_error": {
+                "en": "Wrong login or password",
                 "en": "Wrong login or password",
                 "pl": "Niepoprawny login lub hasło"
             }

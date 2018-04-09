@@ -1,7 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2018 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.cricketmsf.microsite.cms;
 
@@ -206,6 +216,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             }
             doc.setCreated(Instant.now());
             doc.setModified(Instant.now());
+            doc.setMimeType(doc.getMimeType().trim());
             getDatabase().put("paths", doc.getPath(), doc.getPath());
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
             Kernel.getInstance().dispatchEvent(
@@ -217,7 +228,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
 
     @Override
-    public void addDocument(Map parameters) throws CmsException {
+    public void addDocument(Map parameters, String userID) throws CmsException {
         System.out.println("ADD DOCUMENT 2");
         Document doc = new Document();
         try {
@@ -226,7 +237,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             //System.out.println("UID SET");
             doc.setAuthor((String) parameters.getOrDefault("author", ""));
             doc.setCommentable(Boolean.parseBoolean((String) parameters.getOrDefault("commentable", "false")));
-            doc.setMimeType((String) parameters.getOrDefault("mimeType", ""));
+            doc.setMimeType(((String) parameters.getOrDefault("mimeType", "")).trim());
             doc.setType((String) parameters.getOrDefault("type", ""));
             if (doc.getType().equals(Document.FILE)) {
                 String fileLocation = (String) parameters.getOrDefault("file", "");
@@ -250,7 +261,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 doc.setContent((String) parameters.getOrDefault("content", ""));
                 doc.setSize(0);
             }
-            doc.setCreatedBy((String) parameters.getOrDefault("createdBy", ""));
+            //doc.setCreatedBy((String) parameters.getOrDefault("createdBy", ""));
+            doc.setCreatedBy(userID);
             doc.setLanguage((String) parameters.getOrDefault("language", ""));
             doc.setModified(Instant.now());
             //doc.setName();
@@ -289,8 +301,15 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             throw new CmsException(CmsException.NOT_FOUND, "original document not found");
         }
         try {
+            doc.setMimeType(doc.getMimeType().trim());
             if (!doc.getLanguage().equals(original.getLanguage()) || !doc.getStatus().equals(original.getStatus())) {
                 getDatabase().remove(resolveTableName(original), doc.getUid());
+
+            }
+            if (!doc.getStatus().equals(original.getStatus())) {
+                if (doc.getStatus().equals("published")) {
+                    doc.setPublished(Instant.now());
+                }
             }
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
         } catch (KeyValueDBException e) {
@@ -345,6 +364,9 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 if (!newStatus.equals(actualStatus)) {
                     getDatabase().remove(resolveTableName(doc), doc.getUid());
                     statusChanged = true;
+                    if (doc.getStatus().equals("published")) {
+                        doc.setPublished(Instant.now());
+                    }
                 }
                 doc.setStatus(newStatus);
             }
@@ -380,7 +402,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 }
                 String newMimeType = (String) parameters.get("mimeType");
                 if (newMimeType != null) {
-                    doc.setMimeType(newMimeType);
+                    doc.setMimeType(newMimeType.trim());
                 }
                 doc.setSize(0);
             }
@@ -793,9 +815,9 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
      * @param publishedFilesRoot the publishedFilesRoot to set
      */
     public void setPublishedFilesRoot(String publishedFilesRoot) {
-        if(publishedFilesRoot.startsWith(".")){
-            this.publishedFilesRoot = System.getProperty("user.dir")+publishedFilesRoot.substring(1);
-        }else{
+        if (publishedFilesRoot.startsWith(".")) {
+            this.publishedFilesRoot = System.getProperty("user.dir") + publishedFilesRoot.substring(1);
+        } else {
             this.publishedFilesRoot = publishedFilesRoot;
         }
     }

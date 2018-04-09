@@ -6,11 +6,13 @@
 package org.cricketmsf.microsite.cms;
 
 import java.time.Instant;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author greg
  */
+@XmlRootElement
 public class Document {
 
     public static String PAGE = "PAGE";

@@ -32,21 +32,27 @@
         <div class="col-md-12">
             <table id="doclist" class="table table-condensed">
                 <thead>
-                    <tr>
-                        <th>{labels.t_name[app.language]}</th>
-                        <th>{labels.t_title[app.language]}</th>
+                    <tr class="d-flex">
+                        <th class="col-1"></th>
+                        <th class="col-3">{labels.t_name[app.language]}</th>
+                        <th class="col-5">{labels.t_title[app.language]}</th>
                         <!--<th>{labels.t_status[app.language]}</th>-->
-                        <th class="text-right">
+                        <th class="col-3 text-right">
                             <i class="material-icons clickable" onclick={ editDocument('NEW', true) }>add</i>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr each={doc in documents}>
-                        <td>{ doc.name }</td>
-                        <td>{ doc.title }</td>
+                    <tr class="d-flex" each={doc in documents}>
+                        <td class="col-1">
+                            <i class="material-icons clickable" if={ doc.type == 'FILE'}>attachment</i>
+                            <i class="material-icons clickable" if={ doc.type == 'CODE'}>receipt</i>
+                            <i class="material-icons clickable" if={ doc.type == 'ARTICLE'}>subject</i>
+                        </td>
+                        <td class="col-3">{ doc.name }</td>
+                        <td class="col-5">{ doc.title }</td>
                         <!--<td>{ doc.status }</td>-->
-                        <td class="text-right">
+                        <td class="col-3 text-right">
                             <i class="material-icons clickable" onclick={ editDocument(doc.uid, false) }>open_in_browser</i>
                             <i class="material-icons clickable" onclick={ editDocument(doc.uid, true) }>mode_edit</i>
                             <i class="material-icons clickable" if={ doc.status=='wip'} onclick={ setPublished(doc.uid, true) }>visibility</i>
@@ -252,44 +258,54 @@
         }
 
         self.labels = {
-        "t_name": {
-        "en": "NAME",
+            "t_name": {
+                "en": "NAME",
+                "fr": "NAME",
                 "pl": "NAZWA"
-        },
+            },
                 "t_title": {
                 "en": "TITLE",
+                "fr": "TITLE",
                  "pl": "TYTUŁ"
                 },
                 "t_status": {
                 "en": "STATUS",
+                "fr": "STATUS",
                         "pl": "STATUS"
                 },
-                "path_status": {
+            "path_status": {
                 "en": "Path / Status",
+                "fr": "Path / Status",
                         "pl": "Ścieżka / Status"
                 },
                 "title": {
                 "en": "documents",
+                "fr": "documents",
                         "pl": "dokumenty"
                 },
                 "remove": {
                 "en": "Remove",
+                "fr": "Remove",
                         "pl": "Usuń"
                 },
                 "cancel": {
                 "en": "Cancel",
+                "fr": "Cancel",
                         "pl": "Porzuć"
                 },
                 "remove_question": {
                 "en": "Do you want to remove selected document?",
+                "fr": "Do you want to remove selected document?",
                         "pl": "Czy chcesz usunąć wybrany dokument?"
                 },
                 "remove_info": {
                 "en": "All language versions will be removed.",
+                "fr": "All language versions will be removed.",
                         "pl": "Zostaną usunięte wszystkie wersje językowe."
                 },
                 "remove_title": {
                 "en": "Removing document",
+                "fr": "Removing document",
                         "pl": "Usuwanie dokumentu"
                 }
         }

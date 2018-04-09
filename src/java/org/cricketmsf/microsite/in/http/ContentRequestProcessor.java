@@ -75,6 +75,9 @@ public class ContentRequestProcessor {
             try {
                 doc = adapter.getDocument("/" + pathExt, language, "published");
                 if (doc != null) {
+                    if (doc.getType() == Document.FILE) {
+                        doc.setContent("*****");
+                    }
                     result.setData(doc);
                 } else {
                     result.setCode(HttpAdapter.SC_NOT_FOUND);
@@ -165,53 +168,53 @@ public class ContentRequestProcessor {
         }
 
         String contentType = request.headers.getFirst("Content-Type");
-        try{
-        if ("application/json".equalsIgnoreCase(contentType)) {
-            String jsonString = request.body;
-            //System.out.println(jsonString);
-            jsonString
-                    = "{\"@type\":\"org.cricketmsf.microsite.cms.Document\","
-                    + jsonString.substring(jsonString.indexOf("{") + 1);
+        try {
+            if ("application/json".equalsIgnoreCase(contentType)) {
+                String jsonString = request.body;
+                //System.out.println(jsonString);
+                jsonString
+                        = "{\"@type\":\"org.cricketmsf.microsite.cms.Document\","
+                        + jsonString.substring(jsonString.indexOf("{") + 1);
 
-            Document doc = null;
-            try {
-                doc = (Document) JsonReader.jsonToJava(jsonString);
-            } catch (Exception e) {
-                Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), "deserialization problem - check @type declaration"));
-                e.printStackTrace();
-            }
-            try {
-                if (doc != null) {
-                    doc.validateUid(); // prepend doc.uid with "/" if needed and update doc.path
-                    doc.setStatus("wip");
-                    doc.setCreatedBy(userID);
-                    // make sure that content is allways Base64 encoded
-                    doc.setContent(doc.getContent());
-                    try {
-                        adapter.addDocument(doc);
-                    } catch (CmsException ex) {
-                        Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
-                    }
-                    result.setData(doc);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
+                Document doc = null;
                 try {
-                    adapter.addDocument(request.parameters);
+                    doc = (Document) JsonReader.jsonToJava(jsonString);
+                } catch (Exception e) {
+                    Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), "deserialization problem - check @type declaration"));
+                    e.printStackTrace();
+                }
+                try {
+                    if (doc != null) {
+                        doc.validateUid(); // prepend doc.uid with "/" if needed and update doc.path
+                        doc.setStatus("wip");
+                        doc.setCreatedBy(userID);
+                        // make sure that content is allways Base64 encoded
+                        doc.setContent(doc.getContent());
+                        try {
+                            adapter.addDocument(doc);
+                        } catch (CmsException ex) {
+                            Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
+                        }
+                        result.setData(doc);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                try {
+                    adapter.addDocument(request.parameters, userID);
                     result.setData(adapter.getDocument((String) request.parameters.get("uid"), (String) request.parameters.get("language")));
                 } catch (CmsException ex) {
                     Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
-                    if(ex.getCode()>=400 && ex.getCode()<600){
+                    if (ex.getCode() >= 400 && ex.getCode() < 600) {
                         result.setCode(ex.getCode());
-                    }else{
+                    } else {
                         result.setCode(HttpAdapter.SC_BAD_REQUEST);
                     }
                     result.setMessage(ex.getMessage());
-                }             
+                }
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;

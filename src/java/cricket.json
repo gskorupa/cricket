@@ -94,7 +94,7 @@
                     "interfaceName": "FileReaderAdapterIface",
                     "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
-                        "root": "./work/www/",
+                        "root": "./www/",
                         "index-file": "index.html"
                     }
                 }
@@ -150,7 +150,7 @@
                     "interfaceName": "FileReaderAdapterIface",
                     "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
-                        "root": "./work/www/",
+                        "root": "./www/",
                         "index-file": "index.html"
                     }
                 },
@@ -327,9 +327,9 @@
                     "classFullName": "org.cricketmsf.microsite.cms.CmsEmbededAdapter",
                     "properties": {
                         "helper-name": "cmsDB",
-                        "root-path": "./work/www/",
+                        "root-path": "./www/",
                         "file-path": "./work/files/",
-                        "file-path-published": "./work/www/assets/",
+                        "file-path-published": "./www/assets/",
                         "index-file": "index.html"
                     }
                 },

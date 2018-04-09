@@ -169,54 +169,67 @@
         this.labels = {
             "user_view": {
                 "en": "User Preview",
+                "fr": "User Preview",
                 "pl": "Podgląd Danych Użytkownika"
             },
             "user_new": {
                 "en": "New User",
+                "fr": "New User",
                 "pl": "Nowe Konto Użytkownika"
             },
             "user_modify": {
                 "en": "Modify User",
+                "fr": "Modify User",
                 "pl": "Zmiana Danych Użytkownika"
             },
             "email": {
                 "en": "* e-mail address",
+                "fr": "* e-mail address",
                 "pl": "* adres e-mail"
             },
             "uid": {
                 "en": "* Login (UID)",
+                "fr": "* Login (UID)",
                 "pl": "* Login (UID)"
             },
             "type": {
                 "en": "* User Type",
+                "fr": "* User Type",
                 "pl": "* Typ Użytkownika"
             },
             "role": {
                 "en": "User Roles",
+                "fr": "User Roles",
                 "pl": "Role Użytkownika"
             },
             "password": {
                 "en": "Password",
+                "fr": "Password",
                 "pl": "Hasło"
             },
             "confirmString": {
                 "en": "Confirmation Code",
+                "fr": "Confirmation Code",
                 "pl": "Kod Potwierdzenia"
             },
             "confirmed": {
                 "en": "Is Confirmed?",
+                "fr": "Is Confirmed?",
                 "pl": "Czy potwierdzone?"
             },
             "unregisterRequested": {
                 "en": "* Unregistration Requested?",
+                "fr": "* Unregistration Requested?",
                 "pl": "* Żądanie usunięcia konta?"
             },
             "save": {
                 "en": "Save",
+                "fr": "Save",
                 "pl": "Zapisz"
             },
             "cancel": {
                 "en": "Cancel",
+                "fr": "Cancel",
                 "pl": "Porzuć"
             }
         }

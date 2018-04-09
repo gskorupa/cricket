@@ -54,18 +54,22 @@
                     <label for="content">{ labels.content[app.language] }</label>
                     <input class="form-control" id="content" name="content" value={ doc.content } readonly>
                 </div>
+                <!--
                 <div class="form-group">
                     <label for="tags">{ labels.tags[app.language] }</label>
                     <input class="form-control" id="tags" name="tags" type="text" value={ doc.tags } readonly={ !allowEdit }>
                 </div>
+                -->
                 <div class="form-group">
                     <label for="language">{ labels.language[app.language] }</label>
                     <input class="form-control" id="language" name="language" type="text" value={ doc.language } readonly={ true }>
                 </div>
+                <!--
                 <div class="form-group">
                     <label for="commentable">{ labels.commentable[app.language] }</label>
                     <input class="form-control" id="commentable" name="commentable" type="text" value={ doc.commentable } readonly={ !allowEdit }>
                 </div>
+                -->
                 <div class="form-group" if={doc.type == 'FILE' && allowEdit}>
                     <label for="file">{ labels.selectFile[app.language]}</label><br />
                     <input class="form-control-file" type="file" name="file" id="file">
@@ -227,74 +231,92 @@
     this.labels = {
         "document_view": {
             "en": "Document Preview",
+            "fr": "Document Preview",
             "pl": "Podgląd Dokumentu"
         },
         "document_new": {
             "en": "New Document",
+            "fr": "New Document",
             "pl": "Nowy Dokument"
         },
         "document_modify": {
             "en": "Modify Dokument",
+            "fr": "Modify Dokument",
             "pl": "Edycja Dokumentu"
         },
         "name": {
             "en": "* Name",
+            "fr": "* Name",
             "pl": "* Nazwa"
         },
         "uid": {
             "en": "UID",
+            "fr": "UID",
             "pl": "UID"
         },
         "path": {
             "en": "Path",
+            "fr": "Path",
             "pl": "Ścieżka"
         },
         "title": {
             "en": "Title",
+            "fr": "Title",
             "pl": "Tytuł"
         },
         "author": {
             "en": "Author",
+            "fr": "Author",
             "pl": "Autor"
         },
         "summary": {
             "en": "Summary",
+            "fr": "Summary",
             "pl": "Streszczenie"
         },
         "content": {
             "en": "Content",
+            "fr": "Content",
             "pl": "Treść"
         },
         "tags": {
             "en": "Tags",
+            "fr": "Tags",
             "pl": "Znaczniki"
         },
         "language": {
             "en": "Language",
+            "fr": "Language",
             "pl": "Język"
         },
         "type": {
             "en": "* Type",
+            "fr": "* Type",
             "pl": "* Typ"
         },
         "mimeType": {
             "en": "Mime type",
+            "fr": "Mime type",
             "pl": "Mime type"
         },
         "commentable": {
             "en": "Can be commented?",
+            "fr": "Can be commented?",
             "pl": "Można komentować?"
         },
         "selectFile": {
             "en": "Select a File to Upload",
+            "fr": "Select a File to Upload",
             "pl": "Wybierz plik do przesłania"
         },
         "save": {
             "en": "Save",
+            "fr": "Save",
             "pl": "Zapisz"
         },
         "cancel": {
             "en": "Cancel",
+            "fr": "Cancel",
             "pl": "Porzuć"
         }
     }

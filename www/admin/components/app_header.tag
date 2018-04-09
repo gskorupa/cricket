@@ -24,6 +24,7 @@
                         <a class="nav-link" href="#login">{ labels.login[app.language] }</a>
                     </li>
                     <li class="nav-item" data-toggle="collapse" data-target="#navbarNavDropdown" onclick="document.location = '#en';" if={app.language!='en'}><a class="nav-link" href="#en">EN</a></li>
+                    <li class="nav-item" data-toggle="collapse" data-target="#navbarNavDropdown" onclick="document.location = '#en';" if={app.language!='fr'}><a class="nav-link" href="#fr">FR</a></li>
                     <li class="nav-item" data-toggle="collapse" data-target="#navbarNavDropdown" onclick="document.location = '#pl';" if={app.language!='pl'}><a class="nav-link" href="#pl">PL</a></li>
                 </ul>
             </div>
@@ -46,30 +47,37 @@
         this.labels = {
             "name": {
                 "en": "Cricket \u00B5Site",
+                "fr": "Cricket \u00B5Site",
                 "pl": "Cricket \u00B5Site"
             },
             "users": {
                 "en": "Users",
+                "fr": "Users",
                 "pl": "Użytkownicy"
             },
             "content": {
                 "en": "Content",
+                "fr": "Content",
                 "pl": "Treści"
             },
             "documents": {
                 "en": "documents",
+                "fr": "documents",
                 "pl": "dokumenty"
             },
             "tags": {
                 "en": "tags",
+                "fr": "tags",
                 "pl": "znaczniki"
             },
             "login": {
                 "en": "Sign In",
+                "fr": "Sign In",
                 "pl": "Zaloguj się"
             },
             "logout": {
                 "en": "Sign Out",
+                "fr": "Sign Out",
                 "pl": "Wyloguj się"
             }
         }

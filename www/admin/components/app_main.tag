@@ -46,6 +46,7 @@
         self.labels = {
             "description": {
                 "en": "Microsite management module",
+                "fr": "Microsite management module",
                 "pl": "Microsite - moduł administracyjny"
             }
         }

@@ -11,6 +11,7 @@
         self.labels = {
             "title": {
                 "en": "content management: tags",
+                "fr": "content management: tags",
                 "pl": "zarządzanie treścią: tagi"
             }
         }

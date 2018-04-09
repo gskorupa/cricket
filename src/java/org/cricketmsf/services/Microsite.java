@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
- * Copyright 2017 Signocom Sp. z o.o.
- */
 package org.cricketmsf.services;
 
 import org.cricketmsf.Event;

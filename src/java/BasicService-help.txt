@@ -1,5 +1,5 @@
 
-Usage: java -jar cricketms-1.2.38.jar [options]
+Usage: java -jar cricketms-1.2.39.jar [options]
 
 Runs selected service class.
 
