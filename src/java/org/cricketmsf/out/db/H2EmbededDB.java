@@ -44,6 +44,8 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     private String userName;
     private String password;
     private String systemVersion;
+    private boolean encrypted;
+    private String filePassword;
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -61,6 +63,10 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         Kernel.getLogger().print("\tuser: " + getUserName());
         setPassword(properties.get("password"));
         Kernel.getLogger().print("\tpassword=" + getPassword());
+        setEncrypted(properties.get("encrypted"));
+        Kernel.getLogger().print("\tencrypted=" + isEncrypted());
+        setFilePassword(properties.get("filePassword"));
+        Kernel.getLogger().print("\tfilePassword=" + getFilePassword());
         try {
             start();
         } catch (KeyValueDBException ex) {
@@ -117,7 +123,11 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
 
     @Override
     public void start() throws KeyValueDBException {
-        cp = JdbcConnectionPool.create("jdbc:h2:" + getLocation(), getUserName(), getPassword());
+        if (isEncrypted()) {
+            cp = JdbcConnectionPool.create("jdbc:h2:" + getLocation()+";CIPHER=AES", getUserName(), getFilePassword()+" "+getPassword());
+        } else {
+            cp = JdbcConnectionPool.create("jdbc:h2:" + getLocation(), getUserName(), getPassword());
+        }
         Connection conn = null;
         try {
             conn = cp.getConnection();
@@ -362,7 +372,24 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         return getName() + ".zip";
     }
 
-    public void updateStructure(Connection conn, String from, String to) throws KeyValueDBException {
+    public final void updateStructure(Connection conn, String from, String to) throws KeyValueDBException {
+        int fromVersion = 1;
+        int toVersion = -1;
+        try {
+            fromVersion = Integer.parseInt(from);
+        } catch (NumberFormatException | NullPointerException e) {
+            e.printStackTrace();
+        }
+        try {
+            toVersion = Integer.parseInt(to);
+        } catch (NumberFormatException | NullPointerException e) {
+            e.printStackTrace();
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_WRITE, "cannot update database structure of " + this.getClass().getSimpleName());
+        }
+        for (int i = fromVersion; i < toVersion; i++) {
+            updateStructureTo(conn, i + 1);
+        }
+
         String query = "update serviceversion set version='" + to + "' where version='" + from + "'";
         try {
             conn.createStatement().execute(query);
@@ -374,4 +401,35 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         }
     }
 
+    protected void updateStructureTo(Connection conn, int versionNumber) throws KeyValueDBException {
+        throw new KeyValueDBException(KeyValueDBException.UNKNOWN, "method not implemented");
+    }
+
+    /**
+     * @return the encrypted
+     */
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    /**
+     * @param encrypted the encrypted to set
+     */
+    public void setEncrypted(String encrypted) {
+        this.encrypted = Boolean.parseBoolean(encrypted);
+    }
+
+    /**
+     * @return the filePassword
+     */
+    public String getFilePassword() {
+        return filePassword;
+    }
+
+    /**
+     * @param filePassword the filePassword to set
+     */
+    public void setFilePassword(String filePassword) {
+        this.filePassword = filePassword;
+    }
 }

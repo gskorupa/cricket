@@ -2,6 +2,7 @@
  * Copyright 2018 Grzegorz Skorupa <g.skorupa at gmail.com>.
  * Licensed under the Apache License http://www.apache.org/licenses/LICENSE-2.0
  */
+
 route(function (id) {
     if (app.languages.indexOf(id) > -1) {
         app.language = id
@@ -23,4 +24,3 @@ route(function (id) {
     globalEvents.trigger('pageselected')
     riot.update()
 })
-

@@ -139,7 +139,7 @@ public class UserModule extends UserBusinessLogic {
                 userAdapter.confirmRegistration(newUser.getUid());
                 result.setCode(HttpAdapter.SC_CREATED);
                 //fire event to send "welcome" email
-                Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_REG_CONFIRMED, newUser.getUid()));
+                Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_REG_CONFIRMED, newUser.getNumber()));
             }
             result.setData(newUser.getUid());
         } catch (UserException e) {
@@ -174,8 +174,9 @@ public class UserModule extends UserBusinessLogic {
             return result;
         }
         try {
+            User tmpUser =userAdapter.get(uid);
             userAdapter.remove(uid);
-            Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_DELETED, uid));
+            Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_DELETED, tmpUser.getNumber()+" "+uid));
             result.setCode(HttpAdapter.SC_OK);
             result.setData(uid);
         } catch (UserException e) {
@@ -232,6 +233,7 @@ public class UserModule extends UserBusinessLogic {
             }
             if (confirmed != null) {
                 user.setConfirmed("true".equalsIgnoreCase(confirmed));
+                Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_REG_CONFIRMED, user.getNumber()));
             }
             if (unregisterRequested != null) {
                 //is this new request?

@@ -28,6 +28,7 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -214,8 +215,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             if (getDatabase().containsKey(resolveTableName(doc), doc.getUid())) {
                 throw new CmsException(CmsException.ALREADY_EXISTS, "document already exists");
             }
-            doc.setCreated(Instant.now());
-            doc.setModified(Instant.now());
+            doc.setCreated(Instant.now().toString());
+            doc.setModified(Instant.now().toString());
             doc.setMimeType(doc.getMimeType().trim());
             getDatabase().put("paths", doc.getPath(), doc.getPath());
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
@@ -264,10 +265,10 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             //doc.setCreatedBy((String) parameters.getOrDefault("createdBy", ""));
             doc.setCreatedBy(userID);
             doc.setLanguage((String) parameters.getOrDefault("language", ""));
-            doc.setModified(Instant.now());
+            doc.setModified(Instant.now().toString());
             //doc.setName();
             // doc.setPublished(Instant.EPOCH);
-            doc.setCreated(Instant.now());
+            doc.setCreated(Instant.now().toString());
             doc.setStatus("wip");
             doc.setSummary((String) parameters.getOrDefault("summary", ""));
             doc.setTags((String) parameters.getOrDefault("tags", ""));
@@ -295,7 +296,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         Document original = null;
         original = getDocument(doc.getUid(), null, null);
         doc.setCreated(original.getCreated());
-        doc.setModified(Instant.now());
+        doc.setModified(Instant.now().toString());
         if (original == null) {
             Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "original document uid=" + doc.getUid() + " not found"));
             throw new CmsException(CmsException.NOT_FOUND, "original document not found");
@@ -308,7 +309,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             }
             if (!doc.getStatus().equals(original.getStatus())) {
                 if (doc.getStatus().equals("published")) {
-                    doc.setPublished(Instant.now());
+                    doc.setPublished(Instant.now().toString());
                 }
             }
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
@@ -364,8 +365,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 if (!newStatus.equals(actualStatus)) {
                     getDatabase().remove(resolveTableName(doc), doc.getUid());
                     statusChanged = true;
-                    if (doc.getStatus().equals("published")) {
-                        doc.setPublished(Instant.now());
+                    if (newStatus.equals("published")) {
+                        doc.setPublished(Instant.now().toString());
                     }
                 }
                 doc.setStatus(newStatus);
@@ -407,7 +408,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 doc.setSize(0);
             }
 
-            doc.setModified(Instant.now());
+            doc.setModified(Instant.now().toString());
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
         } catch (KeyValueDBException e) {
             Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), "error while moving document uid=" + doc.getUid() + " database will be inconsistent"));
@@ -562,6 +563,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         return result;
     }
      */
+    @Override
     public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName, String language) {
         String filePath = getFilePath(request);
         byte[] content;
@@ -637,10 +639,10 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 fo = new FileObject();
                 fo.content = content;
                 if (doc.getModified() != null) {
-                    fo.modified = Date.from(doc.getModified());
+                    fo.modified = Date.from(Instant.from(ISO_INSTANT.parse(doc.getModified())));//Date.from(doc.getModified());
                 } else {
                     if (doc.getCreated() != null) {
-                        fo.modified = Date.from(doc.getCreated());
+                        fo.modified = Date.from(Instant.from(ISO_INSTANT.parse(doc.getCreated()))); //Date.from(doc.getCreated());
                     } else {
                         fo.modified = Date.from(Instant.now());
                     }

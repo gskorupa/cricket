@@ -253,4 +253,9 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         }
     }
 
+    @Override
+    public boolean isAvailable() {
+        return true;
+    }
+
 }

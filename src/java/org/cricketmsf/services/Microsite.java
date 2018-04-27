@@ -28,7 +28,6 @@ import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.microsite.cms.CmsIface;
 import org.cricketmsf.microsite.out.auth.AuthAdapterIface;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
-import org.cricketmsf.microsite.out.user.UserException;
 import org.cricketmsf.microsite.user.User;
 import org.cricketmsf.out.db.*;
 import org.cricketmsf.out.file.FileReaderAdapterIface;
@@ -50,6 +49,7 @@ public class Microsite extends Kernel {
 
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
+    LoggerAdapterIface gdrpLog = null;
     //EchoHttpAdapterIface echoAdapter = null;
     KeyValueDBIface database = null;
     SchedulerIface scheduler = null;
@@ -72,6 +72,7 @@ public class Microsite extends Kernel {
     public void getAdapters() {
         // standard Cricket adapters
         logAdapter = (LoggerAdapterIface) getRegistered("Logger");
+        gdrpLog = (LoggerAdapterIface) getRegistered("GdrpLogger");
         database = (KeyValueDBIface) getRegistered("Database");
         scheduler = (SchedulerIface) getRegistered("Scheduler");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
@@ -132,10 +133,14 @@ public class Microsite extends Kernel {
 
     @Override
     public void shutdown() {
+        try{
         emailSender.send(
                 (String) getProperties().getOrDefault("admin-notification-email", ""),
                 "Microsite shutdown", "Microsite service is going down."
         );
+        }catch(Exception e){
+            e.printStackTrace();
+        }
         super.shutdown();
     }
 
@@ -408,6 +413,7 @@ public class Microsite extends Kernel {
                 try {
                     String uid = (String) event.getPayload();
                     User user = userAdapter.get(uid);
+                    gdrpLog.log(Event.logInfo(event.getId(), "REGISTERED USER "+user.getNumber()));
                     long timeout = 1800 * 1000; //30 minut
                     authAdapter.createConfirmationToken(uid, user.getConfirmString(), timeout);
                     emailSender.send(
@@ -428,6 +434,7 @@ public class Microsite extends Kernel {
                 try {
                     String uid = (String) event.getPayload();
                     User user = userAdapter.get(uid);
+                    gdrpLog.log(Event.logInfo(event.getId(), "DELETE REQUEST FOR "+user.getNumber()));
                     emailSender.send(
                             user.getEmail(),
                             "Cricket unregistration confirmed",
@@ -443,7 +450,8 @@ public class Microsite extends Kernel {
                 }
                 break;
             case UserEvent.USER_DELETED:        //TODO: authorization
-                String uid = (String) event.getPayload();
+                String[] tmpPayload = ((String)event.getPayload()).split(" ");
+                gdrpLog.log(Event.logInfo(event.getId(), "DELETED USER "+tmpPayload[0]+" "+tmpPayload[1]));
                 break;
             case UserEvent.USER_RESET_PASSWORD:
                 String payload = null;
@@ -464,6 +472,8 @@ public class Microsite extends Kernel {
                     dispatchEvent(Event.logWarning("UserEvent.USER_RESET_PASSWORD", "Malformed payload->" + payload));
                 }
             case UserEvent.USER_REG_CONFIRMED:  //TODO: update user
+                gdrpLog.log(Event.logInfo(event.getId(), "REGISTRATION CONFIRMED FOR "+event.getPayload()));
+                break;
             case UserEvent.USER_UPDATED:
             default:
                 dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), "Event recived: " + event.getType()));

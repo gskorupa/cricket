@@ -19,6 +19,7 @@
                 <table id="doclist" class="table table-sm">
                     <thead>
                         <tr>
+                            <th>{labels.t_no[app.language]}</th>
                             <th>{labels.t_uid[app.language]}</th>
                             <th>{labels.t_type[app.language]}</th>
                             <th>{labels.t_role[app.language]}</th>
@@ -30,6 +31,7 @@
                     </thead>
                     <tbody>
                         <tr each={user in users}>
+                            <td>{ user.number }</td>
                             <td>{ user.uid }</td>
                             <td>{ user.type }</td>
                             <td>{ user.role }</td>
@@ -180,6 +182,11 @@
         "en": "users",
         "fr": "users",
         "pl": "użytkownicy"
+        },
+        "t_no": {
+        "en": "NO.",
+        "fr": "NO.",
+        "pl": "NR"
         },
         "t_uid": {
         "en": "LOGIN",

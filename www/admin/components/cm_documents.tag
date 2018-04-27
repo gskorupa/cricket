@@ -50,7 +50,7 @@
                             <i class="material-icons clickable" if={ doc.type == 'ARTICLE'}>subject</i>
                         </td>
                         <td class="col-3">{ doc.name }</td>
-                        <td class="col-5">{ doc.title }</td>
+                        <td class="col-5">{ decodeURIComponent(doc.title) }</td>
                         <!--<td>{ doc.status }</td>-->
                         <td class="col-3 text-right">
                             <i class="material-icons clickable" onclick={ editDocument(doc.uid, false) }>open_in_browser</i>

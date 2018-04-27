@@ -2,6 +2,72 @@
  * Licensed under the Apache License, Version 2.0 
  */
 
+var app = {
+    "user": {
+        "name": "",
+        "token": "",
+        "status": "logged-out",
+        "alerts": [],
+        "role": ""
+    },
+    "config": {
+        "brand": "Cricket",
+        "copyright": "Cricket 2018"
+    },
+    "navigation": [
+        {"name":"Home", "link":"#"},
+        {"name":"Language", "id":"lang","options":[
+            {"name": "English", "link": "#en"},
+            {"name": "French", "link": "#fr"},
+            {"name": "Polish", "link": "#pl"}
+        ]}
+    ],
+    "offline": false,
+    "authAPI": "http://localhost:8080/api/auth",
+    "csAPI": "http://localhost:8080/api/cs",
+    "cmAPI": "http://localhost:8080/api/cm",
+    "userAPI": "http://localhost:8080/api/user",
+    "currentPage": "",
+    "language": "en",
+    "languages": ["en", "pl", "fr"],
+    "debug": false,
+    "localUid": 0,
+    "requests": 0,
+    "log": function (message) {
+        if (app.debug) {
+            console.log(message)
+        }
+    }
+}
+
+var globalEvents = riot.observable();
+
+function decodeDocument(doc){
+  var result = doc  
+  if (result.title) {
+    try {
+      result.title = decodeURIComponent(result.title)
+    } catch (e) {
+      result.title = unescape(result.title)
+    }
+  }
+  if (result.summary) {
+    try {
+      result.summary = decodeURIComponent(result.summary)
+    } catch (e) {
+      result.summary = unescape(result.summary)
+    }
+  }
+  if (result.content) {
+    try {
+      result.content = decodeURIComponent(result.content)
+    } catch (e) {
+      result.content = unescape(result.content)
+    }
+  }
+  return result
+}
+
 function getDataCallEventName(success, defaultName, status){
     var errorPrefix = 'err:';
     var successName = 'dataLoaded';

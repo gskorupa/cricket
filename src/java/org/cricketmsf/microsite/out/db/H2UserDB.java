@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.cricketmsf.out.db;
+package org.cricketmsf.microsite.out.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -25,6 +25,10 @@ import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.microsite.user.User;
+import org.cricketmsf.out.db.ComparatorIface;
+import org.cricketmsf.out.db.H2EmbededDB;
+import org.cricketmsf.out.db.KeyValueDBException;
+import org.cricketmsf.out.db.SqlDBIface;
 
 /**
  *
@@ -41,6 +45,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
     public void addTable(String tableName, int maxSize, boolean persistent) throws KeyValueDBException {
         String query;
         StringBuilder sb = new StringBuilder();
+        sb.append("create sequence if not exists user_number_seq;");
         sb.append("create table users (")
                 .append("uid varchar primary key,")
                 .append("type int,")
@@ -51,7 +56,8 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
                 .append("confirmed boolean,")
                 .append("unregisterreq boolean,")
                 .append("authstatus int,")
-                .append("created timestamp)");
+                .append("created timestamp,")
+                .append("user_number bigint default user_number_seq.nextval )");
         query = sb.toString();
         try (Connection conn = getConnection()) {
             PreparedStatement pst;
@@ -60,7 +66,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
             } else {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
-            boolean updated = pst.executeUpdate()>0;
+            boolean updated = pst.executeUpdate() > 0;
             pst.close();
             conn.close();
             if (!updated) {
@@ -79,7 +85,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
                 putUser(tableName, key, (User) o);
             } catch (ClassCastException e) {
                 throw new KeyValueDBException(KeyValueDBException.UNKNOWN, "object is not a User");
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
@@ -106,7 +112,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
             //check?
         } catch (SQLException e) {
             throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -130,7 +136,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
         HashMap<String, User> map = new HashMap<>();
         //TODO: nie używać, zastąpić konkretnymi search'ami
         if (tableName.equals("users")) {
-            String query = "select uid,type,email,role,secret,password,confirmed,unregisterreq,authstatus,created from users";
+            String query = "select uid,type,email,role,secret,password,confirmed,unregisterreq,authstatus,created,user_number from users";
             try (Connection conn = getConnection()) {
                 PreparedStatement pstmt = conn.prepareStatement(query);
                 ResultSet rs = pstmt.executeQuery();
@@ -178,7 +184,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
             PreparedStatement pst;
             pst = conn.prepareStatement(query);
             pst.setString(1, key);
-            updated = pst.executeUpdate()>0;
+            updated = pst.executeUpdate() > 0;
             pst.close();
             conn.close();
         } catch (SQLException e) {
@@ -211,13 +217,14 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
         user.setUnregisterRequested(rs.getBoolean(8));
         user.setStatus(rs.getInt(9));
         user.setCreatedAt(rs.getTimestamp(10).getTime());
+        user.setNumber(rs.getLong(11));
         return user;
     }
 
     private Object getUser(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         User user = null;
         try (Connection conn = getConnection()) {
-            String query = "select uid,type,email,role,secret,password,confirmed,unregisterreq,authstatus,created from " + tableName + " where uid=?";
+            String query = "select uid,type,email,role,secret,password,confirmed,unregisterreq,authstatus,created,user_number from " + tableName + " where uid=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
             ResultSet rs = pstmt.executeQuery();
@@ -231,6 +238,25 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
             return defaultResult;
         } else {
             return user;
+        }
+    }
+
+    @Override
+    protected void updateStructureTo(Connection conn, int versionNumber) throws KeyValueDBException {
+        String query = "";
+        switch (versionNumber) {
+            case 2:
+                query = "create sequence if not exists user_number_seq; alter table users add user_number bigint default user_number_seq.nextval;";
+                break;
+        }
+        try {
+            PreparedStatement pst;
+            pst = conn.prepareStatement(query);
+            pst.executeUpdate();
+            pst.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
         }
     }
 

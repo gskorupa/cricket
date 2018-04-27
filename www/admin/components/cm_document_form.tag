@@ -33,7 +33,11 @@
                     <label for="title">{ labels.title[app.language] }</label>
                     <input class="form-control" id="title" name="title" type="text" value={ doc.title } readonly={ !allowEdit }>
                 </div>
-                <div class="form-group">
+                <div class="form-group" if={doc.type=='ARTICLE'}>
+                    <label for="summary">{ labels.summary[app.language] }</label>
+                    <textarea class="form-control cricket-article" rows="3" id="summary" name="summary" readonly={ !allowEdit }>{ doc.summary }</textarea>
+                </div>
+                <div class="form-group" if={doc.type!='ARTICLE'}>
                     <label for="summary">{ labels.summary[app.language] }</label>
                     <textarea class="form-control" rows="3" id="summary" name="summary" readonly={ !allowEdit }>{ doc.summary }</textarea>
                 </div>
@@ -45,7 +49,12 @@
                     <label for="mimeType">{ labels.mimeType[app.language] }</label>
                     <input class="form-control" id="mimeType" name="mimeType" type="text" value={ doc.mimeType } readonly>
                 </div>
-                <div class="form-group" if={ doc.type != 'FILE' }>
+                <div class="form-group" if={ doc.type != 'FILE' && doc.type == 'ARTICLE'}>
+                    <label for="content">{ labels.content[app.language] }</label>
+                    <textarea class="form-control cricket-article" style="white-space:pre-wrap"
+                              rows="10" id="content" name="content" readonly={ !allowEdit }>{ doc.content }</textarea>
+                </div>
+                <div class="form-group" if={ doc.type != 'FILE' && doc.type != 'ARTICLE'}>
                     <label for="content">{ labels.content[app.language] }</label>
                     <textarea class="form-control" style="white-space:pre-wrap"
                               rows="10" id="content" name="content" readonly={ !allowEdit }>{ doc.content }</textarea>
@@ -143,7 +152,7 @@
             self.doc.status = 'wip'
         }
         $(function() {
-            $("textarea").htmlarea({
+            $(".cricket-article").htmlarea({
                 loaded: function() {
                 this.updateTextArea();
                 this.updateHtmlArea();
@@ -157,6 +166,15 @@
         e.preventDefault()
         self.doc.type = e.target.value
         riot.update()
+        $(function() {
+            $(".cricket-article").htmlarea({
+                loaded: function() {
+                this.updateTextArea();
+                this.updateHtmlArea();
+                this.showHTMLView();
+                }
+            })
+        })
     }
     
     self.submitForm = function (e) {
@@ -185,12 +203,18 @@
         }
         fd.set('name', name)
         fd.set('uid',pth+name)
+        var title=encodeURIComponent(fd.get('title'))
+        fd.set('title',title)
         var summ=encodeURIComponent(fd.get('summary'))
         fd.set('summary',summ)
         var c=encodeURIComponent(fd.get('content'))
         fd.set('content',c)
         sendFormData(fd, self.method, app.cmAPI + docPath, app.user.token, self.close, globalEvents)
     }
+    
+    self.listener.on('*', function(event){
+      riot.update()
+    })
 
     self.close = function (object) {
         var text = '' + object
@@ -210,6 +234,11 @@
     var update = function (text) {
         app.log("DOC: " + text)
         self.doc = JSON.parse(text);
+        try{
+            self.doc.title=decodeURIComponent(self.doc.title)
+        }catch(e){
+            self.doc.title=unescape(self.doc.title)
+        }
         try{
             self.doc.summary=decodeURIComponent(self.doc.summary)
         }catch(e){

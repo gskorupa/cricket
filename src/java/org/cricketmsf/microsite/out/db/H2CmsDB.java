@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.cricketmsf.out.db;
+package org.cricketmsf.microsite.out.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,10 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.microsite.cms.CmsException;
 import org.cricketmsf.microsite.cms.Document;
 import org.cricketmsf.microsite.cms.DocumentPathComparator;
+import org.cricketmsf.out.db.ComparatorIface;
+import org.cricketmsf.out.db.H2EmbededDB;
+import org.cricketmsf.out.db.KeyValueDBException;
+import org.cricketmsf.out.db.SqlDBIface;
 
 /**
  *
@@ -120,12 +125,12 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
             pstmt.setString(13, doc.getCreatedBy());
             pstmt.setLong(14, doc.getSize());
             pstmt.setBoolean(15, doc.isCommentable());
-            pstmt.setTimestamp(16, new Timestamp(doc.getCreated().toEpochMilli()));
-            pstmt.setTimestamp(17, new Timestamp(doc.getModified().toEpochMilli()));
+            pstmt.setTimestamp(16, Timestamp.from(Instant.from(ISO_INSTANT.parse(doc.getCreated()))));            //doc.getCreated().toEpochMilli()));
+            pstmt.setTimestamp(17, Timestamp.from(Instant.from(ISO_INSTANT.parse(doc.getModified()))));
             if (doc.getPublished() == null) {
                 pstmt.setNull(18, java.sql.Types.TIMESTAMP, "TIMESTAMP");
             } else {
-                pstmt.setTimestamp(18, new Timestamp(doc.getPublished().toEpochMilli()));
+                pstmt.setTimestamp(18, Timestamp.from(Instant.from(ISO_INSTANT.parse(doc.getPublished()))));
             }
             int updated = pstmt.executeUpdate();
             //check?
@@ -274,10 +279,10 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
         doc.setCreatedBy(rs.getString(11));
         doc.setSize(rs.getLong(12));
         doc.setCommentable(rs.getBoolean(13));
-        doc.setCreated(rs.getTimestamp(14).toInstant());
-        doc.setModified(rs.getTimestamp(15).toInstant());
+        doc.setCreated(rs.getTimestamp(14).toInstant().toString());
+        doc.setModified(rs.getTimestamp(15).toInstant().toString());
         try {
-            doc.setPublished(rs.getTimestamp(16).toInstant());
+            doc.setPublished(rs.getTimestamp(16).toInstant().toString());
         } catch (NullPointerException e) {
         }
         return doc;

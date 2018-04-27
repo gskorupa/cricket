@@ -34,9 +34,14 @@ public class Document {
     private String mimeType;
     private String status;
     private long size;
+    /*
     private Instant created;
     private Instant modified;
     private Instant published;
+    */
+    private String created;
+    private String modified;
+    private String published;
     private String createdBy;
 
     public Document() {
@@ -279,11 +284,11 @@ public class Document {
         this.size = size;
     }
 
-    public Instant getCreated() {
+    public String getCreated() {
         return created;
     }
 
-    public void setCreated(Instant created) {
+    public void setCreated(String created) {
         this.created = created;
         /*
         try {
@@ -296,7 +301,7 @@ public class Document {
          */
     }
 
-    public Instant getModified() {
+    public String getModified() {
         return modified;
         /*
         try {
@@ -308,7 +313,7 @@ public class Document {
          */
     }
 
-    public void setModified(Instant modified) {
+    public void setModified(String modified) {
         this.modified = modified;
         /*
         try {
@@ -321,7 +326,7 @@ public class Document {
          */
     }
 
-    public Instant getPublished() {
+    public String getPublished() {
         return published;
         /*
         try {
@@ -333,7 +338,7 @@ public class Document {
          */
     }
 
-    public void setPublished(Instant published) {
+    public void setPublished(String published) {
         this.published = published;
         /*
         try {

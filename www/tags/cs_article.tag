@@ -1,51 +1,43 @@
 <cs_article>
-    <article>
+    <article class='standard'>
         <header>
-            <h1 ref="a_title" if={ article.title }>{ article.title }</h1>
-            <p ref="a_summary" if={ article.summary }>{ article.summary }</p>
+            <h1>{title}</h1>
+            <div class='intro' if={summary}><raw html={summary}/></div>
         </header>
-        <section ref="a_content">{ article.content }</section>
+        <div if={content}><raw html={content}/></div>
+        <footer><div class="author'>{ author }</div><div class="published'>{ published }</div></footer>
+        <div if={ mode=='view' }><a href="#" onClick="history.back()" }>{ texts.back[app.language]}</a></div>
+        <div  if={ mode=='list' }><a href={detailsLink}>{ texts.details[app.language]}</a></div>
     </article>
-    <script charset="UTF-8">
-        var self = this;
-        self.opts = opts
-        self.listener = riot.observable()
-        self.article = {
-            title: '',
-            summary:'',
-            content: 'loading content '+opts.path+' ...'
+    <script>
+        var self=this
+        self.title=opts.title
+        self.summary=opts.summary
+        self.content=opts.content
+        self.author=opts.author
+        self.published=opts.published
+        self.type=opts.type
+        self.page=opts.page
+        self.uid=opts.uid
+        if(opts.mode){
+        self.mode=opts.mode
+        }else{
+        self.mode='default'
         }
-        this.on('mount',function(){
-            app.log('ARTICLE MOUNT')
-            app.log(self.refs)
-        })
-        self.listener.on('*',function(){
-            riot.update()
-        })
-        this.on('unmount',function(){
-            app.log('ARTICLE UNMOUNT')
-        })     
-        self.updateContent = function(){
-            readDocument(self.opts.path, self.opts.language, self.showMe)
-        }
+        self.detailsLink=''+self.page+self.uid
+        self.detailsLink=self.detailsLink.replace(/\//g , ',')
         
-        readDocument = function (path, language, callback) {
-            getData(app.csAPI+path+'?language='+language,null,null,callback,self.listener)
-        }
-
-        self.showMe = function (response) {
-            var doc = JSON.parse(response);
-            self.article['title'] = doc.title
-            self.article['summary'] = doc.summary
-            self.article['content'] = unescape(doc.content)
-            riot.update()
-            if(self.article['title']){
-                self.refs.a_title.innerHTML=self.article['title']
+        self.texts = {
+            "details": {
+                "en": "View details",
+                "fr": "View details",
+                "pl": "Więcej"
+            },
+            "back": {
+                "en": "Back",
+                "fr": "Back",
+                "pl": "Wróć"
             }
-            if(self.article['summary']){
-                self.refs.a_summary.innerHTML=self.article['summary']
-            }
-            self.refs.a_content.innerHTML=self.article['content']
         }
     </script>
 </cs_article>

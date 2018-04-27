@@ -44,6 +44,7 @@ public class User {
     private String password;
     private int authStatus;
     private long createdAt;
+    private long number;
 
     public User() {
         confirmed = false;
@@ -202,6 +203,20 @@ public class User {
      */
     public void setCreatedAt(long createdAt) {
         this.createdAt = createdAt;
+    }
+
+    /**
+     * @return the number
+     */
+    public long getNumber() {
+        return number;
+    }
+
+    /**
+     * @param number the number to set
+     */
+    public void setNumber(long number) {
+        this.number = number;
     }
 
 }

@@ -78,6 +78,7 @@ public class ContentRequestProcessor {
                     if (doc.getType() == Document.FILE) {
                         doc.setContent("*****");
                     }
+                    System.out.println("DOCUMENT2 "+doc.getPublished());
                     result.setData(doc);
                 } else {
                     result.setCode(HttpAdapter.SC_NOT_FOUND);

@@ -159,12 +159,21 @@
                     "interfaceName": "LoggerAdapterIface",
                     "classFullName": "org.cricketmsf.out.log.StandardLogger",
                     "properties": {
-                        "name": "SimpleService",
+                        "name": "Microsite",
                         "level": "FINEST",
                         "log-file-name": "./work/log/cricket%g.log",
                         "max-size": "1000000",
                         "count": "10",
                         "console": "true"
+                    }
+                },
+                "GdrpLogger": {
+                    "name": "GdrpLogger",
+                    "interfaceName": "LoggerAdapterIface",
+                    "classFullName": "org.cricketmsf.out.log.FileLogger",
+                    "properties": {
+                        "name": "Microsite",
+                        "log-file-name": "./work/log/gdrp.log"
                     }
                 },
                 "Database": {
@@ -183,7 +192,8 @@
                     "properties": {
                         "path": "./work/data",
                         "envVariable": "SCHEDULER_DB_PATH",
-                        "file": "scheduler.xml"
+                        "file": "scheduler.xml",
+                        "init":"Data1,MICROSITE,EVENT,CLEAR_DATA,05:00:00 GMT|*24h,_|_;Data2,MICROSITE,EVENT,BACKUP,06:00:00 GMT|*24h,_"
                     }
                 },
                 "Dispatcher": {
@@ -224,7 +234,7 @@
                 "ConfirmationService": {
                     "name": "ConfirmationService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "com.signocom.signode.in.http.ConfirmationApi",
+                    "classFullName": "org.cricketmsf.microsite.in.http.ConfirmationApi",
                     "properties": {
                         "context": "/api/confirm",
                         "silent-mode": "false"
@@ -251,7 +261,7 @@
                 "AlertService": {
                     "name": "AlertService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "com.signocom.signode.in.http.AlertApi",
+                    "classFullName": "org.cricketmsf.microsite.in.http.AlertApi",
                     "properties": {
                         "context": "/api/alert",
                         "silent-mode": "false"
@@ -260,7 +270,7 @@
                 "SystemService": {
                     "name": "SystemService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "com.signocom.signode.in.http.SystemApi",
+                    "classFullName": "org.cricketmsf.microsite.in.http.SystemApi",
                     "properties": {
                         "context": "/api/system",
                         "silent-mode": "false"
@@ -277,15 +287,17 @@
                 "userDB": {
                     "name": "userDB",
                     "interfaceName": "SqlDBIface",
-                    "classFullName": "org.cricketmsf.out.db.H2UserDB",
+                    "classFullName": "org.cricketmsf.microsite.out.db.H2UserDB",
                     "properties": {
                         "path": "./work/data",
                         "file": "user",
                         "test-query": "select * from serviceversion",
-                        "version": "1",
+                        "version": "2",
                         "name": "user",
                         "user": "sa",
-                        "password": ""
+                        "password": "",
+                        "encrypted": "true",
+                        "filePassword":"cr1Ck37#@"
                     }
                 },
                 "authAdapter": {
@@ -301,7 +313,7 @@
                 "authDB": {
                     "name": "authDB",
                     "interfaceName": "SqlDBIface",
-                    "classFullName": "org.cricketmsf.out.db.H2AuthDB",
+                    "classFullName": "org.cricketmsf.microsite.out.db.H2AuthDB",
                     "properties": {
                         "path": "./work/data",
                         "file": "auth",
@@ -314,11 +326,16 @@
                 },
                 "cmsDB": {
                     "name": "cmsDB",
-                    "interfaceName": "KeyValueDBIface",
-                    "classFullName": "org.cricketmsf.out.db.KeyValueDB",
+                    "interfaceName": "SqlDBIface",
+                    "classFullName": "org.cricketmsf.microsite.out.db.H2CmsDB",
                     "properties": {
                         "path": "./work/data",
-                        "name": "content"
+                        "file": "cms",
+                        "test-query": "select * from serviceversion",
+                        "version": "1",
+                        "name": "content",
+                        "user": "sa",
+                        "password": ""
                     }
                 },
                 "cmsAdapter": {

@@ -1,7 +1,9 @@
 <raw>
-    this.root.innerHTML=opts.content
-this.on('mount',function(){
-            console.log('MOUNT RAW')
-            console.log('HTML='+opts.content)
-})
+  this.updateContent = function () {
+        this.root.innerHTML = opts.html;
+  }
+  this.on('update', function() {
+        this.updateContent();
+  });
+  this.updateContent();
 </raw>

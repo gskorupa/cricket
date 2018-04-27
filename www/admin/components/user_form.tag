@@ -33,12 +33,9 @@
                     <input class="form-check-input" type="checkbox" value="true" id="unregisterRequested" disabled={ true } checked={ user.unregisterRequested }>
                     <label class="form-check-label" for="unregisterRequested">{ labels.unregisterRequested[app.language] }</label>
                 </div>
-                <!--
                 <div class="form-group">
-                    <label for="unregisterRequested">{ labels.unregisterRequested[app.language] }</label>
-                    <input class="form-control" id="unregisterRequested" name="unregisterRequested" type="text" value={ user.unregisterRequested } readonly={ true } required>
+                    <label>{ labels.number[app.language] } {user.number}</label>
                 </div>
-                -->
                 <button type="button" onclick={ close } class="btn btn-default">{ labels.cancel[app.language] }</button>
                 <span>&nbsp;</span>
                 <button type="submit" class="btn btn-default  pull-right" disabled={ !allowEdit }>{ labels.save[app.language] }</button>
@@ -221,6 +218,11 @@
                 "en": "* Unregistration Requested?",
                 "fr": "* Unregistration Requested?",
                 "pl": "* Żądanie usunięcia konta?"
+            },
+            "number": {
+                "en": "no.",
+                "fr": "no.",
+                "pl": "nr"
             },
             "save": {
                 "en": "Save",
