@@ -42,7 +42,7 @@ import org.cricketmsf.in.InboundAdapterIface;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, HttpHandler {
+public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, HttpHandler, InboundAdapterIface {
 
     public final static String JSON = "application/json";
     public final static String XML = "text/xml";
@@ -160,50 +160,48 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             }
         });
 
-        if (result.getCode() == SC_MOVED_PERMANENTLY || result.getCode() == SC_MOVED_TEMPORARY) {
-            headers.set("Location", result.getMessage());
-            responseData = ("moved to " + result.getMessage()).getBytes("UTF-8");
-        } else {
-            if (!headers.containsKey("Content-type")) {
-                if (acceptedTypesMap.containsKey(acceptedResponseType)) {
-                    headers.set("Content-type", acceptedResponseType + "; charset=UTF-8");
-                    responseData = formatResponse(acceptedResponseType, result);
-                } else {
-                    headers.set("Content-type", getMimeType(result.getFileExtension()));
-                    responseData = result.getPayload();
-                }
-            }else{
+        switch (result.getCode()) {
+            case SC_MOVED_PERMANENTLY:
+            case SC_MOVED_TEMPORARY:
+                headers.set("Location", result.getMessage());
+                responseData = ("moved to " + result.getMessage()).getBytes("UTF-8");
+                break;
+            case SC_NOT_FOUND:
+                headers.set("Content-type", "text/html");
                 responseData = result.getPayload();
-            }
-            headers.set("Last-Modified", result.getModificationDateFormatted());
-            //TODO: get max age and no-cache info from the result object
-            if (result.getMaxAge() > 0) {
-                headers.set("Cache-Control", "max-age=" + result.getMaxAge());  // 1 hour
-            } else {
-                headers.set("Pragma", "no-cache");
-            }
-
-            if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
-                CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
-            }else if(exchange.getRequestURI().getPath().startsWith("/api/")){ //TODO: this is workaround
-                CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
-            }
-
-            if (result.getCode() == 0) {
-                result.setCode(SC_OK);
-            } else {
-                if (responseData.length == 0) {
-                    if (result.getMessage() != null) {
-                        responseData = result.getMessage().getBytes("UTF-8");
+                break;
+            default:
+                if (!headers.containsKey("Content-type")) {
+                    if (acceptedTypesMap.containsKey(acceptedResponseType)) {
+                        headers.set("Content-type", acceptedResponseType + "; charset=UTF-8");
+                        responseData = formatResponse(acceptedResponseType, result);
+                    } else {
+                        headers.set("Content-type", getMimeType(result.getFileExtension()));
+                        responseData = result.getPayload();
                     }
-                }
-            }
+                }else{
+                    responseData = result.getPayload();
+                }   headers.set("Last-Modified", result.getModificationDateFormatted());
+                //TODO: get max age and no-cache info from the result object
+                if (result.getMaxAge() > 0) {
+                    headers.set("Cache-Control", "max-age=" + result.getMaxAge());  // 1 hour
+                } else {
+                    headers.set("Pragma", "no-cache");
+                }   if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+                    CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
+                }else if(exchange.getRequestURI().getPath().startsWith("/api/")){ //TODO: this is workaround
+                    CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
+                }   if (result.getCode() == 0) {
+                    result.setCode(SC_OK);
+                } else {
+                    if (responseData.length == 0) {
+                        if (result.getMessage() != null) {
+                            responseData = result.getMessage().getBytes("UTF-8");
+                        }
+                    }
+                }   break;
         }
-        /*
-        headers.set("Connection", "Keep-Alive");
-        headers.set("Server", "Cricket/1.0");
-        headers.set("ETag", ""+rootEvent.getId());
-         */
+
         //TODO: format logs to have clear info about root event id
         Kernel.getInstance().dispatchEvent(
                 Event.logFinest("HttpAdapter", "event " + rootEvent.getId() + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
@@ -269,7 +267,9 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 formattedResponse = JsonFormatter.getInstance().format(true, extendedResponse ? result : result.getData());
                 break;
             case XML:
-                formattedResponse = XmlFormatter.getInstance().format(true, extendedResponse ? result : result.getData());
+                //formattedResponse = XmlFormatter.getInstance().format(true, extendedResponse ? result : result.getData());
+                //TODO: extended response is not possible because of "java.util.List is an interface, and JAXB can't handle interfaces"
+                formattedResponse = XmlFormatter.getInstance().format(true,result.getData());
                 break;
             case CSV:
                 // formats only Result.getData() object

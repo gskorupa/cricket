@@ -17,16 +17,18 @@ package org.cricketmsf.in.http;
 
 import com.sun.net.httpserver.Headers;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
  * @author greg
  */
-
+@XmlRootElement(name = "result")
 @XmlAccessorType (XmlAccessType.FIELD)
 public class StandardResult implements Result {
 
@@ -151,7 +153,7 @@ public class StandardResult implements Result {
     
     @Override
     public void setHeader(String name, List values){
-        headers.put(name, values);
+        headers.put(name, (ArrayList)values);
     }
     
     @Override

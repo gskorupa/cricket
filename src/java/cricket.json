@@ -122,6 +122,7 @@
                 "file.upload.maxsize": "1000000",
                 "request-encoding": "UTF-8",
                 "serviceurl": "http://localhost:8080",
+                 "default-language": "en",
                 "SRVC_NAME_ENV_VARIABLE": "CRICKET_SERVICE_NAME",
                 "SRVC_URL_ENV_VARIABLE": "CRICKET_URL"
             },

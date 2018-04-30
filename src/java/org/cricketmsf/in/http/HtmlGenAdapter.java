@@ -69,6 +69,7 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
     @Override
     public byte[] formatResponse(String type, Result result) {
         if (HTML.equalsIgnoreCase(type) && processingVariables) {
+            // && !Boolean.parseBoolean(result.getHeaders().getFirst("X-from-cache"))
             return updateHtml((ParameterMapResult) result);
         } else {
             return result.getPayload();
@@ -91,15 +92,12 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
     }
 
     private byte[] updateHtml(ParameterMapResult result) {
-
         if (result.getData() != null && result.getPayload()!=null) {
+            System.out.println("UPDATING");
             HashMap map = (HashMap) result.getData();
             if (result.getPayload().length>0 && !map.isEmpty()) {
-                //output = result.getPayload();
-                // replace using regex
                 Pattern p = Pattern.compile("(\\$\\w+)");
                 Matcher m = p.matcher(new String(result.getPayload()));
-
                 StringBuffer res = new StringBuffer();
                 String paramName;
                 String replacement;
@@ -109,7 +107,6 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
                     try {
                         m.appendReplacement(res, replacement);
                     } catch (Exception e) {
-
                     }
                 }
                 m.appendTail(res);

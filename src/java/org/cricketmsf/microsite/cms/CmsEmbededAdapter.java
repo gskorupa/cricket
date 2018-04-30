@@ -564,7 +564,25 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
      */
     @Override
+    public void updateCache(RequestObject request, KeyValueDBIface cache, String tableName, String language, String fileContent) {
+        FileObject fo;
+        String filePath = getFilePath(request);
+        try {
+            fo = (FileObject) cache.get(tableName, filePath);
+            fo.content=fileContent.getBytes();
+            cache.put(tableName, filePath, cache);
+        } catch (KeyValueDBException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName, String language) {
+        return getFile(request, cache, tableName, language, true);
+    }
+
+    @Override
+    public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName, String language, boolean updateCache) {
         String filePath = getFilePath(request);
         byte[] content;
         byte[] emptyContent = {};
@@ -606,6 +624,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                         result.setPayload("".getBytes());
                         result.setCode(HttpAdapter.SC_NOT_MODIFIED);
                     }
+                    result.setHeader("X-from-cache", "true");
                     Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
                     return result;
                 }
@@ -653,7 +672,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                     result.setHeader("Content-type", doc.getMimeType());
                     fo.mimeType = doc.getMimeType();
                 }
-                if (cache != null && content.length > 0) {
+                if (cache != null && updateCache && content.length > 0) {
                     try {
                         cache.put(tableName, filePath, fo);
                     } catch (KeyValueDBException e) {

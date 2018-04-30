@@ -164,15 +164,17 @@ public class Microsite extends Kernel {
         String cacheName = "webcache_"+language;
         try {
             result = (ParameterMapResult) cms
-                    .getFile(event.getRequest(), htmlAdapter.useCache() ? database : null, cacheName, language);
+                    .getFile(event.getRequest(), htmlAdapter.useCache() ? database : null, cacheName, language, true);
+            /*
             if (result.getCode() == HttpAdapter.SC_NOT_FOUND) {
                 if (event.getRequest().pathExt.endsWith(".html")) {
                     //TODO: configurable index file params
-                    RequestObject request = processRequest(event.getRequest(), ".html", "index.html");
+                    RequestObject request = forceIndexFile(event.getRequest(), ".html", "index.html");
                     result = (ParameterMapResult) fileReader
                             .getFile(request, htmlAdapter.useCache() ? database : null, cacheName);
                 }
             }
+            */
             //((HashMap) result.getData()).put("serviceurl", getProperties().get("serviceurl"));
             HashMap rd = (HashMap) result.getData();
             rd.put("serviceurl", getProperties().get("serviceurl"));
@@ -195,6 +197,7 @@ public class Microsite extends Kernel {
             } else {
                 rd.put("roles", "[]");
             }
+            result.setData(rd);
             // TODO: caching policy 
             result.setMaxAge(120);
         } catch (Exception e) {
@@ -209,15 +212,15 @@ public class Microsite extends Kernel {
     }
 
     /**
-     * Modify request pathExt basic on adapter configuration for CMS/Website
-     * systems
+     * Modify request pathExt: replaces all "*//*.html" requests to "/" (to be redirecetd to index.html)
+     * Seems it is not usable anumore - TO BE REMOVED
      *
      * @param originalRequest
      * @param indexFileExt
      * @param indexFileName
      * @return
      */
-    private RequestObject processRequest(RequestObject originalRequest, String indexFileExt, String indexFileName) {
+    private RequestObject forceIndexFile(RequestObject originalRequest, String indexFileExt, String indexFileName) {
         RequestObject request = originalRequest;
         String[] pathElements = request.uri.split("/");
         if (pathElements.length == 0) {

@@ -53,9 +53,8 @@ public class XmlFormatter {
             jaxbMarshaller.marshal(r, sw);
             return sw.toString();
         } catch (JAXBException e) {
-            e.printStackTrace();
+            return "<error><code>"+e.getErrorCode()+"</code><text>"+e.toString()+"</text></error>";
         }
-        return "";
     }
 
     /*
