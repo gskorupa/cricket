@@ -102,18 +102,26 @@
         this.on('mount', function(){
             self.selected = ''
             self.selectedLanguage = app.language
-            console.log('PAGE DOCUMENTS')
-            console.log(self.statuses)
-            console.log(self.paths)
+            app.log('PAGE DOCUMENTS')
+            app.log(self.statuses)
+            app.log(self.paths)
             readPaths()
         });
         
+        this.on('unmount',function(){
+            Object.keys(self.refs).forEach(function(key) {
+                self.refs[key].unmount()
+            });
+            self.refs=[]
+        })
+        
         self.listener.on('*', function (eventName) {
             app.log('LISTENER: ' + eventName)
+            if(!eventName) return;
             if(eventName.startsWith('submitted:')){
                 self.selected = ''
                 var currentPath=eventName.substring(10)
-                console.log('CURRENT PATH: '+currentPath)
+                app.log('CURRENT PATH: '+currentPath)
                 if(currentPath.length>0){
                     self.path = currentPath
                 }else{
@@ -145,7 +153,7 @@
             if (self.paths.length > 0){
                 //self.path = self.paths[0]
                 var index = self.paths.indexOf(self.path)
-                console.log('PATH INDEX:'+index)
+                app.log('PATH INDEX:'+index)
                 document.getElementById("pathsDropdown").selectedIndex = index
             } else{
                 //self.path = '/'
@@ -195,7 +203,7 @@
 
         self.afterPublish = function(object){
             var text = '' + object
-            console.log('CALBACK: ' + object)
+            app.log('CALBACK: ' + object)
             if (text.startsWith('{')){
                 readContentList()
             } else if (text.startsWith('error')){
@@ -232,21 +240,21 @@
                 e.preventDefault()
                 self.removing = uid
                 riot.update()
-                console.log('DEL SELECTED ' + uid)
+                app.log('DEL SELECTED ' + uid)
             }
         }
         
         removeDocument(){
             return function(e){
                 e.preventDefault()
-                console.log('REMOVING ' + self.removing + ' ...')
+                app.log('REMOVING ' + self.removing + ' ...')
                 deleteData(app.cmAPI + self.removing,app.user.token,self.closeRemove,globalEvents)
             }
         }
         
         self.closeRemove = function(object){
             var text = '' + object
-            console.log('CALBACK: ' + object)
+            app.log('CALBACK: ' + object)
             if (text.startsWith('{')){
             //
             } else if (text.startsWith('error:')){

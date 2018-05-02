@@ -99,6 +99,9 @@
                 case 'cancelled':
                     self.selected = ''
                     break
+                case 'err:403':
+                    globalEvents.trigger(eventName)
+                    break
                 default:
                     app.log('USERS: ' + eventName)
             }
@@ -140,7 +143,7 @@
         e.preventDefault()
         self.removing = uid
         riot.update()
-        console.log('DEL SELECTED ' + uid)
+        app.log('DEL SELECTED ' + uid)
         }
         }
 
@@ -154,7 +157,7 @@
         removeAccount(){
         return function(e){
         e.preventDefault()
-        console.log('REMOVING ' + self.removing + ' ...')
+        app.log('REMOVING ' + self.removing + ' ...')
         if (self.removing == app.user.name){
         alert('Operation not permitted')
         self.removing = ''
@@ -166,7 +169,7 @@
 
         self.closeRemove = function(object){
         var text = '' + object
-        console.log('CALBACK: ' + object)
+        app.log('CALBACK: ' + object)
         if (text.startsWith('{')){
         //
         } else if (text.startsWith('error:')){

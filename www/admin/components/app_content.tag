@@ -5,7 +5,7 @@
                 <div class="col-md-12">
                     <div class="card red lighten-1 text-center z-depth-2">
                         <div class="card-body">
-                            <p class="white-text mb-0">{labels.message[app.language]}</p>
+                            <p class="white-text mb-0">{labels.message1[app.language]}<a href="/admin">{labels.message2[app.language]}</a></p>
                         </div>
                     </div>
                 </div>
@@ -27,14 +27,25 @@
         })
         globalEvents.on('err:403', function (eventName) {
             self.infoToShow = true
+            alert(self.labels.timeoutmessage[app.language])
             riot.update()
         })
         self.labels = {
-            "message": {
-                "en": "Your session has expired. Please log in again.",
-                "fr": "Votre session est expirée. Veuillez vous reconnecter.",
-                "pl": "Twoja sesja wygasła. Zaloguj się ponownie"
-            }
+            "message1": {
+                "en": "Your session has expired. ",
+                "fr": "Votre session est expirée. ",
+                "pl": "Twoja sesja wygasła. "
+            },
+            "message2": {
+                "en": "Please log in again.",
+                "fr": "Veuillez vous reconnecter.",
+                "pl": "Zaloguj się ponownie."
+            },
+            "timeoutmessage": {
+            "en": "Your session has expired. Unsaved changes will be lost.",
+            "fr": "Votre session est expirée. Les changements non indiqués seront perdus.",
+            "pl": "Twoja sesja wygasła. Niezapamiętane zmiany zostaną utracone."
+        }
         }
     </script>
 </app_content>

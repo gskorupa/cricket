@@ -63,7 +63,7 @@
         }
 
         globalEvents.on('data:submitted', function(event){
-            if (app.debug) { console.log("I'm happy!") }
+            //
         });
         
         init(eventListener, uid, editable, isAdmin){
@@ -154,6 +154,9 @@
             self.user = JSON.parse(text);
             riot.update();
         }
+        self.listener.on('*', function(event){
+          riot.update()
+        })
 
         var readUser = function (uid) {
             getData(app.userAPI+'/'+uid,null,app.user.token,update,self.listener)

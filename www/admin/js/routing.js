@@ -72,7 +72,7 @@ route(function(id){
             riot.update()
             break;
         default:
-            console.log('DEFAULT ROUTE')
+            app.log('DEFAULT ROUTE')
             break;
     }
     riot.update();

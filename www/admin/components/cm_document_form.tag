@@ -119,12 +119,6 @@
         'size': 0
     }
 
-    globalEvents.on('data:submitted', function (event) {
-        if (app.debug) {
-            console.log("I'm happy!")
-        }
-    });
-
     init(eventListener, uid, editable, language, status, path){
         self.callbackListener = eventListener
         self.allowEdit = editable

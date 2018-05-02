@@ -33,7 +33,7 @@ import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.http.Result;
-import org.cricketmsf.out.db1.KeyValueCacheAdapterIface;
+import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
 

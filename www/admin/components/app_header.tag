@@ -32,10 +32,11 @@
     <script>
         var self = this
         globalEvents.on('*', function (event) {
-            if(event=='err:401'){
+            if(event=='err:401'||event=='err:401'){
                 app.user.name = '';
                 app.user.token = '';
                 app.user.status = 'logged-out';
+                app.log('logged out')
                 riot.update()
             }else if(event&&(event=='sending'||event=='dataLoaded'||event.startsWith('err:'))){
                 app.log('HANDLING:'+event);

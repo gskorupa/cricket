@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.out.db1;
+package org.cricketmsf.out.db;
 
+import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.OutboundAdapter;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;

@@ -43,9 +43,7 @@
         self.error = false
 
         globalEvents.on('data:submitted', function (event) {
-            if (app.debug) {
-                console.log("I'm happy!")
-            }
+            //
         });
 
         init(eventListener, uid){
@@ -91,7 +89,7 @@
 
         self.close = function (object) {
             var text = '' + object
-            console.log('CALBACK: ' + object)
+            app.log('CALBACK: ' + object)
             if (text.startsWith('"') || text.startsWith('{')) {
                 self.callbackListener.trigger('pSubmitted')
             } else if (text.startsWith('error:202')) {

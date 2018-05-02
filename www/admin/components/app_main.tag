@@ -37,7 +37,7 @@
         })
         
         self.loadDocuments = function(){
-            console.log(self.refs)
+            app.log(self.refs)
             Object.keys(self.refs).forEach(function(key) {
                 self.refs[key].updateContent()
             });

@@ -172,7 +172,7 @@ public class Runner {
     }
 
     public ConfigSet readConfig(ArgumentParser arguments) {
-        ConfigSet cs = null;
+        ConfigSet configSet = null;
         if (arguments.containsKey("config")) {
             //Properties props;
             Map args = new HashMap();
@@ -184,7 +184,7 @@ public class Runner {
             try {
                 InputStream propertyFile = new FileInputStream(new File((String) arguments.get("config")));
                 String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
-                cs = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
+                configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
             } catch (Exception e) {
                 e.printStackTrace();
                 //LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration: {0}", path);
@@ -199,7 +199,7 @@ public class Runner {
             types.put("java.utils.HashMap", "adapters");
             types.put("java.utils.HashMap", "properties");
             args.put(JsonReader.TYPE_NAME_MAP, types);
-            cs = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
+            configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
         }
         // read Kernel version
         Properties prop = new Properties();
@@ -209,16 +209,16 @@ public class Runner {
             }
         } catch (IOException e) {
         }
-        cs.setKernelVersion(prop.getProperty("version", "unknown"));
+        configSet.setKernelVersion(prop.getProperty("version", "unknown"));
         // force property changes based on command line --force param
         if (arguments.containsKey("force")) {
             ArrayList<String> forcedProps = (ArrayList) arguments.get("force");
             for (int i = 0; i < forcedProps.size(); i++) {
-                cs.forceProperty(forcedProps.get(i));
+                configSet.forceProperty(forcedProps.get(i));
             }
         }
 
-        return cs;
+        return configSet;
     }
 
     public String getConfigAsString(ConfigSet c) {

@@ -1,6 +1,5 @@
 /* Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
- * Licensed under the Apache License, Version 2.0 
- */
+ * Licensed under the Apache License, Version 2.0 */
 
 var app = {
     "user": {
@@ -31,7 +30,6 @@ var app = {
     "language": "en",
     "languages": ["en", "pl", "fr"],
     "debug": false,
-    "localUid": 0,
     "requests": 0,
     "log": function (message) {
         if (app.debug) {
@@ -67,6 +65,14 @@ function decodeDocument(doc){
   }
   return result
 }
+// ucs-2 string to base64 encoded ascii
+function utoa(str) {
+  return window.btoa(unescape(encodeURIComponent(str)));
+}
+// base64 encoded ascii to ucs-2 string
+function atou(str) {
+  return decodeURIComponent(escape(window.atob(str)));
+}
 
 function getDataCallEventName(success, defaultName, status){
     var errorPrefix = 'err:';
@@ -89,7 +95,7 @@ function getDataCallEventName(success, defaultName, status){
 function getData(url, query, token, callback, eventListener, errName) {
     var oReq = new XMLHttpRequest();
     oReq.onerror = function (oEvent) {
-        app.log("onerror " + this.status + " " + oEvent.toString())
+//        app.log("onerror " + this.status + " " + oEvent.toString())
         app.requests--;
         eventListener.trigger(getDataCallEventName(false,errName,this.status));
     }
@@ -108,9 +114,14 @@ function getData(url, query, token, callback, eventListener, errName) {
             if (this.status == 200) {
                 app.log(JSON.parse(this.responseText));
                 callback(this.responseText);
-            } else {
-                eventListener.trigger(getDataCallEventName(false,errName,this.status));
+            }else if (this.status == 401 || this.status == 403) {
+//                app.log('getData.onreadystatechange: '+this.readyState+' '+this.status);
+                eventListener.trigger(getDataCallEventName(false,null,this.status));
+            } else{
+//                app.log('getData.onreadystatechange: '+this.readyState+' '+this.status)
             }
+        } else {
+            eventListener.trigger(getDataCallEventName(false,errName,this.status));
         }
     };
     oReq.open("get", url, true);
@@ -125,7 +136,7 @@ function getData(url, query, token, callback, eventListener, errName) {
 }
 
 function sendData(data, method, url, token, callback, eventListener, errName) {
-    app.log("sendData ...")
+//    app.log("sendData ...")
     var urlEncodedData = "";
     var urlEncodedDataPairs = [];
     var name;
@@ -135,7 +146,7 @@ function sendData(data, method, url, token, callback, eventListener, errName) {
     }
     urlEncodedData = urlEncodedDataPairs.join('&').replace(/%20/g, '+');
     oReq.onerror = function (oEvent) {
-        app.log("onerror " + this.status + " " + oEvent.toString())
+//        app.log("onerror " + this.status + " " + oEvent.toString())
         app.requests--;
         eventListener.trigger(getDataCallEventName(false,errName,this.status));
     }
@@ -154,11 +165,18 @@ function sendData(data, method, url, token, callback, eventListener, errName) {
             if (this.status > 199 && this.status < 203) {
                 app.log(JSON.parse(this.responseText));
                 callback(this.responseText);
-            } else {
-                eventListener.trigger(getDataCallEventName(false,errName,this.status));
+            }else if (this.status == 401 || this.status == 403) {
+//                app.log('sendData.onreadystatechange: '+this.readyState+' '+this.status);
+                eventListener.trigger(getDataCallEventName(false,null,this.status));
+            } else{
+//                app.log('sendData.onreadystatechange: '+this.readyState+' '+this.status)
             }
+        } else {
+//                app.log('sendData.onreadystatechange: '+this.readyState+' '+this.status)
+                //eventListener.trigger(getDataCallEventName(false,errName,this.status));
         }
     }
+
     app.requests++;
     eventListener.trigger(getDataCallEventName(null));
     oReq.open(method, url);
@@ -172,21 +190,24 @@ function sendData(data, method, url, token, callback, eventListener, errName) {
 }
 
 function sendFormData(formData, method, url, token, callback, eventListener, errName) {
-    app.log("sendFormData ...");
+//    app.log("sendFormData ...");
     var oReq = new XMLHttpRequest();
     oReq.onerror = function (oEvent) {
-        app.log("onerror " + this.status + " " + oEvent.toString())
+//        app.log("sendFormData.onerror " + this.status + " " + oEvent.toString())
         app.requests--;
         eventListener.trigger(getDataCallEventName(false,errName,this.status));
     }
     oReq.onloadend = function(oEvent){
+//        app.log('sendFormData.onloadend: '+oEvent)
         app.requests--;
         eventListener.trigger(getDataCallEventName(true));
     }
     oReq.onabort = function(oEvent){
+//        app.log('sendFormData.onAbort: '+oEvent)
         app.requests--;
     }
     oReq.timeout = function(oEvent){
+//        app.log('sendFormData.timeout: '+oEvent)
         app.requests--;
     }   
     oReq.onreadystatechange = function () {
@@ -197,8 +218,11 @@ function sendFormData(formData, method, url, token, callback, eventListener, err
             } else {
                 eventListener.trigger(getDataCallEventName(true));
             }
-        }else{
-            eventListener.trigger(getDataCallEventName(false,errName,this.status));
+        }else if (this.readyState == 4 && (this.status == 401 || this.status == 403)) {
+//            app.log('sendFormData.onreadystatechange: '+this.readyState+' '+this.status);
+            eventListener.trigger(getDataCallEventName(false,null,this.status));
+        } else{
+//            app.log('sendFormData.onreadystatechange: '+this.readyState+' '+this.status)
         }
     };
     app.requests++;
@@ -215,7 +239,7 @@ function sendFormData(formData, method, url, token, callback, eventListener, err
 function deleteData(url, token, callback, eventListener, successEventName, errorEventName, debug, appEventBus) {
     var oReq = new XMLHttpRequest();
     oReq.onerror = function (oEvent) {
-        app.log("onerror " + this.status + " " + oEvent.toString())
+//        app.log("onerror " + this.status + " " + oEvent.toString())
         app.requests--;
         eventListener.trigger(getDataCallEventName(false,errName,this.status));
     }
@@ -237,8 +261,11 @@ function deleteData(url, token, callback, eventListener, successEventName, error
             } else {
                 eventListener.trigger(getDataCallEventName(true));
             }
-        } else if (this.readyState == 4 && this.status == 0) {
-            eventListener.trigger(getDataCallEventName(false,errName,this.status));
+        }else if (this.status == 401 || this.status == 403) {
+//            app.log('deleteData.onreadystatechange: '+this.readyState+' '+this.status);
+            eventListener.trigger(getDataCallEventName(false,null,this.status));
+        } else{
+//            app.log('deleteData.onreadystatechange: '+this.readyState+' '+this.status)
         }
     };
     app.requests++;
@@ -286,7 +313,7 @@ function loginSubmit(oFormElement, eventListener, successEventName, errName) {
     }
     var oReq = new XMLHttpRequest();
     oReq.onerror = function (oEvent) {
-        app.log("onerror " + this.status + " " + oEvent.toString())
+//        app.log("onerror " + this.status + " " + oEvent.toString())
         app.requests--;
         eventListener.trigger(getDataCallEventName(false,errName,this.status));
     }

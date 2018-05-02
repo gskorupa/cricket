@@ -27,7 +27,7 @@
     <script>
         var self = this
         self.on('mount', function () {
-            console.log('mounted')
+            app.log('mounted')
             getData(app.url + '/config/site.json?language=' + app.language, null, null, setConfig, self)
             getData(app.url + '/config/navigation.json?language=' + app.language, null, null, setNavigation, self)
         })

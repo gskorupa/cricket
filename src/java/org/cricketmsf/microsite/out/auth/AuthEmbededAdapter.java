@@ -71,7 +71,7 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
         } catch (NumberFormatException e) {
             Kernel.getInstance().getLogger().print("\ttoken-timeout: wrong format");
         }
-        Kernel.getInstance().getLogger().print("\ttoken-timeout: " + timeout);
+        Kernel.getInstance().getLogger().print("\ttoken-timeout: " + timeout+" seconds");
     }
 
     @Override
