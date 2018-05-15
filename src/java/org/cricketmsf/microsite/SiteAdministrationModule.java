@@ -94,6 +94,9 @@ public class SiteAdministrationModule {
                 case "status":
                     result = getServiceInfo();
                     break;
+                case "config":
+                    result = getServiceConfig();
+                    break;
                 case "shutdown":
                     result.setCode(HttpAdapter.SC_ACCEPTED);
                     result.setData("the service will be stopped within few seconds");
@@ -119,6 +122,12 @@ public class SiteAdministrationModule {
     private StandardResult getServiceInfo() {
         StandardResult result = new StandardResult();
         result.setData(Kernel.getInstance().reportStatus());
+        return result;
+    }
+    
+    private StandardResult getServiceConfig() {
+        StandardResult result = new StandardResult();
+        result.setData(Kernel.getInstance().getConfigSet().getConfigurationById(Kernel.getInstance().getId()));
         return result;
     }
 

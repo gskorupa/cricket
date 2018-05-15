@@ -5,7 +5,7 @@
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <property name="version" value="1.2.41"/>
+    <property name="version" value="1.2.42"/>
     <property name="src" location="src/java"/>
     <property name="src-other" location="src/other"/>
     <property name="build" location="build/classes"/>
@@ -25,8 +25,8 @@
     <!-- external libraries used by Cricket-->
     <!-- REMEMBER to download these libraries before building Cricket -->
     <property name="json-io-lib" value="json-io-4.10.0.jar"/>
-    <property name="commons-csv-lib" value="commons-csv-1.2.jar"/>
-    <property name="h2-lib" value="h2-1.4.196.jar"/>
+    <property name="commons-csv-lib" value="commons-csv-1.5.jar"/>
+    <property name="h2-lib" value="h2-1.4.197.jar"/>
     <property name="javamail-lib" value="javax.mail.jar"/>
     
     <path id="project-classpath">
