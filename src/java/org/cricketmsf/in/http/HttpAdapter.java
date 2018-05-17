@@ -82,10 +82,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
     protected HashMap<String, String> acceptedTypesMap;
 
     private String context;
-
-    //private HashMap<String, String> hookMethodNames = new HashMap();
     private boolean extendedResponse = true;
-    //private String dateFormat = "dd/MMM/yyyy:kk:mm:ss Z";
     SimpleDateFormat dateFormat;
 
     protected int mode = SERVICE_MODE;
@@ -130,11 +127,9 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
 
     public void doHandle(HttpExchange exchange) throws IOException {
 
-        //System.out.println("HANDLE query exchange "+exchange.toString());
         Stopwatch timer = new Stopwatch();
         Event rootEvent = new Event();
         String acceptedResponseType = JSON;
-        //System.out.println("doHandle requestHeaders "+exchange.getRequestHeaders());
 
         try {
             acceptedResponseType
@@ -145,7 +140,6 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
 
         // cerating Result object
         Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEvent.getId());
-        //System.out.println("RESPONSE CREATED ");
 
         acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
 
@@ -207,7 +201,6 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 Event.logFinest("HttpAdapter", "event " + rootEvent.getId() + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
         );
 
-        //exchange.sendResponseHeaders(result.getCode(), responseData.length);
         if (responseData.length > 0) {
             exchange.sendResponseHeaders(result.getCode(), responseData.length);
             try (OutputStream os = exchange.getResponseBody()) {
@@ -267,7 +260,6 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 formattedResponse = JsonFormatter.getInstance().format(true, extendedResponse ? result : result.getData());
                 break;
             case XML:
-                //formattedResponse = XmlFormatter.getInstance().format(true, extendedResponse ? result : result.getData());
                 //TODO: extended response is not possible because of "java.util.List is an interface, and JAXB can't handle interfaces"
                 formattedResponse = XmlFormatter.getInstance().format(true,result.getData());
                 break;
@@ -283,7 +275,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 formattedResponse = JsonFormatter.getInstance().format(true, result);
                 break;
         }
-        formattedResponse = formattedResponse;
+
         try {
             r = formattedResponse.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -293,12 +285,9 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
     }
 
     RequestObject buildRequestObject(HttpExchange exchange, String acceptedResponseType) {
-
         // Remember that "parameters" attribute is created by filter
         Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
-        //System.out.println("queryInRequest=["+parameters.get("query")+"]");
         String method = exchange.getRequestMethod();
-        //String adapterContext = exchange.getHttpContext().getPath();
         String pathExt = exchange.getRequestURI().getPath();
         if (null != pathExt) {
             pathExt = pathExt.substring(exchange.getHttpContext().getPath().length());
@@ -307,7 +296,6 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             }
         }
 
-        //
         RequestObject requestObject = new RequestObject();
         requestObject.method = method;
         requestObject.parameters = parameters;
@@ -328,9 +316,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
 
         Result result = new StandardResult();
         if (mode == WEBSITE_MODE) {
-            //System.out.println("requestObject.uri: "+requestObject.uri);
             if (!requestObject.uri.endsWith("/")) {
-
                 if (requestObject.uri.lastIndexOf("/") > requestObject.uri.lastIndexOf(".")) {
                     // redirect to index.file but only if property index.file is not null
                     result.setCode(SC_MOVED_PERMANENTLY);
@@ -352,11 +338,11 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         try {
             sendLogEvent(Event.LOG_FINE, "sending request to hook method " + hookMethodName);
             Event event = new Event("HttpAdapter", requestObject);
+            event.setRootEventId(rootEventId);
             event.setPayload(requestObject);
             Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
             result = (Result) m.invoke(Kernel.getInstance(), event);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            //e.printStackTrace();
             sendLogEvent(Event.LOG_SEVERE, e.getMessage());
             result.setCode(SC_INTERNAL_SERVER_ERROR);
             result.setMessage("handler method error");
@@ -396,7 +382,6 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
     }
 
     protected void sendLogEvent(HttpExchange exchange, int length) {
-        //SimpleDateFormat sdf = new SimpleDateFormat("[dd/MMM/yyyy:kk:mm:ss Z]");
         StringBuilder sb = new StringBuilder();
 
         sb.append(exchange.getRemoteAddress().getAddress().getHostAddress());

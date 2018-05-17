@@ -391,6 +391,14 @@ public class Microsite extends Kernel {
     public Object systemServiceHandle(Event event) {
         return new SiteAdministrationModule().handleRestEvent(event);
     }
+    
+    @HttpAdapterHook(adapterName = "StatusService", requestMethod = "*")
+    public Object systemStatusHandle(Event event) {
+        StandardResult result = new StandardResult();
+        result.setCode(HttpAdapter.SC_OK);
+        result.setData("OK");
+        return result;
+    }
 
     @EventHook(eventCategory = Event.CATEGORY_LOG)
     public void logEvent(Event event) {

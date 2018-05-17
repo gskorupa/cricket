@@ -22,7 +22,7 @@ import org.cricketmsf.microsite.user.User;
  * @author greg
  */
 public class SecurityFilterResult {
-    public int code = 0;
+    public int code = 200;
     public String message = "";
     public User user;
     public User issuer;

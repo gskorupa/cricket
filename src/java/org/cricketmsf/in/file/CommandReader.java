@@ -23,7 +23,6 @@ import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.InboundAdapter;
-import org.cricketmsf.in.file.WatchdogIface;
 
 /**
  *

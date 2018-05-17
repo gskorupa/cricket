@@ -42,10 +42,11 @@ public class SecurityFilter extends Filter {
      * @return
      */
     public SecurityFilterResult checkRequest(HttpExchange exchange) {
-        // if we found problems analysing exchange object
-        boolean problemDetected = false;
-        
         SecurityFilterResult result = new SecurityFilterResult();
+        // below is simple example how to ovetwrite this method
+        /*
+        boolean problemDetected = false;
+        // do some request checks etc.
         if (problemDetected) {
             result.code = 403; // FORBIDDEN
             result.message = "request blocket by security filter\r\n";
@@ -53,12 +54,15 @@ public class SecurityFilter extends Filter {
             result.code = 200;
             result.message = "";
         }
+        */
         return result;
     }
 
     @Override
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
+        // below is simple example how to ovetwrite this method
+        /*
         SecurityFilterResult result = checkRequest(exchange);
         if (result.code != 200) {
             exchange.sendResponseHeaders(result.code, result.message.length());
@@ -68,6 +72,8 @@ public class SecurityFilter extends Filter {
         } else {
             chain.doFilter(exchange);
         }
+        */
+        chain.doFilter(exchange);
     }
 
 }
