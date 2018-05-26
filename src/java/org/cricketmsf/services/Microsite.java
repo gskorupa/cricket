@@ -482,10 +482,13 @@ public class Microsite extends Kernel {
                 } else {
                     dispatchEvent(Event.logWarning("UserEvent.USER_RESET_PASSWORD", "Malformed payload->" + payload));
                 }
+                gdrpLog.log(Event.logInfo(event.getId(), "RESET PASSWORD REQUESTED FOR "+event.getPayload()));
             case UserEvent.USER_REG_CONFIRMED:  //TODO: update user
                 gdrpLog.log(Event.logInfo(event.getId(), "REGISTRATION CONFIRMED FOR "+event.getPayload()));
                 break;
             case UserEvent.USER_UPDATED:
+                gdrpLog.log(Event.logInfo(event.getId(), "USER DATA UPDATED FOR"+event.getPayload()));
+                break;
             default:
                 dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), "Event recived: " + event.getType()));
                 break;

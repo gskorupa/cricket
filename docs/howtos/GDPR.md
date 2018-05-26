@@ -2,25 +2,21 @@
 
 ## Encryption
 
-Zaszyfrowanana baza danych użytkowników
+User database can be encrypted
 
 HTPPS
 
 ## Monitoring and logging
 
-Logowanie zdarzeń związanych z bazą użytkowników
+Logging events related to user database access
 
-Informacje o żądaniu usunięcia konta wysyłane na e-mail
+Info about requested account removal are send to admin email
 
-Logi i notyfikacje są anonimowane (numer użytkownika)
-
-Ostrzeżenia o błędnych logowaniach ????
+Anomymized log files 
 
 ## Access control
 
-Dostęp do bazy danych jedynie dla administratorów
-
-Uzytkownicy maja dostęp przez REST API i web GUI jedynie do własnych danych
+Restricted access to the data using both REST API and web GUI
 
 
 ## Data privacy

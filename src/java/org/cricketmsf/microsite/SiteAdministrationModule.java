@@ -151,6 +151,9 @@ public class SiteAdministrationModule {
             backupDaily = Boolean.parseBoolean((String) Kernel.getInstance().getProperties().get("backup-daily"));
         } catch (ClassCastException e) {
         }
+        if (backupFolder == null) {
+            Kernel.handle(Event.logSevere(this, "Kernel parameter \"backup-folder\" not configured"));
+        }
         if (backupFolder!=null && !backupFolder.endsWith(System.getProperty("file.separator"))) {
             backupFolder = backupFolder.concat(System.getProperty("file.separator"));
         }
@@ -240,13 +243,7 @@ public class SiteAdministrationModule {
             Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
         }
 
-        // CMS
-        /*
-        try{
-           cms.initialize(cmsDatabase, cmsFileReader, logAdapter);
-        }catch(CmsException e){
-           //TODO: 
-        }*/
+
     }
 
     /**

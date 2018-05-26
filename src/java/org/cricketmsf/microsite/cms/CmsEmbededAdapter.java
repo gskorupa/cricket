@@ -207,7 +207,6 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
 
     @Override
     public void addDocument(Document doc) throws CmsException {
-        System.out.println("ADD DOCUMENT 1");
         if (doc.getLanguage() == null || !supportedLanguages.contains(doc.getLanguage())) {
             throw new CmsException(CmsException.UNSUPPORTED_LANGUAGE);
         }
@@ -230,7 +229,6 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
 
     @Override
     public void addDocument(Map parameters, String userID) throws CmsException {
-        System.out.println("ADD DOCUMENT 2");
         Document doc = new Document();
         try {
             //System.out.println("SETTING UID:" + (String) parameters.get("uid"));
