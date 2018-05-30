@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2018 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,12 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
-import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.http.Result;
 import org.cricketmsf.in.http.StandardResult;
-import org.cricketmsf.out.OutboundAdapter;
 
 import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLContext;
@@ -50,7 +47,7 @@ import java.security.cert.Certificate;
  *
  * @author greg
  */
-public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttpAdapterIface, Adapter {
+public class Client {
 
     private final String JSON = "application/json";
     private final String CSV = "text/csv";
@@ -58,71 +55,20 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
     private final String TEXT = "text/plain";
     private final String XML = "text/xml";
 
-    protected String endpointURL;
     protected int timeout = 0;
     protected boolean ignoreCertificateCheck = false;
 
-    //public HashMap<String, String> properties = new HashMap<>();
-    @Override
-    public void loadProperties(HashMap<String, String> properties, String adapterName) {
-        super.loadProperties(properties, adapterName);
-        endpointURL = properties.get("url");
-        properties.put("url", endpointURL);
-        Kernel.getInstance().getLogger().print("\turl: " + endpointURL);
-        try {
-            properties.put("timeout", properties.getOrDefault("timeout", "120000"));
-            timeout = Integer.parseInt(properties.getOrDefault("timeout", "120000"));
-        } catch (NumberFormatException e) {
-
-        }
-        Kernel.getInstance().getLogger().print("\ttimeout: " + timeout);
-        ignoreCertificateCheck = Boolean.parseBoolean(properties.getOrDefault("ignore-certificate-check", "false"));
-        properties.put("ignore-certificate-check", "" + ignoreCertificateCheck);
-        Kernel.getInstance().getLogger().print("\tignore-certificate-check: " + ignoreCertificateCheck);
-
+    public Result send(Request request) {
+        return send(request, false);
     }
 
-    private boolean isRequestSuccessful(int code) {
-        return code == HttpURLConnection.HTTP_ACCEPTED || code == HttpURLConnection.HTTP_CREATED || code == HttpURLConnection.HTTP_OK;
-    }
-
-    @Override
-    public Result send(Object data) {
-        return send(endpointURL, null, data, true);
-    }
-
-    @Override
-    public Result send(String url, Request request, Object data) {
-        return send(url, request, data, true);
-    }
-
-    @Override
-    public Result send(Object data, boolean transform) {
-        return send(endpointURL, null, data, transform);
-    }
-
-    @Override
     public Result send(Request request, boolean transform) {
-        return send(endpointURL, request, null, transform);
-    }
-
-    @Override
-    public Result send(String url, Request request, Object data, boolean transform){
-        return send(endpointURL, request, data, transform, ignoreCertificateCheck);
-    }
-    
-    @Override
-    public Result send(String url, Request request, Object data, boolean transform, boolean trustAllCertificates) {
-
+        StandardResult result = new StandardResult();
         if (request == null) {
-            request = new Request();
-        }
-        if (data != null) {
-            request.setData(data);
+            result.setCode(500);
+            result.setMessage("Request is null");
         }
         String requestData = "";
-
-        StandardResult result = new StandardResult();
         if (transform) {
             switch (request.properties.get("Content-Type")) {
                 case JSON:
@@ -154,16 +100,12 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
         }
         result.setCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
         try {
-
-            Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "sending to " + url));
-
-            long startPoint = System.currentTimeMillis();
-            URL urlObj = new URL(url);
+            URL urlObj = new URL(request.getUrl());
             HttpURLConnection con;
             HttpsURLConnection scon;
             // TODO: Proxy proxy = new Proxy(Proxy.Type.HTTP, sa);
-            if (url.toUpperCase().startsWith("HTTPS")) {
-                if (trustAllCertificates) {
+            if (urlObj.getProtocol().equalsIgnoreCase("HTTPS")) {
+                if (ignoreCertificateCheck) {
                     HttpsURLConnection.setDefaultSSLSocketFactory(getTrustAllSocketFactory());
                 }
                 scon = (HttpsURLConnection) urlObj.openConnection();
@@ -188,7 +130,6 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
                 scon.connect();
                 //print_https_cert(scon);
                 result.setCode(scon.getResponseCode());
-                result.setResponseTime(System.currentTimeMillis() - startPoint);
                 if (isRequestSuccessful(result.getCode())) {
                     StringBuilder response;
                     try ( // success
@@ -229,7 +170,6 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
                 }
                 con.connect();
                 result.setCode(con.getResponseCode());
-                result.setResponseTime(System.currentTimeMillis() - startPoint);
                 try {
                     StringBuilder response;
                     try ( // success
@@ -329,7 +269,7 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
         sc.init(null, trustAllCerts, new SecureRandom());
         return sc.getSocketFactory();
     }
-    
+
     private void print_https_cert(HttpsURLConnection con) {
 
         if (con != null) {
@@ -361,6 +301,19 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
 
     }
 
+    public Client setTimeout(int timeout) {
+        this.timeout = timeout;
+        return this;
+    }
+
+    public Client setCertificateCheck(boolean check) {
+        ignoreCertificateCheck = !check;
+        return this;
+    }
+
+    private boolean isRequestSuccessful(int code) {
+        return code == HttpURLConnection.HTTP_ACCEPTED || code == HttpURLConnection.HTTP_CREATED || code == HttpURLConnection.HTTP_OK;
+    }
     /*
     public HashMap<String, String> getProperties() {
         return properties;

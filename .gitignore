@@ -68,10 +68,10 @@ hs_err_pid*
 /data/cricket0.log.2
 /db/
 /dist/
-/test/
 /data/cricket_publickeystore.jks
 /docs/todo/
 /cricket-microsite.zip
 !/lib/commons-csv-1.5.jar
 !/lib/h2-1.4.197.jar
 !/lib/json-io-4.10.0.jar
+/reports/

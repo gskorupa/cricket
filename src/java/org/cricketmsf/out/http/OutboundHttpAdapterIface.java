@@ -31,5 +31,6 @@ public interface OutboundHttpAdapterIface extends OutboundAdapterIface{
     public Result send(String url, Request request, Object data);
     public Result send(Object data, boolean transform);
     public Result send(String url, Request request, Object data, boolean transform);
+    public Result send(String url, Request request, Object data, boolean transform, boolean trustAllCertificates);    
     //public HashMap getProperties();
 }

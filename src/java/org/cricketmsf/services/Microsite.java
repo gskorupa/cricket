@@ -110,6 +110,7 @@ public class Microsite extends Kernel {
                 (String) getProperties().getOrDefault("admin-notification-email", ""),
                 "Microsite started", "Microsite service has been started."
         );
+        setInitialized(true);
     }
 
     @Override

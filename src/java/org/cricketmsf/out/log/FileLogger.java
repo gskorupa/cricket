@@ -76,7 +76,7 @@ public class FileLogger extends OutboundAdapter implements Adapter, LoggerAdapte
             Files.write(Paths.get(getFileLocation()), (message + System.lineSeparator()).getBytes(UTF_8),StandardOpenOption.CREATE,StandardOpenOption.APPEND);
             return true;
         } catch (IOException ex) {
-            ex.printStackTrace();
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this, ex.getMessage()));
             return false;
         }
     }

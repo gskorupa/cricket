@@ -47,7 +47,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     protected boolean restored = false;
     long threadsCounter = 0;
     private String initialTasks;
-    private HashMap<String,String> killList;
+    private HashMap<String, String> killList;
 
     private long MINIMAL_DELAY = 5000;
 
@@ -96,8 +96,13 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         database.read();
         setRestored(database.getSize() > 0);
         processDatabase();
-        killList=new HashMap<>();
+        killList = new HashMap<>();
 
+    }
+    
+    @Override
+    public void run(){
+        initScheduledTasks();
     }
 
     private void setStoragePath(String storagePath) {
@@ -116,6 +121,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         return envVariable;
     }
 
+    @Override
     public boolean handleEvent(Event event) {
         return handleEvent(event, false, false);
     }
@@ -124,32 +130,34 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
         return handleEvent(event, restored, false);
     }
 
+    @Override
     public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
         if (event.getTimePoint() == null) {
             return false;
         }
-        
+
         if (systemStart) {
-            String oldCopy="";
+            String oldCopy = "";
             //when events initialized on the service start, we need to create new instances of these events
             if (event.getName() != null && !event.getName().isEmpty()) {
-                if(database.containsKey(event.getName())){
-                    oldCopy=((Event)database.get(event.getName())).getId()+"";
+                if (database.containsKey(event.getName())) {
+                    oldCopy = ((Event) database.get(event.getName())).getId() + "";
                 }
             } else {
-                if(database.containsKey(""+event.getId())){
-                    oldCopy=((Event)database.get(""+event.getId())).getId()+"";
+                if (database.containsKey("" + event.getId())) {
+                    oldCopy = ((Event) database.get("" + event.getId())).getId() + "";
                 }
             }
-            if(!oldCopy.isEmpty()){
-                killList.put(oldCopy,oldCopy);
+            if (!oldCopy.isEmpty()) {
+                killList.put(oldCopy, oldCopy);
             }
         }
-        
+
         final Runnable runnable;
         runnable = new Runnable() {
             Event ev;
 
+            @Override
             public void run() {
                 // we should reset timepoint to prevent sending this event back from the service
                 String remembered = ev.getTimePoint();
@@ -162,11 +170,11 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
 
                     }
                 }
-                
-                if(!killList.containsKey(""+ev.getId())){
+
+                if (!killList.containsKey("" + ev.getId())) {
                     Kernel.getInstance().dispatchEvent(ev);
                 }
-                
+
                 threadsCounter--;
                 database.remove("" + ev.getId());
                 try {
@@ -280,7 +288,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     }
 
     private long getDelay(String dateStr) {
-        long result = 0;
+        long result;
         Date target;
         String dateStrNoRepeat;
         int pos = dateStr.indexOf("|");
@@ -335,6 +343,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     /**
      * @return the restored
      */
+    @Override
     public boolean isRestored() {
         return restored;
     }
@@ -361,5 +370,29 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
     @Override
     public boolean isScheduled(String eventID) {
         return database.containsKey(eventID);
+    }
+
+    public void initScheduledTasks() {
+        String[] params;
+        String[] tasks;
+        if (initialTasks != null && !initialTasks.isEmpty()) {
+            tasks = initialTasks.split(";");
+            for (String task : tasks) {
+                params = task.split(",");
+                if (params.length == 6) {
+                    handleEvent(
+                            new Event(
+                                    params[1], //origin
+                                    params[2], //category
+                                    params[3], //type
+                                    params[4], //timePoint
+                                    params[5]  //payload
+                            ).putName(params[0]), 
+                            false, 
+                            true
+                    );
+                }
+            }
+        }
     }
 }

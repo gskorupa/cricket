@@ -23,6 +23,8 @@ import java.util.HashMap;
  */
 public class Request {
     public HashMap<String, String> properties;
+    public String url;
+    public String query;
     public String method;
     public Object data;
     
@@ -32,18 +34,47 @@ public class Request {
         properties.put("User-Agent", "Mozilla/5.0");
         properties.put("Content-Type", "text/html");
         data = null;
+        url=null;
+        query=null;
     }
     
-    public void setProperty(String key, String value){
+    public Request setProperty(String key, String value){
         properties.put(key, value);
+        return this;
     }
     
-    public void setMethod(String method){
+    public Request setMethod(String method){
         method = method.toUpperCase();
+        return this;
     }
     
-    public void setData(Object data){
+    public Request setData(Object data){
         this.data = data;
+        return this;
+    }
+    
+    public Request setUrl(String url){
+        this.url=url;
+        return this;
+    }
+    
+    public Request setQuery(String query){
+        this.query=query;
+        return this;
+    }
+    
+    public String getUrl(){
+        if(query!=null&&!query.isEmpty()){
+            if(!url.endsWith("/")){
+                url=url.concat("/");
+            }
+            if(query.startsWith("/")){
+                query=query.substring(1);
+            }
+            return url.concat(query);
+        }else{
+            return url;
+        }
     }
     
 }

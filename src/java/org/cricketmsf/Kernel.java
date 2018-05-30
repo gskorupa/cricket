@@ -88,6 +88,7 @@ public abstract class Kernel {
 
     private long startedAt = 0;
     private boolean started = false;
+    private boolean initialized=false;
 
     public Kernel() {
     }
@@ -472,6 +473,7 @@ public abstract class Kernel {
      * before HTTP service.
      */
     protected void runInitTasks() {
+        setInitialized(true);
     }
 
     /**
@@ -681,6 +683,20 @@ public abstract class Kernel {
         args.put(JsonWriter.DATE_FORMAT, "dd/MMM/yyyy:kk:mm:ss Z");
         args.put(JsonWriter.TYPE, false);
         return JsonWriter.objectToJson(reportStatus(), args);
+    }
+
+    /**
+     * @return the initialized
+     */
+    public boolean isInitialized() {
+        return initialized;
+    }
+
+    /**
+     * @param initialized the initialized to set
+     */
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
     }
 
 }

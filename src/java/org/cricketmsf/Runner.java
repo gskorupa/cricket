@@ -39,12 +39,93 @@ import java.util.Scanner;
  * @author greg
  */
 public class Runner {
+    
+    public static Kernel getService(String[] args){
+        long runAt = System.currentTimeMillis();
+        final Kernel service;
+        final ConfigSet configSet;
+        Runner runner = new Runner();
+
+        ArgumentParser arguments = new ArgumentParser(args);
+        if (arguments.isProblem()) {
+            if (arguments.containsKey("error")) {
+                System.out.println(arguments.get("error"));
+            }
+            System.out.println(runner.getHelp());
+            System.exit(-1);
+        }
+
+        configSet = runner.readConfig(arguments);
+
+        Class serviceClass = null;
+        String serviceId;
+        String serviceName = null;
+        Configuration configuration = null;
+        if (arguments.containsKey("service")) {
+            // if service name provided as command line option
+            serviceId = (String) arguments.get("service");
+        } else {
+            // otherwise get first configured service
+            serviceId = configSet.getDefault().getId();
+        }
+
+        configuration = configSet.getConfigurationById(serviceId);
+
+        // if serviceName isn't configured print error and exit
+        if (configuration == null) {
+            System.out.println("Configuration not found for id=" + serviceId);
+            System.exit(-1);
+        } else if (arguments.containsKey("lift")) {
+            serviceName = (String) arguments.get("lift");
+            System.out.println("LIFT service " + serviceName);
+        } else {
+            serviceName = configuration.getService();
+        }
+
+        if (arguments.containsKey("help")) {
+            System.out.println(runner.getHelp(serviceName));
+            System.exit(0);
+        }
+
+        if (arguments.containsKey("print")) {
+            System.out.println(runner.getConfigAsString(configSet));
+            System.exit(0);
+        }
+
+        try {
+            serviceClass = Class.forName(serviceName);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        System.out.println("CRICKET RUNNER");
+        try {
+            service = (Kernel) Kernel.getInstanceWithProperties(serviceClass, configuration);
+            service.configSet = configSet;
+            service.liftMode = arguments.containsKey("lift");
+            if (arguments.containsKey("run")) {
+                service.setStartedAt(runAt);
+                service.start();
+                return service;
+            } else {
+                //service.setScheduler(new Scheduler());
+                //System.out.println("Executing runOnce method");
+                service.runOnce();
+                service.shutdown();
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-
+        getService(args);
+        /*
         long runAt = System.currentTimeMillis();
         final Kernel service;
         final ConfigSet configSet;
@@ -119,6 +200,7 @@ public class Runner {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        */
     }
 
     /**
