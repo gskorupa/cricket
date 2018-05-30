@@ -107,7 +107,12 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
     }
 
     @Override
-    public Result send(String url, Request request, Object data, boolean transform) {
+    public Result send(String url, Request request, Object data, boolean transform){
+        return send(endpointURL, request, data, transform, ignoreCertificateCheck);
+    }
+    
+    @Override
+    public Result send(String url, Request request, Object data, boolean transform, boolean trustAllCertificates) {
 
         if (request == null) {
             request = new Request();
@@ -158,7 +163,7 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
             HttpsURLConnection scon;
             // TODO: Proxy proxy = new Proxy(Proxy.Type.HTTP, sa);
             if (url.toUpperCase().startsWith("HTTPS")) {
-                if (ignoreCertificateCheck) {
+                if (trustAllCertificates) {
                     HttpsURLConnection.setDefaultSSLSocketFactory(getTrustAllSocketFactory());
                 }
                 scon = (HttpsURLConnection) urlObj.openConnection();

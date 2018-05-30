@@ -30,4 +30,5 @@ public interface SchedulerIface {
     public long getThreadsCount();
     public boolean isScheduled(String eventID);
     public String getProperty(String name);
+    public void initScheduledTasks();
 }

@@ -5,10 +5,13 @@
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <property name="version" value="1.2.43"/>
+    <property name="version" value="1.2.44_8"/>
     <property name="src" location="src/java"/>
     <property name="src-other" location="src/other"/>
+    <property name="tests" location="test"/>
     <property name="build" location="build/classes"/>
+    <property name="build.test" location="build/test"/>
+    <property name="reports" location="reports"/>
     <property name="dist" location="dist"/>
     <property name="web" location="web"/>
     <property name="lib" location="lib"/>
@@ -43,6 +46,8 @@
         </tstamp>
         <!-- Create the build directory structure used by compile -->
         <mkdir dir="${build}"/>
+        <mkdir dir="${build.test}"/>
+        <mkdir dir="${reports}"/>
         <propertyfile file="${src}/cricket.properties">
             <entry  key="version" value="${version}"/>
         </propertyfile>
@@ -53,7 +58,7 @@
         <copy file="${src}/BasicService-help.template" tofile="${src}/BasicService-help.txt" overwrite="true"/>
         <replace file="${src}/BasicService-help.txt" token="{{version}}" value="${version}" summary="true"/>
         <javac 
-            target="1.10" 
+            target="1.8" 
             source="1.8" 
             srcdir="${src}" 
             destdir="${build}"
@@ -151,7 +156,7 @@
         </jar>
     </target>
     
-        <target name="docker-build" depends="jar" description="create new tagged image">
+    <target name="docker-build" depends="jar" description="create new tagged image">
         <exec executable="docker">
             <arg value="build"/>
             <arg value="-t"/>
@@ -173,5 +178,57 @@
         </exec>
     </target>
 
-    
+    <target name="get-dependencies" depends="init" description="upload external libraries">
+        <mkdir dir="lib"/>
+        <get
+            src="http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar"
+            dest="lib/junit-4.12.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
+        <get
+            src="http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"
+            dest="lib/hamcrest-core-1.3.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
+    </target>
+    <target name="compile.tests" depends="init" description="compile test cases">
+        <javac 
+            target="1.8" 
+            source="1.8" 
+            srcdir="${tests}" 
+            destdir="${build.test}"
+            includeantruntime="false" 
+            debug="on"
+            classpathref="project-classpath">
+            <classpath>
+                <pathelement path="${build}"/>
+                <pathelement path="${build.test}"/>
+                <pathelement location="${lib}/junit-4.12.jar"/>
+                <pathelement path="${java.class.path}"/>
+            </classpath>
+            <!--<compilerarg value="-Xlint:unchecked"/>-->
+        </javac>
+    </target>
+    <target name="test" depends="compile.tests">
+        <junit fork="yes" printsummary="yes" showoutput="yes" dir="${reports}">
+            <classpath>
+                <pathelement path="${build.test}"/>
+                <pathelement location="${dist}/${jar-name}"/>
+                <pathelement location="${lib}/junit-4.12.jar"/>
+                <pathelement location="${lib}/hamcrest-core-1.3.jar"/>
+                <pathelement path="${java.class.path}"/>
+            </classpath>
+            <formatter type="brief" usefile="false"/>
+            <formatter type="xml"/>
+            <test name="org.cricketmsf.test.microsite.GdprStandardUserTest" haltonfailure="no" todir="${reports}"/>
+        </junit>
+        <junitreport todir="${reports}">
+            <fileset dir="${reports}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${reports}/html"/>
+        </junitreport>
+    </target>
 </project>

@@ -46,9 +46,9 @@ public class SiteAdministrationModule {
     private boolean backupDaily = false;
     private final int maxCacheSize = 1000;
     private final int maxUsers = 100;
-    
+
     private final String ADMIN = "admin";
-    
+
     private boolean hasAccessRights(String userID, List<String> roles) {
         if (userID == null || userID.isEmpty()) {
             return false;
@@ -124,7 +124,7 @@ public class SiteAdministrationModule {
         result.setData(Kernel.getInstance().reportStatus());
         return result;
     }
-    
+
     private StandardResult getServiceConfig() {
         StandardResult result = new StandardResult();
         result.setData(Kernel.getInstance().getConfigSet().getConfigurationById(Kernel.getInstance().getId()));
@@ -154,7 +154,7 @@ public class SiteAdministrationModule {
         if (backupFolder == null) {
             Kernel.handle(Event.logSevere(this, "Kernel parameter \"backup-folder\" not configured"));
         }
-        if (backupFolder!=null && !backupFolder.endsWith(System.getProperty("file.separator"))) {
+        if (backupFolder != null && !backupFolder.endsWith(System.getProperty("file.separator"))) {
             backupFolder = backupFolder.concat(System.getProperty("file.separator"));
         }
         // web moduleName CACHE
@@ -203,6 +203,28 @@ public class SiteAdministrationModule {
                 userDB.put("users", newUser.getUid(), newUser);
                 System.out.println("CREATING admin DONE");
             }
+            if (!userDB.containsKey("users", "public")) {
+                //create user public
+                newUser = new User();
+                newUser.setUid("public");
+                newUser.setEmail("");
+                newUser.setType(User.READONLY);
+                newUser.setRole("guest");
+                newUser.setConfirmed(true);
+                userDB.put("users", newUser.getUid(), newUser);
+            }
+            if (!userDB.containsKey("users", "tester")) {
+                //create user public
+                newUser = new User();
+                newUser.setUid("tester");
+                newUser.setEmail("");
+                newUser.setType(User.USER);
+                newUser.setRole("user");
+                newUser.setPassword(HashMaker.md5Java("cricket"));
+                newUser.setConfirmString("1234567890");
+                newUser.setConfirmed(true);
+                userDB.put("users", newUser.getUid(), newUser);
+            }
             //create user demo
             if (Kernel.getInstance().getName().toLowerCase(Locale.getDefault()).contains("demo")) {
                 if (!userDB.containsKey("users", "demo")) {
@@ -219,30 +241,18 @@ public class SiteAdministrationModule {
                 }
             }
 
-            if (!userDB.containsKey("users", "public")) {
-                //create user public
-                newUser = new User();
-                newUser.setUid("public");
-                newUser.setEmail("");
-                newUser.setType(User.READONLY);
-                newUser.setRole("guest");
-                newUser.setConfirmed(true);
-                userDB.put("users", newUser.getUid(), newUser);
-            }
-
         } catch (ClassCastException | KeyValueDBException e) {
             Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         // AUTH / IDM
         try {
             authDB.addTable("tokens", 2 * maxUsers, false);
         } catch (ClassCastException | KeyValueDBException e) {
             Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), e.getMessage()));
         }
-
 
     }
 
@@ -352,7 +362,7 @@ public class SiteAdministrationModule {
         }
 
     }
-    
+
     private String getDateString() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-");
         return sdf.format(new Date());
