@@ -13,6 +13,8 @@ import org.cricketmsf.out.http.HttpClient;
 import org.cricketmsf.out.http.Request;
 import org.junit.*;
 import org.junit.runners.MethodSorters;
+import com.cedarsoftware.util.io.JsonReader;
+import java.util.HashMap;
 
 
 /**
@@ -32,18 +34,14 @@ public class GdprStandardUserTest {
 
     @Test
     public void checkValidTokenOK() {
-
         // Given
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
-                .setUrl("http://localhost:8080/api/auth/")
-                .setQuery(sessionToken);
-
+                .setUrl("http://localhost:8080/api/auth/"+sessionToken);
         // When
         StandardResult response = (StandardResult) client.send(req, false);
-
         // Then
         Assert.assertEquals(200, response.getCode());
     }
@@ -55,8 +53,7 @@ public class GdprStandardUserTest {
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
-                .setUrl("http://localhost:8080/api/auth/")
-                .setQuery("somefaketoken");
+                .setUrl("http://localhost:8080/api/auth/faketoken");
         // When
         StandardResult response = (StandardResult) client.send(req, false);
         // Then
@@ -65,19 +62,15 @@ public class GdprStandardUserTest {
 
     @Test
     public void readingPersonalDataOK() {
-
         // Given
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
-                .setProperty("Accept", "apNplication/json")
+                .setProperty("Accept", "application/json")
                 .setProperty("Authentication", sessionToken)
-                .setUrl("http://localhost:8080/api/user/")
-                .setQuery(LOGIN);
-
+                .setUrl("http://localhost:8080/api/user/"+LOGIN);
         // When
         StandardResult response = (StandardResult) client.send(req, false);
-
         // Then
         Assert.assertEquals(200, response.getCode());
         String data = null;
@@ -97,8 +90,7 @@ public class GdprStandardUserTest {
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
                 .setProperty("Authentication", sessionToken)
-                .setUrl("http://localhost:8080/api/user/")
-                .setQuery("admin");
+                .setUrl("http://localhost:8080/api/user/admin");
         // When
         StandardResult response = (StandardResult) client.send(req);
         // Then
@@ -107,23 +99,103 @@ public class GdprStandardUserTest {
 
     @Test
     public void updatingPersonalDataOK() {
-        Assert.assertTrue(true);
+        String newEmail="X@xx.yy.zz";
+        //Given
+        HttpClient client = new HttpClient().setCertificateCheck(false);
+        Request req = new Request()
+                .setMethod("PUT")
+                .setProperty("Accept", "application/json")
+                .setProperty("Authentication", sessionToken)
+                .setUrl("http://localhost:8080/api/user/"+LOGIN)
+                .setData("email="+newEmail);
+        // When
+        StandardResult response = (StandardResult) client.send(req);
+        // Then
+        Assert.assertEquals(200, response.getCode());
+        String data = null;
+        try {
+            data = new String(response.getPayload(), "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Assert.fail(ex.getMessage());
+        }
+        //System.out.println(data);
+        HashMap userData = (HashMap)JsonReader.jsonToJava(data);
+        Assert.assertEquals("expecting  "+newEmail,newEmail,userData.get("email"));
     }
 
     @Test
     public void updatingOtherUserPersonalDataNOK() {
-        Assert.assertTrue(true);
+        String newEmail="X@xx.yy.zz";
+        //Given
+        HttpClient client = new HttpClient().setCertificateCheck(false);
+        Request req = new Request()
+                .setMethod("PUT")
+                .setProperty("Accept", "application/json")
+                .setProperty("Authentication", sessionToken)
+                .setUrl("http://localhost:8080/api/user/admin")
+                .setData("email="+newEmail);
+        // When
+        StandardResult response = (StandardResult) client.send(req);
+        // Then
+        Assert.assertEquals(403, response.getCode());
+    }
+    
+    @Test
+    public void y_unregisteringUserOK() {
+        String newEmail="X@xx.yy.zz";
+        //Given
+        HttpClient client = new HttpClient().setCertificateCheck(false);
+        Request req = new Request()
+                .setMethod("PUT")
+                .setProperty("Accept", "application/json")
+                .setProperty("Authentication", sessionToken)
+                .setUrl("http://localhost:8080/api/user/"+LOGIN)
+                .setData("unregisterRequested=true");
+        // When
+        StandardResult response = (StandardResult) client.send(req);
+        // Then
+        Assert.assertEquals(200, response.getCode());
+        String data = null;
+        try {
+            data = new String(response.getPayload(), "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Assert.fail(ex.getMessage());
+        }
+        System.out.println(data);
+        HashMap userData = (HashMap)JsonReader.jsonToJava(data);
+        Assert.assertEquals("expecting true",Boolean.TRUE,userData.get("unregisterRequested"));
     }
 
     @Test
     public void deletingOtherUserPersonalDataNOK() {
-        Assert.assertTrue(true);
+        //Given
+        HttpClient client = new HttpClient().setCertificateCheck(false);
+        Request req = new Request()
+                .setMethod("DELETE")
+                .setProperty("Accept", "application/json")
+                .setProperty("Authentication", sessionToken)
+                .setUrl("http://localhost:8080/api/user/admin")
+                .setData("aa=zz");
+        // When
+        StandardResult response = (StandardResult) client.send(req);
+        // Then
+        Assert.assertEquals(403, response.getCode());
     }
 
     @Test
-    public void z_deletingPersonalDataOK() {
-        System.out.println("deletingPersonalDataOK");
-        Assert.assertTrue(true);
+    public void z_deletingPersonalDataNOK() {
+        //Given
+        HttpClient client = new HttpClient().setCertificateCheck(false);
+        Request req = new Request()
+                .setMethod("DELETE")
+                .setProperty("Accept", "application/json")
+                .setProperty("Authentication", sessionToken)
+                .setUrl("http://localhost:8080/api/user/"+LOGIN)
+                .setData("aa=zz");
+        // When
+        StandardResult response = (StandardResult) client.send(req);
+        // Then
+        Assert.assertEquals(403, response.getCode());
     }
 
     /**

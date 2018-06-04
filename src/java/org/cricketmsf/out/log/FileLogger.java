@@ -15,9 +15,9 @@
  */
 package org.cricketmsf.out.log;
 
-import java.io.IOException;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
@@ -73,10 +73,11 @@ public class FileLogger extends OutboundAdapter implements Adapter, LoggerAdapte
     
     private boolean printMe(String message) {
         try {
-            Files.write(Paths.get(getFileLocation()), (message + System.lineSeparator()).getBytes(UTF_8),StandardOpenOption.CREATE,StandardOpenOption.APPEND);
+            Files.write(Paths.get(getFileLocation()), (message + System.lineSeparator()).getBytes(UTF_8),StandardOpenOption.CREATE,StandardOpenOption.WRITE,StandardOpenOption.APPEND);
             return true;
-        } catch (IOException ex) {
-            Kernel.getInstance().dispatchEvent(Event.logWarning(this, ex.getMessage()));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            //Kernel.getInstance().dispatchEvent(Event.logWarning("FileLogger", ex.getMessage()));
             return false;
         }
     }
@@ -111,13 +112,16 @@ public class FileLogger extends OutboundAdapter implements Adapter, LoggerAdapte
      * @param fileLocation the fileLocation to set
      */
     public void setFileLocation(String fileLocation) {
-        this.fileLocation = fileLocation;
+        if (fileLocation.startsWith(".")) {
+            this.fileLocation = System.getProperty("user.dir") + fileLocation.substring(1);
+        } else {
+            this.fileLocation = fileLocation;
+        }
     }
 
     @Override
     public boolean isAvailable() {
         return available;
     }
-
 
 }

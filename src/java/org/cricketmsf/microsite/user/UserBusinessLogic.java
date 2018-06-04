@@ -229,7 +229,7 @@ public class UserBusinessLogic {
             }
             userAdapter.modify(user);
             //fire event
-            Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_UPDATED, user.getUid()));
+            Kernel.getInstance().dispatchEvent(new UserEvent(UserEvent.USER_UPDATED, user.getNumber()));
             result.setCode(HttpAdapter.SC_OK);
             result.setData(user);
         } catch (NullPointerException | UserException e) {
