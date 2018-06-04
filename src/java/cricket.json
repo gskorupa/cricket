@@ -168,13 +168,13 @@
                         "console": "true"
                     }
                 },
-                "GdrpLogger": {
-                    "name": "GdrpLogger",
+                "GdprLogger": {
+                    "name": "GdprLogger",
                     "interfaceName": "LoggerAdapterIface",
                     "classFullName": "org.cricketmsf.out.log.FileLogger",
                     "properties": {
                         "name": "Microsite",
-                        "log-file-name": "./work/log/gdrp.log"
+                        "log-file-name": "./work/log/gdpr.log"
                     }
                 },
                 "Database": {

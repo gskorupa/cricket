@@ -49,7 +49,7 @@ public class Microsite extends Kernel {
 
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
-    LoggerAdapterIface gdrpLog = null;
+    LoggerAdapterIface gdprLog = null;
     //EchoHttpAdapterIface echoAdapter = null;
     KeyValueDBIface database = null;
     SchedulerIface scheduler = null;
@@ -72,7 +72,7 @@ public class Microsite extends Kernel {
     public void getAdapters() {
         // standard Cricket adapters
         logAdapter = (LoggerAdapterIface) getRegistered("Logger");
-        gdrpLog = (LoggerAdapterIface) getRegistered("GdrpLogger");
+        gdprLog = (LoggerAdapterIface) getRegistered("GdprLogger");
         database = (KeyValueDBIface) getRegistered("Database");
         scheduler = (SchedulerIface) getRegistered("Scheduler");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
@@ -425,7 +425,7 @@ public class Microsite extends Kernel {
                 try {
                     String uid = (String) event.getPayload();
                     User user = userAdapter.get(uid);
-                    gdrpLog.log(Event.logInfo(event.getId(), "REGISTERED USER "+user.getNumber()));
+                    gdprLog.log(Event.logInfo(event.getId(), "REGISTERED USER "+user.getNumber()));
                     long timeout = 1800 * 1000; //30 minut
                     authAdapter.createConfirmationToken(uid, user.getConfirmString(), timeout);
                     emailSender.send(
@@ -446,7 +446,7 @@ public class Microsite extends Kernel {
                 try {
                     String uid = (String) event.getPayload();
                     User user = userAdapter.get(uid);
-                    gdrpLog.log(Event.logInfo(event.getId(), "DELETE REQUEST FOR "+user.getNumber()));
+                    gdprLog.log(Event.logInfo(event.getId(), "DELETE REQUEST FOR "+user.getNumber()));
                     emailSender.send(
                             user.getEmail(),
                             "Cricket unregistration confirmed",
@@ -463,7 +463,7 @@ public class Microsite extends Kernel {
                 break;
             case UserEvent.USER_DELETED:        //TODO: authorization
                 String[] tmpPayload = ((String)event.getPayload()).split(" ");
-                gdrpLog.log(Event.logInfo(event.getId(), "DELETED USER "+tmpPayload[0]+" "+tmpPayload[1]));
+                gdprLog.log(Event.logInfo(event.getId(), "DELETED USER "+tmpPayload[0]+" "+tmpPayload[1]));
                 break;
             case UserEvent.USER_RESET_PASSWORD:
                 String payload = null;
@@ -483,12 +483,12 @@ public class Microsite extends Kernel {
                 } else {
                     dispatchEvent(Event.logWarning("UserEvent.USER_RESET_PASSWORD", "Malformed payload->" + payload));
                 }
-                gdrpLog.log(Event.logInfo(event.getId(), "RESET PASSWORD REQUESTED FOR "+event.getPayload()));
+                gdprLog.log(Event.logInfo(event.getId(), "RESET PASSWORD REQUESTED FOR "+event.getPayload()));
             case UserEvent.USER_REG_CONFIRMED:  //TODO: update user
-                gdrpLog.log(Event.logInfo(event.getId(), "REGISTRATION CONFIRMED FOR "+event.getPayload()));
+                gdprLog.log(Event.logInfo(event.getId(), "REGISTRATION CONFIRMED FOR "+event.getPayload()));
                 break;
             case UserEvent.USER_UPDATED:
-                gdrpLog.log(Event.logInfo(event.getId(), "USER DATA UPDATED FOR"+event.getPayload()));
+                gdprLog.log(Event.logInfo(event.getId(), "USER DATA UPDATED FOR "+event.getPayload()));
                 break;
             default:
                 dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), "Event recived: " + event.getType()));

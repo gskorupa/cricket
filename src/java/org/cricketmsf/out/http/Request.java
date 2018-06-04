@@ -44,7 +44,7 @@ public class Request {
     }
     
     public Request setMethod(String method){
-        method = method.toUpperCase();
+        this.method = method.toUpperCase();
         return this;
     }
     
@@ -65,11 +65,14 @@ public class Request {
     
     public String getUrl(){
         if(query!=null&&!query.isEmpty()){
-            if(!url.endsWith("/")){
+            /*if(!url.endsWith("/")){
                 url=url.concat("/");
             }
             if(query.startsWith("/")){
                 query=query.substring(1);
+            }*/
+            if(!query.startsWith("?")){
+                query="?"+query;
             }
             return url.concat(query);
         }else{

@@ -212,6 +212,7 @@
         </javac>
     </target>
     <target name="test" depends="compile.tests">
+        <mkdir dir="${reports}/work/log"/>
         <junit fork="yes" printsummary="yes" showoutput="yes" dir="${reports}">
             <classpath>
                 <pathelement path="${build.test}"/>

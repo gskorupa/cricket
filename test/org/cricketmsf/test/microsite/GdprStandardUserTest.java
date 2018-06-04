@@ -32,18 +32,14 @@ public class GdprStandardUserTest {
 
     @Test
     public void checkValidTokenOK() {
-
         // Given
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
-                .setUrl("http://localhost:8080/api/auth/")
-                .setQuery(sessionToken);
-
+                .setUrl("http://localhost:8080/api/auth/"+sessionToken);
         // When
         StandardResult response = (StandardResult) client.send(req, false);
-
         // Then
         Assert.assertEquals(200, response.getCode());
     }
@@ -55,8 +51,7 @@ public class GdprStandardUserTest {
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
-                .setUrl("http://localhost:8080/api/auth/")
-                .setQuery("somefaketoken");
+                .setUrl("http://localhost:8080/api/auth/faketoken");
         // When
         StandardResult response = (StandardResult) client.send(req, false);
         // Then
@@ -65,19 +60,15 @@ public class GdprStandardUserTest {
 
     @Test
     public void readingPersonalDataOK() {
-
         // Given
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
-                .setProperty("Accept", "apNplication/json")
+                .setProperty("Accept", "application/json")
                 .setProperty("Authentication", sessionToken)
-                .setUrl("http://localhost:8080/api/user/")
-                .setQuery(LOGIN);
-
+                .setUrl("http://localhost:8080/api/user/"+LOGIN);
         // When
         StandardResult response = (StandardResult) client.send(req, false);
-
         // Then
         Assert.assertEquals(200, response.getCode());
         String data = null;
@@ -97,8 +88,7 @@ public class GdprStandardUserTest {
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
                 .setProperty("Authentication", sessionToken)
-                .setUrl("http://localhost:8080/api/user/")
-                .setQuery("admin");
+                .setUrl("http://localhost:8080/api/user/admin");
         // When
         StandardResult response = (StandardResult) client.send(req);
         // Then
@@ -107,7 +97,28 @@ public class GdprStandardUserTest {
 
     @Test
     public void updatingPersonalDataOK() {
-        Assert.assertTrue(true);
+        System.out.println("UPDATE PROFILE");
+        String newEmail="X@xx.yy.zz";
+        //Given
+        HttpClient client = new HttpClient().setCertificateCheck(false);
+        Request req = new Request()
+                .setMethod("PUT")
+                .setProperty("Accept", "application/json")
+                .setProperty("Authentication", sessionToken)
+                .setUrl("http://localhost:8080/api/user/"+LOGIN)
+                .setData("email="+newEmail);
+        // When
+        StandardResult response = (StandardResult) client.send(req);
+        // Then
+        Assert.assertEquals(200, response.getCode());
+        String data = null;
+        try {
+            data = new String(response.getPayload(), "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Assert.fail(ex.getMessage());
+        }
+        System.out.println(data);
+        Assert.assertTrue("email not updated",data.indexOf(newEmail)>0);
     }
 
     @Test
