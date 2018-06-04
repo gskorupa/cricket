@@ -47,7 +47,7 @@ import java.security.cert.Certificate;
  *
  * @author greg
  */
-public class Client {
+public class HttpClient {
 
     private final String JSON = "application/json";
     private final String CSV = "text/csv";
@@ -65,7 +65,7 @@ public class Client {
     public Result send(Request request, boolean transform) {
         StandardResult result = new StandardResult();
         if (request == null) {
-            result.setCode(500);
+            result.setCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
             result.setMessage("Request is null");
         }
         String requestData = "";
@@ -115,9 +115,9 @@ public class Client {
                 //TODO: this adapter can block entire service waiting for timeout.
                 //TODO: probably not a problem after multithreading have been introduced
                 scon.setRequestMethod(request.method);
-                for (String key : request.properties.keySet()) {
+                request.properties.keySet().forEach((key) -> {
                     scon.setRequestProperty(key, request.properties.get(key));
-                }
+                });
                 if (requestData.length() > 0) {
                     scon.setDoOutput(true);
                     scon.setFixedLengthStreamingMode(requestData.getBytes().length);
@@ -152,9 +152,9 @@ public class Client {
                 //TODO: this adapter can block entire service waiting for timeout.
                 //TODO: probably not a problem after multithreading have been introduced
                 con.setRequestMethod(request.method);
-                for (String key : request.properties.keySet()) {
+                request.properties.keySet().forEach((key) -> {
                     con.setRequestProperty(key, request.properties.get(key));
-                }
+                });
                 if (requestData.length() > 0 || "POST".equals(request.method) || "PUT".equals(request.method) || "DELETE".equals(request.method)) {
                     con.setDoOutput(true);
                     OutputStream os = con.getOutputStream();
@@ -164,30 +164,30 @@ public class Client {
                         out.flush();
                         out.close();
                         os.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    } catch (IOException e) {
+                        result.setCode(500);
+                        result.setMessage(e.getMessage());
                     }
                 }
                 con.connect();
                 result.setCode(con.getResponseCode());
+                StringBuilder response;
+                String inputLine;
                 try {
-                    StringBuilder response;
+                    
                     try ( // success
                             BufferedReader in = new BufferedReader(new InputStreamReader(
                                     con.getInputStream()))) {
-                        String inputLine;
                         response = new StringBuilder();
                         while ((inputLine = in.readLine()) != null) {
                             response.append(inputLine);
                         }
                     }
                     result.setPayload(response.toString().getBytes());
-                } catch (Exception e) {
-                    StringBuilder response;
+                } catch (IOException e) {
                     try ( // success
                             BufferedReader in = new BufferedReader(new InputStreamReader(
                                     con.getErrorStream()))) {
-                        String inputLine;
                         response = new StringBuilder();
                         while ((inputLine = in.readLine()) != null) {
                             response.append(inputLine);
@@ -199,7 +199,7 @@ public class Client {
         } catch (IOException e) {
             String message = e.getMessage();
             Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), message));
-            result.setCode(500);
+            result.setCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
             result.setMessage(message);
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             String message = e.getMessage();
@@ -301,12 +301,12 @@ public class Client {
 
     }
 
-    public Client setTimeout(int timeout) {
+    public HttpClient setTimeout(int timeout) {
         this.timeout = timeout;
         return this;
     }
 
-    public Client setCertificateCheck(boolean check) {
+    public HttpClient setCertificateCheck(boolean check) {
         ignoreCertificateCheck = !check;
         return this;
     }

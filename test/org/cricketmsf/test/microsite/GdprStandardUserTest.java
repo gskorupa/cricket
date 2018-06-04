@@ -9,7 +9,7 @@ import java.util.Base64;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.Runner;
 import org.cricketmsf.in.http.StandardResult;
-import org.cricketmsf.out.http.Client;
+import org.cricketmsf.out.http.HttpClient;
 import org.cricketmsf.out.http.Request;
 import org.junit.*;
 import org.junit.runners.MethodSorters;
@@ -33,7 +33,7 @@ public class GdprStandardUserTest {
     public void checkValidTokenOK() {
 
         // Given
-        Client client = new Client().setCertificateCheck(false);
+        HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
@@ -50,7 +50,7 @@ public class GdprStandardUserTest {
     @Test
     public void checkFakeTokenNOK() {
         // Given
-        Client client = new Client().setCertificateCheck(false);
+        HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
@@ -66,7 +66,7 @@ public class GdprStandardUserTest {
     public void readingPersonalDataOK() {
 
         // Given
-        Client client = new Client().setCertificateCheck(false);
+        HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "apNplication/json")
@@ -91,7 +91,7 @@ public class GdprStandardUserTest {
     @Test
     public void readingOtherUserPersonalDataNOK() {
         //Given
-        Client client = new Client().setCertificateCheck(false);
+        HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
@@ -133,7 +133,7 @@ public class GdprStandardUserTest {
         String login = LOGIN;
         String password = PASSWORD;
         String credentials = Base64.getEncoder().encodeToString((login + ":" + password).getBytes());
-        Client client = new Client().setCertificateCheck(false);
+        HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("POST")
                 .setProperty("Accept", "text/plain")
