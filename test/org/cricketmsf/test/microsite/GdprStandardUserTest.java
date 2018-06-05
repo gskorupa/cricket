@@ -120,7 +120,7 @@ public class GdprStandardUserTest {
         }
         //System.out.println(data);
         HashMap userData = (HashMap)JsonReader.jsonToJava(data);
-        Assert.assertEquals("expecting  "+newEmail,newEmail,userData.get("email"));
+        Assert.assertEquals("expecting "+newEmail,newEmail,userData.get("email"));
     }
 
     @Test
