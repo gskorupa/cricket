@@ -1,5 +1,5 @@
 # Cricket MSF microsite image
-FROM openjdk:10-jre-slim
+FROM java:8
 
 RUN mkdir /cricket
 RUN mkdir /cricket/work
@@ -14,4 +14,4 @@ VOLUME /cricket/work
 volume /cricket/www
 WORKDIR /cricket
 
-CMD ["java", "--illegal-access=deny", "--add-modules", "java.xml.bind", "--add-modules", "java.activation", "-jar", "cricket-{{version}}.jar", "-r", "-c", "/cricket/work/config/cricket.json", "-s", "Microsite"]
+CMD ["java", "-jar", "cricket-{{version}}.jar", "-r", "-c", "/cricket/work/config/cricket.json", "-s", "Microsite"]

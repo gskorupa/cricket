@@ -120,6 +120,11 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         } catch (KeyValueDBException e) {
             Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
         }
+        try { // document paths
+            database.addTable("tags", 100, true);
+        } catch (KeyValueDBException e) {
+            Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
+        }
         status = OK;
     }
 
@@ -218,6 +223,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             doc.setModified(Instant.now().toString());
             doc.setMimeType(doc.getMimeType().trim());
             getDatabase().put("paths", doc.getPath(), doc.getPath());
+            getDatabase().put("tags", doc.getTags(), doc.getTags());
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
             Kernel.getInstance().dispatchEvent(
                     new Event(this.getClass().getSimpleName(), Event.CATEGORY_GENERIC, "CONTENT", null, doc.getUid())
@@ -275,6 +281,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 throw new CmsException(CmsException.ALREADY_EXISTS, "document already exists");
             }
             getDatabase().put("paths", doc.getPath(), doc.getPath());
+            getDatabase().put("tags", doc.getTags(), doc.getTags());
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
             Kernel.getInstance().dispatchEvent(
                     new Event(this.getClass().getSimpleName(), Event.CATEGORY_GENERIC, "CONTENT", null, doc.getUid())
@@ -310,6 +317,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                     doc.setPublished(Instant.now().toString());
                 }
             }
+            getDatabase().put("paths", doc.getPath(), doc.getPath());
+            getDatabase().put("tags", doc.getTags(), doc.getTags());
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
         } catch (KeyValueDBException e) {
             Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), "error while moving document uid=" + doc.getUid() + " database will be inconsistent"));
@@ -407,6 +416,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             }
 
             doc.setModified(Instant.now().toString());
+            getDatabase().put("paths", doc.getPath(), doc.getPath());
+            getDatabase().put("tags", doc.getTags(), doc.getTags());
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
         } catch (KeyValueDBException e) {
             Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), "error while moving document uid=" + doc.getUid() + " database will be inconsistent"));
@@ -445,7 +456,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             //TODO: remove path if thera are no more documents with this path 
         }
     }
-
+/*
     @Override
     public List<Document> findByPath(String path, String language, String status) throws CmsException {
         Document pattern = new Document();
@@ -467,10 +478,28 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         }
         return list;
     }
-
+*/
     @Override
-    public Document findByTag(String tag, String language, String status) throws CmsException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public List<Document> findByPathAndTag(String path, String tag, String language, String status) throws CmsException {
+        Document pattern = new Document();
+        if (!supportedLanguages.contains(language)) {
+            throw new CmsException(CmsException.UNSUPPORTED_LANGUAGE, language + " language is not supported");
+        }
+        if (!supportedStatuses.contains(status)) {
+            throw new CmsException(CmsException.UNSUPPORTED_STATUS, status + " status is not supported");
+        }
+        pattern.setStatus(status);
+        pattern.forceTags(tag);
+        pattern.setPath(path);
+        pattern.setLanguage(language);
+        String tableName = status + "_" + language;
+        ArrayList list = new ArrayList();
+        try {
+            list = (ArrayList) getDatabase().search(tableName, new DocumentPathAndTagComparator(), pattern);
+        } catch (KeyValueDBException ex) {
+            throw new CmsException(CmsException.HELPER_EXCEPTION, ex.getMessage());
+        }
+        return list;
     }
 
     @Override
@@ -523,6 +552,20 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         ArrayList<String> list = new ArrayList<>();
         try {
             Map map = getDatabase().getAll("paths");
+            map.keySet().forEach(key -> {
+                list.add((String) key);
+            });
+        } catch (KeyValueDBException ex) {
+            throw new CmsException(CmsException.HELPER_EXCEPTION, ex.getMessage());
+        }
+        return list;
+    }
+    
+    @Override
+    public List getTags() throws CmsException {
+        ArrayList<String> list = new ArrayList<>();
+        try {
+            Map map = getDatabase().getAll("tags");
             map.keySet().forEach(key -> {
                 list.add((String) key);
             });

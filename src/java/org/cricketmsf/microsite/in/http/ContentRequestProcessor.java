@@ -70,6 +70,8 @@ public class ContentRequestProcessor {
         String language = (String) request.parameters.getOrDefault("language", "");
 
         String pathExt = request.pathExt;
+        String path = (String) request.parameters.getOrDefault("path", "");
+        String tag = (String) request.parameters.getOrDefault("tag", "");
         Document doc;
         if (pathExt != null && !pathExt.isEmpty()) {
             try {
@@ -78,7 +80,7 @@ public class ContentRequestProcessor {
                     if (doc.getType() == Document.FILE) {
                         doc.setContent("*****");
                     }
-                    System.out.println("DOCUMENT2 "+doc.getPublished());
+                    //System.out.println("DOCUMENT2 "+doc.getPublished());
                     result.setData(doc);
                 } else {
                     result.setCode(HttpAdapter.SC_NOT_FOUND);
@@ -90,17 +92,24 @@ public class ContentRequestProcessor {
                 result.setData(ex.getMessage());
             }
         } else {
-            //find
-            String path = (String) request.parameters.getOrDefault("path", "");
+            String pathsOnly = (String) request.parameters.getOrDefault("pathsonly", "false");
+            String tagsOnly = (String) request.parameters.getOrDefault("tagsonly", "false");
             try {
-                result.setData(adapter.findByPath(path, language, "published"));
+                if ("true".equalsIgnoreCase(pathsOnly)) {
+                    result.setData(adapter.getPaths());
+                } else if("true".equalsIgnoreCase(tagsOnly)){
+                    result.setData(adapter.getTags());
+                }else {
+                    result.setData(adapter.findByPathAndTag(path, tag, language, "published"));
+                }
             } catch (CmsException ex) {
                 Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
                 result.setCode(HttpAdapter.SC_NOT_FOUND);
                 result.setMessage(ex.getMessage());
                 result.setData(ex.getMessage());
-            }
-        }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }        }
         return result;
     }
 
@@ -128,7 +137,7 @@ public class ContentRequestProcessor {
                     result.setData(doc);
                 } else {
                     result.setCode(HttpAdapter.SC_NOT_FOUND);
-                    System.out.println("doc is null");
+                    //System.out.println("doc is null");
                 }
             } catch (CmsException ex) {
                 Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
@@ -138,12 +147,16 @@ public class ContentRequestProcessor {
         } else {
             //find
             String path = (String) request.parameters.getOrDefault("path", "");
+            String tag = (String) request.parameters.getOrDefault("tag", "");
             String pathsOnly = (String) request.parameters.getOrDefault("pathsonly", "false");
+            String tagsOnly = (String) request.parameters.getOrDefault("tagsonly", "false");
             try {
                 if ("true".equalsIgnoreCase(pathsOnly)) {
                     result.setData(adapter.getPaths());
-                } else {
-                    result.setData(adapter.findByPath(path, language, requiredStatus));
+                } else if("true".equalsIgnoreCase(tagsOnly)){
+                    result.setData(adapter.getTags());
+                }else {
+                    result.setData(adapter.findByPathAndTag(path, tag, language, requiredStatus));
                 }
             } catch (CmsException ex) {
                 Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));

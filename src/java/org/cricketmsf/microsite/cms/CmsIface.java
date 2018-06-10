@@ -29,6 +29,7 @@ public interface CmsIface {
     public void destroy() throws CmsException;
     
     public List getPaths() throws CmsException;
+    public List getTags() throws CmsException;
     public Document getDocument(String uid, String language) throws CmsException;
     public Document getDocument(String uid, String language, String status) throws CmsException;
     public void addDocument(Document doc) throws CmsException;
@@ -36,8 +37,8 @@ public interface CmsIface {
     public void updateDocument(Document doc) throws CmsException;
     public void updateDocument(String uid, String language, Map parameters) throws CmsException;
     public void removeDocument(String uid) throws CmsException;
-    public List<Document> findByPath(String path, String language, String status) throws CmsException;
-    public Document findByTag(String path, String language, String status) throws CmsException;
+    //public List<Document> findByPath(String path, String language, String status) throws CmsException;
+    public List<Document> findByPathAndTag(String path, String tag, String language, String status) throws CmsException;
     public List<Comment> getComments(String uid) throws CmsException;
     public void addComment(String documentUid, Comment comment) throws CmsException;
     public void acceptComment(String documentUid, String commentUid) throws CmsException;

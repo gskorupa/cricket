@@ -15,7 +15,6 @@
  */
 package org.cricketmsf.microsite.cms;
 
-import java.time.Instant;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -220,11 +219,18 @@ public class Document {
      */
     public void setTags(String tags) {
         this.tags = tags;
+        if (!this.tags.startsWith(",")) {
+            this.tags = "," + this.tags;
+        }
+        if (!this.tags.endsWith(",")) {
+            this.tags = this.tags + ",";
+        }
+    }
+    
+    public void forceTags(String tags) {
+        this.tags = tags;
     }
 
-    /**
-     * @param tags the tags to set
-     */
     public void arrayToTags(String[] tagsArray) {
         String tags = "";
         for (int i = 0; i < tagsArray.length; i++) {

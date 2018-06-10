@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2018 Grzegorz Skorupa <g.skorupa at gmail.com>.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,37 @@
  */
 package org.cricketmsf.microsite.cms;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.cricketmsf.out.db.ComparatorIface;
 
 /**
- * Checks if source origin starts with userId+"~"
- * Returns:
- * 0 - OK
- * 1 - NOK
- * -1 - source is not Event
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class DocumentPathComparator implements ComparatorIface {
+public class DocumentPathAndTagComparator implements ComparatorIface {
 
     @Override
     public int compare(Object source, Object pattern) {
         try {
-            if (((Document)pattern).getPath().equals(((Document)source).getPath())) {
-                        return 0;
-            } else {
-                return 1;
+            Document s = (Document) source;
+            Document p = (Document) pattern;
+            String path = p.getPath();
+            if (!path.isEmpty()) {
+                if (!path.equals(s.getPath())) {
+                    return 1;
+                }
             }
+            if (!p.getTags().isEmpty()) {
+                Set<String> patternSet = new HashSet<String>(Arrays.asList(p.tagsAsArray()));
+                Set<String> sourceSet = new HashSet<String>(Arrays.asList(s.tagsAsArray()));
+                sourceSet.retainAll(patternSet);
+                if (sourceSet.isEmpty()) {
+                    return 1;
+                }
+            }
+            return 0;
         } catch (ClassCastException e) {
             e.printStackTrace();
             return -1;

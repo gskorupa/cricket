@@ -174,7 +174,6 @@ public class HttpClient {
                 StringBuilder response;
                 String inputLine;
                 try {
-                    
                     try ( // success
                             BufferedReader in = new BufferedReader(new InputStreamReader(
                                     con.getInputStream()))) {
@@ -184,16 +183,18 @@ public class HttpClient {
                         }
                     }
                     result.setPayload(response.toString().getBytes());
-                } catch (IOException e) {
-                    try ( // success
-                            BufferedReader in = new BufferedReader(new InputStreamReader(
-                                    con.getErrorStream()))) {
+                } catch (NullPointerException | IOException e) {
+                    try {
+                        BufferedReader in = new BufferedReader(new InputStreamReader(
+                                con.getErrorStream()));
                         response = new StringBuilder();
                         while ((inputLine = in.readLine()) != null) {
                             response.append(inputLine);
                         }
+                        result.setMessage(response.toString());
+                    } catch (NullPointerException ex) {
+                        result.setMessage("empty response");
                     }
-                    result.setMessage(response.toString());
                 }
             }
         } catch (IOException e) {

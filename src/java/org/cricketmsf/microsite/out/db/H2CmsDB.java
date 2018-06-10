@@ -31,7 +31,7 @@ import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.microsite.cms.CmsException;
 import org.cricketmsf.microsite.cms.Document;
-import org.cricketmsf.microsite.cms.DocumentPathComparator;
+import org.cricketmsf.microsite.cms.DocumentPathAndTagComparator;
 import org.cricketmsf.out.db.ComparatorIface;
 import org.cricketmsf.out.db.H2EmbededDB;
 import org.cricketmsf.out.db.KeyValueDBException;
@@ -78,6 +78,8 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
                 pst = conn.prepareStatement("create table " + tableName + docQuery);
             } else if (tableName.equals("paths")) {
                 pst = conn.prepareStatement("create table paths (path varchar primary key)");
+            } else if (tableName.equals("tags")) {
+                pst = conn.prepareStatement("create table tags (tag varchar primary key)");
             } else {
                 throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
@@ -102,6 +104,8 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
             }
         } else if (tableName.equals("paths")) {
             putPath(key);
+        } else if (tableName.equals("tags")) {
+            putTags(key);
         }
     }
 
@@ -151,6 +155,23 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
         }
     }
 
+    private void putTags(String tags) throws KeyValueDBException {
+        try (Connection conn = getConnection()) {
+            String[] tagArray = tags.split(",");
+            String query = "merge into tags values (?)";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            for (int i = 0; i < tagArray.length; i++) {
+                if (!tagArray[i].trim().isEmpty()) {
+                    pstmt.setString(1, tagArray[i]);
+                    int updated = pstmt.executeUpdate();
+                }
+            }
+            //check?
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+    }
+
     @Override
     public Object get(String tableName, String key) throws KeyValueDBException {
         return get(tableName, key, null);
@@ -160,8 +181,10 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
     public Object get(String tableName, String key, Object o) throws KeyValueDBException {
         if (tableName.startsWith("wip_") || tableName.startsWith("published_")) {
             return getDocument(tableName, key, o);
-        } else if (tableName.equals("path")) {
+        } else if (tableName.equals("paths")) {
             return getPath("paths", key, o);
+        } else if (tableName.equals("tags")) {
+            return getTag("tags", key, o);
         } else {
             return null;
         }
@@ -169,18 +192,23 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     @Override
     public Map getAll(String tableName) throws KeyValueDBException {
-        String query = "select path from paths";
+        String query;
         HashMap<String, String> map = new HashMap<>();
         if (tableName.equals("paths")) {
-            try (Connection conn = getConnection()) {
-                PreparedStatement pstmt = conn.prepareStatement(query);
-                ResultSet rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    map.put(rs.getString(1), rs.getString(1));
-                }
-            } catch (SQLException e) {
-                throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+            query = "select path from paths";
+        } else if (tableName.equals("tags")) {
+            query = "select tag from tags";
+        } else {
+            return map;
+        }
+        try (Connection conn = getConnection()) {
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                map.put(rs.getString(1), rs.getString(1));
             }
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
         }
         return map;
     }
@@ -191,7 +219,9 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
         if (tableName.startsWith("published_") || tableName.startsWith("wip_")) {
             query = "select uid from " + tableName + " where uid=?";
         } else if (tableName.equals("paths")) {
-            query = "select path from " + tableName + " where path=?";
+            query = "select path from paths where path=?";
+        } else if (tableName.equals("tags")) {
+            query = "select tag from tags where tag=?";
         } else {
             throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unsupported table " + tableName);
         }
@@ -212,12 +242,15 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
     public boolean remove(String tableName, String key) throws KeyValueDBException {
         String docQuery = "delete from ?? where uid = ?".replaceFirst("\\?\\?", tableName);
         String pathQuery = "delete from paths where path = ?";
+        String tagQuery = "delete from tags where tag = ?";
         String query;
         boolean updated = false;
         if (tableName.startsWith("published_") || tableName.startsWith("wip_")) {
             query = docQuery;
         } else if (tableName.equals("paths")) {
             query = pathQuery;
+        } else if (tableName.equals("tags")) {
+            query = tagQuery;
         } else {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
@@ -242,20 +275,41 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     @Override
     public List search(String tableName, ComparatorIface ci, Object o) throws KeyValueDBException {
-        if (ci instanceof DocumentPathComparator) {
+        if (ci instanceof DocumentPathAndTagComparator) {
             String path = ((Document) o).getPath();
-            String query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from ?? where path = ?";
+            String tags = ((Document) o).getTags();
+            String queryAll = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from ?? where path = ? and tags like ?";
+            String queryWithPath = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from ?? where path = ?";
+            String queryWithTags = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from ?? where tags like ?";
+            String query;
+            boolean tagsOnly = path.isEmpty();
+            boolean pathOnly = tags.isEmpty();
+            if (tagsOnly) {
+                query = queryWithTags;
+            } else if (pathOnly) {
+                query = queryWithPath;
+            } else {
+                query = queryAll;
+            }
             query = query.replaceFirst("\\?\\?", tableName);
             ArrayList list = new ArrayList();
             try (Connection conn = getConnection()) {
                 PreparedStatement pstmt = conn.prepareStatement(query);
-                pstmt.setString(1, path);
+                if (pathOnly) {
+                    pstmt.setString(1, path);
+                } else if (tagsOnly) {
+                    pstmt.setString(1, "%," + tags + ",%");
+                } else {
+                    pstmt.setString(1, path);
+                    pstmt.setString(2, "%," + tags + ",%");
+                }
                 ResultSet rs = pstmt.executeQuery();
                 while (rs.next()) {
                     list.add(buildDocument(rs));
                 }
                 conn.close();
             } catch (SQLException | CmsException e) {
+                e.printStackTrace();
                 throw new KeyValueDBException(KeyValueDBException.UNKNOWN, e.getMessage());
             }
             return list;
@@ -314,6 +368,26 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
         String path = null;
         try (Connection conn = getConnection()) {
             String query = "select * from paths where path=?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, key);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                path = rs.getString(1);
+            }
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+        if (path == null) {
+            return defaultResult;
+        } else {
+            return path;
+        }
+    }
+
+    private Object getTag(String tableName, String key, Object defaultResult) throws KeyValueDBException {
+        String path = null;
+        try (Connection conn = getConnection()) {
+            String query = "select * from tags where tag=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
             ResultSet rs = pstmt.executeQuery();
