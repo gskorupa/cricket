@@ -4,104 +4,6 @@
     "services": [
         {
             "@type": "org.cricketmsf.config.Configuration",
-            "id": "BasicService",
-            "service": "org.cricketmsf.services.BasicService",
-            "properties": {
-                "host": "0.0.0.0",
-                "port": "8080",
-                "ssl": "false",
-                "keystore": "./work/data/cricket_publickeystore.jks",
-                "keystore-password": "cricket15$#17",
-                "threads": "0",
-                "filter": "org.cricketmsf.SecurityFilter",
-                "cors": "Access-Control-Allow-Origin:*",
-                "time-zone": "GMT",
-                "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME",
-                "request-encoding": "UTF-8",
-                "file-upload-maxsize": "1000000"
-            },
-            "adapters": {
-                "Echo": {
-                    "name": "Echo",
-                    "interfaceName": "EchoHttpAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
-                    "properties": {
-                        "context": "/api/echo",
-                        "silent-mode": "false"
-                    }
-                },
-                "StatusService": {
-                    "name": "StatusService",
-                    "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.StandardHttpAdapter",
-                    "properties": {
-                        "context": "/api/status",
-                        "silent-mode": "true"
-                    }
-                },
-                "Logger": {
-                    "name": "Logger",
-                    "interfaceName": "LoggerAdapterIface",
-                    "classFullName": "org.cricketmsf.out.log.StandardLogger",
-                    "properties": {
-                        "name": "BasicService",
-                        "level": "FINEST",
-                        "log-file-name": "./work/log/cricket%g.log",
-                        "max-size": "1000000",
-                        "count": "10",
-                        "console": "true"
-                    }
-                },
-                "Database": {
-                    "name": "Database",
-                    "interfaceName": "KeyValueDBIface",
-                    "classFullName": "org.cricketmsf.out.db.KeyValueDB",
-                    "properties": {
-                        "path": "./work/data",
-                        "name": "local"
-                    }
-                },
-                "Scheduler": {
-                    "name": "Scheduler",
-                    "interfaceName": "SchedulerIface",
-                    "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
-                    "properties": {
-                        "path": "./work/data",
-                        "envVariable": "SCHEDULER_DB_PATH",
-                        "file": "scheduler.xml"
-                    }
-                },
-                "Dispatcher": {
-                    "name": "Dispatcher",
-                    "interfaceName": "DispatcherIface",
-                    "classFullName": "org.cricketmsf.out.EventDispatcherAdapter",
-                    "description": "default dispatcher does nothing",
-                    "properties": {
-                    }
-                },
-                "WWWService": {
-                    "name": "WWWService",
-                    "interfaceName": "HtmlGenAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
-                    "properties": {
-                        "context": "/",
-                        "use-cache": "true",
-                        "page-processor": "false"
-                    }
-                },
-                "FileReader": {
-                    "name": "FileReader",
-                    "interfaceName": "FileReaderAdapterIface",
-                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
-                    "properties": {
-                        "root": "./www/",
-                        "index-file": "index.html"
-                    }
-                }
-            }
-        },
-        {
-            "@type": "org.cricketmsf.config.Configuration",
             "id": "Microsite",
             "service": "org.cricketmsf.services.Microsite",
             "properties": {
@@ -144,15 +46,6 @@
                         "context": "/",
                         "use-cache": "true",
                         "page-processor": "true"
-                    }
-                },
-                "FileReader": {
-                    "name": "FileReader",
-                    "interfaceName": "FileReaderAdapterIface",
-                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
-                    "properties": {
-                        "root": "./www/",
-                        "index-file": "index.html"
                     }
                 },
                 "Logger": {
@@ -361,6 +254,104 @@
                         "user": "",
                         "password": "",
                         "debug-session": "false"
+                    }
+                }
+            }
+        },
+        {
+            "@type": "org.cricketmsf.config.Configuration",
+            "id": "BasicService",
+            "service": "org.cricketmsf.services.BasicService",
+            "properties": {
+                "host": "0.0.0.0",
+                "port": "8080",
+                "ssl": "false",
+                "keystore": "./work/data/cricket_publickeystore.jks",
+                "keystore-password": "cricket15$#17",
+                "threads": "0",
+                "filter": "org.cricketmsf.SecurityFilter",
+                "cors": "Access-Control-Allow-Origin:*",
+                "time-zone": "GMT",
+                "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME",
+                "request-encoding": "UTF-8",
+                "file-upload-maxsize": "1000000"
+            },
+            "adapters": {
+                "Echo": {
+                    "name": "Echo",
+                    "interfaceName": "EchoHttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.EchoHttpAdapter",
+                    "properties": {
+                        "context": "/api/echo",
+                        "silent-mode": "false"
+                    }
+                },
+                "StatusService": {
+                    "name": "StatusService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.StandardHttpAdapter",
+                    "properties": {
+                        "context": "/api/status",
+                        "silent-mode": "true"
+                    }
+                },
+                "Logger": {
+                    "name": "Logger",
+                    "interfaceName": "LoggerAdapterIface",
+                    "classFullName": "org.cricketmsf.out.log.StandardLogger",
+                    "properties": {
+                        "name": "BasicService",
+                        "level": "FINEST",
+                        "log-file-name": "./work/log/cricket%g.log",
+                        "max-size": "1000000",
+                        "count": "10",
+                        "console": "true"
+                    }
+                },
+                "Database": {
+                    "name": "Database",
+                    "interfaceName": "KeyValueDBIface",
+                    "classFullName": "org.cricketmsf.out.db.KeyValueDB",
+                    "properties": {
+                        "path": "./work/data",
+                        "name": "local"
+                    }
+                },
+                "Scheduler": {
+                    "name": "Scheduler",
+                    "interfaceName": "SchedulerIface",
+                    "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
+                    "properties": {
+                        "path": "./work/data",
+                        "envVariable": "SCHEDULER_DB_PATH",
+                        "file": "scheduler.xml"
+                    }
+                },
+                "Dispatcher": {
+                    "name": "Dispatcher",
+                    "interfaceName": "DispatcherIface",
+                    "classFullName": "org.cricketmsf.out.EventDispatcherAdapter",
+                    "description": "default dispatcher does nothing",
+                    "properties": {
+                    }
+                },
+                "WWWService": {
+                    "name": "WWWService",
+                    "interfaceName": "HtmlGenAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
+                    "properties": {
+                        "context": "/",
+                        "use-cache": "true",
+                        "page-processor": "false"
+                    }
+                },
+                "FileReader": {
+                    "name": "FileReader",
+                    "interfaceName": "FileReaderAdapterIface",
+                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
+                    "properties": {
+                        "root": "./www/",
+                        "index-file": "index.html"
                     }
                 }
             }

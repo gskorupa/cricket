@@ -6,7 +6,7 @@
     </target>
     <!-- set global properties for this build -->
     <property name="targetJava10" value="true"/>
-    <property name="mainVersion" value="1.2.44"/>
+    <property name="mainVersion" value="1.2.45"/>
     
     <condition property="version" value="${mainVersion}">
         <equals arg1="${targetJava10}" arg2="true"/>
@@ -128,6 +128,7 @@
         </copy>
         <echo message="Building distribution package"/>
         <copy todir="${dist}/work/config" file="${src}/cricket.json"/>
+        <copy todir="${dist}" file="${src-other}/build.xml"/>
         <antcall target="copy10run">
             <param name="targetJava10" value="${targetJava10}"/>
         </antcall>
@@ -167,6 +168,9 @@
             <fileset dir="${src}" includes="*.json"/>
             <fileset dir="${src}" includes="*.txt"/>
         </copy>
+        <copy todir="${build}/src/java/my/example" file="${src}/org/cricketmsf/services/Microsite.java"/>
+        <copy todir="${build}/src/html" file="${src-other}/index.html"/>
+        <replace file="${build}/src/java/my/example/Microsite.java" token="package org.cricketmsf.services;" value="package my.example;"/>
         <jar  
             destfile="${dist}/${jar-name}">
             <manifest>

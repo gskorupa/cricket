@@ -30,7 +30,6 @@ import org.cricketmsf.microsite.out.auth.AuthAdapterIface;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.microsite.user.User;
 import org.cricketmsf.out.db.*;
-import org.cricketmsf.out.file.FileReaderAdapterIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.List;
 import org.cricketmsf.annotation.EventHook;
@@ -54,10 +53,9 @@ public class Microsite extends Kernel {
     KeyValueDBIface database = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
-    FileReaderAdapterIface fileReader = null;
     //cms
     KeyValueDBIface cmsDatabase = null;
-    FileReaderAdapterIface cmsFileReader = null;
+    //   FileReaderAdapterIface cmsFileReader = null;
     CmsIface cms = null;
     //user module
     KeyValueDBIface userDB = null;
@@ -76,9 +74,7 @@ public class Microsite extends Kernel {
         database = (KeyValueDBIface) getRegistered("Database");
         scheduler = (SchedulerIface) getRegistered("Scheduler");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
-        fileReader = (FileReaderAdapterIface) getRegistered("FileReader");
         //cms
-        cmsFileReader = (FileReaderAdapterIface) getRegistered("CmsFileReader");
         cmsDatabase = (KeyValueDBIface) getRegistered("cmsDB");
         cms = (CmsIface) getRegistered("cmsAdapter");
         //user

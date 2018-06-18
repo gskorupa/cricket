@@ -41,13 +41,17 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
+import java.util.HashMap;
+import java.util.Map;
+import org.cricketmsf.Adapter;
+import org.cricketmsf.out.OutboundAdapterIface;
 
 /**
  * HttpClient will be better name
  *
  * @author greg
  */
-public class HttpClient {
+public class HttpClient implements OutboundAdapterIface, Adapter {
 
     private final String JSON = "application/json";
     private final String CSV = "text/csv";
@@ -57,6 +61,7 @@ public class HttpClient {
 
     protected int timeout = 0;
     protected boolean ignoreCertificateCheck = false;
+    protected String endpointURL;
 
     public Result send(Request request) {
         return send(request, false);
@@ -315,9 +320,42 @@ public class HttpClient {
     private boolean isRequestSuccessful(int code) {
         return code == HttpURLConnection.HTTP_ACCEPTED || code == HttpURLConnection.HTTP_CREATED || code == HttpURLConnection.HTTP_OK;
     }
+
     /*
     public HashMap<String, String> getProperties() {
         return properties;
     }
      */
+
+    @Override
+    public String getProperty(String name) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Map<String, String> getStatus(String name) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        endpointURL = properties.get("url");
+        properties.put("url", endpointURL);
+        Kernel.getInstance().getLogger().print("\turl: " + endpointURL);
+        try {
+            properties.put("timeout", properties.getOrDefault("timeout", "120000"));
+            timeout = Integer.parseInt(properties.getOrDefault("timeout", "120000"));
+        } catch (NumberFormatException e) {
+
+        }
+        Kernel.getInstance().getLogger().print("\ttimeout: " + timeout);
+        ignoreCertificateCheck = Boolean.parseBoolean(properties.getOrDefault("ignore-certificate-check", "false"));
+        properties.put("ignore-certificate-check", "" + ignoreCertificateCheck);
+        Kernel.getInstance().getLogger().print("\tignore-certificate-check: " + ignoreCertificateCheck);
+    }
+
+    @Override
+    public void updateStatusItem(String key, String value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
