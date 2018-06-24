@@ -47,7 +47,7 @@ public class Document {
     private Instant created;
     private Instant modified;
     private Instant published;
-    */
+     */
     private String created;
     private String modified;
     private String published;
@@ -69,6 +69,9 @@ public class Document {
      */
     public void setUid(String uid) throws CmsException {
         if (uid != null && !uid.isEmpty()) {
+            this.uid=uid;
+            validateUid();
+            /*
             if (uid.startsWith("/")) {
                 this.uid = uid;
             } else {
@@ -76,6 +79,7 @@ public class Document {
             }
             setPath(this.uid.substring(0, this.uid.lastIndexOf("/") + 1));
             setName(this.uid.substring(this.uid.lastIndexOf("/") + 1));
+            */
         } else {
             throw new CmsException(CmsException.MALFORMED_UID, "malformed document uid");
         }
@@ -188,7 +192,6 @@ public class Document {
         }
         return decoded;
     }*/
-
     /**
      * @param content the content to set. Must be escaped
      */
@@ -199,8 +202,8 @@ public class Document {
         } catch (IllegalArgumentException e) {
         }
         this.content = decoded;
-        */
-        this.content=content;
+         */
+        this.content = content;
     }
 
     /**
@@ -226,7 +229,7 @@ public class Document {
             this.tags = this.tags + ",";
         }
     }
-    
+
     public void forceTags(String tags) {
         this.tags = tags;
     }

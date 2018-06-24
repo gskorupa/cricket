@@ -162,7 +162,7 @@
         alert('Operation not permitted')
         self.removing = ''
         } else{
-        deleteData(app.userAPI+'/'+self.removing,app.user.token,self.closeRemove,globalEvents)
+        deleteData(app.userAPI+self.removing,app.user.token,self.closeRemove,globalEvents)
         }
         }
         }

@@ -45,7 +45,7 @@
             }
         })
         var loadDocs = function () {
-            getData(app.csAPI + '/home?language=' + app.language, null, null, setDocument, self, null)
+            getData(app.csAPI + 'home?language=' + app.language, null, null, setDocument, self, null)
             getData(app.csAPI + '?path=/home/&language=' + app.language, null, null, setDocList, self, null)
         }
         var setDocument = function (text) {

@@ -22,7 +22,7 @@
         globalEvents.on('*', function (event) {
             if(event=='auth:loggedin'){
                 app.currentPage = 'main'
-                getData(app.userAPI+'/'+app.user.name, null, app.user.token, saveUserData, globalEvents)
+                getData(app.userAPI+app.user.name, null, app.user.token, saveUserData, globalEvents)
             }else if(event=='auth:error'){
                 alert(event)
             }

@@ -17,7 +17,7 @@ route(function (id) {
     }
     if (id.startsWith('articles')) {
         app.currentPage = 'articles'
-        app.docPath = id.substring(8).replace(/,/g, "/");
+        app.docPath = id.substring(9).replace(/,/g, "/");
     } else {
         app.currentPage = id
     }

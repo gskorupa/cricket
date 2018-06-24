@@ -291,7 +291,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         String pathExt = exchange.getRequestURI().getPath();
         if (null != pathExt) {
             pathExt = pathExt.substring(exchange.getHttpContext().getPath().length());
-            if (pathExt.startsWith("/")) {
+            while (pathExt.startsWith("/")) {
                 pathExt = pathExt.substring(1);
             }
         }

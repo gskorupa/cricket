@@ -159,7 +159,7 @@
         })
 
         var readUser = function (uid) {
-            getData(app.userAPI+'/'+uid,null,app.user.token,update,self.listener)
+            getData(app.userAPI+uid,null,app.user.token,update,self.listener)
         }
 
         var generatePassword = function(){
