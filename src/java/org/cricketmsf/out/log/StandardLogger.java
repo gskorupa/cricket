@@ -150,6 +150,11 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
             logger.log(Level.INFO, message);
         }
     }
+    
+    @Override
+    public void printIndented(String message) {
+        print("    ".concat(message));
+    }
 
     private void setLoggingLevel(String level) {
         try {

@@ -32,12 +32,14 @@ import org.cricketmsf.microsite.user.User;
 import org.cricketmsf.out.db.*;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.List;
+import javafx.event.EventDispatcher;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.microsite.auth.AuthBusinessLogic;
 import org.cricketmsf.microsite.in.http.ContentRequestProcessor;
 import org.cricketmsf.microsite.user.UserEvent;
 import org.cricketmsf.microsite.out.notification.*;
 import org.cricketmsf.microsite.*;
+import org.cricketmsf.out.DispatcherIface;
 
 /**
  * Microsite
@@ -85,6 +87,8 @@ public class Microsite extends Kernel {
         authDB = (KeyValueDBIface) getRegistered("authDB");
         //
         emailSender = (EmailSenderIface) getRegistered("emailSender");
+        
+        //eventDispatcher = (DispatcherIface) getRegistered("emailSender");
     }
 
     @Override
@@ -107,6 +111,9 @@ public class Microsite extends Kernel {
                 "Microsite started", "Microsite service has been started."
         );
         setInitialized(true);
+        dispatchEvent(
+                new Event(this.getName(),"SYSTEM","message","+10s",getUuid()+" service started")
+        );
     }
 
     @Override
@@ -531,7 +538,7 @@ public class Microsite extends Kernel {
                 SiteAdministrationModule.getInstance().backupDatabases(database, userDB, authDB, cmsDatabase);
                 break;
             default:
-                dispatchEvent(Event.logWarning("Don't know how to handle type " + event.getType(), event.getPayload().toString()));
+                dispatchEvent(Event.logWarning("Don't know how to handle event: " + event.getType(), event.getPayload().toString()));
         }
     }
 
@@ -545,7 +552,10 @@ public class Microsite extends Kernel {
         if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
         } else {
-            dispatchEvent(Event.logWarning("Don't know how to handle category " + event.getCategory(), event.getPayload().toString()));
+            dispatchEvent(Event.logWarning(
+                    "Don't know how to handle category/type: " + event.getCategory()+"/"+event.getType()
+                    , event.getPayload().toString()
+            ));
         }
     }
 

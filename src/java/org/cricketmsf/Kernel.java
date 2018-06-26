@@ -52,6 +52,8 @@ public abstract class Kernel {
     private static final Logger LOGGER = Logger.getLogger(org.cricketmsf.Kernel.class.getName());
     // standard logger
     protected static LoggerAdapterIface logger = new StandardLogger().getDefault();
+    // event dispatcher
+    protected DispatcherIface eventDispatcher = null;
 
     // singleton
     private static Object instance = null;
@@ -65,9 +67,6 @@ public abstract class Kernel {
     // adapters
     public HashMap<String, Object> adaptersMap = new HashMap<>();
     
-    // event dispatcher
-    private DispatcherIface eventDispatcher = null;
-
     // user defined properties
     public HashMap<String, Object> properties = new HashMap<>();
     public SimpleDateFormat dateFormat = null;
@@ -282,7 +281,7 @@ public abstract class Kernel {
                     } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.InboundAdapter) {
                         setInboundAdaptersLoaded(true);
                     }
-                    if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.EventDispatcherAdapter) {
+                    if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.DispatcherIface) {
                         setEventDispatcher(adaptersMap.get(adapterName));
                     }
                     // loading properties
