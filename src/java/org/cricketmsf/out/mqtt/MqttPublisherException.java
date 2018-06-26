@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2018 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,30 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.out;
+package org.cricketmsf.out.mqtt;
 
-
-/**
- *
- * @author greg
- */
-public class DispatcherException extends Exception {
+public class MqttPublisherException extends Exception {
     
     public static int UNKNOWN = 999;
     public static int NOT_IMPLEMENTED = 998;
-    public static int UNKNOWN_EVENT = 997;
 
     private int code = NOT_IMPLEMENTED;
     private String message;
     
-    public DispatcherException(int code){
+    public MqttPublisherException(int code){
         this.code = code;
         switch (code){
             case 998:
                 message = "operation not implemented";
-                break;
-            case 997:
-                message = "event category/type not handled";
                 break;
             case 999:
                 message = "unknown error";
@@ -44,7 +35,7 @@ public class DispatcherException extends Exception {
         }
     }
     
-    public DispatcherException(int code, String message){
+    public MqttPublisherException(int code, String message){
         this.code = code;
         this.message = message;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2018 Grzegorz Skorupa <g.skorupa at gmail.com>.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.cricketmsf.out;
-
-import org.cricketmsf.Event;
+package org.cricketmsf.out.mqtt;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public interface DispatcherIface {
-    public void dispatch(Event event) throws DispatcherException;
-    public void clearEventsMap();
-    public void registerEventType(String category, String type) throws DispatcherException;
+public interface MqttPublisherIface {
+    
+    public void publish(String clientID, int qos, String topic, String message) throws MqttPublisherException;
+    public void publish(int qos, String topic, String message) throws MqttPublisherException;
+    public void publish(String topic, String message) throws MqttPublisherException;
 }

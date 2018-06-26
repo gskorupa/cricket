@@ -17,7 +17,6 @@ package org.cricketmsf.out.log;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
@@ -69,6 +68,10 @@ public class FileLogger extends OutboundAdapter implements Adapter, LoggerAdapte
     @Override
     public void print(String message) {
         if(isAvailable()) printMe(message);
+    }
+        @Override
+    public void printIndented(String message) {
+        printMe("    ".concat(message));
     }
     
     private boolean printMe(String message) {

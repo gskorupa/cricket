@@ -93,9 +93,26 @@
                 "Dispatcher": {
                     "name": "Dispatcher",
                     "interfaceName": "DispatcherIface",
-                    "classFullName": "org.cricketmsf.out.EventDispatcherAdapter",
-                    "description": "default dispatcher does nothing",
+                    "classFullName": "org.cricketmsf.out.MqttDispatcher",
                     "properties": {
+                        "url": "tcp://test.mosquitto.org:1883",
+                        "qos": "1",
+                        "root-topic": "org.cricketmsf/events",
+                        "event-types": "EVENT/CALL",
+                        "debug": "true"
+                    }
+                },
+                "MqttSubscriber": {
+                    "name": "MqttSubscriber",
+                    "interfaceName": "Adapter",
+                    "classFullName": "org.cricketmsf.in.mqtt.MqttSubscriber",
+                    "properties": {
+                        "url": "tcp://test.mosquitto.org:1883",
+                        "qos": "1",
+                        "root-topic": "org.cricketmsf/events",
+                        "topic-filter": "/#",
+                        "type-suffix": ".local",
+                        "debug": "true"
                     }
                 },
                 "UserService": {

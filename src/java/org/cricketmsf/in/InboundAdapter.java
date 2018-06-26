@@ -30,7 +30,7 @@ import org.cricketmsf.Kernel;
 public class InboundAdapter implements Runnable{
     
     protected HashMap<String, String> hookMethodNames;
-    private HashMap<String, String> properties;
+    protected HashMap<String, String> properties;
     protected HashMap<String,String> statusMap=null;
     
     public void loadProperties(HashMap<String,String> properties, String adapterName){

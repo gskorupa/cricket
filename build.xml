@@ -42,12 +42,14 @@
     <property name="commons-csv-lib" value="commons-csv-1.5.jar"/>
     <property name="h2-lib" value="h2-1.4.197.jar"/>
     <property name="javamail-lib" value="javax.mail.jar"/>
+    <property name="mqtt-lib" value="org.eclipse.paho.client.mqttv3-1.2.0.jar"/>
     
     <path id="project-classpath">
         <pathelement location="${lib}/${json-io-lib}"/>
         <pathelement location="${lib}/${commons-csv-lib}"/>
         <pathelement location="${lib}/${h2-lib}"/>
         <pathelement location="${lib}/${javamail-lib}"/>
+        <pathelement location="${lib}/${mqtt-lib}"/>
     </path>
 
     <target name="init">
@@ -181,6 +183,7 @@
             <zipfileset src="${lib}/${commons-csv-lib}" includes="org/**/*"/>
             <zipfileset src="${lib}/${h2-lib}" includes="org/**/*"/>
             <zipfileset src="${lib}/${javamail-lib}" includes="com/**/*,javax/**/*"/>
+            <zipfileset src="${lib}/${mqtt-lib}" includes="org/**/*"/>
         </jar>
     </target>
     
