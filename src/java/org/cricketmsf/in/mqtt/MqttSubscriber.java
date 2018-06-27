@@ -15,7 +15,6 @@
  */
 package org.cricketmsf.in.mqtt;
 
-import java.sql.Array;
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;

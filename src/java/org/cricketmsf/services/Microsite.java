@@ -32,14 +32,12 @@ import org.cricketmsf.microsite.user.User;
 import org.cricketmsf.out.db.*;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.List;
-import javafx.event.EventDispatcher;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.microsite.auth.AuthBusinessLogic;
 import org.cricketmsf.microsite.in.http.ContentRequestProcessor;
 import org.cricketmsf.microsite.user.UserEvent;
 import org.cricketmsf.microsite.out.notification.*;
 import org.cricketmsf.microsite.*;
-import org.cricketmsf.out.DispatcherIface;
 
 /**
  * Microsite
@@ -87,8 +85,6 @@ public class Microsite extends Kernel {
         authDB = (KeyValueDBIface) getRegistered("authDB");
         //
         emailSender = (EmailSenderIface) getRegistered("emailSender");
-        
-        //eventDispatcher = (DispatcherIface) getRegistered("emailSender");
     }
 
     @Override
