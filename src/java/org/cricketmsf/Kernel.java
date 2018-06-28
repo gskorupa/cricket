@@ -630,7 +630,10 @@ public abstract class Kernel {
             tmp = System.getenv(variableName);
         } catch (Exception e) {
         }
-        this.name = tmp != null ? tmp : "CricketService";
+        this.name = tmp != null ? tmp : ""+getProperties().getOrDefault("servicename","");
+        if(this.name.isEmpty()){
+            this.name= "CricketService";
+        }
     }
 
     /**
