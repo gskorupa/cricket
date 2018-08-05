@@ -98,6 +98,8 @@ public class ParameterFilter extends Filter {
         Map<String, Object> parameters = new HashMap<String, Object>();
         URI requestedUri = exchange.getRequestURI();
         String query = requestedUri.getRawQuery();
+        //System.out.println("URI:"+requestedUri.getQuery());
+        //System.out.println("REQUEST QUERY:"+query);
         ArrayList<RequestParameter> list = parseQuery(query);
         list.forEach((param) -> {
             parameters.put(param.name, param.value);
@@ -373,12 +375,11 @@ public class ParameterFilter extends Filter {
     @SuppressWarnings("unchecked")
     private ArrayList parseQuery(String query)
             throws UnsupportedEncodingException {
-        //System.out.println("parseQuery: " + query);
+        //System.out.println("REQUEST QUERY:"+query);
         ArrayList<RequestParameter> list = new ArrayList<>();
         if (query == null || query.isEmpty()) {
             return list;
         }
-
         String pairs[] = query.split("[&]");
         for (String pair : pairs) {
             String param[] = pair.split("[=]");
@@ -397,6 +398,7 @@ public class ParameterFilter extends Filter {
     }
 
     //TODO: remove
+    /*
     @SuppressWarnings("unchecked")
     private ArrayList parseQuery(String query, Map<String, Object> parameters)
             throws UnsupportedEncodingException {
@@ -421,7 +423,8 @@ public class ParameterFilter extends Filter {
         }
         return list;
     }
-
+    */
+    
     /**
      * @return the fileSizeLimit
      */

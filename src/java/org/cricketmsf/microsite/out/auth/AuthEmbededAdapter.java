@@ -112,7 +112,7 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
     
     @Override
     public Token createConfirmationToken(String userID, String token, long timeout) throws AuthException{
-        Token t = new Token(userID, timeout, false);
+        Token t = new Token(userID, 1000*timeout, false);
         t.setToken(token);
         try {
             getDatabase().put("tokens", t.getToken(), t);
@@ -253,7 +253,7 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
                 throw new AuthException(AuthException.UNAUTHORIZED, "");
             }
             t.refresh();
-            getDatabase().put("tokens", t.getToken(), t);
+            getDatabase().put("tokens", tokenID, t);
         }catch(ClassCastException | KeyValueDBException e){
             throw new AuthException(AuthException.HELPER_EXCEPTION, e.getMessage());
         }

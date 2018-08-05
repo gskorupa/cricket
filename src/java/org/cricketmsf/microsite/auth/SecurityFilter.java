@@ -179,7 +179,7 @@ public class SecurityFilter extends Filter {
         try {
             authorizationNotRequired = !isRestrictedPath(exchange.getRequestMethod(), path);
         } catch (Exception e) {
-            e.printStackTrace();
+            Kernel.getInstance().dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), e.getMessage()));
         }
 
         Map parameters = (Map) exchange.getAttribute("parameters");
@@ -205,7 +205,7 @@ public class SecurityFilter extends Filter {
                     result.user = getUser(inParamsToken, true);
                     result.issuer = getIssuer(inParamsToken);
                 } catch (AuthException e) {
-                    e.printStackTrace(); // eg. expired token
+                    Kernel.getInstance().dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), e.getMessage())); // eg. expired token
                 }
             }
             result.code = 200;
@@ -213,20 +213,32 @@ public class SecurityFilter extends Filter {
             return result;
         }
         String tokenID = exchange.getRequestHeaders().getFirst("Authentication");
+        //System.out.println("AUTHTOKEN:" + tokenID);
         User user = null;
         User issuer = null;
         if (tokenID == null || tokenID.isEmpty()) {
             try {
                 if (parameters != null) {
                     tokenID = (String) parameters.get("tid");
-                    if (tokenID.endsWith("/")) {
-                        tokenID = tokenID.substring(0, tokenID.length() - 1);
+                } else {
+                    tokenID = exchange.getRequestURI().getQuery().substring(4);
+                    int pos=tokenID.indexOf("&");
+                    if(pos>0){
+                        tokenID=tokenID.substring(0,pos);
                     }
-                    user = getUser(tokenID, tokenID.startsWith(PERMANENT_TOKEN_PREFIX));
-                    issuer = getIssuer(tokenID);
                 }
+                if (tokenID != null && tokenID.endsWith("/")) {
+                    tokenID = tokenID.substring(0, tokenID.length() - 1);
+                }
+                //System.out.println("TOKEN:" + tokenID);
+                user = getUser(tokenID, tokenID.startsWith(PERMANENT_TOKEN_PREFIX));
+                //System.out.println("USER:" + user);
+                if (user != null) {
+                    //System.out.println("USER:" + user.getUid());
+                }
+                issuer = getIssuer(tokenID);
             } catch (Exception e) {
-                e.printStackTrace();
+                Kernel.getInstance().dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), e.getMessage()));
             }
         } else {
             try {

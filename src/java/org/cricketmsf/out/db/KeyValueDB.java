@@ -176,7 +176,6 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             return tables.get(tableName).getAll();
         } catch (NullPointerException e) {
-            e.printStackTrace();
             throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
         }
     }

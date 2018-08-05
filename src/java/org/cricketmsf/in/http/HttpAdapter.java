@@ -181,11 +181,15 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                     headers.set("Cache-Control", "max-age=" + result.getMaxAge());  // 1 hour
                 } else {
                     headers.set("Pragma", "no-cache");
-                }   if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+                }   
+                if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
                     CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
                 }else if(exchange.getRequestURI().getPath().startsWith("/api/")){ //TODO: this is workaround
                     CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
-                }   if (result.getCode() == 0) {
+                }else if(exchange.getRequestURI().getPath().endsWith(".tag")){ //TODO: this is workaround
+                    CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
+                }
+                if (result.getCode() == 0) {
                     result.setCode(SC_OK);
                 } else {
                     if (responseData.length == 0) {

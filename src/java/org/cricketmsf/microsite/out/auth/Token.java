@@ -35,7 +35,7 @@ public class Token {
 
     public Token(String userID, long lifetime, boolean permanent) {
         timestamp = System.currentTimeMillis();
-        setLifetime(lifetime);
+        setLifetime(lifetime, permanent);
         uid = userID;
         token = Base64.getEncoder().encodeToString((uid + ":" + timestamp).getBytes());
         if (permanent) {
@@ -44,7 +44,8 @@ public class Token {
     }
 
     public boolean isValid() {
-        return eofLife - System.currentTimeMillis() > 0;
+        //return eofLife - System.currentTimeMillis() > 0;
+        return (eofLife < 0 || eofLife - System.currentTimeMillis() > 0);
     }
 
     /**
@@ -117,25 +118,28 @@ public class Token {
         this.payload = payload;
     }
 
-    public void setLifetime(long lifetime) {
-        if (lifetime < 0) {
-            eofLife = timestamp + 315360000000L; //+10 years
+    public void setLifetime(long lifetime, boolean permanent) {
+        if (lifetime < 0 && permanent) {
+            //eofLife = timestamp + 315360000000L; //+10 years
+            eofLife = -1;
+        } else if (lifetime < 0) {
+            eofLife = timestamp + 60*1000; //1min
         } else {
-            eofLife = timestamp + lifetime;
+            eofLife = timestamp + lifetime*1000;
         }
     }
-    
-    public void setEndOfLife(long eofl){
+
+    public void setEndOfLife(long eofl) {
         eofLife = eofl;
     }
-    
-    public void setToken(String token){
+
+    public void setToken(String token) {
         this.token = token;
     }
-    
-    public void refresh(){
-        long lt = eofLife-timestamp;
+
+    public void refresh() {
+        long lt = 600; //10 min
         setTimestamp(System.currentTimeMillis());
-        setLifetime(lt);
+        setLifetime(lt,false);
     }
 }
