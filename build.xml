@@ -6,7 +6,7 @@
     </target>
     <!-- set global properties for this build -->
     <property name="targetJava10" value="true"/>
-    <property name="mainVersion" value="1.2.47"/>
+    <property name="mainVersion" value="1.2.48"/>
     
     <condition property="version" value="${mainVersion}">
         <equals arg1="${targetJava10}" arg2="true"/>
@@ -41,7 +41,7 @@
     <property name="json-io-lib" value="json-io-4.10.0.jar"/>
     <property name="commons-csv-lib" value="commons-csv-1.5.jar"/>
     <property name="h2-lib" value="h2-1.4.197.jar"/>
-    <property name="javamail-lib" value="javax.mail.jar"/>
+    <property name="javamail-lib" value="javax.mail-1.6.1.jar"/>
     <property name="mqtt-lib" value="org.eclipse.paho.client.mqttv3-1.2.0.jar"/>
     
     <path id="project-classpath">
@@ -210,7 +210,37 @@
     </target>
 
     <target name="get-dependencies" depends="init" description="upload external libraries">
-        <mkdir dir="lib"/>
+        <mkdir dir="lib"/> 
+        <get
+            src="https://search.maven.org/remotecontent?filepath=com/cedarsoftware/json-io/4.10.0/json-io-4.10.0.jar"
+            dest="lib/json-io-4.10.0.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
+        <get
+            src="https://search.maven.org/remotecontent?filepath=org/apache/commons/commons-csv/1.5/commons-csv-1.5.jar"
+            dest="lib/commons-csv-1.5.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
+        <get
+            src="https://search.maven.org/remotecontent?filepath=com/h2database/h2/1.4.197/h2-1.4.197.jar"
+            dest="lib/h2-1.4.197.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
+        <get
+            src="https://maven.java.net/content/repositories/releases/com/sun/mail/javax.mail/1.6.1/javax.mail-1.6.1.jar"
+            dest="lib/javax.mail-1.6.1.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
+        <get
+            src="https://search.maven.org/remotecontent?filepath=org/eclipse/paho/org.eclipse.paho.client.mqttv3/1.2.0/org.eclipse.paho.client.mqttv3-1.2.0.jar"
+            dest="lib/org.eclipse.paho.client.mqttv3-1.2.0.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
         <get
             src="http://search.maven.org/remotecontent?filepath=junit/junit/4.12/junit-4.12.jar"
             dest="lib/junit-4.12.jar" 
@@ -220,6 +250,24 @@
         <get
             src="http://search.maven.org/remotecontent?filepath=org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar"
             dest="lib/hamcrest-core-1.3.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
+        <get
+            src="http://central.maven.org/maven2/org/apache/httpcomponents/httpclient/4.5.5/httpclient-4.5.5.jar"
+            dest="lib/httpclient-4.5.5.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
+        <get
+            src="http://central.maven.org/maven2/org/apache/httpcomponents/httpcore/4.4.9/httpcore-4.4.9.jar"
+            dest="lib/httpcore-4.4.9.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
+        <get
+            src="http://central.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar"
+            dest="lib/commons-logging-1.2.jar" 
             usetimestamp="true" 
             ignoreerrors="true"
         />

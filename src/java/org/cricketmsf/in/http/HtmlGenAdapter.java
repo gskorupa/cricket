@@ -93,7 +93,6 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
 
     private byte[] updateHtml(ParameterMapResult result) {
         if (result.getData() != null && result.getPayload()!=null) {
-            System.out.println("UPDATING");
             HashMap map = (HashMap) result.getData();
             if (result.getPayload().length>0 && !map.isEmpty()) {
                 Pattern p = Pattern.compile("(\\$\\w+)");
