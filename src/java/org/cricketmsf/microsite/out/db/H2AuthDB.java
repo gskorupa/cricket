@@ -118,21 +118,19 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
     @Override
     public Map getAll(String tableName) throws KeyValueDBException {
         HashMap<String, Token> map = new HashMap<>();
-        //TODO: nie używać, zastąpić konkretnymi search'ami
-        /*
-        if (tableName.equals("users")) {
-            String query = "select uid,type,email,role,secret,password,generalchannel,infochannel,warningchannel,alertchannel,confirmed,unregisterreq,authstatus,created from users";
-            try (Connection conn = getConnection()) {
-                PreparedStatement pstmt = conn.prepareStatement(query);
-                ResultSet rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    map.put(rs.getString(1), buildUser(rs));
-                }
-            } catch (SQLException e) {
-                throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        //TODO: do not use - replace with dedicated searches
+        Token token = null;
+        try (Connection conn = getConnection()) {
+            String query = "select token, uid, issuer, payload, tstamp, eoflife from " + tableName;
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            ResultSet rs = pstmt.executeQuery();
+            while(rs.next()) {
+                token = buildToken(rs, tableName.equals("ptokens"));
+                map.put(token.getToken(), token);
             }
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
         }
-        */
         return map;
     }
 

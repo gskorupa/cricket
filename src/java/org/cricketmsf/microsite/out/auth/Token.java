@@ -120,10 +120,10 @@ public class Token {
 
     public void setLifetime(long lifetime, boolean permanent) {
         if (lifetime < 0 && permanent) {
-            //eofLife = timestamp + 315360000000L; //+10 years
-            eofLife = -1;
+            eofLife = timestamp + 315360000000L;
+            //eofLife = -1;
         } else if (lifetime < 0) {
-            eofLife = timestamp + 60*1000; //1min
+            eofLife = timestamp + 180*1000; //1min
         } else {
             eofLife = timestamp + lifetime*1000;
         }
