@@ -104,6 +104,7 @@ public class Exchange extends HttpExchange {
     @Override
     public void close() {
         httpExchange.close();
+        httpExchange=null;
     }
 
     @Override

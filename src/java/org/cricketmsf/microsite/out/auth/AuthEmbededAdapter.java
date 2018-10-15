@@ -222,7 +222,6 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
         try {
             Token t = null;
             t = (Token) getDatabase().get("ptokens", tokenID);
-            //System.out.println("TOKEN FOUND (getIssuer)=" + t);
             if (t != null) {
                 if (t.isValid()) {
                     return getUserAdapter().get(t.getIssuer());

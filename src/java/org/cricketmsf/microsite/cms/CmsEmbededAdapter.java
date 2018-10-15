@@ -542,6 +542,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         supportedLanguages.add("pl");
         supportedLanguages.add("en");
         supportedLanguages.add("fr");
+        supportedLanguages.add("it");
         supportedStatuses = new ArrayList<>();
         supportedStatuses.add("wip");
         supportedStatuses.add("published");

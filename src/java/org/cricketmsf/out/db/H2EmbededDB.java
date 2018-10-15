@@ -46,6 +46,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     private String systemVersion;
     private boolean encrypted;
     private String filePassword;
+    private boolean autocommit;
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -67,6 +68,8 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         Kernel.getLogger().print("\tencrypted=" + isEncrypted());
         setFilePassword(properties.get("filePassword"));
         Kernel.getLogger().print("\tfilePassword=" + getFilePassword());
+        setAutocommit(properties.getOrDefault("autocommit","true"));
+        Kernel.getLogger().print("\tautocommit=" + autocommit);
         try {
             start();
         } catch (KeyValueDBException ex) {
@@ -102,7 +105,9 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
 
     @Override
     public Connection getConnection() throws SQLException {
-        return cp.getConnection();
+        Connection c = cp.getConnection();
+        c.setAutoCommit(autocommit);
+        return c;
     }
 
     @Override
@@ -431,5 +436,12 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
      */
     public void setFilePassword(String filePassword) {
         this.filePassword = filePassword;
+    }
+
+    /**
+     * @param autocommit the autocommit to set
+     */
+    public void setAutocommit(String value) {
+        this.autocommit = Boolean.parseBoolean(value);
     }
 }

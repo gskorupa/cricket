@@ -143,7 +143,6 @@ public class SecurityFilter extends Filter {
                 case "PUT":
                     if (restrictedPut != null) {
                         for (String restrictedPut1 : restrictedPut) {
-                            //System.out.println("FOR:" + restrictedPut1);
                             if (path.startsWith(restrictedPut1)) {
                                 return true;
                             }
@@ -173,7 +172,6 @@ public class SecurityFilter extends Filter {
     public SecurityFilterResult checkRequest(HttpExchange exchange) {
 
         String path = exchange.getRequestURI().getPath();
-        //System.out.println("CHECK REQUEST FOR PATH:" + path);
         Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), "PATH=" + path));
         boolean authorizationNotRequired = true;
         try {
@@ -186,15 +184,11 @@ public class SecurityFilter extends Filter {
 
         SecurityFilterResult result = new SecurityFilterResult();
         if (authorizationNotRequired) {
-            //System.out.println("AUTHORIZATION NOT REQUIRED");
             String inParamsToken = null;
-
             try {
                 if (parameters != null) {
                     inParamsToken = (String) parameters.get("tid");
                 }
-                //System.out.println(">>> INPARAMSTOKEN="+inParamsToken);
-
             } catch (NullPointerException e) {
             }
             if (inParamsToken != null) {
@@ -213,29 +207,24 @@ public class SecurityFilter extends Filter {
             return result;
         }
         String tokenID = exchange.getRequestHeaders().getFirst("Authentication");
-        //System.out.println("AUTHTOKEN:" + tokenID);
         User user = null;
         User issuer = null;
         if (tokenID == null || tokenID.isEmpty()) {
             try {
-                if (parameters != null) {
+                if (null!= parameters) {
                     tokenID = (String) parameters.get("tid");
-                } else {
+                }
+                if (null == tokenID) {
                     tokenID = exchange.getRequestURI().getQuery().substring(4);
-                    int pos=tokenID.indexOf("&");
-                    if(pos>0){
-                        tokenID=tokenID.substring(0,pos);
+                    int pos = tokenID.indexOf("&");
+                    if (pos > 0) {
+                        tokenID = tokenID.substring(0, pos);
                     }
                 }
                 if (tokenID != null && tokenID.endsWith("/")) {
                     tokenID = tokenID.substring(0, tokenID.length() - 1);
                 }
-                //System.out.println("TOKEN:" + tokenID);
                 user = getUser(tokenID, tokenID.startsWith(PERMANENT_TOKEN_PREFIX));
-                //System.out.println("USER:" + user);
-                if (user != null) {
-                    //System.out.println("USER:" + user.getUid());
-                }
                 issuer = getIssuer(tokenID);
             } catch (Exception e) {
                 Kernel.getInstance().dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), e.getMessage()));

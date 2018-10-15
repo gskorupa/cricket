@@ -123,7 +123,7 @@ public class Token {
             eofLife = timestamp + 315360000000L;
             //eofLife = -1;
         } else if (lifetime < 0) {
-            eofLife = timestamp + 180*1000; //1min
+            eofLife = timestamp + 180*1000; //3min
         } else {
             eofLife = timestamp + lifetime*1000;
         }
@@ -141,5 +141,11 @@ public class Token {
         long lt = 600; //10 min
         setTimestamp(System.currentTimeMillis());
         setLifetime(lt,false);
+    }
+    
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        sb.append(getToken()).append(":").append(getUid()).append(":").append(getIssuer()).append(":").append(isValid());
+        return sb.toString();
     }
 }
