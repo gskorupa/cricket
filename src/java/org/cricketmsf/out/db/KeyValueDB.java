@@ -61,18 +61,17 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
             e.printStackTrace();
         }
     }
-    
+
     @Override
-    public String getName(){
+    public String getName() {
         return dbName;
     }
 
     @Override
     public void start() throws KeyValueDBException {
+        restore(filePath);
+        /*
         tables = new HashMap<>();
-        //read lines from file with: tableName,capacity
-        //table.read
-        //taples.put(name,table)
         try {
             FileReader fr = new FileReader(filePath);
             BufferedReader bufr = new BufferedReader(fr);
@@ -91,6 +90,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         } catch (IOException e) {
 
         }
+        */
     }
 
     @Override
@@ -116,7 +116,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
             } catch (IOException e) {
             e.printStackTrace();
             }
-            */
+             */
         } catch (KeyValueDBException ex) {
             ex.printStackTrace();
         }
@@ -130,7 +130,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     @Override
     public void addTable(String name, int capacity, boolean persistent) throws KeyValueDBException {
         if (tables.containsKey(name)) {
-            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "unable to create table "+name);
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "unable to create table " + name);
         }
         tables.put(name, new KeyValueTable(name, capacity, persistent, storagePath));
     }
@@ -138,7 +138,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     @Override
     public void deleteTable(String name) throws KeyValueDBException {
         if (!tables.containsKey(name)) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+name);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + name);
         }
         tables.remove(name);
     }
@@ -148,7 +148,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             tables.get(tableName).put(key, value);
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + tableName);
         }
     }
 
@@ -157,7 +157,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             return tables.get(tableName).get(key);
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + tableName);
         }
     }
 
@@ -166,7 +166,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             return tables.get(tableName).get(key, defaultValue);
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + tableName);
         }
     }
 
@@ -176,7 +176,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             return tables.get(tableName).getAll();
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + tableName);
         }
     }
 
@@ -185,7 +185,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             return tables.get(tableName).search(comparator, pattern);
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + tableName);
         }
     }
 
@@ -194,20 +194,20 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             return tables.get(tableName).containsKey(key);
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + tableName);
         }
     }
 
     @Override
     public boolean remove(String tableName, String key) throws KeyValueDBException {
         try {
-            if(containsKey(tableName, key)){
+            if (containsKey(tableName, key)) {
                 return tables.get(tableName).remove(key);
-            }else{
+            } else {
                 throw new KeyValueDBException(KeyValueDBException.CANNOT_DELETE);
             }
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + tableName);
         }
     }
 
@@ -216,14 +216,14 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
         try {
             tables.get(tableName).clear();
         } catch (NullPointerException e) {
-            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table "+tableName);
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + tableName);
         }
     }
 
     @Override
     public List<String> getTableNames() throws KeyValueDBException {
         ArrayList<String> result = new ArrayList<>();
-        tables.keySet().forEach(key -> result.add((String)key));
+        tables.keySet().forEach(key -> result.add((String) key));
         return result;
     }
 
@@ -231,7 +231,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     public void backup(String fileLocation) throws KeyValueDBException {
         try {
             FileWriter fw = new FileWriter(fileLocation);
-            fw.write("# "+this.getClass().getName()+"\r\n");
+            fw.write("# " + this.getClass().getName() + "\r\n");
             fw.write("# DO NOT MODIFY\r\n");
             fw.write("#\r\n");
             tables.keySet().forEach((key) -> {
@@ -251,6 +251,32 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public String getBackupFileName() {
-        return getName()+".db";
+        return getName() + ".db";
+    }
+
+    @Override
+    public void restore(String fileLocation) throws KeyValueDBException {
+        tables = new HashMap<>();
+        //read lines from file with: tableName,capacity
+        //table.read
+        //taples.put(name,table)
+        try {
+            FileReader fr = new FileReader(fileLocation);
+            BufferedReader bufr = new BufferedReader(fr);
+            int count = 1;
+            String line = bufr.readLine();
+            String[] params;
+            while (line != null) {
+                line = line.trim();
+                if (!line.startsWith("#")) {
+                    params = line.split(",");
+                    addTable(params[0], Integer.parseInt(params[1]), Boolean.valueOf(params[2]).booleanValue());
+                }
+                line = bufr.readLine();
+            }
+            bufr.close();
+        } catch (IOException e) {
+
+        }
     }
 }

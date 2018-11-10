@@ -361,7 +361,22 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
 
     @Override
     public void backup(String fileLocation) throws KeyValueDBException {
-        String query = "backup to '" + fileLocation + "'";
+        //String query = "backup to '" + fileLocation + "'";
+        String query = "script to '" + fileLocation + "' compression ZIP";
+        try (Connection conn = cp.getConnection()) {
+            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+                pstmt.executeUpdate();
+            }
+            conn.close();
+        } catch (SQLException e) {
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_DELETE, "backup error - " + e.getMessage());
+        }
+    }
+    
+    @Override
+    public void restore(String fileLocation) throws KeyValueDBException {
+        //String query = "backup to '" + fileLocation + "'";
+        String query = "runscript from '" + fileLocation + "'";
         try (Connection conn = cp.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(query)) {
                 pstmt.executeUpdate();

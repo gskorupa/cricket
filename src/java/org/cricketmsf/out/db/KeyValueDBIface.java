@@ -54,6 +54,14 @@ public interface KeyValueDBIface {
      * @throws KeyValueDBException 
      */
     public void backup(String fileLocation) throws KeyValueDBException;
+    
+    /**
+     * Restores all database tables from the specified file on disk
+     * 
+     * @param fileLocation
+     * @throws KeyValueDBException 
+     */
+    public void restore(String fileLocation) throws KeyValueDBException;
 
     /**
      * Creates new table within the database
