@@ -160,9 +160,9 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
             String[] tagArray = tags.split(",");
             String query = "merge into tags values (?)";
             PreparedStatement pstmt = conn.prepareStatement(query);
-            for (int i = 0; i < tagArray.length; i++) {
-                if (!tagArray[i].trim().isEmpty()) {
-                    pstmt.setString(1, tagArray[i]);
+            for (String tagArray1 : tagArray) {
+                if (!tagArray1.trim().isEmpty()) {
+                    pstmt.setString(1, tagArray1);
                     int updated = pstmt.executeUpdate();
                 }
             }

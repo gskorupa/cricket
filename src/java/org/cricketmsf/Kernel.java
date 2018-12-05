@@ -146,6 +146,15 @@ public abstract class Kernel {
         }
         return o;
     }
+
+    /**
+     * Invokes the service method annotated as dedicated to this event category
+     *
+     * @param event event object that should be processed
+     */
+    public static Object handle(Event event) {
+        return Kernel.getInstance().handleEvent(event);
+    }
     
     /**
      * Sends event object to the event queue using registered dispatcher adapter. In case the dispatcher adapter is not registered or throws exception,
@@ -161,15 +170,6 @@ public abstract class Kernel {
             } catch (NullPointerException | DispatcherException ex) {
                 return handleEvent(event);
             }
-    }
-
-    /**
-     * Invokes the service method annotated as dedicated to this event category
-     *
-     * @param event event object that should be processed
-     */
-    public static Object handle(Event event) {
-        return Kernel.getInstance().handleEvent(event);
     }
 
     public HashMap<String, Object> getAdaptersMap() {
@@ -296,8 +296,10 @@ public abstract class Kernel {
             LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterName);
             throw new Exception(e);
         }
+        getLogger().print("event dispatcher: "+eventDispatcher!=null?eventDispatcher.getClass().getName():" not used");
         getLogger().print("END LOADING ADAPTERS");
         getLogger().print("");
+        
     }
     
     private void setEventDispatcher(Object adapter){

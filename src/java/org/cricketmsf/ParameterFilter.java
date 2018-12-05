@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import junit.framework.Assert;
 
 /**
  * This filter is used to recognize, parse and transform request parameters into
@@ -48,8 +49,8 @@ public class ParameterFilter extends Filter {
 
     public ParameterFilter() {
         super();
-        setParameterEncoding((String)Kernel.getInstance().properties.getOrDefault("request-encoding","UTF-8"));
-        setFileSizeLimit((String)Kernel.getInstance().properties.getOrDefault("file.upload.maxsize","1000000"));
+        setParameterEncoding((String) Kernel.getInstance().properties.getOrDefault("request-encoding", "UTF-8"));
+        setFileSizeLimit((String) Kernel.getInstance().properties.getOrDefault("file.upload.maxsize", "1000000"));
     }
 
     @Override
@@ -61,7 +62,6 @@ public class ParameterFilter extends Filter {
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
         String method = exchange.getRequestMethod().toUpperCase();
-        //System.out.println("ParameterFilter: doFilter");
         switch (method) {
             case "GET":
                 exchange.setAttribute("parameters", parseGetParameters(exchange));
@@ -70,7 +70,8 @@ public class ParameterFilter extends Filter {
             case "PUT":
             case "DELETE":
                 try {
-                    Map<String, Object> tmp = parsePostParameters(exchange);
+                    Map<String, Object> tmp;
+                    tmp = parsePostParameters(exchange);
                     if (tmp.containsKey("&&&data")) {
                         exchange.setAttribute("body", tmp.get("&&&data"));
                         tmp.remove("&&&data");
@@ -88,19 +89,13 @@ public class ParameterFilter extends Filter {
                 exchange.setAttribute("parameters", parseGetParameters(exchange));
         }
         chain.doFilter(exchange);
-        //System.out.println("ParameterFilter: doFilter ended");
-
     }
 
     private Map<String, Object> parseGetParameters(HttpExchange exchange)
             throws UnsupportedEncodingException {
 
-        Map<String, Object> parameters = new HashMap<String, Object>();
-        URI requestedUri = exchange.getRequestURI();
-        String query = requestedUri.getRawQuery();
-        //System.out.println("URI:"+requestedUri.getQuery());
-        //System.out.println("REQUEST QUERY:"+query);
-        ArrayList<RequestParameter> list = parseQuery(query);
+        Map<String, Object> parameters = new HashMap<>();
+        ArrayList<RequestParameter> list = parseQuery(exchange.getRequestURI().getRawQuery());
         list.forEach((param) -> {
             parameters.put(param.name, param.value);
         });
@@ -173,15 +168,11 @@ public class ParameterFilter extends Filter {
                 }
                 isr.close();
         }
-
-        //exchange.setAttribute("parameters", parameters);
-        //System.out.println("ParameterFilter: "+parameters.size());
         return parameters;
     }
 
     private HashMap<String, Object> parseForm(String boundary, InputStream br)
             throws IOException {
-        //System.out.println("parsing form");
         HashMap<String, Object> parameters = new HashMap<>();
         String line;
         String startLine = "--" + boundary;
@@ -203,33 +194,25 @@ public class ParameterFilter extends Filter {
                 fileName = null;
                 if (paramName.startsWith("file\";")) {
                     fileName = paramName.substring(paramName.lastIndexOf("\"") + 1);
-                    //System.out.println("FILENAME=" + fileName);
                     paramName = paramName.substring(0, paramName.indexOf("\""));
-                    //fileName=fileName.substring(17);
-                    //System.out.println("PARAMNAME=" + paramName);
                 }
-                //empty line or contentType
                 contentType = readLine(br);
-                //System.out.println(line);
-                if (fileName == null) {
+                if (fileName == null || fileName.isEmpty()) {
                     value = "";
                     while (!(line = readLine(br)).startsWith(startLine)) {
                         value = value.concat(line);
                     }
                     parameters.put(paramName, value);
-                    //System.out.println("PARAM: "+paramName+"="+value);
                 } else {
                     fileParameter = readFileContent(br, startLine + "\r\n", endLine + "\r\n", getFileSizeLimit(), fileName);
                     parameters.put(paramName, contentType + ";" + fileParameter.fileSize + ";" + fileParameter.fileLocation);
                     line = fileParameter.nextLine;
-                    //System.out.println("FILESIZE:"+fileParameter.fileSize);
                 }
 
             } while (!endLine.equals(line));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //System.out.println("ParameterFilter.parseForm: "+parameters.size());
         return parameters;
     }
 
@@ -240,25 +223,28 @@ public class ParameterFilter extends Filter {
         byte[] buffer = new byte[bufferLength];
         int pos = 0;
         long totalSize = 0;
-        int b = -1;
+        int b;
         String line;
         boolean startLineFound = false;
         int targetPos;
         int bytesMoved;
-        Path filePath = null;
-        OutputStream output = null;
+        Path filePath;
+        OutputStream output;
         boolean writingStarted = false;
         boolean fileTooLarge = false;
-        String ext = "";
+        String ext;
+
+        assert fileName != null;
+        assert !fileName.isEmpty();
 
         if (fileName.lastIndexOf(".") >= 0) {
             ext = fileName.substring(fileName.lastIndexOf("."));
+        } else {
+            ext = "";
         }
-        if (fileName != null && !fileName.isEmpty()) {
-            filePath = Files.createTempFile("cricket-", ext);
-            filePath.toFile().deleteOnExit();
-            output = Files.newOutputStream(filePath);
-        }
+        filePath = Files.createTempFile("cricket-", ext);
+        filePath.toFile().deleteOnExit();
+        output = Files.newOutputStream(filePath);
         do {
             b = is.read();
             if (b != -1) {
@@ -274,7 +260,6 @@ public class ParameterFilter extends Filter {
                     }
                     if (startLine.equals(line) || endLine.equals(line)) {
                         startLineFound = true;
-                        //System.out.println("END REACHED");
                         fileParameter.nextLine = line.substring(0, line.length() - 2);
                         fileParameter.fileLocation = "" + filePath;
                     }
@@ -310,8 +295,7 @@ public class ParameterFilter extends Filter {
                          */
                     }
                 } else if (startLineFound) {
-                    //System.out.println("ENDLINE FOUND: "+pos+" "+endLine.length());
-                    //zapisz do pliku - WITHOUT ENDING CRLF!
+                    //save to file - WITHOUT ENDING CRLF!
                     //TODO: byte to file
                     bytesMoved = pos - endLine.length();
                     if (output != null) {
@@ -341,7 +325,7 @@ public class ParameterFilter extends Filter {
             fileParameter.fileLocation = null;
             try {
                 Files.delete(filePath);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 Kernel.getInstance().dispatchEvent(Event.logWarning(this, e.getMessage()));
             }
         } else {
@@ -351,7 +335,6 @@ public class ParameterFilter extends Filter {
     }
 
     private String readLine(InputStream is) throws IOException {
-        //System.out.println("READING:");
         int c = -1;
         int prev;
         int pos = 0;
@@ -359,7 +342,6 @@ public class ParameterFilter extends Filter {
         do {
             prev = c;
             c = is.read();
-            //System.out.print(""+c);
             if (prev == 13 && c == 10) {
                 break;
             }
@@ -367,15 +349,12 @@ public class ParameterFilter extends Filter {
                 bytes[pos++] = (byte) c;
             }
         } while (c != -1 && pos < 1024);
-        //String result=new String(Arrays.copyOfRange(bytes, 0, pos));
-        //System.out.println(result);
         return new String(Arrays.copyOfRange(bytes, 0, pos));
     }
 
     @SuppressWarnings("unchecked")
     private ArrayList parseQuery(String query)
             throws UnsupportedEncodingException {
-        //System.out.println("REQUEST QUERY:"+query);
         ArrayList<RequestParameter> list = new ArrayList<>();
         if (query == null || query.isEmpty()) {
             return list;
@@ -383,48 +362,23 @@ public class ParameterFilter extends Filter {
         String pairs[] = query.split("[&]");
         for (String pair : pairs) {
             String param[] = pair.split("[=]");
-            String key = null;
-            String value = null;
+            String key;
+            String value;
             if (param.length > 0) {
                 key = URLDecoder.decode(param[0], getParameterEncoding());
+            } else {
+                key = null;
             }
             if (param.length > 1) {
                 value = URLDecoder.decode(param[1], getParameterEncoding());
+            } else {
+                value = null;
             }
-            //System.out.println("parseQuery:[" + key + "][" + value + "]");
             list.add(new RequestParameter(key, value));
         }
         return list;
     }
 
-    //TODO: remove
-    /*
-    @SuppressWarnings("unchecked")
-    private ArrayList parseQuery(String query, Map<String, Object> parameters)
-            throws UnsupportedEncodingException {
-        //System.out.println("parseQuery: " + query);
-        if (query == null || query.isEmpty()) {
-            return null;
-        }
-        ArrayList<RequestParameter> list = new ArrayList<>();
-        String pairs[] = query.split("[&]");
-        for (String pair : pairs) {
-            String param[] = pair.split("[=]");
-            String key = null;
-            String value = null;
-            if (param.length > 0) {
-                key = URLDecoder.decode(param[0], getParameterEncoding()); //TODO: static
-            }
-            if (param.length > 1) {
-                value = URLDecoder.decode(param[1], getParameterEncoding());
-            }
-            //System.out.println("parseQuery:[" + key + "][" + value + "]" + parameters.containsKey(key));
-            list.add(new RequestParameter(key, value));
-        }
-        return list;
-    }
-    */
-    
     /**
      * @return the fileSizeLimit
      */

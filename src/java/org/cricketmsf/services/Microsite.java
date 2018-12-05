@@ -108,7 +108,7 @@ public class Microsite extends Kernel {
         );
         setInitialized(true);
         dispatchEvent(
-                new Event(this.getName(),"SYSTEM","message","+10s",getUuid()+" service started")
+                new Event(this.getName(), "SYSTEM", "message", "+10s", getUuid() + " service started")
         );
     }
 
@@ -133,12 +133,12 @@ public class Microsite extends Kernel {
 
     @Override
     public void shutdown() {
-        try{
-        emailSender.send(
-                (String) getProperties().getOrDefault("admin-notification-email", ""),
-                "Microsite shutdown", "Microsite service is going down."
-        );
-        }catch(Exception e){
+        try {
+            emailSender.send(
+                    (String) getProperties().getOrDefault("admin-notification-email", ""),
+                    "Microsite shutdown", "Microsite service is going down."
+            );
+        } catch (Exception e) {
             e.printStackTrace();
         }
         super.shutdown();
@@ -161,7 +161,7 @@ public class Microsite extends Kernel {
             language = "en";
         }
         ParameterMapResult result = null;
-        String cacheName = "webcache_"+language;
+        String cacheName = "webcache_" + language;
         try {
             result = (ParameterMapResult) cms
                     .getFile(event.getRequest(), htmlAdapter.useCache() ? database : null, cacheName, language, true);
@@ -174,7 +174,7 @@ public class Microsite extends Kernel {
                             .getFile(request, htmlAdapter.useCache() ? database : null, cacheName);
                 }
             }
-            */
+             */
             //((HashMap) result.getData()).put("serviceurl", getProperties().get("serviceurl"));
             HashMap rd = (HashMap) result.getData();
             rd.put("serviceurl", getProperties().get("serviceurl"));
@@ -184,8 +184,13 @@ public class Microsite extends Kernel {
             rd.put("environmentName", getName());
             rd.put("javaversion", System.getProperty("java.version"));
             List<String> roles = event.getRequest().headers.get("X-user-role");
-            if (roles != null) {
+            if (roles != null && roles.size() > 0) {
                 StringBuilder sb = new StringBuilder("[");
+                for (String role : roles) {
+                    sb.append(role).append(",");
+                }
+                rd.put("roles", sb.substring(0, sb.length() - 1) + "]");
+                /*
                 for (int i = 0; i < roles.size(); i++) {
                     if (i > 0) {
                         sb.append(",");
@@ -193,7 +198,8 @@ public class Microsite extends Kernel {
                     sb.append("'").append(roles.get(i)).append("'");
                 }
                 sb.append("]");
-                rd.put("roles", sb.toString());
+                rd.put("roles", sb.toString);
+                 */
             } else {
                 rd.put("roles", "[]");
             }
@@ -203,39 +209,12 @@ public class Microsite extends Kernel {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        if("HEAD".equalsIgnoreCase(event.getRequest().method)){ //quick hack
+
+        if ("HEAD".equalsIgnoreCase(event.getRequest().method)) { //quick hack
             byte[] empty = {};
             result.setPayload(empty);
         }
         return result;
-    }
-
-    /**
-     * Modify request pathExt: replaces all "*//*.html" requests to "/" (to be redirecetd to index.html)
-     * Seems it is not usable anumore - TO BE REMOVED
-     *
-     * @param originalRequest
-     * @param indexFileExt
-     * @param indexFileName
-     * @return
-     */
-    private RequestObject forceIndexFile(RequestObject originalRequest, String indexFileExt, String indexFileName) {
-        RequestObject request = originalRequest;
-        String[] pathElements = request.uri.split("/");
-        if (pathElements.length == 0) {
-            return request;
-        }
-        StringBuilder sb = new StringBuilder();
-        if (pathElements[pathElements.length - 1].endsWith(indexFileExt)) {
-            if (!pathElements[pathElements.length - 1].equals(indexFileName)) {
-                for (int i = 0; i < pathElements.length - 1; i++) {
-                    sb.append(pathElements[i]).append("/");
-                }
-                request.pathExt = sb.toString();
-            }
-        }
-        return request;
     }
 
     @HttpAdapterHook(adapterName = "UserService", requestMethod = "OPTIONS")
@@ -318,44 +297,6 @@ public class Microsite extends Kernel {
         return AuthBusinessLogic.getInstance().refreshToken(event, authAdapter);
     }
 
-    /**
-    @HttpAdapterHook(adapterName = "ConfirmationService", requestMethod = "GET")
-    public Object userConfirm(Event event) {
-        StandardResult result = new StandardResult();
-        result.setCode(HttpAdapter.SC_FORBIDDEN);
-        try {
-            String key = event.getRequestParameter("key");
-            try {
-                if(authAdapter.checkToken(key)){
-                        User user = authAdapter.getUser(key);
-                        if (user.getStatus() == User.IS_REGISTERING && user.getConfirmString().equals(key)) {
-                            user.setConfirmed(true);
-                            userAdapter.modify(user);
-                            result.setCode(200);
-                            String pageContent
-                                    = "Registration confirmed.<br>You can go to <a href=/#login>login page</a> and sign in.";
-                            result.setFileExtension("html");
-                            result.setHeader("Content-type", "text/html");
-                            result.setPayload(pageContent.getBytes());
-                        }
-                } else {
-                    result.setCode(401);
-                    String pageContent
-                            = "Oops, something has gone wrong: confirmation token not found . We cannot confirm your <a href=/#>Cricket</a> registration. Please contact support.";
-                    result.setFileExtension("html");
-                    result.setHeader("Content-type", "text/html");
-                    result.setPayload(pageContent.getBytes());
-                }
-            } catch (UserException ex) {
-                Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "confirmation error " + ex.getMessage()));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-    */
-
     @HttpAdapterHook(adapterName = "ContentService", requestMethod = "OPTIONS")
     public Object contentCors(Event requestEvent) {
         StandardResult result = new StandardResult();
@@ -391,7 +332,7 @@ public class Microsite extends Kernel {
     public Object systemServiceHandle(Event event) {
         return new SiteAdministrationModule().handleRestEvent(event);
     }
-    
+
     @HttpAdapterHook(adapterName = "StatusService", requestMethod = "*")
     public Object systemStatusHandle(Event event) {
         StandardResult result = new StandardResult();
@@ -415,16 +356,12 @@ public class Microsite extends Kernel {
 
     @EventHook(eventCategory = UserEvent.CATEGORY_USER)
     public void processUserEvent(Event event) {
-        if (event.getTimePoint() != null) {
-            scheduler.handleEvent(event);
-            return;
-        }
         switch (event.getType()) {
             case UserEvent.USER_REGISTERED:     //send confirmation email
                 try {
                     String uid = (String) event.getPayload();
                     User user = userAdapter.get(uid);
-                    gdprLog.log(Event.logInfo(event.getId(), "REGISTERED USER "+user.getNumber()));
+                    gdprLog.log(Event.logInfo(event.getId(), "REGISTERED USER " + user.getNumber()));
                     long timeout = 1800 * 1000; //30 minut
                     authAdapter.createConfirmationToken(uid, user.getConfirmString(), timeout);
                     emailSender.send(
@@ -435,7 +372,7 @@ public class Microsite extends Kernel {
                             + "If you received this email by mistake, simply delete it. You won't be registered if you don't click the confirmation link above."
                     );
                     emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Cricket - registration", uid);
-                    
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), e.getMessage() + " while sending confirmation emai"));
@@ -445,7 +382,7 @@ public class Microsite extends Kernel {
                 try {
                     String uid = (String) event.getPayload();
                     User user = userAdapter.get(uid);
-                    gdprLog.log(Event.logInfo(event.getId(), "DELETE REQUEST FOR "+user.getNumber()));
+                    gdprLog.log(Event.logInfo(event.getId(), "DELETE REQUEST FOR " + user.getNumber()));
                     emailSender.send(
                             user.getEmail(),
                             "Cricket unregistration confirmed",
@@ -454,15 +391,15 @@ public class Microsite extends Kernel {
                             + "If you received this email by mistake, you can contact our support before this date to stop unregistration procedure."
                     );
                     emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Cricket - unregister", uid);
-                    
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), e.getMessage() + " while sending confirmation emai"));
                 }
                 break;
             case UserEvent.USER_DELETED:        //TODO: authorization
-                String[] tmpPayload = ((String)event.getPayload()).split(" ");
-                gdprLog.log(Event.logInfo(event.getId(), "DELETED USER "+tmpPayload[0]+" "+tmpPayload[1]));
+                String[] tmpPayload = ((String) event.getPayload()).split(" ");
+                gdprLog.log(Event.logInfo(event.getId(), "DELETED USER " + tmpPayload[0] + " " + tmpPayload[1]));
                 break;
             case UserEvent.USER_RESET_PASSWORD:
                 String payload = null;
@@ -482,12 +419,12 @@ public class Microsite extends Kernel {
                 } else {
                     dispatchEvent(Event.logWarning("UserEvent.USER_RESET_PASSWORD", "Malformed payload->" + payload));
                 }
-                gdprLog.log(Event.logInfo(event.getId(), "RESET PASSWORD REQUESTED FOR "+event.getPayload()));
+                gdprLog.log(Event.logInfo(event.getId(), "RESET PASSWORD REQUESTED FOR " + event.getPayload()));
             case UserEvent.USER_REG_CONFIRMED:  //TODO: update user
-                gdprLog.log(Event.logInfo(event.getId(), "REGISTRATION CONFIRMED FOR "+event.getPayload()));
+                gdprLog.log(Event.logInfo(event.getId(), "REGISTRATION CONFIRMED FOR " + event.getPayload()));
                 break;
             case UserEvent.USER_UPDATED:
-                gdprLog.log(Event.logInfo(event.getId(), "USER DATA UPDATED FOR "+event.getPayload()));
+                gdprLog.log(Event.logInfo(event.getId(), "USER DATA UPDATED FOR " + event.getPayload()));
                 break;
             default:
                 dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), "Event recived: " + event.getType()));
@@ -502,10 +439,6 @@ public class Microsite extends Kernel {
      */
     @EventHook(eventCategory = Event.CATEGORY_GENERIC)
     public void processSystemEvent(Event event) {
-        if (event.getTimePoint() != null) {
-            scheduler.handleEvent(event);
-            return;
-        }
         switch (event.getType()) {
             case "SHUTDOWN":
                 shutdown();
@@ -545,14 +478,10 @@ public class Microsite extends Kernel {
      */
     @EventHook(eventCategory = "*")
     public void processEvent(Event event) {
-        if (event.getTimePoint() != null) {
-            scheduler.handleEvent(event);
-        } else {
-            dispatchEvent(Event.logWarning(
-                    "Don't know how to handle category/type: " + event.getCategory()+"/"+event.getType()
-                    , event.getPayload().toString()
-            ));
-        }
+        dispatchEvent(Event.logWarning(
+                "Don't know how to handle category/type: " + event.getCategory() + "/" + event.getType(),
+                 event.getPayload().toString()
+        ));
     }
 
 }

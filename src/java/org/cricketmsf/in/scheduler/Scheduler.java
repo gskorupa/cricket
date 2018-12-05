@@ -33,12 +33,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import org.cricketmsf.out.DispatcherException;
+import org.cricketmsf.out.DispatcherIface;
+
 
 /**
  *
  * @author greg
  */
-public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter {
+public class Scheduler extends InboundAdapter implements SchedulerIface, DispatcherIface, Adapter {
 
     private String storagePath;
     private String envVariable;
@@ -394,5 +397,24 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Adapter
                 }
             }
         }
+    }
+
+    @Override
+    public void dispatch(Event event) throws DispatcherException {
+        if(event.getTimePoint()==null){
+            Kernel.getInstance().handleEvent(event);
+        }else{
+            handleEvent(event);
+        }
+    }
+
+    @Override
+    public void clearEventsMap() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void registerEventType(String category, String type) throws DispatcherException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

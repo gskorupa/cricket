@@ -149,16 +149,19 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
 
         result.getHeaders().keySet().forEach((key) -> {
             List<String> values = result.getHeaders().get(key);
-            for (int i = 0; i < values.size(); i++) {
-                headers.set(key, values.get(i));
-            }
+            //for (int i = 0; i < values.size(); i++) {
+            //    headers.set(key, values.get(i));
+            //}
+            values.forEach((value) -> {
+                headers.set(key, value);
+            });
         });
 
         switch (result.getCode()) {
             case SC_MOVED_PERMANENTLY:
             case SC_MOVED_TEMPORARY:
                 headers.set("Location", result.getMessage());
-                responseData = ("moved to " + result.getMessage()).getBytes("UTF-8");
+                responseData = ("moved to ".concat(result.getMessage())).getBytes("UTF-8");
                 break;
             case SC_NOT_FOUND:
                 headers.set("Content-type", "text/html");
@@ -167,7 +170,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             default:
                 if (!headers.containsKey("Content-type")) {
                     if (acceptedTypesMap.containsKey(acceptedResponseType)) {
-                        headers.set("Content-type", acceptedResponseType + "; charset=UTF-8");
+                        headers.set("Content-type", acceptedResponseType.concat("; charset=UTF-8"));
                         responseData = formatResponse(acceptedResponseType, result);
                     } else {
                         headers.set("Content-type", getMimeType(result.getFileExtension()));
@@ -220,7 +223,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
     }
 
     private String getMimeType(String fileExt) {
-        switch (fileExt) {
+        switch (fileExt.toLowerCase()) {
             case ".ico":
                 return "image/x-icon";
             case ".jpg":
@@ -324,7 +327,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 if (requestObject.uri.lastIndexOf("/") > requestObject.uri.lastIndexOf(".")) {
                     // redirect to index.file but only if property index.file is not null
                     result.setCode(SC_MOVED_PERMANENTLY);
-                    result.setMessage(requestObject.uri + "/");
+                    result.setMessage(requestObject.uri.concat("/"));
                     return result;
                 }
             }

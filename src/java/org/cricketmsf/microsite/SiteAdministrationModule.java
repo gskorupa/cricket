@@ -265,8 +265,8 @@ public class SiteAdministrationModule {
         String[] tasks;
         if (initialTasks != null && !initialTasks.isEmpty()) {
             tasks = initialTasks.split(";");
-            for (int i = 0; i < tasks.length; i++) {
-                params = tasks[i].split(",");
+            for (String task : tasks) {
+                params = task.split(",");
                 if (params.length == 6) {
                     scheduler.handleEvent(
                             new Event(params[1], params[2], params[3], params[4], params[5]).putName(params[0]), false, true);
