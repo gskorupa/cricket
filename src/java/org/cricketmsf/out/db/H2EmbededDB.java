@@ -365,7 +365,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         String query = "script to '" + fileLocation + "' compression ZIP";
         try (Connection conn = cp.getConnection()) {
             try (PreparedStatement pstmt = conn.prepareStatement(query)) {
-                pstmt.executeUpdate();
+                pstmt.execute();
             }
             conn.close();
         } catch (SQLException e) {
