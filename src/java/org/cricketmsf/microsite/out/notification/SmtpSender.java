@@ -28,12 +28,13 @@ import javax.mail.internet.MimeMessage;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.out.OutboundAdapter;
 
 /**
  *
  * @author greg
  */
-public class SmtpSender implements EmailSenderIface, Adapter {
+public class SmtpSender extends OutboundAdapter implements EmailSenderIface, Adapter {
 
     String from = "signode@signocom.com";
     String cc = null;

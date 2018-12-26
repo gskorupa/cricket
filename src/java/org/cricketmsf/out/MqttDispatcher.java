@@ -16,6 +16,7 @@
 package org.cricketmsf.out;
 
 import java.util.HashMap;
+import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.mqtt.MqttPublisher;
@@ -25,7 +26,7 @@ import org.cricketmsf.out.mqtt.MqttPublisherException;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class MqttDispatcher extends EventDispatcherAdapter {
+public class MqttDispatcher extends EventDispatcherAdapter implements Adapter{
 
     private String clientID;
     private String brokerURL;

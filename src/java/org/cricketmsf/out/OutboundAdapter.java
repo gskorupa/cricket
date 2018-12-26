@@ -22,37 +22,46 @@ import java.util.Map;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class OutboundAdapter implements OutboundAdapterIface{
-    
-    protected HashMap<String,String> statusMap=null;
+public class OutboundAdapter implements OutboundAdapterIface {
+
+    protected HashMap<String, String> statusMap = null;
     protected HashMap<String, String> properties;
-    
-    public OutboundAdapter(){
+    protected String name;
+
+    public OutboundAdapter() {
     }
-    
-    public void destroy(){   
+
+    public void destroy() {
     }
-    
-    public void loadProperties(HashMap<String,String> properties, String adapterName){
-        this.properties = (HashMap<String,String>)properties.clone();        
+
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        this.name = name;
+        this.properties = (HashMap<String, String>) properties.clone();
         getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
     }
-    
-    public Map<String,String> getStatus(String name){
-        if(statusMap==null){
+
+    public Map<String, String> getStatus(String name) {
+        if (statusMap == null) {
             statusMap = new HashMap();
             statusMap.put("name", name);
             statusMap.put("class", getClass().getName());
         }
         return statusMap;
     }
-    
-    public void updateStatusItem(String key, String value){
+
+    public void updateStatusItem(String key, String value) {
         statusMap.put(key, value);
     }
-    
-    public String getProperty(String name){
+
+    public String getProperty(String name) {
         return properties.get(name);
     }
 
+    public DispatcherIface getDispatcher() {
+        return null;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

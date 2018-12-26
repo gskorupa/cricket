@@ -8,7 +8,7 @@
         <div class="col-md-12">
             <h2>{labels.title[app.language]} 
                 <virtual each={ lang, i in app.languages}>
-                    <button type="button" class="btn btn-sm { lang==selectedLanguage?'btn-primary':'btn-default' }" onclick={ selectLanguage(lang) }>{ lang }</button>
+                    <button type="button" class="btn btn-sm { lang==selectedLanguage?'btn-primary':'btn-secondary' }" onclick={ selectLanguage(lang) }>{ lang }</button>
                 </virtual>
                 <i class="material-icons clickable" onclick={ refreshDocs() }>refresh</i>
                 <i class="material-icons clickable" onclick={ editDocument('NEW', true) }>add</i>
@@ -25,15 +25,17 @@
                 <select class="select" id="statusesDropdown" onchange={ selectStatus }>
                     <option each={ tmpStatus, index in statuses }>{ tmpStatus }</option>
                 </select>
+                <label for="doctag" style="margin-left:10px;margin-right: 5px;">{ labels.doctag[app.language] }</label>
+                <input class="form-control" id="doctag" name="doctag" type="text" value={ doctag }>
             </form>
         </div>
     </div>
     <div class="row" if={ !selected }>
         <div class="col-md-12">
-            <table id="doclist" class="table table-condensed">
+            <table id="doclist" class="table table-condensed topspacing-sm">
                 <thead>
                     <tr class="d-flex">
-                        <th class="col-1"></th>
+                        <th class="col-1">{labels.t_type[app.language]}</th>
                         <th class="col-3">{labels.t_name[app.language]}</th>
                         <th class="col-5">{labels.t_title[app.language]}</th>
                         <!--<th>{labels.t_status[app.language]}</th>-->
@@ -78,8 +80,8 @@
                             <p class="text-warning"><small>{labels.remove_info[app.language]}</small></p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal" onclick={ select('') }>{labels.cancel[app.language]}</button>
                             <button type="button" class="btn btn-primary" data-dismiss="modal" onclick={ removeDocument() }>{labels.remove[app.language]}</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick={ select('') }>{labels.cancel[app.language]}</button>
                         </div>
                     </div>
                 </div>
@@ -96,6 +98,7 @@
         self.documents = []
         self.selected = ''
         self.selectedLanguage = 'EN'
+        self.doctag = ''
         self.removing = ''
 
         //globalEvents.on('pageselected:documents', function (eventName) {
@@ -143,7 +146,12 @@
 
         var readContentList = function () {
             app.log('reading docs ...')
-            getData(app.cmAPI+'?path='+self.path+'&language='+self.selectedLanguage+'&status='+self.status,null,app.user.token,updateList,self.listener)
+            self.doctag=document.getElementById("doctag").value.trim()
+            var query = app.cmAPI+'?path='+self.path+'&language='+self.selectedLanguage+'&status='+self.status
+            if(self.doctag.length>0){
+                query=query+'&tag='+self.doctag
+            }
+            getData(query,null,app.user.token,updateList,self.listener)
         }
 
         var updatePaths = function (text) {
@@ -271,51 +279,61 @@
                 "fr": "NAME",
                 "pl": "NAZWA"
             },
-                "t_title": {
+            "t_type": {
+                "en": "TYPE",
+                "fr": "TYPE",
+                "pl": "TYP"
+            },
+            "t_title": {
                 "en": "TITLE",
                 "fr": "TITLE",
                  "pl": "TYTUŁ"
-                },
-                "t_status": {
+            },
+            "t_status": {
                 "en": "STATUS",
                 "fr": "STATUS",
-                        "pl": "STATUS"
-                },
+                "pl": "STATUS"
+            },
             "path_status": {
                 "en": "Path / Status",
                 "fr": "Path / Status",
-                        "pl": "Ścieżka / Status"
-                },
+                "pl": "Ścieżka / Status"
+            },
                 "title": {
                 "en": "documents",
                 "fr": "documents",
-                        "pl": "dokumenty"
-                },
-                "remove": {
+                "pl": "dokumenty"
+            },
+            "remove": {
                 "en": "Remove",
                 "fr": "Remove",
-                        "pl": "Usuń"
-                },
-                "cancel": {
+                "pl": "Usuń"
+            },
+            "cancel": {
                 "en": "Cancel",
                 "fr": "Cancel",
-                        "pl": "Porzuć"
-                },
-                "remove_question": {
+                "pl": "Porzuć"
+            },
+            "remove_question": {
                 "en": "Do you want to remove selected document?",
                 "fr": "Do you want to remove selected document?",
-                        "pl": "Czy chcesz usunąć wybrany dokument?"
-                },
-                "remove_info": {
+                "pl": "Czy chcesz usunąć wybrany dokument?"
+            },
+            "remove_info": {
                 "en": "All language versions will be removed.",
                 "fr": "All language versions will be removed.",
-                        "pl": "Zostaną usunięte wszystkie wersje językowe."
-                },
-                "remove_title": {
+                "pl": "Zostaną usunięte wszystkie wersje językowe."
+            },
+            "remove_title": {
                 "en": "Removing document",
                 "fr": "Removing document",
-                        "pl": "Usuwanie dokumentu"
-                }
+                "pl": "Usuwanie dokumentu"
+            },
+            "doctag": {
+                "en": "tag",
+                "fr": "tag",
+                "pl": "tag"
+            }
         }
     </script>
 </cm_documents>

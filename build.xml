@@ -6,7 +6,7 @@
     </target>
     <!-- set global properties for this build -->
     <property name="targetJava10" value="true"/>
-    <property name="mainVersion" value="1.2.53"/>
+    <property name="mainVersion" value="1.2.54"/>
     
     <condition property="version" value="${mainVersion}">
         <equals arg1="${targetJava10}" arg2="true"/>
@@ -38,7 +38,7 @@
     
     <!-- external libraries used by Cricket-->
     <!-- REMEMBER to download these libraries before building Cricket -->
-    <property name="json-io-lib" value="json-io-4.10.0.jar"/>
+    <property name="json-io-lib" value="json-io-4.10.1.jar"/>
     <property name="commons-csv-lib" value="commons-csv-1.5.jar"/>
     <property name="h2-lib" value="h2-1.4.197.jar"/>
     <property name="javamail-lib" value="javax.mail-1.6.1.jar"/>
@@ -212,8 +212,8 @@
     <target name="get-dependencies" depends="init" description="upload external libraries">
         <mkdir dir="lib"/> 
         <get
-            src="https://search.maven.org/remotecontent?filepath=com/cedarsoftware/json-io/4.10.0/json-io-4.10.0.jar"
-            dest="lib/json-io-4.10.0.jar" 
+            src="https://search.maven.org/remotecontent?filepath=com/cedarsoftware/json-io/4.10.1/json-io-4.10.1.jar"
+            dest="lib/json-io-4.10.1.jar" 
             usetimestamp="true" 
             ignoreerrors="true"
         />

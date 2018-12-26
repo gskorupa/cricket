@@ -22,38 +22,41 @@ import java.util.Map;
 import org.cricketmsf.Event;
 import org.cricketmsf.annotation.InboundAdapterHook;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.out.DispatcherIface;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class InboundAdapter implements Runnable{
-    
+public class InboundAdapter implements Runnable {
+
     protected HashMap<String, String> hookMethodNames;
     protected HashMap<String, String> properties;
-    protected HashMap<String,String> statusMap=null;
-    
-    public void loadProperties(HashMap<String,String> properties, String adapterName){
-        this.properties = (HashMap<String,String>)properties.clone();        
+    protected HashMap<String, String> statusMap = null;
+    protected String name;
+
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        this.name = name;
+        this.properties = (HashMap<String, String>) properties.clone();
         getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
     }
-    
-    public String getProperty(String name){
+
+    public String getProperty(String name) {
         return properties.get(name);
     }
-    
-    public InboundAdapter(){
+
+    public InboundAdapter() {
         hookMethodNames = new HashMap<>();
     }
-    
-    public void destroy(){        
+
+    public void destroy() {
     }
-    
+
     @Override
-    public void run(){   
+    public void run() {
     }
-    
-    protected Result handle(String method, String payload){
+
+    protected Result handle(String method, String payload) {
         String hookMethodName = getHookMethodNameForMethod(method);
         Result result = null;
         if (hookMethodName == null) {
@@ -63,7 +66,7 @@ public class InboundAdapter implements Runnable{
         }
         try {
             Kernel.getInstance().dispatchEvent(
-                Event.logFine(this.getClass().getSimpleName(), "sending event to hook " + method)
+                    Event.logFine(this.getClass().getSimpleName(), "sending event to hook " + method)
             );
             Event event = new Event();
             event.setOrigin(this.getClass().getSimpleName());
@@ -74,14 +77,14 @@ public class InboundAdapter implements Runnable{
             e.printStackTrace();
         }
         return result;
-}
-    
+    }
+
     protected void getServiceHooks(String adapterName) {
-        if(hookMethodNames==null){
+        if (hookMethodNames == null) {
             hookMethodNames = new HashMap<>();
         }
         InboundAdapterHook ah;
-        String requestMethod="X";
+        String requestMethod = "X";
         // for every method of a Kernel instance (our service class extending Kernel)
         for (Method m : Kernel.getInstance().getClass().getMethods()) {
             ah = (InboundAdapterHook) m.getAnnotation(InboundAdapterHook.class);
@@ -95,7 +98,7 @@ public class InboundAdapter implements Runnable{
             }
         }
     }
-    
+
     public void addHookMethodNameForMethod(String requestMethod, String hookMethodName) {
         hookMethodNames.put(requestMethod, hookMethodName);
     }
@@ -108,17 +111,25 @@ public class InboundAdapter implements Runnable{
         }
         return result;
     }
-    
-        public Map<String,String> getStatus(String name){
-        if(statusMap==null){
+
+    public Map<String, String> getStatus(String name) {
+        if (statusMap == null) {
             statusMap = new HashMap();
             statusMap.put("name", name);
             statusMap.put("class", getClass().getName());
         }
         return statusMap;
     }
-    
-    public void updateStatusItem(String key, String value){
+
+    public void updateStatusItem(String key, String value) {
         statusMap.put(key, value);
+    }
+
+    public DispatcherIface getDispatcher() {
+        return null;
+    }
+    
+    public String getName(){
+        return name;
     }
 }

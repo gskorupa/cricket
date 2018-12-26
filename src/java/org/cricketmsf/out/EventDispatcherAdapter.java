@@ -54,4 +54,9 @@ public class EventDispatcherAdapter extends OutboundAdapter implements OutboundA
     public void registerEventType(String category, String type) throws DispatcherException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    @Override
+    public DispatcherIface getDispatcher(){
+        return this;
+    }
 }

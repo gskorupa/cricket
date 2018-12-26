@@ -24,4 +24,5 @@ import java.util.Map;
 public interface InboundAdapterIface {
     public String getProperty(String name);
     public Map<String,String> getStatus(String name);
+    public String getName();
 }

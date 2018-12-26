@@ -51,7 +51,7 @@ import org.cricketmsf.out.OutboundAdapterIface;
  *
  * @author greg
  */
-public class HttpClient implements OutboundAdapterIface, Adapter {
+public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIface, Adapter {
 
     private final String JSON = "application/json";
     private final String CSV = "text/csv";

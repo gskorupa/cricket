@@ -62,8 +62,8 @@
                             <p class="text-warning"><small>{labels.remove_info[app.language]}</small></p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal" onclick={ select('') }>{labels.cancel[app.language]}</button>
                             <button type="button" class="btn btn-primary" data-dismiss="modal" onclick={ removeAccount() }>{labels.remove[app.language]}</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick={ select('') }>{labels.cancel[app.language]}</button>
                         </div>
                     </div>
                 </div>

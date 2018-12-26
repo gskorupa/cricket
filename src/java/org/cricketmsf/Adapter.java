@@ -17,6 +17,7 @@ package org.cricketmsf;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.cricketmsf.out.DispatcherIface;
 
 /**
  *
@@ -36,5 +37,6 @@ public interface Adapter {
     
     public Map<String,String> getStatus(String name);
     public void updateStatusItem(String key, String value);
-    
+    public DispatcherIface getDispatcher();
+    public String getName();
 }

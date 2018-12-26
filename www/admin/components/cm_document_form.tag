@@ -63,12 +63,10 @@
                     <label for="content">{ labels.content[app.language] }</label>
                     <input class="form-control" id="content" name="content" value={ doc.content } readonly>
                 </div>
-                <!--
                 <div class="form-group">
-                    <label for="tags">{ labels.tags[app.language] }</label>
-                    <input class="form-control" id="tags" name="tags" type="text" value={ doc.tags } readonly={ !allowEdit }>
+                    <label for="doctags">{ labels.doctags[app.language] }</label>
+                    <input class="form-control" id="doctags" name="doctags" type="text" value={ doc.tags } >
                 </div>
-                -->
                 <div class="form-group">
                     <label for="language">{ labels.language[app.language] }</label>
                     <input class="form-control" id="language" name="language" type="text" value={ doc.language } readonly={ true }>
@@ -83,8 +81,8 @@
                     <label for="file">{ labels.selectFile[app.language]}</label><br />
                     <input class="form-control-file" type="file" name="file" id="file">
                 </div>
-                <button type="button" onclick={ close } class="btn btn-secondary">{ labels.cancel[app.language] }</button>
                 <button type="submit" class="btn btn-primary" disabled={ !allowEdit }>{ labels.save[app.language] }</button>
+                <button type="button" onclick={ close } class="btn btn-secondary">{ labels.cancel[app.language] }</button>
             </form>
         </div>
 </div>
@@ -203,6 +201,7 @@
         fd.set('summary',summ)
         var c=encodeURIComponent(fd.get('content'))
         fd.set('content',c)
+        fd.set('tags',fd.get('doctags'))
         sendFormData(fd, self.method, app.cmAPI + docPath, app.user.token, self.close, globalEvents)
     }
     
@@ -302,7 +301,7 @@
             "fr": "Content",
             "pl": "Treść"
         },
-        "tags": {
+        "doctags": {
             "en": "Tags",
             "fr": "Tags",
             "pl": "Znaczniki"

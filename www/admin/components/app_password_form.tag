@@ -23,8 +23,8 @@
                 </div>
 
                 <div class="text-center">
+                    <button type="submit" class="btn btn-primary">{ labels.save[app.language] }</button>
                     <button type="button" class="btn btn-secondary" onclick={ close }>{ labels.cancel[app.language] }</button>
-                    <button type="submit" class="btn btn-default">{ labels.save[app.language] }</button>
                 </div>
             </form>
             <!-- Login form -->

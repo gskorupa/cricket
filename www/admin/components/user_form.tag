@@ -36,9 +36,9 @@
                 <div class="form-group">
                     <label>{ labels.number[app.language] } {user.number}</label>
                 </div>
-                <button type="button" onclick={ close } class="btn btn-default">{ labels.cancel[app.language] }</button>
+                <button type="submit" class="btn btn-primary  pull-right" disabled={ !allowEdit }>{ labels.save[app.language] }</button>
                 <span>&nbsp;</span>
-                <button type="submit" class="btn btn-default  pull-right" disabled={ !allowEdit }>{ labels.save[app.language] }</button>
+                <button type="button" onclick={ close } class="btn btn-secondary">{ labels.cancel[app.language] }</button>
             </form>
         </div>
     </div>

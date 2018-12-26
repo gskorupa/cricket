@@ -91,31 +91,6 @@
                         "init":"Data1,MICROSITE,EVENT,CLEAR_DATA,05:00:00 GMT|*24h,_|_;Data2,MICROSITE,EVENT,BACKUP,06:00:00 GMT|*24h,_"
                     }
                 },
-                "Dispatcher": {
-                    "name": "Dispatcher",
-                    "interfaceName": "DispatcherIface",
-                    "classFullName": "org.cricketmsf.out.MqttDispatcher",
-                    "properties": {
-                        "url": "tcp://test.mosquitto.org:1883",
-                        "qos": "1",
-                        "root-topic": "org.cricketmsf/events/",
-                        "event-types": "SYSTEM/message",
-                        "debug": "true"
-                    }
-                },
-                "MqttSubscriber": {
-                    "name": "MqttSubscriber",
-                    "interfaceName": "Adapter",
-                    "classFullName": "org.cricketmsf.in.mqtt.MqttSubscriber",
-                    "properties": {
-                        "url": "tcp://test.mosquitto.org:1883",
-                        "qos": "1",
-                        "root-topic": "org.cricketmsf/events/",
-                        "topic-filter": "SYSTEM/test/#",
-                        "type-suffix": "",
-                        "debug": "true"
-                    }
-                },
                 "UserService": {
                     "name": "UserService",
                     "interfaceName": "HttpAdapterIface",

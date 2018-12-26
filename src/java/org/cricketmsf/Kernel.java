@@ -37,7 +37,6 @@ import java.util.logging.Level;
 import org.cricketmsf.config.HttpHeader;
 import org.cricketmsf.out.DispatcherException;
 import org.cricketmsf.out.DispatcherIface;
-import org.cricketmsf.out.EventDispatcherAdapter;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import org.cricketmsf.out.log.StandardLogger;
 
@@ -66,7 +65,7 @@ public abstract class Kernel {
 
     // adapters
     public HashMap<String, Object> adaptersMap = new HashMap<>();
-    
+
     // user defined properties
     public HashMap<String, Object> properties = new HashMap<>();
     public SimpleDateFormat dateFormat = null;
@@ -87,7 +86,7 @@ public abstract class Kernel {
 
     private long startedAt = 0;
     private boolean started = false;
-    private boolean initialized=false;
+    private boolean initialized = false;
 
     public Kernel() {
     }
@@ -155,21 +154,23 @@ public abstract class Kernel {
     public static Object handle(Event event) {
         return Kernel.getInstance().handleEvent(event);
     }
-    
+
     /**
-     * Sends event object to the event queue using registered dispatcher adapter. In case the dispatcher adapter is not registered or throws exception,
-     * the Kernel.handle(event) method will be called. 
-     * 
-     * @param event the event object that should be send to the event queue 
-     * @return null if dispatcher adapter is registered, otherwise returns result of the Kernel.handle(event) method
+     * Sends event object to the event queue using registered dispatcher
+     * adapter. In case the dispatcher adapter is not registered or throws
+     * exception, the Kernel.handle(event) method will be called.
+     *
+     * @param event the event object that should be send to the event queue
+     * @return null if dispatcher adapter is registered, otherwise returns
+     * result of the Kernel.handle(event) method
      */
-    public Object dispatchEvent(Event event){
-            try {
-                eventDispatcher.dispatch(event);
-                return null;
-            } catch (NullPointerException | DispatcherException ex) {
-                return handleEvent(event);
-            }
+    public Object dispatchEvent(Event event) {
+        try {
+            eventDispatcher.dispatch(event);
+            return null;
+        } catch (NullPointerException | DispatcherException ex) {
+            return handleEvent(event);
+        }
     }
 
     public HashMap<String, Object> getAdaptersMap() {
@@ -183,7 +184,6 @@ public abstract class Kernel {
     //protected Object registerAdapter(String adapterName, Object adapter) {
     //    return adaptersMap.put(adapterName, adapter);
     //}
-
     /**
      * Returns next unique identifier for Event.
      *
@@ -281,12 +281,10 @@ public abstract class Kernel {
                     } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.InboundAdapter) {
                         setInboundAdaptersLoaded(true);
                     }
-                    if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.DispatcherIface) {
-                        setEventDispatcher(adaptersMap.get(adapterName));
-                    }
                     // loading properties
                     java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class, String.class);
                     loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
+                    setEventDispatcher(((Adapter) adaptersMap.get(adapterName)).getDispatcher());
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                     adaptersMap.put(adapterName, null);
                     getLogger().print("ERROR: " + adapterName + " configuration: " + ex.getClass().getSimpleName());
@@ -296,14 +294,16 @@ public abstract class Kernel {
             LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterName);
             throw new Exception(e);
         }
-        getLogger().print("event dispatcher: "+eventDispatcher!=null?eventDispatcher.getClass().getName():" not used");
+        getLogger().print("event dispatcher: " + (eventDispatcher != null ? eventDispatcher.getClass().getName() : " not used"));
         getLogger().print("END LOADING ADAPTERS");
         getLogger().print("");
-        
+
     }
-    
-    private void setEventDispatcher(Object adapter){
-        eventDispatcher = (EventDispatcherAdapter)adapter;
+
+    private void setEventDispatcher(Object adapter) {
+        if (adapter != null) {
+            eventDispatcher = (DispatcherIface) adapter;
+        }
     }
 
     private void setSecurityFilter(String filterName) {
@@ -632,9 +632,9 @@ public abstract class Kernel {
             tmp = System.getenv(variableName);
         } catch (Exception e) {
         }
-        this.name = tmp != null ? tmp : ""+getProperties().getOrDefault("servicename","");
-        if(this.name.isEmpty()){
-            this.name= "CricketService";
+        this.name = tmp != null ? tmp : "" + getProperties().getOrDefault("servicename", "");
+        if (this.name.isEmpty()) {
+            this.name = "CricketService";
         }
     }
 
