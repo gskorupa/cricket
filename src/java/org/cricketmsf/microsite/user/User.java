@@ -155,7 +155,7 @@ public class User {
      * @param role the role to set
      */
     public void setRole(String role) {
-        this.role = role;
+        this.role = role.toLowerCase();
     }
 
     /**

@@ -56,10 +56,10 @@
                         <!--<td>{ doc.status }</td>-->
                         <td class="col-3 text-right">
                             <i class="material-icons clickable" onclick={ editDocument(doc.uid, false) }>open_in_browser</i>
-                            <i class="material-icons clickable" onclick={ editDocument(doc.uid, true) }>mode_edit</i>
-                            <i class="material-icons clickable" if={ doc.status=='wip'} onclick={ setPublished(doc.uid, true) }>visibility</i>
-                            <i class="material-icons clickable" if={ doc.status=='published'} onclick={ setPublished(doc.uid, false) }>visibility_off</i>
-                            <i class="material-icons clickable" onclick={ select(doc.uid) } data-toggle="modal" data-target="#removeDialog">delete</i>
+                            <i class="material-icons clickable" if={ doc.rights=='rw'} onclick={ editDocument(doc.uid, true) }>mode_edit</i>
+                            <i class="material-icons clickable" if={ doc.status=='wip' && doc.rights=='rw'} onclick={ setPublished(doc.uid, true) }>visibility</i>
+                            <i class="material-icons clickable" if={ doc.status=='published' && doc.rights=='rw'} onclick={ setPublished(doc.uid, false) }>visibility_off</i>
+                            <i class="material-icons clickable" if={ doc.rights=='rw'} onclick={ select(doc.uid) } data-toggle="modal" data-target="#removeDialog">delete</i>
                         </td>
                     </tr>
                 </tbody>

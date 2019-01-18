@@ -18,7 +18,9 @@
     <script>
         var self = this
         self.mounted = false
-        self.doc = {title: 'Hello', summary: 'It seems that your application is not configured.'}
+        self.doc = {
+            title: 'Hello', 
+            summary: 'It seems that your application is not configured. More information: <a href="https://github.com/gskorupa/Cricket/wiki/Microsite:-Getting-Started">Microsite: Getting Started</a>'}
         self.list = []
         globalEvents.on('language', function (event) {
             if(self.mounted){

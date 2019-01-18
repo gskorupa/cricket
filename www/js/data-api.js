@@ -193,21 +193,22 @@ function sendFormData(formData, method, url, token, callback, eventListener, err
 //    app.log("sendFormData ...");
     var oReq = new XMLHttpRequest();
     oReq.onerror = function (oEvent) {
-//        app.log("sendFormData.onerror " + this.status + " " + oEvent.toString())
+        app.log("sendFormData.onerror " + this.status + " " + oEvent.toString())
         app.requests--;
         eventListener.trigger(getDataCallEventName(false,errName,this.status));
     }
     oReq.onloadend = function(oEvent){
-//        app.log('sendFormData.onloadend: '+oEvent)
+        app.log('sendFormData.onloadend: '+oEvent)
+        //app.log(oEvent)
         app.requests--;
-        eventListener.trigger(getDataCallEventName(true));
+        eventListener.trigger(getDataCallEventName(true), oEvent);
     }
     oReq.onabort = function(oEvent){
-//        app.log('sendFormData.onAbort: '+oEvent)
+        app.log('sendFormData.onAbort: '+oEvent)
         app.requests--;
     }
     oReq.timeout = function(oEvent){
-//        app.log('sendFormData.timeout: '+oEvent)
+        app.log('sendFormData.timeout: '+oEvent)
         app.requests--;
     }   
     oReq.onreadystatechange = function () {

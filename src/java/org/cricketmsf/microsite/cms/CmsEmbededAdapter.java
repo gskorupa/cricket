@@ -61,12 +61,23 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
 
     String helperAdapterName = null;
     KeyValueDBIface database = null;
+    String ruleEngineName = null;
+    RuleEngineIface ruleEngine = new DefaultRuleEngine();
+
     int status = NOT_INITIALIZED;
 
     private String wwwRoot = null; //www root path in the filesystem
     private String fileRoot = null; //cms document files root path in the filesystem
     private String publishedFilesRoot = null;
     String indexFileName = "index.html";
+
+    private void initRuleEngine() {
+        if(ruleEngineName==null) return;
+        try {
+            ruleEngine = (RuleEngineIface) Kernel.getInstance().getAdaptersMap().get(ruleEngineName);
+        } catch (Exception e) {
+        }
+    }
 
     private KeyValueDBIface getDatabase() throws KeyValueDBException {
         if (database == null) {
@@ -130,11 +141,11 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
 
     @Override
     public Document getDocument(String uid, String language) throws CmsException {
-        return getDocument(uid, language, null);
+        return getDocument(uid, language, null, null);
     }
 
     @Override
-    public Document getDocument(String uid, String language, String status) throws CmsException {
+    public Document getDocument(String uid, String language, String status, List<String> roles) throws CmsException {
         //TODO: getDocument(uid, null, status) should return list of documents
         Document doc = null;
         //System.out.println("LANGUAGE:[" + language + "]");
@@ -203,6 +214,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         } else {
             throw new CmsException(CmsException.UNSUPPORTED_STATUS, "unsupported status");
         }
+        doc = ruleEngine.processDocument(doc, roles);
         return doc;
     }
 
@@ -211,10 +223,11 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
 
     @Override
-    public void addDocument(Document doc) throws CmsException {
+    public void addDocument(Document doc, List<String>roles) throws CmsException {
         if (doc.getLanguage() == null || !supportedLanguages.contains(doc.getLanguage())) {
             throw new CmsException(CmsException.UNSUPPORTED_LANGUAGE);
         }
+        ruleEngine.checkDocument(doc, roles);
         try {
             if (getDatabase().containsKey(resolveTableName(doc), doc.getUid())) {
                 throw new CmsException(CmsException.ALREADY_EXISTS, "document already exists");
@@ -234,7 +247,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
 
     @Override
-    public void addDocument(Map parameters, String userID) throws CmsException {
+    public void addDocument(Map parameters, String userID, List<String>roles) throws CmsException {
         Document doc = new Document();
         try {
             //System.out.println("SETTING UID:" + (String) parameters.get("uid"));
@@ -280,6 +293,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             if (getDatabase().containsKey(resolveTableName(doc), doc.getUid())) {
                 throw new CmsException(CmsException.ALREADY_EXISTS, "document already exists");
             }
+            ruleEngine.checkDocument(doc, roles);
             getDatabase().put("paths", doc.getPath(), doc.getPath());
             getDatabase().put("tags", doc.getTags(), doc.getTags());
             getDatabase().put(resolveTableName(doc), doc.getUid(), doc);
@@ -292,20 +306,21 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
 
     @Override
-    public void updateDocument(Document doc) throws CmsException {
+    public void updateDocument(Document doc, List<String>roles) throws CmsException {
 
         //TODO: when status changes from wip to published then doc should be removed from wip table
         if (doc.getLanguage() == null || !supportedLanguages.contains(doc.getLanguage())) {
             throw new CmsException(CmsException.UNSUPPORTED_LANGUAGE);
         }
+        ruleEngine.checkDocument(doc, roles);
         Document original = null;
-        original = getDocument(doc.getUid(), null, null);
-        doc.setCreated(original.getCreated());
-        doc.setModified(Instant.now().toString());
+        original = getDocument(doc.getUid(), null, null, null);
         if (original == null) {
             Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "original document uid=" + doc.getUid() + " not found"));
             throw new CmsException(CmsException.NOT_FOUND, "original document not found");
         }
+        doc.setCreated(original.getCreated());
+        doc.setModified(Instant.now().toString());
         try {
             doc.setMimeType(doc.getMimeType().trim());
             if (!doc.getLanguage().equals(original.getLanguage()) || !doc.getStatus().equals(original.getStatus())) {
@@ -330,13 +345,14 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
 
     @Override
-    public void updateDocument(String uid, String language, Map parameters) throws CmsException {
+    public void updateDocument(String uid, String language, Map parameters, List<String>roles) throws CmsException {
         boolean statusChanged = false;
-        Document doc = getDocument(uid, (String) parameters.get("language"));
+        Document doc = getDocument(uid, language);
         if (doc == null) {
             Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "original document uid=" + uid + ", language=" + language + " not found"));
             throw new CmsException(CmsException.NOT_FOUND, "original document not found");
         }
+        ruleEngine.checkDocument(doc, roles);
         try {
             String actualLanguage = doc.getLanguage(); //its not possible to change document's language
             String actualStatus = doc.getStatus();
@@ -378,6 +394,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 }
                 doc.setStatus(newStatus);
             }
+            
             //if (doc.getType().equals(Document.FILE)) {
             if (Document.FILE.equals(doc.getType())) {
                 String fileLocation = (String) parameters.getOrDefault("file", "");
@@ -429,9 +446,10 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
 
     @Override
-    public void removeDocument(String uid) throws CmsException {
+    public void removeDocument(String uid, List<String>roles) throws CmsException {
         boolean removed = false;
-        Document doc = getDocument(uid, null, null);
+        Document doc = getDocument(uid, null, null, null);
+        ruleEngine.checkDocument(doc, roles);
         if (doc != null) {
             if (Document.FILE.equals(doc.getType())) {
                 //TODO: delete file (
@@ -456,7 +474,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             //TODO: remove path if thera are no more documents with this path 
         }
     }
-/*
+
+    /*
     @Override
     public List<Document> findByPath(String path, String language, String status) throws CmsException {
         Document pattern = new Document();
@@ -478,9 +497,9 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         }
         return list;
     }
-*/
+     */
     @Override
-    public List<Document> findByPathAndTag(String path, String tag, String language, String status) throws CmsException {
+    public List<Document> findByPathAndTag(String path, String tag, String language, String status, List<String> roles) throws CmsException {
         Document pattern = new Document();
         if (!supportedLanguages.contains(language)) {
             throw new CmsException(CmsException.UNSUPPORTED_LANGUAGE, language + " language is not supported");
@@ -499,6 +518,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         } catch (KeyValueDBException ex) {
             throw new CmsException(CmsException.HELPER_EXCEPTION, ex.getMessage());
         }
+        //TODO: check access rules
+        list = (ArrayList)ruleEngine.processDocumentsList(list, roles);
         return list;
     }
 
@@ -528,9 +549,13 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        super.loadProperties(properties, adapterName);
         // no specific config is required
         helperAdapterName = properties.get("helper-name");
         Kernel.getInstance().getLogger().print("\thelper-name: " + helperAdapterName);
+        ruleEngineName = properties.get("rule-engine");
+        Kernel.getInstance().getLogger().print("\trule-engine-name: " + ruleEngineName);
+        initRuleEngine();
         setWwwRoot(properties.get("root-path"));
         Kernel.getInstance().getLogger().print("\troot-path: " + getWwwRoot());
         setFileRoot(properties.get("file-path"));
@@ -561,7 +586,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         }
         return list;
     }
-    
+
     @Override
     public List getTags() throws CmsException {
         ArrayList<String> list = new ArrayList<>();
@@ -611,7 +636,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         String filePath = getFilePath(request);
         try {
             fo = (FileObject) cache.get(tableName, filePath);
-            fo.content=fileContent.getBytes();
+            fo.content = fileContent.getBytes();
             cache.put(tableName, filePath, cache);
         } catch (KeyValueDBException e) {
             e.printStackTrace();
@@ -680,7 +705,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         Document doc;
 
         try {
-            doc = getDocument("/" + filePath, language, "published");
+            doc = getDocument("/" + filePath, language, "published", null);
             if (doc != null && Document.FILE.equals(doc.getType())) {
                 File file = new File(doc.getContent());
                 content = readFile(file);

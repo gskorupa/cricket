@@ -6,11 +6,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
         <title>Cricket microsite</title>
-        <link rel="icon" href="/resources/cricket-icon.png">
+        <link rel="icon" href="/theme1/resources/cricket-icon.png">
         <!-- Bootstrap -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
         <!-- Custom styles -->
-        <link rel="stylesheet" href="/css/styles.css">
+        <link rel="stylesheet" href="/theme1/css/styles.css">
         <!-- Global Site Tag (gtag.js) - Google Analytics - below-->
     </head>
     <body>
@@ -35,16 +35,17 @@
     <script data-src="/tags/cs_article.tag" type="riot/tag"></script>
     <script data-src="/tags/cs_article2.tag" type="riot/tag"></script>
     <script data-src="/tags/cs_article3.tag" type="riot/tag"></script>
-    <script data-src="components/app_main.tag" type="riot/tag"></script>
-    <script data-src="components/app_404.tag" type="riot/tag"></script>
-    <script data-src="components/app_home.tag" type="riot/tag"></script>
-    <script data-src="components/app_articles.tag" type="riot/tag"></script>
-    <script data-src="components/app_navigation.tag" type="riot/tag"></script>
-    <script data-src="components/app_footer.tag" type="riot/tag"></script>
+    <script data-src="/theme1/components/app_main.tag" type="riot/tag"></script>
+    <script data-src="/theme1/components/app_404.tag" type="riot/tag"></script>
+    <script data-src="/theme1/components/app_home.tag" type="riot/tag"></script>
+    <script data-src="/theme1/components/app_articles.tag" type="riot/tag"></script>
+    <script data-src="/theme1/components/app_navigation.tag" type="riot/tag"></script>
+    <script data-src="/theme1/components/app_footer.tag" type="riot/tag"></script>
     <script>
         <!-- dynamic configuration. Look at cricket.json - service propertises -->
         app.url = "$serviceurl"
         app.csAPI = "$serviceurl"+"/api/cs/"
+        app.languages = ["en", "pl", "fr"]
         app.language = "$defaultLanguage"
         if(app.language.startsWith('$')){
             app.language = 'en'
