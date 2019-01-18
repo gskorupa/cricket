@@ -202,10 +202,21 @@
         var c=encodeURIComponent(fd.get('content'))
         fd.set('content',c)
         fd.set('tags',fd.get('doctags'))
-        sendFormData(fd, self.method, app.cmAPI + docPath, app.user.token, self.close, globalEvents)
+        sendFormData(fd, self.method, app.cmAPI + docPath, app.user.token, self.close, self.listener)
     }
     
-    self.listener.on('*', function(event){
+    self.listener.on('*', function(event, originalEvent){
+        try{
+            var status = originalEvent.currentTarget.status
+            var message = originalEvent.currentTarget.statusText
+            if(status == 409){
+                alert('Error while saving the document\nThe same UID already exists.')
+            }else if(status!=200 && status!=201){
+                alert('Error while saving the document\nCode '+status+': '+message)
+            }
+        }catch(err){
+            app.log(err)
+        }
       riot.update()
     })
 

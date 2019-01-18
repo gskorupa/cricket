@@ -34,14 +34,21 @@ public class ContentRequestProcessor {
 
     private static String ADMIN = "admin";
     private static String REDACTOR = "redactor";
+    private static String LANG_REDACTOR = "redactor.";
 
     private boolean hasAccessRights(String userID, List<String> roles) {
+
         if (userID == null || userID.isEmpty()) {
             return false;
         }
         if (roles.contains(ADMIN) || roles.contains(REDACTOR)) {
             return true;
         } else {
+            for (String role : roles) {
+                if(role.startsWith(LANG_REDACTOR)){
+                    return true;
+                }
+            }
             return false;
         }
     }
@@ -75,9 +82,9 @@ public class ContentRequestProcessor {
         Document doc;
         if (pathExt != null && !pathExt.isEmpty()) {
             try {
-                doc = adapter.getDocument("/" + pathExt, language, "published");
+                doc = adapter.getDocument("/" + pathExt, language, "published", null);
                 if (doc != null) {
-                    if (doc.getType() == Document.FILE) {
+                    if (doc.getType() == null ? false : doc.getType().equals(Document.FILE)) {
                         doc.setContent("*****");
                     }
                     //System.out.println("DOCUMENT2 "+doc.getPublished());
@@ -97,10 +104,10 @@ public class ContentRequestProcessor {
             try {
                 if ("true".equalsIgnoreCase(pathsOnly)) {
                     result.setData(adapter.getPaths());
-                } else if("true".equalsIgnoreCase(tagsOnly)){
+                } else if ("true".equalsIgnoreCase(tagsOnly)) {
                     result.setData(adapter.getTags());
-                }else {
-                    result.setData(adapter.findByPathAndTag(path, tag, language, "published"));
+                } else {
+                    result.setData(adapter.findByPathAndTag(path, tag, language, "published", null));
                 }
             } catch (CmsException ex) {
                 Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
@@ -109,7 +116,8 @@ public class ContentRequestProcessor {
                 result.setData(ex.getMessage());
             } catch (Exception e) {
                 e.printStackTrace();
-            }        }
+            }
+        }
         return result;
     }
 
@@ -132,7 +140,7 @@ public class ContentRequestProcessor {
         if (pathExt != null && !pathExt.isEmpty()) {
             String uid = "/" + pathExt;
             try {
-                doc = adapter.getDocument(uid, language, requiredStatus);
+                doc = adapter.getDocument(uid, language, requiredStatus, roles);
                 if (doc != null) {
                     result.setData(doc);
                 } else {
@@ -153,10 +161,10 @@ public class ContentRequestProcessor {
             try {
                 if ("true".equalsIgnoreCase(pathsOnly)) {
                     result.setData(adapter.getPaths());
-                } else if("true".equalsIgnoreCase(tagsOnly)){
+                } else if ("true".equalsIgnoreCase(tagsOnly)) {
                     result.setData(adapter.getTags());
-                }else {
-                    result.setData(adapter.findByPathAndTag(path, tag, language, requiredStatus));
+                } else {
+                    result.setData(adapter.findByPathAndTag(path, tag, language, requiredStatus, roles));
                 }
             } catch (CmsException ex) {
                 Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
@@ -205,7 +213,7 @@ public class ContentRequestProcessor {
                         // make sure that content is allways Base64 encoded
                         doc.setContent(doc.getContent());
                         try {
-                            adapter.addDocument(doc);
+                            adapter.addDocument(doc, roles);
                         } catch (CmsException ex) {
                             Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
                         }
@@ -216,7 +224,7 @@ public class ContentRequestProcessor {
                 }
             } else {
                 try {
-                    adapter.addDocument(request.parameters, userID);
+                    adapter.addDocument(request.parameters, userID, roles);
                     result.setData(adapter.getDocument((String) request.parameters.get("uid"), (String) request.parameters.get("language")));
                 } catch (CmsException ex) {
                     Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
@@ -275,7 +283,7 @@ public class ContentRequestProcessor {
                     return result;
                 }
                 try {
-                    adapter.updateDocument(doc);
+                    adapter.updateDocument(doc, roles);
                     result.setData(doc);
                 } catch (CmsException ex) {
                     Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
@@ -283,7 +291,7 @@ public class ContentRequestProcessor {
                 }
             } else {
                 try {
-                    adapter.updateDocument(uid, (String) request.parameters.get("language"), request.parameters);
+                    adapter.updateDocument(uid, (String) request.parameters.get("language"), request.parameters, roles);
                     result.setData(adapter.getDocument(uid, (String) request.parameters.get("language")));
                 } catch (CmsException ex) {
                     Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
@@ -316,7 +324,7 @@ public class ContentRequestProcessor {
             return result;
         }
         try {
-            adapter.removeDocument(uid);
+            adapter.removeDocument(uid, roles);
         } catch (CmsException ex) {
             result.setCode(HttpAdapter.SC_NOT_FOUND);
             result.setData(ex.getMessage());

@@ -225,12 +225,20 @@
                         "password": ""
                     }
                 },
+                "cmsRuleEngine": {
+                    "name": "cmsRuleEngine",
+                    "interfaceName": "RuleEngineIface",
+                    "classFullName": "org.cricketmsf.microsite.cms.DefaultRuleEngine",
+                    "properties": {
+                    }
+                },
                 "cmsAdapter": {
                     "name": "cmsAdapter",
                     "interfaceName": "CmsIface",
                     "classFullName": "org.cricketmsf.microsite.cms.CmsEmbededAdapter",
                     "properties": {
                         "helper-name": "cmsDB",
+                        "rule-engine": "cmsRuleEngine",
                         "root-path": "./www/",
                         "file-path": "./work/files/",
                         "file-path-published": "./www/assets/",

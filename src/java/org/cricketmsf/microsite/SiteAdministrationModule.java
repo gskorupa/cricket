@@ -137,9 +137,6 @@ public class SiteAdministrationModule {
      * @param database
      * @param userDB
      * @param authDB
-     * @param thingsDB
-     * @param iotDataDB
-     * @param actuatorCommandsDB
      */
     public void initDatabases(
             KeyValueDBIface database,

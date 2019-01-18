@@ -28,7 +28,9 @@ public class Document {
     public static String ARTICLE = "ARTICLE";
     public static String CODE = "CODE";
     public static String FILE = "FILE";
-
+    public static String READWRITE = "rw";
+    public static String READONLY = "r";
+    
     private String uid;
     private String author;
     private String type;
@@ -52,6 +54,8 @@ public class Document {
     private String modified;
     private String published;
     private String createdBy;
+    
+    private String rights = READWRITE;
 
     public Document() {
 
@@ -256,7 +260,7 @@ public class Document {
      * @param language the language to set
      */
     public void setLanguage(String language) {
-        this.language = language;
+        this.language = language.toLowerCase();
     }
 
     /**
@@ -376,6 +380,21 @@ public class Document {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    /**
+     * @return the rights
+     */
+    public String getRights() {
+        return rights;
+    }
+
+    /**
+     * @param rights the rights to set
+     */
+    public Document setRights(String rights) {
+        this.rights = rights;
+        return this;
     }
 
 }
