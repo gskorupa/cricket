@@ -20,7 +20,7 @@
         self.mounted = false
         self.doc = {
             title: 'Hello', 
-            summary: 'It seems that your application is not configured. More information: <a href="https://github.com/gskorupa/Cricket/wiki/Microsite:-Getting-Started">Microsite: Getting Started</a>'}
+            summary: 'It seems that your application is not configured. More information: <a href="https://github.com/gskorupa/Cricket/wiki/Microsite-Quickstart">Microsite Quickstart</a>'}
         self.list = []
         globalEvents.on('language', function (event) {
             if(self.mounted){

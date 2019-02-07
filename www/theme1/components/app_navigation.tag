@@ -6,7 +6,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav mr-auto">
-                <virtual each={item in app.navigation}>
+                <virtual each={item in app.navigation[app.language]}>
                     <li class={ item.link===('#'+app.currentPage)?'nav-item active':'nav-item' } if={ item.link }>
                         <a class="nav-link" href={ item.link }>{ item.name }<span class="sr-only" if={ ('#'+app.currentPage)===item.link }>(current)</span></a>
                     </li>

@@ -6,7 +6,7 @@
     </target>
     <!-- set global properties for this build -->
     <property name="targetJava10" value="true"/>
-    <property name="mainVersion" value="1.2.55"/>
+    <property name="mainVersion" value="1.2.56"/>
     
     <condition property="version" value="${mainVersion}">
         <equals arg1="${targetJava10}" arg2="true"/>

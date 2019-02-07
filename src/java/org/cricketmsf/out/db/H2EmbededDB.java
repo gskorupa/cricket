@@ -47,6 +47,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     private boolean encrypted;
     private String filePassword;
     private boolean autocommit;
+    private boolean ignorecase = false;
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -70,6 +71,8 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         Kernel.getLogger().print("\tfilePassword=" + getFilePassword());
         setAutocommit(properties.getOrDefault("autocommit","true"));
         Kernel.getLogger().print("\tautocommit=" + autocommit);
+        setIgnorecase("true".equalsIgnoreCase(properties.getOrDefault("ignorecase","false")));
+        Kernel.getLogger().print("\tignorecase=" + ignorecase);
         try {
             start();
         } catch (KeyValueDBException ex) {
@@ -128,10 +131,14 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
 
     @Override
     public void start() throws KeyValueDBException {
+        String connectString = "jdbc:h2:" + getLocation();
+        if(true){
+            connectString=connectString.concat(";IGNORECASE=TRUE");
+        }
         if (isEncrypted()) {
-            cp = JdbcConnectionPool.create("jdbc:h2:" + getLocation()+";CIPHER=AES", getUserName(), getFilePassword()+" "+getPassword());
+            cp = JdbcConnectionPool.create(connectString+";CIPHER=AES", getUserName(), getFilePassword()+" "+getPassword());
         } else {
-            cp = JdbcConnectionPool.create("jdbc:h2:" + getLocation(), getUserName(), getPassword());
+            cp = JdbcConnectionPool.create(connectString, getUserName(), getPassword());
         }
         Connection conn = null;
         try {
@@ -458,5 +465,12 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
      */
     public void setAutocommit(String value) {
         this.autocommit = Boolean.parseBoolean(value);
+    }
+
+    /**
+     * @param ignorecase the ignorecase to set
+     */
+    public void setIgnorecase(boolean ignorecase) {
+        this.ignorecase = ignorecase;
     }
 }

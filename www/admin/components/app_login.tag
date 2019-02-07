@@ -2,18 +2,18 @@
     <div class="panel panel-default form-login">
         <div class="panel-body">
             <form onsubmit={ submitLoginForm }>
-                <h3 class="logo">{ labels.l_title[app.language] }</h3>
+                <!--<h3 class="logo">{ app.texts.app_login.l_title[app.language] }</h3>-->
                 <div class="form-group">
-                    <label class="visuallyhidden" for="login">{ labels.l_name[app.language] }</label>
+                    <label class="visuallyhidden" for="login">{ app.texts.app_login.l_name[app.language] }</label>
                     <input class="form-control" id="login" name="login" type="text" 
-                               placeholder={ labels.l_name[app.language] } required>
+                               placeholder={ app.texts.app_login.l_name[app.language] } required>
                 </div>
                 <div class="form-group">
-                    <label class="visuallyhidden" for="description">{ labels.l_password[app.language] }</label>
+                    <label class="visuallyhidden" for="description">{ app.texts.app_login.l_password[app.language] }</label>
                     <input class="form-control" id="password" name="password" type="password" 
-                               placeholder={ labels.l_password[app.language] } required>
+                               placeholder={ app.texts.app_login.l_password[app.language] } required>
                 </div>
-                <button type="submit" class="btn btn-block btn-primary">{ labels.l_save[app.language] }</button>
+                <button type="submit" class="btn btn-block btn-primary">{ app.texts.app_login.l_save[app.language] }</button>
             </form>
         </div>
     </div>
@@ -37,33 +37,6 @@
             app.log("submitting ..."+e.target)
             loginSubmit(e.target, globalEvents, 'auth:loggedin', 'auth.error');
             e.target.reset()
-        }
-        this.labels = {
-            "l_title": {
-                "en": "Cricket Microsite",
-                "fr": "Cricket Microsite",
-                "pl": "Cricket Microsite"
-            },
-            "l_name": {
-                "en": "Login",
-                "fr": "Login",
-                "pl": "Login"
-            },
-            "l_password": {
-                "en": "Pasword",
-                "fr": "Pasword",
-                "pl": "Hasło"
-            },
-            "l_save": {
-                "en": "Sign In",
-                "fr": "Sign In",
-                "pl": "Zaloguj się"
-            },
-            "l_error": {
-                "en": "Wrong login or password",
-                "en": "Wrong login or password",
-                "pl": "Niepoprawny login lub hasło"
-            }
         }
     </script>
     <style>

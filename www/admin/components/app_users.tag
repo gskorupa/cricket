@@ -11,7 +11,7 @@
     </div>
     <div class="row" if={ !selected && !selectedPwd }>
         <div class="col-md-12">
-            <h2>{labels.title[app.language]} 
+            <h2>{app.texts.app_users.title[app.language]} 
                 <i class="material-icons clickable" onclick={ refreshUsers() }>refresh</i>
                 <i class="material-icons clickable" onclick={ editUser('NEW', true) }>add</i>
             </h2>
@@ -19,11 +19,11 @@
                 <table id="doclist" class="table table-sm">
                     <thead>
                         <tr>
-                            <th>{labels.t_no[app.language]}</th>
-                            <th>{labels.t_uid[app.language]}</th>
-                            <th>{labels.t_type[app.language]}</th>
-                            <th>{labels.t_role[app.language]}</th>
-                            <th>{labels.t_status[app.language]}</th>
+                            <th>{app.texts.app_users.t_no[app.language]}</th>
+                            <th>{app.texts.app_users.t_uid[app.language]}</th>
+                            <th>{app.texts.app_users.t_type[app.language]}</th>
+                            <th>{app.texts.app_users.t_role[app.language]}</th>
+                            <th>{app.texts.app_users.t_status[app.language]}</th>
                             <th class="text-right">
                                 <i class="material-icons clickable" onclick={ editUser('NEW', true) }>add</i>
                             </th>
@@ -33,7 +33,7 @@
                         <tr each={user in users}>
                             <td>{ user.number }</td>
                             <td>{ user.uid }</td>
-                            <td>{ user.type }</td>
+                            <td>{ userTypeAsLetter(user.type) }</td>
                             <td>{ user.role }</td>
                             <td>{ user.authStatus }</td>
                             <td class="text-right">
@@ -55,15 +55,15 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title">{labels.remove_title[app.language]}</h4>
+                            <h4 class="modal-title">{app.texts.app_users.remove_title[app.language]}</h4>
                         </div>
                         <div class="modal-body">
-                            <p>{labels.remove_question[app.language]}</p>
-                            <p class="text-warning"><small>{labels.remove_info[app.language]}</small></p>
+                            <p>{app.texts.app_users.remove_question[app.language]}</p>
+                            <p class="text-warning"><small>{app.texts.app_users.remove_info[app.language]}</small></p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-dismiss="modal" onclick={ removeAccount() }>{labels.remove[app.language]}</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick={ select('') }>{labels.cancel[app.language]}</button>
+                            <button type="button" class="btn btn-primary" data-dismiss="modal" onclick={ removeAccount() }>{app.texts.app_users.remove[app.language]}</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick={ select('') }>{app.texts.app_users.cancel[app.language]}</button>
                         </div>
                     </div>
                 </div>
@@ -180,62 +180,32 @@
         readUserList()
         }
 
-        self.labels = {
-        "title": {
-        "en": "users",
-        "fr": "users",
-        "pl": "użytkownicy"
-        },
-        "t_no": {
-        "en": "NO.",
-        "fr": "NO.",
-        "pl": "NR"
-        },
-        "t_uid": {
-        "en": "LOGIN",
-        "fr": "LOGIN",
-        "pl": "LOGIN"
-        },
-        "t_type": {
-        "en": "TYPE",
-        "fr": "TYPE",
-        "pl": "TYP"
-        },
-        "t_role": {
-        "en": "ROLE",
-        "fr": "ROLE",
-        "pl": "ROLA"
-        },
-        "t_status": {
-        "en": "STATUS",
-        "fr": "STATUS",
-        "pl": "STATUS"
-        },
-        "remove": {
-        "en": "Remove",
-        "fr": "Remove",
-        "pl": "Usuń"
-        },
-        "cancel": {
-        "en": "Cancel",
-        "fr": "Cancel",
-        "pl": "Porzuć"
-        },
-        "remove_question": {
-        "en": "Do you want to remove selected user?",
-        "fr": "Do you want to remove selected user?",
-        "pl": "Czy chcesz usunąć wybranego użytkownika?"
-        },
-        "remove_info": {
-        "en": "Are you sure?",
-        "fr": "Are you sure?",
-        "pl": "Na pewno?"
-        },
-        "remove_title": {
-        "en": "Removing user",
-        "fr": "Removing user",
-        "pl": "Usuwanie użytkownika"
+self.userTypeAsLetter = function(type){
+        switch (type){
+            case 6:
+                return 'R'
+                break
+            case 5:
+                return 'P'
+                break
+            case 4:
+                return 'F'
+                break
+            case 3:
+                return 'D'
+                break
+            case 2:
+                return 'A'
+                break
+            case 1:
+                return 'O'
+                break
+            case 0:
+                return 'U'
+                break
+            default:
+                return 'F'
         }
-        }
+        }        
     </script>
 </app_users>

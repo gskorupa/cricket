@@ -1,9 +1,9 @@
 <cm_tags>
     <div class="row">
         <div class="col-md-12">
-            <h2>{labels.title[app.language]}</h2>
+            <h2>{app.texts.cm_tags.title[app.language]}</h2>
             <form class="form-inline">
-                <label class="mr-2" for="ststusesDropdown">{ labels.l_status[app.language] }</label>
+                <label class="mr-2" for="ststusesDropdown">{ app.texts.cm_tags.l_status[app.language] }</label>
                 <select class="select" id="statusesDropdown" onchange={ selectStatus }>
                     <option each={ tmpStatus, index in statuses }>{ tmpStatus }</option>
                 </select>
@@ -28,10 +28,10 @@
             <table id="doclist" class="table table-condensed topspacing-sm">
                 <thead>
                     <tr class="d-flex">
-                        <th class="col-1">{labels.t_type[app.language]}</th>
-                        <th class="col-3">{labels.t_name[app.language]}</th>
-                        <th class="col-5">{labels.t_title[app.language]}</th>
-                        <th class="col-3 text-right">{labels.t_uid[app.language]}</th>
+                        <th class="col-1">{app.texts.cm_tags.t_type[app.language]}</th>
+                        <th class="col-3">{app.texts.cm_tags.t_name[app.language]}</th>
+                        <th class="col-5">{app.texts.cm_tags.t_title[app.language]}</th>
+                        <th class="col-3 text-right">{app.texts.cm_tags.t_uid[app.language]}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -134,37 +134,5 @@
             riot.update()
         }
         
-        self.labels = {
-            "l_status": {
-                "en": "Status",
-                "fr": "Status",
-                "pl": "Status"
-            },
-            "t_type": {
-                "en": "TYPE",
-                "fr": "TYPE",
-                "pl": "TYP"
-            },
-            "t_uid": {
-                "en": "UID",
-                "fr": "UID",
-                "pl": "UID"
-            },
-            "t_name": {
-                "en": "NAME",
-                "fr": "NAME",
-                "pl": "NAZWA"
-            },
-            "t_title": {
-                "en": "TITLE",
-                "fr": "TITLE",
-                 "pl": "TYTUŁ"
-                },
-            "title": {
-                "en": "tags",
-                "fr": "tags",
-                "pl": "tagi"
-            }
-        }
     </script>
 </cm_tags>

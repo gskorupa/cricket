@@ -1,44 +1,44 @@
 <user_form>
     <div class="panel panel-primary">
-        <div class="panel-heading module-title" if={ self.mode == 'create' }><h2>{ labels.user_new[app.language] }</h2></div>
-        <div class="panel-heading module-title" if={ self.mode == 'update' }><h2>{ labels.user_modify[app.language] }</h2></div>
-        <div class="panel-heading module-title" if={ self.mode == 'view' }><h2>{ labels.user_view[app.language] }</h2></div>
+        <div class="panel-heading module-title" if={ self.mode == 'create' }><h2>{ app.texts.cm_user_form.user_new[app.language] }</h2></div>
+        <div class="panel-heading module-title" if={ self.mode == 'update' }><h2>{ app.texts.cm_user_form.user_modify[app.language] }</h2></div>
+        <div class="panel-heading module-title" if={ self.mode == 'view' }><h2>{ app.texts.cm_user_form.user_view[app.language] }</h2></div>
         <div class="panel-body">
             <form onsubmit={ self.submitForm }>
                 <div class="form-group">
-                    <label for="uid">{ labels.uid[app.language] }</label>
+                    <label for="uid">{ app.texts.cm_user_form.uid[app.language] }</label>
                     <input class="form-control" id="uid" name="uid" type="text" value={ user.uid } readonly={ self.mode != 'create' } required>
                 </div>
                 <div class="form-group">
-                    <label for="email">{ labels.email[app.language] }</label>
+                    <label for="email">{ app.texts.cm_user_form.email[app.language] }</label>
                     <input class="form-control" id="email" name="email" type="email" value={ user.email } readonly={ !allowEdit } required>
                 </div>
                 <div class="form-group" if={ adminMode }>
-                    <label for="type">{ labels.type[app.language] }</label>
+                    <label for="type">{ app.texts.cm_user_form.type[app.language] }</label>
                     <input class="form-control" id="type" name="type" type="text" value={ userTypeAsString(user.type) } readonly={ self.mode != 'create' } required>
                 </div>
                 <div class="form-group" if={ adminMode }>
-                    <label for="role">{ labels.role[app.language] }</label>
+                    <label for="role">{ app.texts.cm_user_form.role[app.language] }</label>
                     <input class="form-control" id="role" name="role" type="text"  value={ user.role } readonly={ !allowEdit }>
                 </div>
                 <div class="form-group">
-                    <label for="confirmString">{ labels.confirmString[app.language] }</label>
+                    <label for="confirmString">{ app.texts.cm_user_form.confirmString[app.language] }</label>
                     <input class="form-control" id="confirmString" name="confirmString" type="text" value={ user.confirmString } readonly={ true }>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="true" id="confirmed" disabled={ !allowEdit || !adminMode } checked={ user.confirmed }>
-                    <label class="form-check-label" for="confirmed">{ labels.confirmed[app.language] }</label>
+                    <label class="form-check-label" for="confirmed">{ app.texts.cm_user_form.confirmed[app.language] }</label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" value="true" id="unregisterRequested" disabled={ true } checked={ user.unregisterRequested }>
-                    <label class="form-check-label" for="unregisterRequested">{ labels.unregisterRequested[app.language] }</label>
+                    <label class="form-check-label" for="unregisterRequested">{ app.texts.cm_user_form.unregisterRequested[app.language] }</label>
                 </div>
                 <div class="form-group">
-                    <label>{ labels.number[app.language] } {user.number}</label>
+                    <label>{ app.texts.cm_user_form.number[app.language] } {user.number}</label>
                 </div>
-                <button type="submit" class="btn btn-primary  pull-right" disabled={ !allowEdit }>{ labels.save[app.language] }</button>
+                <button type="submit" class="btn btn-primary  pull-right" disabled={ !allowEdit }>{ app.texts.cm_user_form.save[app.language] }</button>
                 <span>&nbsp;</span>
-                <button type="button" onclick={ close } class="btn btn-secondary">{ labels.cancel[app.language] }</button>
+                <button type="button" onclick={ close } class="btn btn-secondary">{ app.texts.cm_user_form.cancel[app.language] }</button>
             </form>
         </div>
     </div>
@@ -166,77 +166,5 @@
             return window.btoa((new Date().getMilliseconds() + ''))
         }
 
-        this.labels = {
-            "user_view": {
-                "en": "User Preview",
-                "fr": "User Preview",
-                "pl": "Podgląd Danych Użytkownika"
-            },
-            "user_new": {
-                "en": "New User",
-                "fr": "New User",
-                "pl": "Nowe Konto Użytkownika"
-            },
-            "user_modify": {
-                "en": "Modify User",
-                "fr": "Modify User",
-                "pl": "Zmiana Danych Użytkownika"
-            },
-            "email": {
-                "en": "* e-mail address",
-                "fr": "* e-mail address",
-                "pl": "* adres e-mail"
-            },
-            "uid": {
-                "en": "* Login (UID)",
-                "fr": "* Login (UID)",
-                "pl": "* Login (UID)"
-            },
-            "type": {
-                "en": "* User Type",
-                "fr": "* User Type",
-                "pl": "* Typ Użytkownika"
-            },
-            "role": {
-                "en": "User Roles",
-                "fr": "User Roles",
-                "pl": "Role Użytkownika"
-            },
-            "password": {
-                "en": "Password",
-                "fr": "Password",
-                "pl": "Hasło"
-            },
-            "confirmString": {
-                "en": "Confirmation Code",
-                "fr": "Confirmation Code",
-                "pl": "Kod Potwierdzenia"
-            },
-            "confirmed": {
-                "en": "Is Confirmed?",
-                "fr": "Is Confirmed?",
-                "pl": "Czy potwierdzone?"
-            },
-            "unregisterRequested": {
-                "en": "* Unregistration Requested?",
-                "fr": "* Unregistration Requested?",
-                "pl": "* Żądanie usunięcia konta?"
-            },
-            "number": {
-                "en": "no.",
-                "fr": "no.",
-                "pl": "nr"
-            },
-            "save": {
-                "en": "Save",
-                "fr": "Save",
-                "pl": "Zapisz"
-            },
-            "cancel": {
-                "en": "Cancel",
-                "fr": "Cancel",
-                "pl": "Porzuć"
-            }
-        }
     </script>
 </user_form>
