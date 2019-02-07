@@ -5,8 +5,8 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-        <title>Cricket Microsite</title>
-        <link rel="icon" href="/resources/cricket-icon.png">
+        <title>Cricket &micro;Site</title>
+        <link rel="icon" href="resources/cricket-icon.png">
         <!-- Bootstrap -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -18,9 +18,9 @@
     <app_header></app_header>
     <app_content></app_content>
     <app_footer></app_footer>
+    <app_texts></app_texts>
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <!--<script>window.jQuery || document.write('<script src="/resources/js/jquery-slim.min.js"><\/script>')</script>-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
     <script type="text/javascript" src="js/jHtmlArea-0.8.min.js"></script>
@@ -28,12 +28,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/riot/3.13.2/riot+compiler.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/riot-route@3.1.4/dist/route.min.js"></script>
     <!-- Application scripts -->
+    <script src="js/data-api.js"></script>
     <script src="js/routing.js"></script>
-    <script src="/js/data-api.js"></script>
+    <script src="config/init.js"></script>
 
     <!-- loading tags -->
-    <script data-src="components/raw.tag" type="riot/tag"></script>
-    <script data-src="/tags/spinner.tag" type="riot/tag"></script>
+    <script data-src="components/app_texts.tag" type="riot/tag"></script>
+    <script data-src="tags/raw.tag" type="riot/tag"></script>
+    <script data-src="tags/spinner.tag" type="riot/tag"></script>
     <script data-src="components/app_header.tag" type="riot/tag"></script>
     <script data-src="components/app_login.tag" type="riot/tag"></script>
     <script data-src="components/app_logout.tag" type="riot/tag"></script>
@@ -54,6 +56,7 @@
         app.csAPI = "$serviceurl" + "/api/cs/";
         app.cmAPI = "$serviceurl" + "/api/cm/";
         app.jvm = "$javaversion";
+        setLocalConfig();
         riot.mount('*');
         route.start(true);
     </script>

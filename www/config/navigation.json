@@ -1,4 +1,4 @@
-[
+{"en": [
     {
         "name": "Home",
         "link": "#"
@@ -25,4 +25,61 @@
             }
         ]
     }
+],
+"fr": [
+    {
+        "name": "Accueil",
+        "link": "#"
+    },
+    {
+        "name": "À propos",
+        "link": "#articles,about"
+    },
+    {
+        "name": "La langue",
+        "id": "lang",
+        "options": [
+            {
+                "name": "anglaise",
+                "link": "#en"
+            },
+            {
+                "name": "française",
+                "link": "#fr"
+            },
+            {
+                "name": "polonaise",
+                "link": "#pl"
+            }
+        ]
+    }
+],
+"pl": [
+    {
+        "name": "Home",
+        "link": "#"
+    },
+    {
+        "name": "O nas",
+        "link": "#articles,about"
+    },
+    {
+        "name": "Język",
+        "id": "lang",
+        "options": [
+            {
+                "name": "Angielski",
+                "link": "#en"
+            },
+            {
+                "name": "Francuski",
+                "link": "#fr"
+            },
+            {
+                "name": "Polski",
+                "link": "#pl"
+            }
+        ]
+    }
 ]
+}

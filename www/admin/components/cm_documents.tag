@@ -6,7 +6,7 @@
     </div>
     <div class="row" if={ !selected }>
         <div class="col-md-12">
-            <h2>{labels.title[app.language]} 
+            <h2>{app.texts.cm_documents.title[app.language]} 
                 <virtual each={ lang, i in app.languages}>
                     <button type="button" class="btn btn-sm { lang==selectedLanguage?'btn-primary':'btn-secondary' }" onclick={ selectLanguage(lang) }>{ lang }</button>
                 </virtual>
@@ -18,14 +18,14 @@
     <div class="row" if={ !selected }>
         <div class="col-md-12">
             <form class="form-inline">
-                <label class="mr-2" for="pathsDropdown">{ labels.path_status[app.language] }</label>
+                <label class="mr-2" for="pathsDropdown">{ app.texts.cm_documents.path_status[app.language] }</label>
                 <select class="select mr-2" id="pathsDropdown" onchange={ selectPath }>
                     <option each={ tmpPath, index in paths }>{ tmpPath }</option>
                 </select>
                 <select class="select" id="statusesDropdown" onchange={ selectStatus }>
                     <option each={ tmpStatus, index in statuses }>{ tmpStatus }</option>
                 </select>
-                <label for="doctag" style="margin-left:10px;margin-right: 5px;">{ labels.doctag[app.language] }</label>
+                <label for="doctag" style="margin-left:10px;margin-right: 5px;">{ app.texts.cm_documents.doctag[app.language] }</label>
                 <input class="form-control" id="doctag" name="doctag" type="text" value={ doctag }>
             </form>
         </div>
@@ -35,10 +35,10 @@
             <table id="doclist" class="table table-condensed topspacing-sm">
                 <thead>
                     <tr class="d-flex">
-                        <th class="col-1">{labels.t_type[app.language]}</th>
-                        <th class="col-3">{labels.t_name[app.language]}</th>
-                        <th class="col-5">{labels.t_title[app.language]}</th>
-                        <!--<th>{labels.t_status[app.language]}</th>-->
+                        <th class="col-1">{app.texts.cm_documents.t_type[app.language]}</th>
+                        <th class="col-3">{app.texts.cm_documents.t_name[app.language]}</th>
+                        <th class="col-5">{app.texts.cm_documents.t_title[app.language]}</th>
+                        <!--<th>{app.texts.cm_documents.t_status[app.language]}</th>-->
                         <th class="col-3 text-right">
                             <i class="material-icons clickable" onclick={ editDocument('NEW', true) }>add</i>
                         </th>
@@ -73,15 +73,15 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h4 class="modal-title">{labels.remove_title[app.language]}</h4>
+                            <h4 class="modal-title">{app.texts.cm_documents.remove_title[app.language]}</h4>
                         </div>
                         <div class="modal-body">
-                            <p>{labels.remove_question[app.language]}</p>
-                            <p class="text-warning"><small>{labels.remove_info[app.language]}</small></p>
+                            <p>{app.texts.cm_documents.remove_question[app.language]}</p>
+                            <p class="text-warning"><small>{app.texts.cm_documents.remove_info[app.language]}</small></p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-dismiss="modal" onclick={ removeDocument() }>{labels.remove[app.language]}</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick={ select('') }>{labels.cancel[app.language]}</button>
+                            <button type="button" class="btn btn-primary" data-dismiss="modal" onclick={ removeDocument() }>{app.texts.cm_documents.remove[app.language]}</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick={ select('') }>{app.texts.cm_documents.cancel[app.language]}</button>
                         </div>
                     </div>
                 </div>
@@ -273,67 +273,6 @@
             readContentList()
         }
 
-        self.labels = {
-            "t_name": {
-                "en": "NAME",
-                "fr": "NAME",
-                "pl": "NAZWA"
-            },
-            "t_type": {
-                "en": "TYPE",
-                "fr": "TYPE",
-                "pl": "TYP"
-            },
-            "t_title": {
-                "en": "TITLE",
-                "fr": "TITLE",
-                 "pl": "TYTUŁ"
-            },
-            "t_status": {
-                "en": "STATUS",
-                "fr": "STATUS",
-                "pl": "STATUS"
-            },
-            "path_status": {
-                "en": "Path / Status",
-                "fr": "Path / Status",
-                "pl": "Ścieżka / Status"
-            },
-                "title": {
-                "en": "documents",
-                "fr": "documents",
-                "pl": "dokumenty"
-            },
-            "remove": {
-                "en": "Remove",
-                "fr": "Remove",
-                "pl": "Usuń"
-            },
-            "cancel": {
-                "en": "Cancel",
-                "fr": "Cancel",
-                "pl": "Porzuć"
-            },
-            "remove_question": {
-                "en": "Do you want to remove selected document?",
-                "fr": "Do you want to remove selected document?",
-                "pl": "Czy chcesz usunąć wybrany dokument?"
-            },
-            "remove_info": {
-                "en": "All language versions will be removed.",
-                "fr": "All language versions will be removed.",
-                "pl": "Zostaną usunięte wszystkie wersje językowe."
-            },
-            "remove_title": {
-                "en": "Removing document",
-                "fr": "Removing document",
-                "pl": "Usuwanie dokumentu"
-            },
-            "doctag": {
-                "en": "tag",
-                "fr": "tag",
-                "pl": "tag"
-            }
-        }
+        
     </script>
 </cm_documents>

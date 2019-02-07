@@ -5,26 +5,26 @@
         <div class="col-md-8">
             <!-- Login form -->
             <form onsubmit={ submitForm }>
-                <p class="module-title h3 text-center mb-4">{labels.title[app.language]}</p>
+                <p class="module-title h3 text-center mb-4">{app.texts.app_password_form.title[app.language]}</p>
 
                 <div class="md-form">
                     <i class="fa fa-lock prefix grey-text"></i>
                     <input type="password" id="password" name="password" class="form-control" required>
-                    <label for="password">{ labels.password[app.language] }</label>
+                    <label for="password">{ app.texts.app_password_form.password[app.language] }</label>
                 </div>
 
                 <div class="md-form">
                     <i class="fa fa-lock prefix grey-text"></i>
                     <input type="password" id="password2" name="password2" class="form-control" required>
-                    <label for="password2">{ labels.password2[app.language] }</label>
+                    <label for="password2">{ app.texts.app_password_form.password2[app.language] }</label>
                 </div>
                 <div class="md-form" if={ self.error }>
                     <span class="red-text">password do not match</span>
                 </div>
 
                 <div class="text-center">
-                    <button type="submit" class="btn btn-primary">{ labels.save[app.language] }</button>
-                    <button type="button" class="btn btn-secondary" onclick={ close }>{ labels.cancel[app.language] }</button>
+                    <button type="submit" class="btn btn-primary">{ app.texts.app_password_form.save[app.language] }</button>
+                    <button type="button" class="btn btn-secondary" onclick={ close }>{ app.texts.app_password_form.cancel[app.language] }</button>
                 </div>
             </form>
             <!-- Login form -->
@@ -98,34 +98,6 @@
                 self.callbackListener.trigger('passCancelled')
             } else {
                 alert(text)
-            }
-        }
-
-        this.labels = {
-            "title": {
-                "en": "Password modification",
-                "fr": "Modification du mot de passe",
-                "pl": "Zmiana hasła"
-            },
-            "password": {
-                "en": "Password",
-                "fr": "Mot de passe",
-                "pl": "Hasło"
-            },
-            "password2": {
-                "en": "Retype password",
-                "fr": "Resaisir le mot de passe",
-                "pl": "Powtórzhasło"
-            },
-            "save": {
-                "en": "Save",
-                "fr": "Enregistrer",
-                "pl": "Zapisz"
-            },
-            "cancel": {
-                "en": "Cancel",
-                "fr": "Annuler",
-                "pl": "Porzuć"
             }
         }
     </script>

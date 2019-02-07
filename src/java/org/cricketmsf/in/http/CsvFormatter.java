@@ -40,15 +40,14 @@ public class CsvFormatter {
 
     public String format(List list) {
         StringBuilder sb = new StringBuilder();
-        try{
-        CSVPrinter printer = new CSVPrinter(sb, CSVFormat.DEFAULT);
-        if (list.size() > 0) {
-            printer.printRecord((List) list.get(0));
-            for (int i = 1; i < list.size(); i++) {
-                printer.printRecord((List) list.get(i));
+        try {
+            CSVPrinter printer = new CSVPrinter(sb, CSVFormat.EXCEL.withRecordSeparator("\r\n"));
+            if (list.size() > 0) {
+                for (int i = 0; i < list.size(); i++) {
+                    printer.printRecord((List) list.get(i));
+                }
             }
-        }
-        }catch(IOException e){
+        } catch (IOException e) {
             sb.append(e.getMessage());
         }
         return sb.append("\r\n").toString();
@@ -57,25 +56,24 @@ public class CsvFormatter {
     public String format(Map data) {
         StringBuilder sb = new StringBuilder();
         try {
-            CSVPrinter printer = new CSVPrinter(sb, CSVFormat.DEFAULT);
-            printer.printRecord(data.keySet());
+            CSVPrinter printer = new CSVPrinter(sb, CSVFormat.EXCEL.withRecordSeparator("\r\n"));
             printer.printRecord(data.values());
         } catch (IOException e) {
             sb.append(e.getMessage());
-            
+
         }
         return sb.append("\r\n").toString();
     }
 
     public String format(Result r) {
-            if (r.getData() instanceof List) {
-                return format((List) r.getData());
-            } else if (r.getData() instanceof Map) {
-                return format((Map) r.getData());
-            } else {
-                return "unsupported data format\r\n";
-                //TODO: error code?
-            }
+        if (r.getData() instanceof List) {
+            return format((List) r.getData());
+        } else if (r.getData() instanceof Map) {
+            return format((Map) r.getData());
+        } else {
+            return "unsupported data format\r\n";
+            //TODO: error code?
+        }
     }
 
 }

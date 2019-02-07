@@ -1,12 +1,12 @@
 <cm_document_form>
     <div class="panel panel-default">
-        <div class="panel-heading" if={ self.mode == 'create' }><h2>{ labels.document_new[app.language] } [{ doc.status }]</h2></div>
-        <div class="panel-heading" if={ self.mode == 'update' }><h2>{ labels.document_modify[app.language] } [{ doc.status }]</h2></div>
-        <div class="panel-heading" if={ self.mode == 'view' }><h2>{ labels.document_view[app.language] } [{ doc.status }]</h2></div>
+        <div class="panel-heading" if={ self.mode == 'create' }><h2>{ app.texts.cm_document_form.document_new[app.language] } [{ doc.status }]</h2></div>
+        <div class="panel-heading" if={ self.mode == 'update' }><h2>{ app.texts.cm_document_form.document_modify[app.language] } [{ doc.status }]</h2></div>
+        <div class="panel-heading" if={ self.mode == 'view' }><h2>{ app.texts.cm_document_form.document_view[app.language] } [{ doc.status }]</h2></div>
         <div class="panel-body">
             <form onsubmit={ self.submitForm }>
                 <div class="form-group">
-                    <label for="type">{ labels.type[app.language] }</label>
+                    <label for="type">{ app.texts.cm_document_form.type[app.language] }</label>
                     <select class="form-control" id="type" name="type" value={ doc.type } onchange={ self.changeType } readonly={ self.mode != 'create'  } required>
                         <option value="ARTICLE">ARTICLE</option>
                         <option value="CODE">CODE</option>
@@ -14,75 +14,75 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="name">{ labels.name[app.language] }</label>
+                    <label for="name">{ app.texts.cm_document_form.name[app.language] }</label>
                     <input class="form-control" id="name" name="name" type="text" value={ doc.name } readonly={ self.mode != 'create'  } required>
                 </div>
                 <div class="form-group">
-                    <label for="path">{ labels.path[app.language] }</label>
+                    <label for="path">{ app.texts.cm_document_form.path[app.language] }</label>
                     <input class="form-control" id="path" name="path" type="text" value={ doc.path } readonly={ self.mode != 'create'  } >
                 </div>
                 <div class="form-group">
-                    <label for="uid">{ labels.uid[app.language] }</label>
+                    <label for="uid">{ app.texts.cm_document_form.uid[app.language] }</label>
                     <input class="form-control" id="uid" name="uid" type="text" value={ doc.uid } readonly={ true }>
                 </div>
                 <div class="form-group">
-                    <label for="author">{ labels.author[app.language] }</label>
+                    <label for="author">{ app.texts.cm_document_form.author[app.language] }</label>
                     <input class="form-control" id="author" name="author" type="text"  value={ doc.author } readonly={ !allowEdit }>
                 </div>
                 <div class="form-group">
-                    <label for="title">{ labels.title[app.language] }</label>
+                    <label for="title">{ app.texts.cm_document_form.title[app.language] }</label>
                     <input class="form-control" id="title" name="title" type="text" value={ doc.title } readonly={ !allowEdit }>
                 </div>
                 <div class="form-group" if={doc.type=='ARTICLE'}>
-                    <label for="summary">{ labels.summary[app.language] }</label>
+                    <label for="summary">{ app.texts.cm_document_form.summary[app.language] }</label>
                     <textarea class="form-control cricket-article" rows="3" id="summary" name="summary" readonly={ !allowEdit }>{ doc.summary }</textarea>
                 </div>
                 <div class="form-group" if={doc.type!='ARTICLE'}>
-                    <label for="summary">{ labels.summary[app.language] }</label>
+                    <label for="summary">{ app.texts.cm_document_form.summary[app.language] }</label>
                     <textarea class="form-control" rows="3" id="summary" name="summary" readonly={ !allowEdit }>{ doc.summary }</textarea>
                 </div>
                 <div class="form-group" if={ doc.type != 'FILE' }>
-                    <label for="mimeType">{ labels.mimeType[app.language] }</label>
+                    <label for="mimeType">{ app.texts.cm_document_form.mimeType[app.language] }</label>
                     <input class="form-control" id="mimeType" name="mimeType" type="text" value={ doc.mimeType }>
                 </div>
                 <div class="form-group" if={ doc.type == 'FILE' }>
-                    <label for="mimeType">{ labels.mimeType[app.language] }</label>
+                    <label for="mimeType">{ app.texts.cm_document_form.mimeType[app.language] }</label>
                     <input class="form-control" id="mimeType" name="mimeType" type="text" value={ doc.mimeType } readonly>
                 </div>
                 <div class="form-group" if={ doc.type != 'FILE' && doc.type == 'ARTICLE'}>
-                    <label for="content">{ labels.content[app.language] }</label>
+                    <label for="content">{ app.texts.cm_document_form.content[app.language] }</label>
                     <textarea class="form-control cricket-article" style="white-space:pre-wrap"
                               rows="10" id="content" name="content" readonly={ !allowEdit }>{ doc.content }</textarea>
                 </div>
                 <div class="form-group" if={ doc.type != 'FILE' && doc.type != 'ARTICLE'}>
-                    <label for="content">{ labels.content[app.language] }</label>
+                    <label for="content">{ app.texts.cm_document_form.content[app.language] }</label>
                     <textarea class="form-control" style="white-space:pre-wrap"
                               rows="10" id="content" name="content" readonly={ !allowEdit }>{ doc.content }</textarea>
                 </div>
                 <div class="form-group" if={doc.type == 'FILE'}>
-                    <label for="content">{ labels.content[app.language] }</label>
+                    <label for="content">{ app.texts.cm_document_form.content[app.language] }</label>
                     <input class="form-control" id="content" name="content" value={ doc.content } readonly>
                 </div>
                 <div class="form-group">
-                    <label for="doctags">{ labels.doctags[app.language] }</label>
+                    <label for="doctags">{ app.texts.cm_document_form.doctags[app.language] }</label>
                     <input class="form-control" id="doctags" name="doctags" type="text" value={ doc.tags } >
                 </div>
                 <div class="form-group">
-                    <label for="language">{ labels.language[app.language] }</label>
+                    <label for="language">{ app.texts.cm_document_form.language[app.language] }</label>
                     <input class="form-control" id="language" name="language" type="text" value={ doc.language } readonly={ true }>
                 </div>
                 <!--
                 <div class="form-group">
-                    <label for="commentable">{ labels.commentable[app.language] }</label>
+                    <label for="commentable">{ app.texts.cm_document_form.commentable[app.language] }</label>
                     <input class="form-control" id="commentable" name="commentable" type="text" value={ doc.commentable } readonly={ !allowEdit }>
                 </div>
                 -->
                 <div class="form-group" if={doc.type == 'FILE' && allowEdit}>
-                    <label for="file">{ labels.selectFile[app.language]}</label><br />
+                    <label for="file">{ app.texts.cm_document_form.selectFile[app.language]}</label><br />
                     <input class="form-control-file" type="file" name="file" id="file">
                 </div>
-                <button type="submit" class="btn btn-primary" disabled={ !allowEdit }>{ labels.save[app.language] }</button>
-                <button type="button" onclick={ close } class="btn btn-secondary">{ labels.cancel[app.language] }</button>
+                <button type="submit" class="btn btn-primary" disabled={ !allowEdit }>{ app.texts.cm_document_form.save[app.language] }</button>
+                <button type="button" onclick={ close } class="btn btn-secondary">{ app.texts.cm_document_form.cancel[app.language] }</button>
             </form>
         </div>
 </div>
@@ -260,98 +260,5 @@
         getData(app.cmAPI+docUid+'?language='+self.selectedLanguage+'&status='+self.selectedStatus,null,app.user.token,update,self.listener)
     }
 
-
-    this.labels = {
-        "document_view": {
-            "en": "Document Preview",
-            "fr": "Document Preview",
-            "pl": "Podgląd Dokumentu"
-        },
-        "document_new": {
-            "en": "New Document",
-            "fr": "New Document",
-            "pl": "Nowy Dokument"
-        },
-        "document_modify": {
-            "en": "Modify Dokument",
-            "fr": "Modify Dokument",
-            "pl": "Edycja Dokumentu"
-        },
-        "name": {
-            "en": "* Name",
-            "fr": "* Name",
-            "pl": "* Nazwa"
-        },
-        "uid": {
-            "en": "UID",
-            "fr": "UID",
-            "pl": "UID"
-        },
-        "path": {
-            "en": "Path",
-            "fr": "Path",
-            "pl": "Ścieżka"
-        },
-        "title": {
-            "en": "Title",
-            "fr": "Title",
-            "pl": "Tytuł"
-        },
-        "author": {
-            "en": "Author",
-            "fr": "Author",
-            "pl": "Autor"
-        },
-        "summary": {
-            "en": "Summary",
-            "fr": "Summary",
-            "pl": "Streszczenie"
-        },
-        "content": {
-            "en": "Content",
-            "fr": "Content",
-            "pl": "Treść"
-        },
-        "doctags": {
-            "en": "Tags",
-            "fr": "Tags",
-            "pl": "Znaczniki"
-        },
-        "language": {
-            "en": "Language",
-            "fr": "Language",
-            "pl": "Język"
-        },
-        "type": {
-            "en": "* Type",
-            "fr": "* Type",
-            "pl": "* Typ"
-        },
-        "mimeType": {
-            "en": "Mime type",
-            "fr": "Mime type",
-            "pl": "Mime type"
-        },
-        "commentable": {
-            "en": "Can be commented?",
-            "fr": "Can be commented?",
-            "pl": "Można komentować?"
-        },
-        "selectFile": {
-            "en": "Select a File to Upload",
-            "fr": "Select a File to Upload",
-            "pl": "Wybierz plik do przesłania"
-        },
-        "save": {
-            "en": "Save",
-            "fr": "Save",
-            "pl": "Zapisz"
-        },
-        "cancel": {
-            "en": "Cancel",
-            "fr": "Cancel",
-            "pl": "Porzuć"
-        }
-    }
 </script>
 </cm_document_form>

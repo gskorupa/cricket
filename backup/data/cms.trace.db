@@ -1,3 +1,0 @@
-2018-04-23 16:14:41 jdbc[3]: exception
-org.h2.jdbc.JdbcSQLException: Table "SERVICEVERSION" not found; SQL statement:
-select * from serviceversion [42102-196]
