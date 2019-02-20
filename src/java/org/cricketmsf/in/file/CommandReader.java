@@ -30,7 +30,7 @@ import org.cricketmsf.in.InboundAdapter;
  */
 public class CommandReader extends InboundAdapter implements Adapter, WatchdogIface {
 
-    private final String INBOUND_METHOD_NAME = "dataready";
+    private String categoryName = "NEW_COMMAND";
 
     private String fileName;
     File file;
@@ -46,18 +46,25 @@ public class CommandReader extends InboundAdapter implements Adapter, WatchdogIf
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
-        super.getServiceHooks(adapterName);
+        //super.getServiceHooks(adapterName);
         setFile(properties.getOrDefault("path", ""));
         Kernel.getInstance().getLogger().print("\tpath=" + fileName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
         Kernel.getInstance().getLogger().print("\tsampling-interval=" + samplingInterval);
+        categoryName = properties.getOrDefault("event-category", "NEW_COMMAND");
+        Kernel.getInstance().getLogger().print("\tevent-category =" + categoryName);
+        super.registerEventCategory(categoryName, Event.class.getName());
     }
 
     @Override
     public void checkStatus() {
         byte[] content = exec();
         if (content.length > 0) {
-            handle(INBOUND_METHOD_NAME, new String(content));
+            //handle(categoryName, new String(content));
+            Event ev = new Event();
+            ev.setCategory(categoryName);
+            ev.setPayload(new String(content));
+            Kernel.getInstance().dispatchEvent(ev);
         }
     }
 

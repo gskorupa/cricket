@@ -20,13 +20,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import org.cricketmsf.event.EventIface;
+import org.cricketmsf.exception.EventException;
 
 /**
  * Event
  *
  * @author Grzegorz Skorupa
  */
-public class Event {
+public class Event implements EventIface {
 
     public static final String CATEGORY_LOG = "LOG";
     public static final String CATEGORY_HTTP_LOG = "HTTPLOG";
@@ -40,6 +44,8 @@ public class Event {
     public static final String LOG_INFO = "INFO";
     public static final String LOG_WARNING = "WARNING";
     public static final String LOG_SEVERE = "SEVERE";
+    
+    public static final String TYPE_DEFAULT = "T_DEFAULT";
 
     private long id = -1;
     private String name = null;
@@ -55,6 +61,8 @@ public class Event {
     private long rootEventId = -1;
     private RequestObject request = null;
     private boolean cyclic = false;
+    
+    private boolean iamtheroot = true;
 
     /**
      * Creates new Event instance. Sets new id and createdAt parameters.
@@ -67,6 +75,7 @@ public class Event {
         serviceId = Kernel.getInstance().getId();
         serviceUuid = Kernel.getInstance().getUuid();
         category = Event.CATEGORY_GENERIC;
+        type = Event.TYPE_DEFAULT;
         calculateTimePoint();
     }
 
@@ -650,10 +659,6 @@ public class Event {
 
     public String getRequestParameter(String name) {
         String value = null;
-        //try {
-        //    value = (String) ((RequestObject) getPayload()).parameters.get(name);
-        //} catch (Exception e) {
-        //}
         value = (String)getRequest().parameters.get(name);
         return value;
     }
@@ -662,10 +667,6 @@ public class Event {
      * @return the request
      */
     public RequestObject getRequest() {
-        //if(httpEvent){
-          //  return (RequestObject)payload;
-        //}
-        //return null;
         return request;
     }
     
@@ -721,6 +722,29 @@ public class Event {
     public Event putName(String name){
         this.name=name;
         return this;
+    }
+    
+    public String toJson(){
+        Jsonb jsonb = JsonbBuilder.create();
+        return jsonb.toJson(this);
+    }
+    
+    public static Event fromJson(String json){
+        Jsonb jsonb = JsonbBuilder.create();
+        return jsonb.fromJson(json, Event.class);
+    }
+
+    @Override
+    public String[] getCategories() throws EventException{
+        
+        if(getClass() != Event.class){
+            throw new EventException(EventException.MUST_OVERRIDE_REGISTER, getClass()+" does not override getCategories() method");
+        }
+        String[] categories = {
+            CATEGORY_LOG,CATEGORY_HTTP_LOG,CATEGORY_GENERIC,
+            CATEGORY_HTTP,LOG_ALL,LOG_FINEST,LOG_FINE,LOG_FINER,LOG_INFO,LOG_WARNING,LOG_SEVERE
+        };
+        return categories;
     }
 
 }

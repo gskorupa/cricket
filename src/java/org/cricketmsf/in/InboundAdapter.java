@@ -20,9 +20,10 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import org.cricketmsf.Event;
-import org.cricketmsf.annotation.InboundAdapterHook;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.out.DispatcherIface;
+import org.cricketmsf.event.EventMaster;
+import org.cricketmsf.exception.EventException;
+import org.cricketmsf.out.dispatcher.DispatcherIface;
 
 /**
  *
@@ -31,13 +32,17 @@ import org.cricketmsf.out.DispatcherIface;
 public class InboundAdapter implements Runnable {
 
     protected HashMap<String, String> hookMethodNames;
-    protected HashMap<String, String> properties;
+    protected HashMap<String, String> properties = null;
     protected HashMap<String, String> statusMap = null;
     protected String name;
 
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         this.name = name;
-        this.properties = (HashMap<String, String>) properties.clone();
+        if(properties == null){
+            this.properties = new HashMap<>();
+        }else{
+            this.properties = (HashMap<String, String>) properties.clone();
+        }
         getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
     }
 
@@ -57,6 +62,7 @@ public class InboundAdapter implements Runnable {
     }
 
     protected Result handle(String method, String payload) {
+        /*
         String hookMethodName = getHookMethodNameForMethod(method);
         Result result = null;
         if (hookMethodName == null) {
@@ -77,9 +83,12 @@ public class InboundAdapter implements Runnable {
             e.printStackTrace();
         }
         return result;
+         */
+        return null;
     }
 
     protected void getServiceHooks(String adapterName) {
+        /*
         if (hookMethodNames == null) {
             hookMethodNames = new HashMap<>();
         }
@@ -97,19 +106,24 @@ public class InboundAdapter implements Runnable {
                 }
             }
         }
+         */
     }
 
     public void addHookMethodNameForMethod(String requestMethod, String hookMethodName) {
-        hookMethodNames.put(requestMethod, hookMethodName);
+        //hookMethodNames.put(requestMethod, hookMethodName);
     }
 
     public String getHookMethodNameForMethod(String requestMethod) {
+        /*
         String result = null;
+        
         result = hookMethodNames.get(requestMethod);
         if (null == result) {
             result = hookMethodNames.get("*");
         }
         return result;
+         */
+        return null;
     }
 
     public Map<String, String> getStatus(String name) {
@@ -128,8 +142,17 @@ public class InboundAdapter implements Runnable {
     public DispatcherIface getDispatcher() {
         return null;
     }
-    
-    public String getName(){
+
+    public String getName() {
         return name;
+    }
+
+    public void registerEventCategory(String category, String eventClassName) {
+        try {
+            String[] categories = {category};
+            EventMaster.registerEventCategories(categories, eventClassName);
+        } catch (EventException ex) {
+            ex.printStackTrace();
+        }
     }
 }

@@ -17,7 +17,6 @@ package org.cricketmsf.services;
 
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.RequestObject;
 import java.util.HashMap;
 import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
@@ -33,6 +32,8 @@ import org.cricketmsf.out.db.*;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.List;
 import org.cricketmsf.annotation.EventHook;
+import org.cricketmsf.event.EventMaster;
+import org.cricketmsf.exception.EventException;
 import org.cricketmsf.microsite.auth.AuthBusinessLogic;
 import org.cricketmsf.microsite.in.http.ContentRequestProcessor;
 import org.cricketmsf.microsite.user.UserEvent;
@@ -89,6 +90,14 @@ public class Microsite extends Kernel {
 
     @Override
     public void runInitTasks() {
+        // we should register event categories used by this service
+        try {
+            EventMaster.registerEventCategories(new Event().getCategories(), Event.class.getName());
+            EventMaster.registerEventCategories(new UserEvent().getCategories(), UserEvent.class.getName());
+        } catch (EventException ex) {
+            ex.printStackTrace();
+            shutdown();
+        }
         //read the OS variable to get the service URL
         String urlEnvName = (String) getProperties().get("SRVC_URL_ENV_VARIABLE");
         if (null != urlEnvName) {
@@ -114,12 +123,12 @@ public class Microsite extends Kernel {
 
     @Override
     public void runFinalTasks() {
-        /*
-        // CLI adapter doesn't start automaticaly as other inbound adapters
-        if (cli != null) {
+            /*
+            // CLI adapter doesn't start automaticaly as other inbound adapters
+            if (cli != null) {
             cli.start();
-        }
-         */
+            }
+            */
     }
 
     /**
@@ -342,6 +351,7 @@ public class Microsite extends Kernel {
     }
 
     @EventHook(eventCategory = Event.CATEGORY_LOG)
+    @EventHook(eventCategory = "Category-Test")
     public void logEvent(Event event) {
         logAdapter.log(event);
         if (event.getType().equals(Event.LOG_SEVERE)) {
@@ -479,7 +489,7 @@ public class Microsite extends Kernel {
     @EventHook(eventCategory = "*")
     public void processEvent(Event event) {
         dispatchEvent(Event.logWarning(
-                "Don't know how to handle category/type: " + event.getCategory() + "/" + event.getType(),
+                "Event category/type " + event.getCategory() + "/" + event.getType()+" not handled",
                  event.getPayload().toString()
         ));
     }

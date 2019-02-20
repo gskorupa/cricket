@@ -17,6 +17,7 @@ package org.cricketmsf.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -26,8 +27,16 @@ import java.lang.annotation.Target;
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 @Documented
+@Repeatable(EventHook.List.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface EventHook {
     public String eventCategory();
+    
+    @Documented
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @interface List {
+        EventHook[] value();
+    }
 }

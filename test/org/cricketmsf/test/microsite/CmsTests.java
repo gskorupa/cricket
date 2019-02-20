@@ -14,7 +14,6 @@ import org.junit.*;
 import org.junit.runners.MethodSorters;
 import com.cedarsoftware.util.io.JsonReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;

@@ -37,6 +37,7 @@ public class StandardHttpAdapter extends HttpAdapter implements HttpAdapterIface
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        super.loadProperties(properties, adapterName);
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         Kernel.getInstance().getLogger().print("\tcontext=" + getContext());

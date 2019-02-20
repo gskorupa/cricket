@@ -13,38 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.out;
+package org.cricketmsf.exception;
 
 
 /**
  *
  * @author greg
  */
-public class DispatcherException extends Exception {
+public class QueueException extends Exception {
     
-    public static int UNKNOWN = 999;
-    public static int NOT_IMPLEMENTED = 998;
-    public static int UNKNOWN_EVENT = 997;
+    public static final int UNKNOWN = 888;
+    public static int NOT_IMPLEMENTED = 887;
+    public static int QUEUE_NOT_DEFINED = 886;
+    public static int CLIENT_NOT_DEFINED = 885;
 
     private int code = NOT_IMPLEMENTED;
     private String message;
     
-    public DispatcherException(int code){
+    public QueueException(int code){
         this.code = code;
         switch (code){
-            case 998:
+            case 887:
                 message = "operation not implemented";
                 break;
-            case 997:
-                message = "event category/type not handled";
+            case 886:
+                message = "queue not defined";
                 break;
-            case 999:
+            case 888:
                 message = "unknown error";
                 break;
         }
     }
     
-    public DispatcherException(int code, String message){
+    public QueueException(int code, String message){
         this.code = code;
         this.message = message;
     }

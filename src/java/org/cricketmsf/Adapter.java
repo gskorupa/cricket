@@ -17,7 +17,7 @@ package org.cricketmsf;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.cricketmsf.out.DispatcherIface;
+import org.cricketmsf.out.dispatcher.DispatcherIface;
 
 /**
  *

@@ -95,6 +95,11 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         }
         dateFormat = Kernel.getInstance().dateFormat;
     }
+    
+    @Override
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        super.loadProperties(properties, adapterName);
+    }
 
     @Override
     protected void getServiceHooks(String adapterName) {

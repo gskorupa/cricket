@@ -32,6 +32,7 @@ public class Watchdog extends InboundAdapter implements Adapter, WatchdogIface {
     File folder;
     private int samplingInterval = 1000;
     private HashMap<String, Long> files = new HashMap<>();
+    private String categoryName = "folder_changed";
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -43,10 +44,13 @@ public class Watchdog extends InboundAdapter implements Adapter, WatchdogIface {
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
-        super.getServiceHooks(adapterName);
+        //super.getServiceHooks(adapterName);
         setFolder(properties.getOrDefault("path", ""));
         Kernel.getInstance().getLogger().print("path=" + folderName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
+        categoryName = properties.getOrDefault("event-category", "FOLDER_CHANGED");
+        Kernel.getInstance().getLogger().print("\tevent-category =" + categoryName);
+        super.registerEventCategory(categoryName, Event.class.getName());
     }
 
     @Override
@@ -58,7 +62,11 @@ public class Watchdog extends InboundAdapter implements Adapter, WatchdogIface {
             lastModified = files.get(path);
             if (modified > lastModified) {
                 files.put(path, modified);
-                handle("modified", "modification noticed:" + path);
+                //handle("modified", "modification noticed:" + path);
+                Event ev = new Event();
+                ev.setCategory(categoryName);
+                ev.setPayload(path);
+                Kernel.getInstance().dispatchEvent(ev);
             }
         }
     }

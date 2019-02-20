@@ -13,8 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.cricketmsf.out;
+package org.cricketmsf.out.dispatcher;
 
+import org.cricketmsf.exception.DispatcherException;
 import org.cricketmsf.Event;
 
 /**
@@ -23,6 +24,5 @@ import org.cricketmsf.Event;
  */
 public interface DispatcherIface {
     public void dispatch(Event event) throws DispatcherException;
-    public void clearEventsMap();
-    public void registerEventType(String category, String type) throws DispatcherException;
+    public void registerEventTypes(String categories) throws DispatcherException;
 }

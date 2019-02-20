@@ -30,13 +30,17 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.logging.Level;
+import org.cricketmsf.annotation.HttpAdapterHook;
+import org.cricketmsf.annotation.InboundAdapterHook;
 import org.cricketmsf.config.HttpHeader;
-import org.cricketmsf.out.DispatcherException;
-import org.cricketmsf.out.DispatcherIface;
+import org.cricketmsf.event.EventMaster;
+import org.cricketmsf.exception.DispatcherException;
+import org.cricketmsf.out.dispatcher.DispatcherIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import org.cricketmsf.out.log.StandardLogger;
 
@@ -105,16 +109,20 @@ public abstract class Kernel {
 
     private void getEventHooks() {
         EventHook ah;
+        HttpAdapterHook hah;
         String eventCategory;
         getLogger().print("REGISTERING EVENT HOOKS");
         // for every method of a Kernel instance (our service class extending Kernel)
         for (Method m : this.getClass().getMethods()) {
-            ah = (EventHook) m.getAnnotation(EventHook.class);
-            // we search for annotated method
-            if (ah != null) {
-                eventCategory = ah.eventCategory();
+            EventHook[] categoryArray = m.getAnnotationsByType(EventHook.class);
+            for (EventHook hook : categoryArray) {
+                eventCategory = hook.eventCategory();
                 addHookMethodNameForEvent(eventCategory, m.getName());
-                getLogger().print("hook method for event category " + eventCategory + " : " + m.getName());
+                getLogger().print("event category " + eventCategory + " : " + m.getName());
+            }
+            HttpAdapterHook[] adapterArray = m.getAnnotationsByType(HttpAdapterHook.class);
+            for (HttpAdapterHook hook : adapterArray) {
+                getLogger().print("http adapter " + hook.adapterName() + " " + hook.requestMethod() + " : " + m.getName());
             }
         }
         getLogger().print("END REGISTERING EVENT HOOKS");
@@ -237,6 +245,15 @@ public abstract class Kernel {
         // big text generated using http://patorjk.com/software/taag
     }
 
+    private void printEventRegister() {
+        getLogger().print("");
+        getLogger().print("Event register:");
+        for (Map.Entry<String, String> entry : EventMaster.register.entrySet()) {
+            getLogger().print(entry.getKey()+" "+ entry.getValue());
+        }
+        getLogger().print("");
+    }
+
     /**
      * Instantiates adapters following configuration in cricket.json
      *
@@ -302,7 +319,10 @@ public abstract class Kernel {
 
     private void setEventDispatcher(Object adapter) {
         if (adapter != null) {
-            eventDispatcher = (DispatcherIface) adapter;
+            // Scheduler can be used only if there is no other dispatcher configured
+            if(!"Scheduler".equals(adapter.getClass().getSimpleName()) || null==eventDispatcher){
+                eventDispatcher = (DispatcherIface) adapter;
+            }
         }
     }
 
@@ -432,6 +452,7 @@ public abstract class Kernel {
 
             getLogger().print("Running initialization tasks");
             runInitTasks();
+            printEventRegister();
 
             getLogger().print("Starting listeners ...");
             // run listeners for inbound adapters
@@ -450,6 +471,7 @@ public abstract class Kernel {
             }
             getLogger().print("# UUID: " + getUuid());
             getLogger().print("# NAME: " + getName());
+            getLogger().print("# JAVA: " + System.getProperty("java.version"));
             getLogger().print("#");
             if (getHttpd().isSsl()) {
                 getLogger().print("# HTTPS listening on port " + getPort());

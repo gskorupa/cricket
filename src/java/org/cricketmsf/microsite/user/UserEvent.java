@@ -31,6 +31,10 @@ public class UserEvent extends Event {
     public static final String USER_RESET_PASSWORD = "USER_RESET_PASSWORD";
     public static final String USER_NEW_PERMALINK = "USER_NEW_PERMALINK";
     
+    public UserEvent(){
+        super();
+        setCategory(CATEGORY_USER);
+    }
     public UserEvent(String type, Object payload){
         super();
         setCategory(CATEGORY_USER);
@@ -38,4 +42,9 @@ public class UserEvent extends Event {
         setPayload(payload);
     }
     
+    @Override
+    public String[] getCategories(){
+        String[] categories = {CATEGORY_USER};
+        return categories;
+    }
 }

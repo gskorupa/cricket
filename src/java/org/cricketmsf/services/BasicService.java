@@ -21,18 +21,19 @@ import org.cricketmsf.RequestObject;
 import java.util.HashMap;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.annotation.HttpAdapterHook;
+import org.cricketmsf.event.EventMaster;
+import org.cricketmsf.exception.EventException;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.HttpAdapter;
-import org.cricketmsf.in.http.HttpAdapterIface;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
+import org.cricketmsf.microsite.user.UserEvent;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
 import org.cricketmsf.out.file.FileReaderAdapterIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
-import org.cricketmsf.out.script.ScriptingAdapterIface;
 
 /**
  * EchoService
@@ -68,6 +69,13 @@ public class BasicService extends Kernel {
 
     @Override
     public void runInitTasks() {
+        // we should register event categories used by this service
+        try {
+            EventMaster.registerEventCategories(new Event().getCategories(), Event.class.getName());
+        } catch (EventException ex) {
+            ex.printStackTrace();
+            shutdown();
+        }
         try {
             database.addTable("webcache", 100, false);
         } catch (KeyValueDBException e) {
@@ -76,11 +84,12 @@ public class BasicService extends Kernel {
             database.addTable("counters", 1, false);
         } catch (KeyValueDBException e) {
         }
-        System.out.println(printStatus());
+        
     }
 
     @Override
     public void runFinalTasks() {
+        //System.out.println(printStatus());
     }
 
     @Override
@@ -95,8 +104,7 @@ public class BasicService extends Kernel {
         StandardResult r = scriptingEngine.processRequest(requestEvent.getRequest());
         return r;
     }
-    */
-    
+     */
     /**
      * Process requests from simple web server implementation given by
      * HtmlGenAdapter access web web resources
@@ -106,14 +114,37 @@ public class BasicService extends Kernel {
      */
     @HttpAdapterHook(adapterName = "WWWService", requestMethod = "GET")
     public Object doGet(Event event) {
+        try {
+            RequestObject request = event.getRequest();
+            if ("true".equalsIgnoreCase(((HttpAdapter) Kernel.getInstance().getAdaptersMap().get("WWWService")).getProperty("dump-request"))) {
+                System.out.println(HttpAdapter.dumpRequest(request));
+            }
+            ParameterMapResult result
+                    = (ParameterMapResult) fileReader
+                            .getFile(request, htmlAdapter.useCache() ? database : null, "webcache");
+            // caching policy 
+            result.setMaxAge(120);
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-        RequestObject request = event.getRequest();
-        ParameterMapResult result
-                = (ParameterMapResult) fileReader
-                        .getFile(request, htmlAdapter.useCache() ? database : null, "webcache");
-        // caching policy 
-        result.setMaxAge(120);
-        return result;
+    @HttpAdapterHook(adapterName = "Test", requestMethod = "*")
+    public Object doTest(Event event) {
+        try {
+            RequestObject request = event.getRequest();
+            if ("true".equalsIgnoreCase(((HttpAdapter) Kernel.getInstance().getAdaptersMap().get("Test")).getProperty("dump-request"))) {
+                System.out.println(HttpAdapter.dumpRequest(request));
+            }
+            StandardResult result = new StandardResult();
+            Kernel.getInstance().dispatchEvent(new Event(this.getName(), "TEST", "", null, ""));
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @HttpAdapterHook(adapterName = "StatusService", requestMethod = "GET")
@@ -130,6 +161,7 @@ public class BasicService extends Kernel {
     }
 
     @EventHook(eventCategory = Event.CATEGORY_LOG)
+    @EventHook(eventCategory = "Category-Test")
     public void logEvent(Event event) {
         logAdapter.log(event);
     }
@@ -144,7 +176,7 @@ public class BasicService extends Kernel {
         if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
         } else {
-            Kernel.getInstance().dispatchEvent(Event.logInfo("BasicService", event.getPayload().toString()));
+            Kernel.getInstance().dispatchEvent(Event.logInfo("Event category "+event.getCategory()+" is not handled by BasicService. Payload: ", event.getPayload().toString()));
         }
     }
 

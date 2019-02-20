@@ -38,6 +38,8 @@ public class EnvironmentMonitor extends InboundAdapter implements Adapter, Envir
     
     private boolean diskBelow = false;
     private boolean memoryBelow = false;
+    
+    private String categoryName;
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -49,7 +51,7 @@ public class EnvironmentMonitor extends InboundAdapter implements Adapter, Envir
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
-        super.getServiceHooks(adapterName);
+        //super.getServiceHooks(adapterName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
         Kernel.getInstance().getLogger().print("\tsampling-interval: "+samplingInterval+" miliseconds");
         setDisk(properties.getOrDefault("disk-path", "."));
@@ -58,6 +60,9 @@ public class EnvironmentMonitor extends InboundAdapter implements Adapter, Envir
         Kernel.getInstance().getLogger().print("\tmemory-limit: "+memoryLimitConfig);
         setDiskLimit((properties.getOrDefault("disk-limit", "10M")));
         Kernel.getInstance().getLogger().print("\tdisk-limit: "+diskLimitConfig);
+        categoryName = properties.getOrDefault("event-category", "OS_ENV_CHANGE");
+        Kernel.getInstance().getLogger().print("\tevent-category =" + categoryName);
+        super.registerEventCategory(categoryName, Event.class.getName());
     }
 
     @Override

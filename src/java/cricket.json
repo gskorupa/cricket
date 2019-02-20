@@ -256,6 +256,16 @@
                         "password": "",
                         "debug-session": "false"
                     }
+                },
+                "watchdog": {
+                    "name": "watchdog",
+                    "interfaceName": "WatchdogIface",
+                    "classFullName": "org.cricketmsf.in.file.FileTailer",
+                    "properties": {
+                        "path": "/home/greg/tmp/test.txt",
+                        "sampling-interval": "1000",
+                        "event-category": "FILE_CHANGED"
+                    }
                 }
             }
         },
@@ -331,9 +341,10 @@
                 "Dispatcher": {
                     "name": "Dispatcher",
                     "interfaceName": "DispatcherIface",
-                    "classFullName": "org.cricketmsf.out.EventDispatcherAdapter",
-                    "description": "default dispatcher does nothing",
+                    "classFullName": "org.cricketmsf.out.dispatcher.QueueDispatcher",
+                    "description": "using internal Queue",
                     "properties": {
+                        "event-types": "TEST"
                     }
                 },
                 "WWWService": {
@@ -343,7 +354,9 @@
                     "properties": {
                         "context": "/",
                         "use-cache": "true",
-                        "page-processor": "false"
+                        "page-processor": "false",
+                        "silent-mode": "true",
+                        "dump-request": "false"
                     }
                 },
                 "FileReader": {
@@ -353,6 +366,18 @@
                     "properties": {
                         "root": "./www/",
                         "index-file": "index.html"
+                    }
+                },
+                "Test": {
+                    "name": "Test",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.StandardHttpAdapter",
+                    "properties": {
+                        "context": "/test",
+                        "use-cache": "true",
+                        "page-processor": "false",
+                        "silent-mode": "false",
+                        "dump-request": "false"
                     }
                 }
             }

@@ -22,7 +22,10 @@ import java.util.HashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.event.EventMaster;
+import org.cricketmsf.exception.EventException;
 import org.cricketmsf.in.InboundAdapter;
+import org.cricketmsf.microsite.user.UserEvent;
 
 /**
  *
@@ -30,7 +33,7 @@ import org.cricketmsf.in.InboundAdapter;
  */
 public class FileTailer extends InboundAdapter implements Adapter, WatchdogIface {
 
-    private final String INBOUND_METHOD_NAME = "newline";
+    private String categoryName = "newline";
 
     private String fileName;
     File file;
@@ -49,11 +52,14 @@ public class FileTailer extends InboundAdapter implements Adapter, WatchdogIface
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
-        super.getServiceHooks(adapterName);
+        //super.getServiceHooks(adapterName);
         setFile(properties.getOrDefault("path", ""));
         Kernel.getInstance().getLogger().print("\tpath=" + fileName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
         Kernel.getInstance().getLogger().print("\tsampling-interval=" + samplingInterval);
+        categoryName = properties.getOrDefault("event-category", "NEW_LINE");
+        Kernel.getInstance().getLogger().print("\tevent-category =" + categoryName);
+        super.registerEventCategory(categoryName, Event.class.getName());
     }
 
     @Override
@@ -64,13 +70,16 @@ public class FileTailer extends InboundAdapter implements Adapter, WatchdogIface
         if (!directory) {
             long fileLength = file.length();
             if ((!continuing) || (fileLength > lastKnownPosition)) {
-                try (RandomAccessFile readWriteFileAccess = new RandomAccessFile(file, "rw")) {
+                try (RandomAccessFile readWriteFileAccess = new RandomAccessFile(file, "r")) {
                     readWriteFileAccess.seek(lastKnownPosition - 1);
                     String newLine;
                     while ((newLine = readWriteFileAccess.readLine()) != null) {
                         // create event
                         if (!newLine.isEmpty() && continuing) {
-                            handle(INBOUND_METHOD_NAME, newLine);
+                            Event ev = new Event();
+                            ev.setCategory(categoryName);
+                            ev.setPayload(newLine);
+                            Kernel.getInstance().dispatchEvent(ev);
                         }
                     }
                     continuing = true;

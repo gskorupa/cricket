@@ -13,12 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.cricketmsf.out;
+package org.cricketmsf.out.dispatcher;
 
+import org.cricketmsf.exception.DispatcherException;
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.mqtt.MqttPublisher;
 import org.cricketmsf.out.mqtt.MqttPublisherException;
 
@@ -26,7 +28,7 @@ import org.cricketmsf.out.mqtt.MqttPublisherException;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class MqttDispatcher extends EventDispatcherAdapter implements Adapter{
+public class MqttDispatcher extends OutboundAdapter implements Adapter, DispatcherIface{
 
     private String clientID;
     private String brokerURL;
@@ -92,13 +94,7 @@ public class MqttDispatcher extends EventDispatcherAdapter implements Adapter{
         }
     }
 
-    @Override
-    public void clearEventsMap() {
-        eventMap.clear();
-    }
-
-    @Override
-    public void registerEventType(String category, String type) throws DispatcherException {
+    private void registerEventType(String category, String type) throws DispatcherException {
         if (type == null || type.isEmpty()) {
             eventMap.put(category + "/*", null);
         } else {
@@ -106,7 +102,8 @@ public class MqttDispatcher extends EventDispatcherAdapter implements Adapter{
         }
     }
 
-    private void registerEventTypes(String pathsConfig) {
+    @Override
+    public void registerEventTypes(String pathsConfig) {
         String[] paths = pathsConfig.split(";");
         for (String path : paths) {
             if (!path.isEmpty()) {
