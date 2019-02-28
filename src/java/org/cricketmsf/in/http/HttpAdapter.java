@@ -183,7 +183,8 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                     }
                 }else{
                     responseData = result.getPayload();
-                }   headers.set("Last-Modified", result.getModificationDateFormatted());
+                }   
+                headers.set("Last-Modified", result.getModificationDateFormatted());
                 //TODO: get max age and no-cache info from the result object
                 if (result.getMaxAge() > 0) {
                     headers.set("Cache-Control", "max-age=" + result.getMaxAge());  // 1 hour
@@ -241,6 +242,8 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 return "image/png";
             case ".css":
                 return "text/css";
+            case ".csv":
+                return "text/csv";
             case ".js":
                 return "text/javascript";
             case ".svg":

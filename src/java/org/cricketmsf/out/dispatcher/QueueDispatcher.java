@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2019 Grzegorz Skorupa <g.skorupa at gmail.com>.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +40,13 @@ public class QueueDispatcher extends OutboundAdapter implements Adapter, Dispatc
         }
         if (eventMap.containsKey(event.getCategory())) {
             try {
-                ((QueueClientIface) Kernel.getInstance().getAdaptersMap().get(queueClientName)).publish(name, event.toJson());
+                ((QueueClientIface) Kernel.getInstance().getAdaptersMap().get(queueClientName)).publish(event.getCategory(), event.toJson());
             } catch (QueueException ex) {
                 Kernel.getInstance().dispatchEvent(Event.logSevere(this, ex.getCode() + " " + ex.getMessage()));
+                throw new DispatcherException(DispatcherException.QUEUE_EXCEPTION);
+            } catch(Exception ex){
+                Kernel.getInstance().dispatchEvent(Event.logSevere(this, ex.getMessage()));
+                throw new DispatcherException(DispatcherException.QUEUE_EXCEPTION);
             }
         } else {
             throw new DispatcherException(DispatcherException.UNKNOWN_EVENT);
@@ -56,7 +60,11 @@ public class QueueDispatcher extends OutboundAdapter implements Adapter, Dispatc
         registerEventTypes(eventTypes);
         Kernel.getInstance().getLogger().print("\tevent-types: " + eventTypes);
         queueClientName = properties.get("queue-client-name");
-        Kernel.getInstance().getLogger().print("\tqueue-client-name: " + queueClientName);
+        if (null == queueClientName || queueClientName.isEmpty()) {
+            Kernel.getInstance().getLogger().print("\tWARNING! queue-client-name parameter is not set.");
+        }else{
+            Kernel.getInstance().getLogger().print("\tqueue-client-name: " + queueClientName);
+        }
     }
 
     @Override

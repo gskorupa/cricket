@@ -117,7 +117,7 @@ public class StandardResult implements Result {
         return fileExtension;
     }
 
-    public void setFileExtension(String fileExt) {
+    public void setFileExtension(String fileExtension) {
         this.fileExtension = fileExtension;
     }
 

@@ -46,7 +46,7 @@ public class StandardHttpAdapter extends HttpAdapter implements HttpAdapterIface
         setDateFormat(properties.get("date-format"));
         Kernel.getInstance().getLogger().print("\tdate-format=" + dateFormat);
         defaultContentType = properties.getOrDefault("content-type", "application/json");
-        Kernel.getInstance().getLogger().print("\tdate-format=" + dateFormat);
+        Kernel.getInstance().getLogger().print("\tcontent-type=" + defaultContentType);
     }
 
 }

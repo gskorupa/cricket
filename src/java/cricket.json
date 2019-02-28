@@ -344,7 +344,35 @@
                     "classFullName": "org.cricketmsf.out.dispatcher.QueueDispatcher",
                     "description": "using internal Queue",
                     "properties": {
-                        "event-types": "TEST"
+                        "event-types": "TEST",
+                        "queue-client-name": "QueueClient"
+                    }
+                },
+                "QueueClient": {
+                    "name": "QueueClient",
+                    "interfaceName": "QueueClientIface",
+                    "classFullName": "org.cricketmsf.out.queue.SimpleQueueClient",
+                    "description": "using internal Queue",
+                    "properties": {
+                        "queue-adapter-name": "Queue"
+                    }
+                },
+                "QueueSubscriber": {
+                    "name": "QueueSubscriber",
+                    "interfaceName": "QueueClientIface",
+                    "classFullName": "org.cricketmsf.in.queue.SimpleQueueSubscriber",
+                    "description": "using internal Queue",
+                    "properties": {
+                        "queue-adapter-name": "Queue",
+                        "channels": "TEST"
+                    }
+                },
+                "Queue": {
+                    "name": "Queue",
+                    "interfaceName": "QueueIface",
+                    "classFullName": "org.cricketmsf.out.queue.SimpleQueue",
+                    "description": "=",
+                    "properties": {
                     }
                 },
                 "WWWService": {

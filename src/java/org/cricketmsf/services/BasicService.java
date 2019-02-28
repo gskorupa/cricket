@@ -23,13 +23,14 @@ import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.EventException;
+import org.cricketmsf.exception.QueueException;
 import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.http.StandardResult;
+import org.cricketmsf.in.queue.SubscriberIface;
 import org.cricketmsf.in.scheduler.SchedulerIface;
-import org.cricketmsf.microsite.user.UserEvent;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
 import org.cricketmsf.out.file.FileReaderAdapterIface;
@@ -49,6 +50,7 @@ public class BasicService extends Kernel {
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
     FileReaderAdapterIface fileReader = null;
+    SubscriberIface queueSubscriber = null;
     // optional
     //HttpAdapterIface scriptingService = null;
     //ScriptingAdapterIface scriptingEngine = null;
@@ -62,6 +64,7 @@ public class BasicService extends Kernel {
         scheduler = (SchedulerIface) getRegistered("Scheduler");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("WWWService");
         fileReader = (FileReaderAdapterIface) getRegistered("FileReader");
+        queueSubscriber = (SubscriberIface) getRegistered("QueueSubscriber");
         // optional
         //scriptingService = (HttpAdapterIface) getRegistered("ScriptingService");
         //scriptingEngine = (ScriptingAdapterIface) getRegistered("ScriptingEngine");
@@ -75,6 +78,12 @@ public class BasicService extends Kernel {
         } catch (EventException ex) {
             ex.printStackTrace();
             shutdown();
+        }
+        try {
+            if(null!=queueSubscriber){
+                queueSubscriber.init();
+            }
+        } catch (QueueException ex) {
         }
         try {
             database.addTable("webcache", 100, false);
@@ -139,6 +148,7 @@ public class BasicService extends Kernel {
                 System.out.println(HttpAdapter.dumpRequest(request));
             }
             StandardResult result = new StandardResult();
+            result.setData("");
             Kernel.getInstance().dispatchEvent(new Event(this.getName(), "TEST", "", null, ""));
             return result;
         } catch (Exception e) {

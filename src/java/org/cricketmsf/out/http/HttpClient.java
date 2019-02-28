@@ -59,14 +59,15 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
     private final String TEXT = "text/plain";
     private final String XML = "text/xml";
 
-    protected int timeout = 0;
-    protected boolean ignoreCertificateCheck = false;
-    protected String endpointURL;
+    //protected int timeout = 0;
+    //protected boolean ignoreCertificateCheck = false;
+    //protected String endpointURL;
 
     public Result send(Request request) {
         return send(request, false);
     }
 
+    @Override
     public Result send(Request request, boolean transform) {
         StandardResult result = new StandardResult();
         if (request == null) {
@@ -215,10 +216,12 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
         return result;
     }
 
+    @Override
     protected String translateToHtml(Object data) {
         return translateToText(data);
     }
 
+    @Override
     protected String translateToText(Object data) {
         if (data != null) {
             return data.toString();
@@ -226,10 +229,12 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
         return "";
     }
 
+    @Override
     protected String translateToCsv(Object data) {
         return translateToCsv(data, null);
     }
 
+    @Override
     protected String translateToCsv(Object data, String header) {
         List list;
         if (data instanceof List) {
@@ -249,6 +254,7 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
         return sb.toString();
     }
 
+    @Override
     protected String translateToJson(Object data) {
         if (data instanceof String) {
             return (String) data;
@@ -321,26 +327,22 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
         return code == HttpURLConnection.HTTP_ACCEPTED || code == HttpURLConnection.HTTP_CREATED || code == HttpURLConnection.HTTP_OK;
     }
 
-    /*
-    public HashMap<String, String> getProperties() {
-        return properties;
-    }
-     */
-
     @Override
     public String getProperty(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return properties.get(name);
     }
 
-    @Override
-    public Map<String, String> getStatus(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+    
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        try{
+            super.loadProperties(properties, adapterName);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        /*
         endpointURL = properties.get("url");
-        properties.put("url", endpointURL);
+        this.properties.put("url", endpointURL);
         Kernel.getInstance().getLogger().print("\turl: " + endpointURL);
         try {
             properties.put("timeout", properties.getOrDefault("timeout", "120000"));
@@ -352,6 +354,7 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
         ignoreCertificateCheck = Boolean.parseBoolean(properties.getOrDefault("ignore-certificate-check", "false"));
         properties.put("ignore-certificate-check", "" + ignoreCertificateCheck);
         Kernel.getInstance().getLogger().print("\tignore-certificate-check: " + ignoreCertificateCheck);
+        */
     }
 
     @Override

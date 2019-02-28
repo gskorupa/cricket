@@ -36,7 +36,7 @@ public class OutboundAdapter implements OutboundAdapterIface {
     }
 
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
-        this.name = name;
+        this.name = adapterName;
         this.properties = (HashMap<String, String>) properties.clone();
         getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
     }
