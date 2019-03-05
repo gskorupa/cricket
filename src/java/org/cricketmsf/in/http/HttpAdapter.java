@@ -124,8 +124,8 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         new Thread(() -> {
             try {
                 doHandle(exchange);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException e) {
+                Kernel.getInstance().dispatchEvent(Event.logFinest(this.getClass().getSimpleName()+".handle()", e.getMessage()));
             }
         }).start();
     }
@@ -154,9 +154,6 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
 
         result.getHeaders().keySet().forEach((key) -> {
             List<String> values = result.getHeaders().get(key);
-            //for (int i = 0; i < values.size(); i++) {
-            //    headers.set(key, values.get(i));
-            //}
             values.forEach((value) -> {
                 headers.set(key, value);
             });
@@ -217,9 +214,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         if (responseData.length > 0) {
             exchange.sendResponseHeaders(result.getCode(), responseData.length);
             try (OutputStream os = exchange.getResponseBody()) {
-                //os.write("\r\n".getBytes("UTF-8"));
                 os.write(responseData);
-                //os.flush();
             }
         } else {
             exchange.sendResponseHeaders(result.getCode(), -1);

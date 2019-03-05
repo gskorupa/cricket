@@ -42,11 +42,14 @@ import java.util.Map;
  */
 public class ParameterFilter extends Filter {
 
-    private String parameterEncoding;
-    private long fileSizeLimit;
-
-    public ParameterFilter() {
+    private String parameterEncoding=null;
+    private long fileSizeLimit=0;
+    
+    public ParameterFilter(){
         super();
+    }
+
+    private void init() {
         setParameterEncoding((String) Kernel.getInstance().properties.getOrDefault("request-encoding", "UTF-8"));
         setFileSizeLimit((String) Kernel.getInstance().properties.getOrDefault("file.upload.maxsize", "1000000"));
     }
@@ -59,6 +62,9 @@ public class ParameterFilter extends Filter {
     @Override
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
+        if(null==parameterEncoding){
+            init();
+        }
         String method = exchange.getRequestMethod().toUpperCase();
         switch (method) {
             case "GET":

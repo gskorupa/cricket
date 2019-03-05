@@ -149,7 +149,7 @@ public class SiteAdministrationModule {
         } catch (ClassCastException e) {
         }
         if (backupFolder == null) {
-            Kernel.handle(Event.logSevere(this, "Kernel parameter \"backup-folder\" not configured"));
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "Kernel parameter \"backup-folder\" not configured"));
         }
         if (backupFolder != null && !backupFolder.endsWith(System.getProperty("file.separator"))) {
             backupFolder = backupFolder.concat(System.getProperty("file.separator"));

@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Cricket" default="all" basedir=".">
+<project name="Cricket" default="all" basedir="."
+    xmlns:if="ant:if"
+         xmlns:unless="ant:unless">
     <description>Builds, tests, and runs the project Cricket.</description>
     <target name="all" depends="dist">
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <property name="targetJava10" value="true"/>
-    <property name="mainVersion" value="1.3.0-alpha.1"/>
-    <property name="alternateJvm" value="/usr/lib/jvm/java-1.11.0-openjdk-amd64/bin/java"/>
+    <property name="targetJava10+" value="true"/>
+    <property name="mainVersion" value="1.3.0-alpha.2"/>
+    <property name="alternateJDK" value="/usr/lib/jvm/java-1.11.0-openjdk-amd64"/>
+    
     
     <condition property="version" value="${mainVersion}">
-        <equals arg1="${targetJava10}" arg2="true"/>
+        <equals arg1="${targetJava10+}" arg2="true"/>
     </condition>
     <condition property="version" value="${mainVersion}_8">
-        <equals arg1="${targetJava10}" arg2="false"/>
+        <equals arg1="${targetJava10+}" arg2="false"/>
     </condition>
     <condition property="targetJava8" value="true">
-        <equals arg1="${targetJava10}" arg2="false"/>
+        <equals arg1="${targetJava10+}" arg2="false"/>
     </condition>
     <property name="src" location="src/java"/>
     <property name="src-other" location="src/other"/>
@@ -78,7 +81,7 @@
         <!-- Compile the java code from ${src} into ${build} -->
         <copy file="${src}/BasicService-help.template" tofile="${src}/BasicService-help.txt" overwrite="true"/>
         <replace file="${src}/BasicService-help.txt" token="{{version}}" value="${version}" summary="true"/>
-        <javac 
+        <javac if:blank="${alternateJDK}"
             target="1.8" 
             source="1.8" 
             srcdir="${src}" 
@@ -86,6 +89,19 @@
             includeantruntime="false" 
             debug="on"
             classpathref="project-classpath">
+            <!--<compilerarg value="-Xlint:unchecked"/>-->
+        </javac>
+        <javac  unless:blank="${alternateJDK}"
+            executable="${alternateJDK}/bin/javac"
+            fork="true"
+            target="1.8" 
+            source="1.8" 
+            srcdir="${src}" 
+            destdir="${build}"
+            includeantruntime="false" 
+            debug="on"
+            classpathref="project-classpath"
+            verbose="true">
             <!--<compilerarg value="-Xlint:unchecked"/>-->
         </javac>
     </target>
@@ -140,7 +156,7 @@
         <copy todir="${dist}/work/config" file="${src}/cricket.json"/>
         <copy todir="${dist}" file="${src-other}/build.xml"/>
         <antcall target="copy10run">
-            <param name="targetJava10" value="${targetJava10}"/>
+            <param name="targetJava10+" value="${targetJava10+}"/>
         </antcall>
         <antcall target="copy8run">
             <param name="targetJava8" value="${targetJava8}"/>
@@ -151,7 +167,7 @@
         <zip basedir="dist" destfile="${artifactId}-microsite.zip"/>
     </target>
     
-    <target name="copy10run" if="${targetJava10}">
+    <target name="copy10run" if="${targetJava10+}">
         <copy tofile="${dist}/run.sh" file="${src-other}/run.sh"/>
         <copy file="Dockerfile.template" tofile="Dockerfile" overwrite="true"/>
     </target>
@@ -321,7 +337,7 @@
             <!--<compilerarg value="-Xlint:unchecked"/>-->
         </javac>
     </target>
-    <target name="run" depends="dist" if="${targetJava10}">
+    <target name="run" depends="dist" if="${targetJava10+}">
         <input message="Please enter service name to run [BasicService|Microsite]:" addproperty="service.name" defaultvalue="BasicService"/>
         <java jar="${dist}/${jar-name}" dir="${dist}" jvm="">
             <arg value="-c"/>

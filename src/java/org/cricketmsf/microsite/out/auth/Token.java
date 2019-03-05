@@ -24,7 +24,7 @@ import java.util.Base64;
  */
 public class Token {
 
-    private static final String PERMANENT_TOKEN_PREFIX = "==";
+    private static final String PERMANENT_TOKEN_PREFIX = "~~";
 
     private String uid;
     private long timestamp;
@@ -37,7 +37,11 @@ public class Token {
         timestamp = System.currentTimeMillis();
         setLifetime(lifetime, permanent);
         uid = userID;
-        token = Base64.getEncoder().encodeToString((uid + ":" + timestamp).getBytes());
+        //token = Base64.getEncoder().encodeToString((uid + ":" + timestamp).getBytes());
+        token = Base64.getUrlEncoder().encodeToString((uid + ":" + timestamp).getBytes());
+        while(token.endsWith("=")){
+            token=token.substring(0, token.length()-1);
+        }
         if (permanent) {
             token = PERMANENT_TOKEN_PREFIX + token;
         }

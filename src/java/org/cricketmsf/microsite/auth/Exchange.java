@@ -43,39 +43,27 @@ public class Exchange extends HttpExchange {
         attributes.put("parameters", httpExchange.getAttribute("parameters"));
         attributes.put("body", httpExchange.getAttribute("body"));
         headers = httpExchange.getRequestHeaders();
-        ArrayList<String> al = new ArrayList<>();
-        al.add(user.getUid());
-        headers.put("X-user-id", al);
-        List<String> roles = new ArrayList();
-        if (issuer != null) {
-            ArrayList<String> al2 = new ArrayList<>();
-            al2.add(issuer.getUid());
-            headers.put("X-issuer-id", al2);
-            roles.add("guest");
-        } else {
-            try {
-                roles = Arrays.asList(user.getRole().split(","));
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (null != user) {
+            ArrayList<String> al = new ArrayList<>();
+            al.add(user.getUid());
+            headers.put("X-user-id", al);
+            List<String> roles = new ArrayList();
+            if (issuer != null) {
+                ArrayList<String> al2 = new ArrayList<>();
+                al2.add(issuer.getUid());
+                headers.put("X-issuer-id", al2);
+                roles.add("guest");
+            } else {
+                try {
+                    roles = Arrays.asList(user.getRole().split(","));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
+            headers.put("X-user-role", roles);
         }
-        headers.put("X-user-role", roles);
     }
 
-    /*
-    private void setUserHeaders(Map<String,List<String>> headers) {
-        try {
-            if (headers.get("Authorization") != null) {
-                Map<String,List<String>> userHeaders = (Map<String,List<String>>)Kernel.getInstance().handleEvent(new Event("UserHeaders", "getUserHeaders", "", "", headers.get("Authorization").get(0)));
-                headers.put("x-user-id", userHeaders.get("x-user-id"));
-                headers.put("x-tenant-id", userHeaders.get("x-tenant-id"));
-                headers.put("x-user-role", userHeaders.get("x-user-role"));
-            }
-        }catch (Exception e) {
-            Logger.getLogger(Service.class.getName()).log(Level.SEVERE, null, e);
-        }
-    }
-     */
     @Override
     public Headers getRequestHeaders() {
         return (Headers) headers;
@@ -104,7 +92,9 @@ public class Exchange extends HttpExchange {
     @Override
     public void close() {
         httpExchange.close();
-        httpExchange=null;
+        //httpExchange = null;
+        headers=null;
+        attributes=null;
     }
 
     @Override

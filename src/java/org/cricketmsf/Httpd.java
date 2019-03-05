@@ -106,8 +106,8 @@ public class Httpd {
                     } else {
                         context = server.createContext(((HttpAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
                     }
-                    context.getFilters().add(service.getSecurityFilter());
                     context.getFilters().add(new ParameterFilter());
+                    context.getFilters().add(service.getSecurityFilter());
                 }
             }
         } catch (NoSuchAlgorithmException | IOException | KeyStoreException | CertificateException | UnrecoverableKeyException | KeyManagementException ex) {

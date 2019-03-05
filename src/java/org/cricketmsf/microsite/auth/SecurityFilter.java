@@ -34,7 +34,7 @@ import org.cricketmsf.microsite.user.User;
  */
 public class SecurityFilter extends Filter {
 
-    private static final String PERMANENT_TOKEN_PREFIX = "==";
+    private static final String PERMANENT_TOKEN_PREFIX = "~~";
 
     private String[] restrictedPost = null;
     private String[] restrictedPut = null;
@@ -172,89 +172,84 @@ public class SecurityFilter extends Filter {
     public SecurityFilterResult checkRequest(HttpExchange exchange) {
 
         String path = exchange.getRequestURI().getPath();
-        Kernel.getInstance().dispatchEvent(Event.logInfo(getClass().getSimpleName(), "PATH=" + path));
         boolean authorizationNotRequired = true;
         try {
             authorizationNotRequired = !isRestrictedPath(exchange.getRequestMethod(), path);
         } catch (Exception e) {
-            Kernel.getInstance().dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
         }
-
         Map parameters = (Map) exchange.getAttribute("parameters");
-
         SecurityFilterResult result = new SecurityFilterResult();
+        result.user = null;
+        result.issuer = null;
+
         if (authorizationNotRequired) {
             String inParamsToken = null;
             try {
                 if (parameters != null) {
                     inParamsToken = (String) parameters.get("tid");
+                    if (null != inParamsToken) {
+                        if (inParamsToken.endsWith("/")) {
+                            inParamsToken = inParamsToken.substring(0, inParamsToken.length() - 1);
+                        }
+                        result.user = getUser(inParamsToken, true);
+                        result.issuer = getIssuer(inParamsToken);
+                        //Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "FOUND IP TOKEN " + inParamsToken + " FOR " + result.user.getUid() + " by " + result.issuer.getUid()));
+                    }
                 }
             } catch (NullPointerException e) {
-            }
-            if (inParamsToken != null) {
-                try {
-                    if (inParamsToken.endsWith("/")) {
-                        inParamsToken = inParamsToken.substring(0, inParamsToken.length() - 1);
-                    }
-                    result.user = getUser(inParamsToken, true);
-                    result.issuer = getIssuer(inParamsToken);
-                } catch (AuthException e) {
-                    Kernel.getInstance().dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), e.getMessage())); // eg. expired token
-                }
+            } catch (AuthException e) {
+                Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "AUTH PROBLEM " + e.getCode() + " " + e.getMessage())); // eg. expired token
             }
             result.code = 200;
             result.message = "";
             return result;
         }
+
         String tokenID = exchange.getRequestHeaders().getFirst("Authentication");
         User user = null;
         User issuer = null;
         if (tokenID == null || tokenID.isEmpty()) {
             try {
-                if (null!= parameters) {
+                if (null != parameters) {
                     tokenID = (String) parameters.get("tid");
+                    if (tokenID.endsWith("/")) {
+                        tokenID = tokenID.substring(0, tokenID.length() - 1);
+                    }
                 }
-                if (null == tokenID) {
-                    tokenID = exchange.getRequestURI().getQuery().substring(4);
-                    int pos = tokenID.indexOf("&");
-                    if (pos > 0) {
-                        tokenID = tokenID.substring(0, pos);
+                if (null == tokenID || tokenID.isEmpty()) {
+                    int idx = exchange.getRequestURI().getQuery().indexOf("tid=");
+                    if (idx >= 0) {
+                        tokenID = exchange.getRequestURI().getQuery().substring(idx + 4);
+                        int pos = tokenID.indexOf("&");
+                        if (pos > 0) {
+                            tokenID = tokenID.substring(0, pos);
+                        }
                     }
                 }
                 if (tokenID != null && tokenID.endsWith("/")) {
                     tokenID = tokenID.substring(0, tokenID.length() - 1);
                 }
-                user = getUser(tokenID, tokenID.startsWith(PERMANENT_TOKEN_PREFIX));
+            } catch (Exception e) {
+                Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
+            }
+        }
+        try {
+            user = getUser(tokenID, tokenID.startsWith(PERMANENT_TOKEN_PREFIX));
+            if ("public".equalsIgnoreCase(user.getUid())) {
                 issuer = getIssuer(tokenID);
-            } catch (Exception e) {
-                Kernel.getInstance().dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), e.getMessage()));
             }
-        } else {
-            try {
-                user = getUser(tokenID, tokenID.startsWith(PERMANENT_TOKEN_PREFIX));
-                if ("public".equalsIgnoreCase(user.getUid())) {
-                    issuer = getIssuer(tokenID);
-                }
-            } catch (AuthException e) {
-                result.code = 403;
-                result.message = e.getMessage();
-                return result;
-            } catch (Exception e) {
-                result.code = 403;
-                result.message = e.getMessage();
-                return result;
-            }
-        }
-        if (user == null) {
-            result.code = 403; // FORBIDDEN // in case of timeout 401 UNAUTHORIZED should be send
-            result.message = "request blocked by security filter\r\n";
-            Kernel.getInstance().dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), "not authorized " + path));
+        } catch (Exception e) {
+            result.code = 403;
+            result.message = e.getMessage() + " - request blocked by security filter\r\n";
+            //Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "not authorized " + path));
             return result;
-        } else {
-            result.user = user;
-            result.issuer = issuer;
-            result.code = 200;
         }
+
+        result.user = user;
+        result.issuer = issuer;
+        result.code = 200;
+
         return result;
     }
 
