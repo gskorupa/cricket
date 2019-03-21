@@ -55,13 +55,14 @@ public class DefaultRuleEngine extends OutboundAdapter implements Adapter, RuleE
     @Override
     public ArrayList<Document> processDocumentsList(List<Document> documents, List<String> roles) {
         ArrayList<Document> result = new ArrayList<>();
+        if(documents!=null){
         for (Document document : documents) {
-            if (roles.contains("redactor") || roles.contains("redactor." + document.getLanguage())) {
+            if (null != roles && (roles.contains("redactor") || roles.contains("redactor." + document.getLanguage()))) {
                 result.add(document.setRights(Document.READWRITE));
-            }else{
+            } else {
                 result.add(document.setRights(Document.READONLY));
             }
-        }
+        }}
         return result;
     }
 

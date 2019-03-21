@@ -55,8 +55,13 @@ public class SimpleQueueClient extends OutboundAdapter implements QueueClientIfa
     }
 
     @Override
-    public Object show(String channel, String key) throws QueueException {
+    public Object getCopy(String channel, String key) throws QueueException {
         return getQueue().show(channel, key);
+    }
+    
+    @Override
+    public Object getCopy(String channel) throws QueueException {
+        return getQueue().show(channel);
     }
 
     @Override
@@ -77,6 +82,11 @@ public class SimpleQueueClient extends OutboundAdapter implements QueueClientIfa
     @Override
     public void purge(String channel) throws QueueException {
         getQueue().purge(channel);
+    }
+    
+    @Override
+    public long getQueueSize(String channel) throws QueueException {
+        return getQueue().getSize(channel);
     }
     
     @Override

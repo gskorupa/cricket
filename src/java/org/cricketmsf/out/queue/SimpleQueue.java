@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.exception.QueueException;
+import org.cricketmsf.exception.QueueException; 
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.OutboundAdapterIface;
 import org.cricketmsf.in.queue.QueueCallbackIface;
@@ -33,7 +33,7 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
     private HashMap<String, ArrayList<QueueCallbackIface>> subscribers;
     private HashMap<String, HashMap<String, Object>> channels;
     private HashMap<String, ArrayList<Object>> listChannels;
-    private boolean notifyAll = false;
+    private int notificationMode = NOTIFY_ALL;
 
     @Override
     public void add(String channel, String key, Object value) throws QueueException {
@@ -63,6 +63,18 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
             return null;
         }
         return channels.get(channel).get(key);
+    }
+    
+    @Override
+    public Object show(String channel) throws QueueException {
+        if (!listChannels.containsKey(channel)) {
+            return null;
+        }
+        try {
+            return listChannels.get(channel).get(0);
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
     }
 
     @Override
@@ -131,8 +143,11 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
         if(subscribers.get(channel).isEmpty()){
             return false;
         }
+        if(notificationMode == NOTIFY_NONE){
+            return false;
+        }
         if (subscribers.containsKey(channel)) {
-            if (notifyAll) {
+            if (notificationMode == NOTIFY_ALL) {
                 subscribers.get(channel).forEach((QueueCallbackIface client) -> {
                     client.call(value);
                 });
@@ -151,5 +166,37 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
         subscribers = new HashMap<>();
         channels = new HashMap<>();
         listChannels = new HashMap<>();
+    }
+
+    @Override
+    public long getSize(String channel) throws QueueException {
+        final int LIST = 1;
+        final int MAP = 2;
+        int type = 0;
+        if (listChannels.containsKey(channel)) {
+            type=LIST;
+        }else if (channels.containsKey(channel)) {
+            type=MAP;
+        }else{
+            throw new QueueException(QueueException.QUEUE_NOT_DEFINED);
+        }
+        if(type==LIST){
+            return listChannels.get(channel).size();
+        }else{
+            return channels.get(channel).size();
+        }
+    }
+
+    @Override
+    public void setSubscribtionMode(int newMode) throws QueueException {
+        if(newMode<0 || newMode >2){
+            throw new QueueException(QueueException.NOT_IMPLEMENTED);
+        }
+        notificationMode = newMode;
+    }
+
+    @Override
+    public int getSubscribtionMode() {
+        return notificationMode;
     }
 }

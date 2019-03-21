@@ -42,10 +42,10 @@ import java.util.Map;
  */
 public class ParameterFilter extends Filter {
 
-    private String parameterEncoding=null;
-    private long fileSizeLimit=0;
-    
-    public ParameterFilter(){
+    private String parameterEncoding = null;
+    private long fileSizeLimit = 0;
+
+    public ParameterFilter() {
         super();
     }
 
@@ -62,7 +62,7 @@ public class ParameterFilter extends Filter {
     @Override
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
-        if(null==parameterEncoding){
+        if (null == parameterEncoding) {
             init();
         }
         String method = exchange.getRequestMethod().toUpperCase();
@@ -117,6 +117,9 @@ public class ParameterFilter extends Filter {
             } else {
                 contentType = contentTypeHeader;
             }
+        } else {
+            //throw new IOException("no conent type header received");
+            contentType = "";
         }
 
         @SuppressWarnings("unchecked")
@@ -128,8 +131,13 @@ public class ParameterFilter extends Filter {
         //System.out.println("ParameterFilter: " + contentType);
         switch (contentType.toLowerCase()) {
             case "multipart/form-data":
+            //case "application/x-www-form-urlencoded": // default algorithm will be used
                 //parameters = parseForm(contentTypeHeader.substring(30), br);
-                parameters = parseForm(contentTypeHeader.substring(30), exchange.getRequestBody());
+                try {
+                    parameters = parseForm(contentTypeHeader.substring(contentType.length() + 11), exchange.getRequestBody());
+                } catch (IndexOutOfBoundsException e) {
+                    throw new IOException("request content inconsistent with declared content type");
+                }
                 break;
             case "text/plain":
             case "text/csv":
@@ -154,7 +162,9 @@ public class ParameterFilter extends Filter {
                 while ((query = br.readLine()) != null) {
                     list = parseQuery(query);
                     for (RequestParameter param : list) {
-                        if (parameters.containsKey(param.name)) {
+                        if (null == param.value) {
+                            parameters.put("&&&data", param.name);
+                        } else if (parameters.containsKey(param.name)) {
                             Object obj = parameters.get(param.name);
                             if (obj instanceof List<?>) {
                                 List<String> values = (List<String>) obj;

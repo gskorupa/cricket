@@ -26,10 +26,11 @@ public interface QueueClientIface {
 
     public void publish(String channel, String key, Object value) throws QueueException;
     public void publish(String channel, Object value) throws QueueException;
-    public Object show(String channel, String key) throws QueueException;
+    public Object getCopy(String channel, String key) throws QueueException;
+    public Object getCopy(String channel) throws QueueException;
     public Object get(String channel, String key) throws QueueException;
     public void push(String channel, Object value) throws QueueException;
     public Object pop(String channel) throws QueueException;
     public void purge(String channel) throws QueueException;
-    
+    public long getQueueSize(String channel) throws QueueException;
 }

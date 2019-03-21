@@ -24,12 +24,20 @@ import org.cricketmsf.in.queue.QueueCallbackIface;
  */
 public interface QueueIface {
     
+    public static int NOTIFY_NONE = 0;
+    public static int NOTIFY_FIRST = 1;
+    public static int NOTIFY_ALL = 2;
+    
     public void add(String channel, String key, Object value) throws QueueException;
     public void push(String channel, Object value) throws QueueException;
     public Object show(String channel, String key) throws QueueException;
+    public Object show(String channel) throws QueueException;
     public Object get(String channel, String key) throws QueueException;
     public Object pop(String channel) throws QueueException;
     public void subscribe(String channel, QueueCallbackIface callback) throws QueueException;
     public void unsubscribe(String channel, QueueCallbackIface callback) throws QueueException;
     public void purge(String channel) throws QueueException;
+    public long getSize(String channel) throws QueueException;
+    public void setSubscribtionMode(int newMode) throws QueueException;
+    public int getSubscribtionMode();
 }
