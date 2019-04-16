@@ -18,6 +18,7 @@ package org.cricketmsf;
 import org.cricketmsf.scheduler.Delay;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 import javax.json.bind.Jsonb;
@@ -44,7 +45,7 @@ public class Event implements EventIface {
     public static final String LOG_INFO = "INFO";
     public static final String LOG_WARNING = "WARNING";
     public static final String LOG_SEVERE = "SEVERE";
-    
+
     public static final String TYPE_DEFAULT = "T_DEFAULT";
 
     private long id = -1;
@@ -61,7 +62,7 @@ public class Event implements EventIface {
     private long rootEventId = -1;
     private RequestObject request = null;
     private boolean cyclic = false;
-    
+
     private boolean iamtheroot = true;
 
     /**
@@ -176,7 +177,6 @@ public class Event implements EventIface {
         return e;
     }
 
-    
     /**
      * Creates an Event used for logging (category LOG)
      *
@@ -305,8 +305,7 @@ public class Event implements EventIface {
                 Event.LOG_FINEST,
                 null,
                 message);
-    }    
-    
+    }
 
     /**
      * Creates an Event used for logging (category LOG) of SEVERE level
@@ -316,7 +315,7 @@ public class Event implements EventIface {
      * @return created Event
      */
     public static Event logSevere(Object source, String message) {
-        
+
         return logSevere(source.getClass().getSimpleName(), message);
     }
 
@@ -494,8 +493,8 @@ public class Event implements EventIface {
     public String getTimePoint() {
         return timePoint;
     }
-    
-    public boolean isFutureEvent(){
+
+    public boolean isFutureEvent() {
         return getTimePoint() != null;
     }
 
@@ -505,9 +504,9 @@ public class Event implements EventIface {
     public void setTimePoint(String timePoint) {
         this.timePoint = timePoint;
     }
-    
-    public void reschedule(){
-        if(isCyclic()){
+
+    public void reschedule() {
+        if (isCyclic()) {
             calculateTimePoint();
         }
     }
@@ -519,8 +518,8 @@ public class Event implements EventIface {
             return;
         }
         long delay;
-        setCyclic(dateDefinition.startsWith("*") || dateDefinition.indexOf("|*")>0);
-        if (dateDefinition.startsWith("+")||dateDefinition.startsWith("*")) {
+        setCyclic(dateDefinition.startsWith("*") || dateDefinition.indexOf("|*") > 0);
+        if (dateDefinition.startsWith("+") || dateDefinition.startsWith("*")) {
             try {
                 delay = Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1));
             } catch (NumberFormatException e) {
@@ -546,9 +545,9 @@ public class Event implements EventIface {
                     setCalculatedTimePoint(-1);
                     return;
             }
-            if(isCyclic()){
+            if (isCyclic()) {
                 setCalculatedTimePoint(multiplicator * delay + System.currentTimeMillis());
-            }else{
+            } else {
                 setCalculatedTimePoint(multiplicator * delay + getCreatedAt());
             }
         } else {
@@ -659,8 +658,23 @@ public class Event implements EventIface {
 
     public String getRequestParameter(String name) {
         String value = null;
-        value = (String)getRequest().parameters.get(name);
+        try {
+            value = (String) getRequest().parameters.get(name);
+        } catch (ClassCastException e) {
+            value = (String) ((ArrayList) getRequest().parameters.get(name)).get(0);
+        }
         return value;
+    }
+    
+    public ArrayList getRequestParameterValues(String name) {
+        ArrayList values = null;
+        try {
+            values = (ArrayList) getRequest().parameters.get(name);
+        } catch (ClassCastException e) {
+            values = new ArrayList();
+            values.add((String)getRequest().parameters.get(name));
+        }
+        return values;
     }
 
     /**
@@ -669,9 +683,9 @@ public class Event implements EventIface {
     public RequestObject getRequest() {
         return request;
     }
-    
+
     @Override
-    public Event clone(){
+    public Event clone() {
         Event clon = new Event();
         clon.name = name;
         clon.calculatedTimePoint = calculatedTimePoint;
@@ -718,31 +732,31 @@ public class Event implements EventIface {
         this.name = name;
         //return this;
     }
-    
-    public Event putName(String name){
-        this.name=name;
+
+    public Event putName(String name) {
+        this.name = name;
         return this;
     }
-    
-    public String toJson(){
+
+    public String toJson() {
         Jsonb jsonb = JsonbBuilder.create();
         return jsonb.toJson(this);
     }
-    
-    public static Event fromJson(String json){
+
+    public static Event fromJson(String json) {
         Jsonb jsonb = JsonbBuilder.create();
         return jsonb.fromJson(json, Event.class);
     }
 
     @Override
-    public String[] getCategories() throws EventException{
-        
-        if(getClass() != Event.class){
-            throw new EventException(EventException.MUST_OVERRIDE_REGISTER, getClass()+" does not override getCategories() method");
+    public String[] getCategories() throws EventException {
+
+        if (getClass() != Event.class) {
+            throw new EventException(EventException.MUST_OVERRIDE_REGISTER, getClass() + " does not override getCategories() method");
         }
         String[] categories = {
-            CATEGORY_LOG,CATEGORY_HTTP_LOG,CATEGORY_GENERIC,
-            CATEGORY_HTTP,LOG_ALL,LOG_FINEST,LOG_FINE,LOG_FINER,LOG_INFO,LOG_WARNING,LOG_SEVERE
+            CATEGORY_LOG, CATEGORY_HTTP_LOG, CATEGORY_GENERIC,
+            CATEGORY_HTTP, LOG_ALL, LOG_FINEST, LOG_FINE, LOG_FINER, LOG_INFO, LOG_WARNING, LOG_SEVERE
         };
         return categories;
     }
