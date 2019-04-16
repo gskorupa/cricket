@@ -6,17 +6,17 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
         <title>Cricket &micro;Site</title>
-        <link rel="icon" href="resources/cricket-icon.png">
+        <link rel="icon" href="$wwwTheme/resources/cricket-icon.png">
         <!-- Bootstrap -->
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
         <!-- Custom styles -->
-        <link rel="stylesheet" href="/theme1/css/styles.css">
+        <link rel="stylesheet" href="/$wwwTheme/css/style.css">
         <!-- Global Site Tag (gtag.js) - Google Analytics - below-->
     </head>
     <body>
-        <app_navigation></app_navigation>
-        <app_main></app_main>
-        <app_footer></app_footer>
+        <app-navigation></app-navigation>
+        <app-main></app-main>
+        <app-footer></app-footer>
     <!-- SCRIPTS -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <!-- Riot scripts we need -->
@@ -35,12 +35,15 @@
     <script data-src="/tags/cs_article.tag" type="riot/tag"></script>
     <script data-src="/tags/cs_article2.tag" type="riot/tag"></script>
     <script data-src="/tags/cs_article3.tag" type="riot/tag"></script>
-    <script data-src="/theme1/components/app_main.tag" type="riot/tag"></script>
-    <script data-src="/theme1/components/app_404.tag" type="riot/tag"></script>
-    <script data-src="/theme1/components/app_home.tag" type="riot/tag"></script>
-    <script data-src="/theme1/components/app_articles.tag" type="riot/tag"></script>
-    <script data-src="/theme1/components/app_navigation.tag" type="riot/tag"></script>
-    <script data-src="/theme1/components/app_footer.tag" type="riot/tag"></script>
+    <script data-src="/$wwwTheme/components/app-main.tag" type="riot/tag"></script>
+    <script data-src="/$wwwTheme/components/app-404.tag" type="riot/tag"></script>
+    <script data-src="/$wwwTheme/components/app-home.tag" type="riot/tag"></script>
+    <script data-src="/$wwwTheme/components/app-articles.tag" type="riot/tag"></script>
+    <script data-src="/$wwwTheme/components/app-homelist.tag" type="riot/tag"></script>
+    <script data-src="/$wwwTheme/components/app-artlist.tag" type="riot/tag"></script>
+    <script data-src="/$wwwTheme/components/app-navigation.tag" type="riot/tag"></script>
+    <script data-src="/$wwwTheme/components/app-footer.tag" type="riot/tag"></script>
+    <script data-src="/$wwwTheme/components/app-search.tag" type="riot/tag"></script>
     <script>
         <!-- dynamic configuration. Look at cricket.json - service propertises -->
         app.url = "$serviceurl"
@@ -51,6 +54,7 @@
             app.language = 'en'
         }
         riot.mount('*');
+        route.base('#!');
         route.start(true);
     </script>
 </body>

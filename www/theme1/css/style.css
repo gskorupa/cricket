@@ -2,6 +2,14 @@
 body {
   padding-top: 3.5rem;
 }
+
+.jumbotron {
+}
+footer {
+    border-top: 1px solid darkgrey;
+    padding-top: 1rem;
+}
+
 .top-spacing {
     margin-top: 1rem;
 }
@@ -13,9 +21,16 @@ article.homelist header h1 {
     font-size: x-large;
     font-weight: bold;
 }
+article.list{
+    margin-top: 1rem;
+}
+article.main{
+    margin-top: 1rem;
+}
+article.folder{
+    margin-top: 1rem;
+}
 article.list header h1 {
     font-size: x-large;
     font-weight: bold;
-}
-.jumbotron {
 }

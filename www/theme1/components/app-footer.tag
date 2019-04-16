@@ -1,6 +1,5 @@
-<app_footer>
+<app-footer>
     <footer class="container">
-        <hr>
         <p>&copy; { app.config.copyright }</p>
     </footer>
-</app_footer>
+</app-footer>

@@ -8,7 +8,7 @@
             "service": "org.cricketmsf.services.Microsite",
             "properties": {
                 "host": "0.0.0.0",
-                "port": "8080",
+                "port": "7070",
                 "ssl": "false",
                 "keystore": "./work/data/cricket_publickeystore.jks",
                 "keystore-password": "cricket15$#17",
@@ -23,11 +23,12 @@
                 "restricted-resources": "DELETE@/api/auth GET@/api/user PUT@/api/user DELETE@/api/user *@/api/cm *@/api/alert *@/api/system",
                 "file.upload.maxsize": "1000000",
                 "request-encoding": "UTF-8",
-                "serviceurl": "http://localhost:8080",
+                "serviceurl": "http://localhost:7070",
                 "servicename": "",
                  "default-language": "en",
                 "SRVC_NAME_ENV_VARIABLE": "CRICKET_SERVICE_NAME",
-                "SRVC_URL_ENV_VARIABLE": "CRICKET_URL"
+                "SRVC_URL_ENV_VARIABLE": "CRICKET_URL",
+                "www-theme": "theme1"
             },
             "adapters": {
                 "StatusService": {
@@ -275,7 +276,7 @@
             "service": "org.cricketmsf.services.BasicService",
             "properties": {
                 "host": "0.0.0.0",
-                "port": "8080",
+                "port": "7070",
                 "ssl": "false",
                 "keystore": "./work/data/cricket_publickeystore.jks",
                 "keystore-password": "cricket15$#17",

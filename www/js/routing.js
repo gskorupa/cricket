@@ -6,21 +6,28 @@
 route(function (id) {
     if (app.languages.indexOf(id) > -1) {
         app.language = id
-        globalEvents.trigger('language')
+        globalEvents.trigger('pageselected')
         riot.mount('raw')
         riot.update()
         return
     }
-
-    if (app.docPath) {
-        app.previousPath = app.docPath
+    if(app.currentId){
+        app.previousId = app.currentId        
+    }else{
+        app.previousId = ''
     }
-    if (id.startsWith('articles')) {
-        app.currentPage = 'articles'
-        app.docPath = id.substring(9).replace(/,/g, "/");
-    } else {
+    app.currentId = id
+
+    var idx=id.indexOf(',')
+    if(idx>-1){
+        app.docPath = id.substring(idx+1).replace(/,/g, "/")
+        app.currentPage = id.substring(0,idx)
+    }else{
+        app.docPath = id
         app.currentPage = id
     }
+    
     globalEvents.trigger('pageselected')
+    
     riot.update()
 })

@@ -1,11 +1,11 @@
 {"en": [
     {
         "name": "Home",
-        "link": "#"
+        "link": "#!"
     },
     {
         "name": "About",
-        "link": "#articles,about"
+        "link": "#!articles,about"
     },
     {
         "name": "Language",
@@ -13,15 +13,15 @@
         "options": [
             {
                 "name": "English",
-                "link": "#en"
+                "link": "#!en"
             },
             {
                 "name": "French",
-                "link": "#fr"
+                "link": "#!fr"
             },
             {
                 "name": "Polish",
-                "link": "#pl"
+                "link": "#!pl"
             }
         ]
     }

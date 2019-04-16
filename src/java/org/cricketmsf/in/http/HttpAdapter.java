@@ -124,7 +124,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         new Thread(() -> {
             try {
                 doHandle(exchange);
-            } catch (IOException e) {
+            } catch (NullPointerException|IOException e) {
                 Kernel.getInstance().dispatchEvent(Event.logFinest(this.getClass().getSimpleName()+".handle()", e.getMessage()));
             }
         }).start();
@@ -357,6 +357,10 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             result.setCode(SC_INTERNAL_SERVER_ERROR);
             result.setMessage("handler method error");
             result.setFileExtension(null);
+        }
+        if(null==result){
+            result=new StandardResult("null result returned by the service");
+            result.setCode(HttpAdapter.SC_INTERNAL_SERVER_ERROR);
         }
         return result;
     }

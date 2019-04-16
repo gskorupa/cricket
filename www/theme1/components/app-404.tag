@@ -1,4 +1,4 @@
-<app_404>
+<app-404>
     <div class="container top-spacing">
         <div class="row">
             <div class="col-md-12">
@@ -8,7 +8,7 @@
         </div>
     </div>
     <script charset="UTF8">
-        self.text = {
+        this.text = {
             "notfound": {
                 "en": "Fle not found",
                 "fr": "File not found",
@@ -16,4 +16,4 @@
             }
         }
     </script>
-</app_404>
+</app-404>
