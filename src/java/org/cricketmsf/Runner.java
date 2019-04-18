@@ -299,7 +299,8 @@ public class Runner {
                 configSet.forceProperty(forcedProps.get(i));
             }
         }
-
+        
+        configSet.joinProps();
         return configSet;
     }
 

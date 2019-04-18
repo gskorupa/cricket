@@ -139,4 +139,10 @@ public class ConfigSet {
         addConfiguration(config);
     }
 
+    public void joinProps(){
+        for(int i=0; i<services.size();i++){
+            services.get(i).joinProps();
+        }
+        
+    }
 }

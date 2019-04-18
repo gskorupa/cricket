@@ -16,6 +16,8 @@
 package org.cricketmsf.config;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  *
@@ -100,4 +102,36 @@ public class AdapterConfiguration {
         this.name = name;
     }
     
+    public void joinProps(){
+        HashMap<String,String> newProperties = new HashMap<>();
+        Iterator<Map.Entry<String, String>> it = properties.entrySet().iterator();
+        String key;
+        String value;
+        String tmpValue;
+        String tmpKey;
+        int i;
+        while (it.hasNext()) {
+            Map.Entry<String, String> pair = it.next();
+            tmpKey=pair.getKey();
+            if(tmpKey.endsWith(".0")){
+                value = properties.get(tmpKey);
+                key = tmpKey.substring(0,tmpKey.length()-2);
+                i=1;
+                tmpValue=properties.get(key+"."+i);
+                while(tmpValue != null){
+                    value=value.concat(tmpValue);
+                    i++;
+                    tmpValue=properties.get(key+"."+i);
+                }
+                newProperties.put(key, value);
+            }else if(tmpKey.indexOf(".")>0){
+                // do nothing
+            }else if(tmpKey.indexOf(".")==0){
+                // do nothing - property name starting from "."
+            }else{
+                newProperties.put(tmpKey, properties.get(tmpKey));
+            }
+        }
+        properties = newProperties;
+    }
 }

@@ -172,5 +172,8 @@ public class Configuration {
         this.properties = properties;
     }
     
+    public void joinProps(){
+        adapters.forEach((k,v) -> v.joinProps());
+    }
     
 }
