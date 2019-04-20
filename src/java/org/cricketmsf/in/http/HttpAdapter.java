@@ -126,6 +126,8 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 doHandle(exchange);
             } catch (NullPointerException|IOException e) {
                 Kernel.getInstance().dispatchEvent(Event.logFinest(this.getClass().getSimpleName()+".handle()", e.getMessage()));
+            } catch(Exception e){
+                e.printStackTrace();
             }
         }).start();
     }
@@ -221,7 +223,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         }
         sendLogEvent(exchange, responseData.length);
         exchange.close();
-    }
+}
 
     private String getMimeType(String fileExt) {
         switch (fileExt.toLowerCase()) {

@@ -66,6 +66,7 @@ public class ParameterFilter extends Filter {
             init();
         }
         String method = exchange.getRequestMethod().toUpperCase();
+        try{
         switch (method) {
             case "GET":
                 exchange.setAttribute("parameters", parseGetParameters(exchange));
@@ -91,6 +92,9 @@ public class ParameterFilter extends Filter {
                 break;
             default:
                 exchange.setAttribute("parameters", parseGetParameters(exchange));
+        }
+        }catch(Exception e){
+            e.printStackTrace();
         }
         chain.doFilter(exchange);
     }
@@ -143,6 +147,7 @@ public class ParameterFilter extends Filter {
             case "text/csv":
             case "application/json":
             case "text/xml":
+            case "application/x-www-form-urlencoded":
                 isr = new InputStreamReader(exchange.getRequestBody(), "utf-8");
                 br = new BufferedReader(isr);
                 while ((query = br.readLine()) != null) {
@@ -156,6 +161,7 @@ public class ParameterFilter extends Filter {
                 isr.close();
                 break;
             default:
+                /*
                 isr = new InputStreamReader(exchange.getRequestBody(), "utf-8");
                 br = new BufferedReader(isr);
                 ArrayList<RequestParameter> list;
@@ -181,6 +187,7 @@ public class ParameterFilter extends Filter {
                     }
                 }
                 isr.close();
+                */
         }
         return parameters;
     }
