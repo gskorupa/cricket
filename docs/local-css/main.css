@@ -1,0 +1,43 @@
+.row-centered {
+    text-align:center;
+}
+.col-centered {
+    display:inline-block;
+    float:none;
+    /* reset the text-align */
+    text-align:left;
+    /* inline-block space fix */
+    margin-right:-4px;
+}
+.intro {
+    color: darkslategray; 
+    padding-top: 20px; 
+    padding-bottom: 10px;
+}
+.feature{
+     color: darkslategray; 
+     padding-top: 10px; 
+     padding-bottom: 10px;
+}
+.footer{
+     color: darkslategray; 
+     margin-top: 0px; 
+     border-top-style: solid;
+     border-top-color: darkslategray;
+     border-top-width: 1px;
+}
+.version{
+    margin-top: 0px; 
+    margin-bottom: 0px;
+    color: darkslategray;
+}
+p {
+    margin-top: 10px; 
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+pre {
+    background: #eeeeee;
+    padding: 10px 10px 10px 10px;
+}
