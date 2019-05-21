@@ -147,7 +147,6 @@ public class ParameterFilter extends Filter {
             case "text/csv":
             case "application/json":
             case "text/xml":
-            case "application/x-www-form-urlencoded":
                 isr = new InputStreamReader(exchange.getRequestBody(), "utf-8");
                 br = new BufferedReader(isr);
                 while ((query = br.readLine()) != null) {
@@ -158,6 +157,33 @@ public class ParameterFilter extends Filter {
                 parameters.put("data", content.toString()); //TODO: remove "data" parameter
                 parameters.put("&&&data", content.toString());
                 //exchange.setAttribute("body", content.toString());
+                isr.close();
+                break;
+            case "application/x-www-form-urlencoded":
+                isr = new InputStreamReader(exchange.getRequestBody(), "utf-8");
+                br = new BufferedReader(isr);
+                ArrayList<RequestParameter> list;
+                while ((query = br.readLine()) != null) {
+                    list = parseQuery(query);
+                    for (RequestParameter param : list) {
+                        if (null == param.value) {
+                            parameters.put("&&&data", param.name);
+                        } else if (parameters.containsKey(param.name)) {
+                            Object obj = parameters.get(param.name);
+                            if (obj instanceof List<?>) {
+                                List<String> values = (List<String>) obj;
+                                values.add(param.value);
+                            } else if (obj instanceof String) {
+                                List<String> values = new ArrayList<>();
+                                values.add((String) obj);
+                                values.add(param.value);
+                                parameters.put(param.name, values);
+                            }
+                        } else {
+                            parameters.put(param.name, param.value);
+                        }
+                    }
+                }
                 isr.close();
                 break;
             default:

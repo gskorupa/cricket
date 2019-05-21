@@ -130,9 +130,9 @@ public class Httpd {
 
     public void stop() {
         if (isSsl()) {
-            sserver.stop(5);
+            sserver.stop(Kernel.getInstance().getShutdownDelay());
         } else {
-            server.stop(5);
+            server.stop(Kernel.getInstance().getShutdownDelay());
         }
     }
 

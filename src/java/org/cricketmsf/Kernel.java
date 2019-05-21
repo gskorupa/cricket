@@ -78,6 +78,7 @@ public abstract class Kernel {
     private Httpd httpd;
     private boolean httpHandlerLoaded = false;
     private boolean inboundAdaptersLoaded = false;
+    private int shutdownDelay = 5;
 
     private static long eventSeed = System.currentTimeMillis();
 
@@ -274,6 +275,12 @@ public abstract class Kernel {
             e.printStackTrace();
         }
         getLogger().print("\tport=" + getPort());
+        try {
+            setShutdownDelay(Integer.parseInt(config.getProperty("shutdown-delay", "2")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        getLogger().print("\tshutdown-delay=" + getShutdownDelay());
         setSecurityFilter(config.getProperty("filter"));
         getLogger().print("\tfilter=" + getSecurityFilter().getClass().getName());
         setCorsHeaders(config.getProperty("cors"));
@@ -721,6 +728,20 @@ public abstract class Kernel {
      */
     public void setInitialized(boolean initialized) {
         this.initialized = initialized;
+    }
+
+    /**
+     * @return the shutdownDelay
+     */
+    public int getShutdownDelay() {
+        return shutdownDelay;
+    }
+
+    /**
+     * @param shutdownDelay the shutdownDelay to set
+     */
+    public void setShutdownDelay(int shutdownDelay) {
+        this.shutdownDelay = shutdownDelay;
     }
 
 }
