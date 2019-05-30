@@ -16,6 +16,9 @@
                     <li class="nav-item"  data-toggle="collapse" data-target="#navbarNavDropdown" onclick="document.location = '#tags';"`if={app.user.status == 'logged-in' && app.user.role.includes('redactor')}>
                         <a class="nav-link" href="#tags">{ app.texts.app_header.tags[app.language] }</a>
                     </li>
+                    <li class="nav-item"  data-toggle="collapse" data-target="#navbarNavDropdown" onclick="document.location = '#system';"`if={app.user.status == 'logged-in' && app.user.role.includes('redactor')}>
+                        <a class="nav-link" href="#system">{ app.texts.app_header.system[app.language] }</a>
+                    </li>
                     <li class="nav-item"  data-toggle="collapse" data-target="#navbarNavDropdown" onclick="document.location = '#logout';"if={app.user.status == 'logged-in'}>
                         <a class="nav-link" href="#logout">{ app.texts.app_header.logout[app.language] }</a>
                     </li>

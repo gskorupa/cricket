@@ -35,11 +35,12 @@ public class GdprStandardUserTest {
     @Test
     public void checkValidTokenOK() {
         // Given
+        int port = service.getPort();
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
-                .setUrl("http://localhost:8080/api/auth/"+sessionToken);
+                .setUrl("http://localhost:"+port+"/api/auth/"+sessionToken);
         // When
         StandardResult response = (StandardResult) client.send(req, false);
         // Then
@@ -49,11 +50,12 @@ public class GdprStandardUserTest {
     @Test
     public void checkFakeTokenNOK() {
         // Given
+        int port = service.getPort();
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
-                .setUrl("http://localhost:8080/api/auth/faketoken");
+                .setUrl("http://localhost:"+port+"/api/auth/faketoken");
         // When
         StandardResult response = (StandardResult) client.send(req, false);
         // Then
@@ -63,12 +65,13 @@ public class GdprStandardUserTest {
     @Test
     public void readingPersonalDataOK() {
         // Given
+        int port = service.getPort();
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
                 .setProperty("Authentication", sessionToken)
-                .setUrl("http://localhost:8080/api/user/"+LOGIN);
+                .setUrl("http://localhost:"+port+"/api/user/"+LOGIN);
         // When
         StandardResult response = (StandardResult) client.send(req, false);
         // Then
@@ -85,12 +88,13 @@ public class GdprStandardUserTest {
     @Test
     public void readingOtherUserPersonalDataNOK() {
         //Given
+        int port = service.getPort();
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
                 .setProperty("Authentication", sessionToken)
-                .setUrl("http://localhost:8080/api/user/admin");
+                .setUrl("http://localhost:"+port+"/api/user/admin");
         // When
         StandardResult response = (StandardResult) client.send(req);
         // Then
@@ -101,15 +105,17 @@ public class GdprStandardUserTest {
     public void updatingPersonalDataOK() {
         String newEmail="X@xx.yy.zz";
         //Given
+        int port = service.getPort();
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("PUT")
+                .setProperty("Content-Type", "application/x-www-form-urlencoded")
                 .setProperty("Accept", "application/json")
                 .setProperty("Authentication", sessionToken)
-                .setUrl("http://localhost:8080/api/user/"+LOGIN)
+                .setUrl("http://localhost:"+port+"/api/user/"+LOGIN)
                 .setData("email="+newEmail);
         // When
-        StandardResult response = (StandardResult) client.send(req);
+        StandardResult response = (StandardResult) client.send(req,true);
         // Then
         Assert.assertEquals(200, response.getCode());
         String data = null;
@@ -118,7 +124,6 @@ public class GdprStandardUserTest {
         } catch (UnsupportedEncodingException ex) {
             Assert.fail(ex.getMessage());
         }
-        //System.out.println(data);
         HashMap userData = (HashMap)JsonReader.jsonToJava(data);
         Assert.assertEquals("expecting "+newEmail,newEmail,userData.get("email"));
     }
@@ -127,12 +132,14 @@ public class GdprStandardUserTest {
     public void updatingOtherUserPersonalDataNOK() {
         String newEmail="X@xx.yy.zz";
         //Given
+        int port = service.getPort();
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("PUT")
                 .setProperty("Accept", "application/json")
+                .setProperty("Content-Type", "application/x-www-form-urlencoded")
                 .setProperty("Authentication", sessionToken)
-                .setUrl("http://localhost:8080/api/user/admin")
+                .setUrl("http://localhost:"+port+"/api/user/admin")
                 .setData("email="+newEmail);
         // When
         StandardResult response = (StandardResult) client.send(req);
@@ -144,12 +151,14 @@ public class GdprStandardUserTest {
     public void y_unregisteringUserOK() {
         String newEmail="X@xx.yy.zz";
         //Given
+        int port = service.getPort();
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("PUT")
                 .setProperty("Accept", "application/json")
+                .setProperty("Content-Type", "application/x-www-form-urlencoded")
                 .setProperty("Authentication", sessionToken)
-                .setUrl("http://localhost:8080/api/user/"+LOGIN)
+                .setUrl("http://localhost:"+port+"/api/user/"+LOGIN)
                 .setData("unregisterRequested=true");
         // When
         StandardResult response = (StandardResult) client.send(req);
@@ -169,12 +178,14 @@ public class GdprStandardUserTest {
     @Test
     public void deletingOtherUserPersonalDataNOK() {
         //Given
+        int port = service.getPort();
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("DELETE")
                 .setProperty("Accept", "application/json")
+                .setProperty("Content-Type", "application/x-www-form-urlencoded")
                 .setProperty("Authentication", sessionToken)
-                .setUrl("http://localhost:8080/api/user/admin")
+                .setUrl("http://localhost:"+port+"/api/user/admin")
                 .setData("aa=zz");
         // When
         StandardResult response = (StandardResult) client.send(req);
@@ -185,12 +196,14 @@ public class GdprStandardUserTest {
     @Test
     public void z_deletingPersonalDataNOK() {
         //Given
+        int port = service.getPort();
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("DELETE")
                 .setProperty("Accept", "application/json")
+                .setProperty("Content-Type", "application/x-www-form-urlencoded")
                 .setProperty("Authentication", sessionToken)
-                .setUrl("http://localhost:8080/api/user/"+LOGIN)
+                .setUrl("http://localhost:"+port+"/api/user/"+LOGIN)
                 .setData("aa=zz");
         // When
         StandardResult response = (StandardResult) client.send(req);
@@ -203,6 +216,7 @@ public class GdprStandardUserTest {
      */
     private static String getSessionToken() {
         // Given
+        int port = service.getPort();
         String login = LOGIN;
         String password = PASSWORD;
         String credentials = Base64.getEncoder().encodeToString((login + ":" + password).getBytes());
@@ -212,7 +226,7 @@ public class GdprStandardUserTest {
                 .setProperty("Accept", "text/plain")
                 .setProperty("Authentication", "Basic " + credentials)
                 .setData("p=ignotethis") /*data must be added to POST or PUT requests */
-                .setUrl("http://localhost:8080/api/auth");
+                .setUrl("http://localhost:"+port+"/api/auth");
         // When
         StandardResult response = (StandardResult) client.send(req);
         // Then

@@ -193,6 +193,7 @@ public class UserBusinessLogic {
                 result.setCode(HttpAdapter.SC_NOT_FOUND);
                 return result;
             }
+            System.out.println(">>>>>>>>DUMP: "+HttpAdapter.dumpRequest(request));
             String email = event.getRequestParameter("email");
             String type = event.getRequestParameter("type");
             String role = event.getRequestParameter("role");

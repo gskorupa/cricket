@@ -106,6 +106,7 @@ public class Httpd {
                     } else {
                         context = server.createContext(((HttpAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
                     }
+                    context.getFilters().add(new MaintenanceFilter());
                     context.getFilters().add(new ParameterFilter());
                     context.getFilters().add(service.getSecurityFilter());
                 }

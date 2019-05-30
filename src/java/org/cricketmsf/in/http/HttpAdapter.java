@@ -68,6 +68,8 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
 
     public final static int SC_INTERNAL_SERVER_ERROR = 500;
     public final static int SC_NOT_IMPLEMENTED = 501;
+    public final static int SC_UNAVAILABLE = 503;
+    
 
     public final static int SERVICE_MODE = 0;
     public final static int WEBSITE_MODE = 1;

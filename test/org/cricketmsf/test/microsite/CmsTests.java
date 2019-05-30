@@ -47,10 +47,11 @@ public class CmsTests {
     public void a_creatingDocumentOK() {
         String responseData = "";
         int responseCode = -1;
-        String sessionToken = getSessionToken("admin", "cricket", "http://localhost:8080/api/auth");
+        int port = service.getPort();
+        String sessionToken = getSessionToken("admin", "cricket", "http://localhost:"+port+"/api/auth");
         System.out.println("@sessionToken=" + sessionToken);
         // Given
-        String apiEndpoint = "http://localhost:8080/api/cm";
+        String apiEndpoint = "http://localhost:"+port+"/api/cm";
         
         List<NameValuePair> docParameters = new ArrayList<NameValuePair>();
         docParameters.add(new BasicNameValuePair("uid", "/doc1"));
@@ -92,13 +93,14 @@ public class CmsTests {
     @Test
     public void b_readingNotPublishedDocumentNOK() {
         // Given
+        int port = service.getPort();
         String documentUID = "/doc1";
         String documentLanguage = "en";
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
-                .setUrl("https://signomix.signocom.com/api/cs" + documentUID + "?language=" + documentLanguage);
+                .setUrl("http://localhost:"+port+"/api/cs" + documentUID + "?language=" + documentLanguage);
         // When
         StandardResult response = (StandardResult) client.send(req, false);
         // Then
@@ -110,10 +112,11 @@ public class CmsTests {
     public void c_publishingDocumentOK() {
         String responseData = "";
         int responseCode = -1;
-        String sessionToken = getSessionToken("admin", "cricket", "http://localhost:8080/api/auth");
+        int port = service.getPort();
+        String sessionToken = getSessionToken("admin", "cricket", "http://localhost:"+port+"/api/auth");
         System.out.println("@sessionToken=" + sessionToken);
         // Given
-        String apiEndpoint = "http://localhost:8080/api/cm/doc1";
+        String apiEndpoint = "http://localhost:"+port+"/api/cm/doc1";
         List<NameValuePair> docParameters = new ArrayList<NameValuePair>();
         docParameters.add(new BasicNameValuePair("uid", "/doc1"));
         docParameters.add(new BasicNameValuePair("language", "en"));
@@ -153,13 +156,14 @@ public class CmsTests {
     @Test
     public void d_readingPublishedDocumentOK() {
         // Given
+        int port = service.getPort();
         String documentUID = "/doc1";
         String documentLanguage = "en";
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
-                .setUrl("http://localhost:8080/api/cs" + documentUID + "?language=" + documentLanguage);
+                .setUrl("http://localhost:"+port+"/api/cs" + documentUID + "?language=" + documentLanguage);
         // When
         StandardResult response = (StandardResult) client.send(req, false);
         // Then
@@ -182,13 +186,14 @@ public class CmsTests {
     @Test
     public void e_gettingTaggedDocumentsOK() {
         // Given
+        int port = service.getPort();
         String tagToGet = "tagA";
         String documentLanguage = "en";
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
-                .setUrl("http://localhost:8080/api/cs?path=/&language=" + documentLanguage + "&tag=" + tagToGet + "&path=/");
+                .setUrl("http://localhost:"+port+"/api/cs?path=/&language=" + documentLanguage + "&tag=" + tagToGet + "&path=/");
         // When
         StandardResult response = (StandardResult) client.send(req, false);
         // Then
@@ -221,13 +226,14 @@ public class CmsTests {
     @Test
     public void f_gettingTagsOK() {
         // Given
+        int port = service.getPort();
         String tagToGet = "tagA";
         String documentLanguage = "en";
         HttpClient client = new HttpClient().setCertificateCheck(false);
         Request req = new Request()
                 .setMethod("GET")
                 .setProperty("Accept", "application/json")
-                .setUrl("http://localhost:8080/api/cs?tagsonly=true");
+                .setUrl("http://localhost:"+port+"/api/cs?tagsonly=true");
         // When
         StandardResult response = (StandardResult) client.send(req, false);
         // Then

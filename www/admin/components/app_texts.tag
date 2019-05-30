@@ -27,6 +27,11 @@
                 "fr": "tags",
                 "pl": "znaczniki"
             },
+            "system": {
+                "en": "system",
+                "fr": "system",
+                "pl": "system"
+            },
             "login": {
                 "en": "Sign In",
                 "fr": "Sign In",
@@ -93,6 +98,29 @@
             }
         }
         
+     app.texts.app_system_form = {
+            "adapter": {
+                "en": "Database adapter",
+                "fr": "Database adapter",
+                "pl": "Database adapter"
+            },
+            "query": {
+                "en": "Query",
+                "fr": "Query",
+                "pl": "Query"
+            },
+            "save": {
+                "en": "Save",
+                "fr": "Enregistrer",
+                "pl": "Zapisz"
+            },
+            "cancel": {
+                "en": "Cancel",
+                "fr": "Annuler",
+                "pl": "Porzuć"
+            }
+    }
+    
     app.texts.app_users = {
         "title": {
         "en": "users",

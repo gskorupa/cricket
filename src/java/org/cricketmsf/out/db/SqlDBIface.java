@@ -54,4 +54,13 @@ public interface SqlDBIface extends KeyValueDBIface{
      */
     public List search(String tableName, String statement, String[] parameters) throws KeyValueDBException;
     
+    /**
+     * Executes database query
+     * 
+     * @param query
+     * @return query result
+     * @throws SQLException 
+     */
+    public List execute(String query) throws SQLException;
+    
 }

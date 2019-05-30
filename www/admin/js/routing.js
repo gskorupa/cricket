@@ -40,6 +40,14 @@ route(function(id){
             }
             //globalEvents.trigger('pageselected:tags');
             break;
+        case "system":
+            if(app.user.role.includes('admin')){
+                app.currentPage = "system";
+            }else{
+                app.currentPage = "main";
+            }
+            //globalEvents.trigger('pageselected:tags');
+            break;
         case "users":
             if(app.user.role.includes('admin')){
                 app.currentPage = "users";

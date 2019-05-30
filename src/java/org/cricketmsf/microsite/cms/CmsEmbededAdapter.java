@@ -72,7 +72,9 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     String indexFileName = "index.html";
 
     private void initRuleEngine() {
-        if(ruleEngineName==null) return;
+        if (ruleEngineName == null) {
+            return;
+        }
         try {
             ruleEngine = (RuleEngineIface) Kernel.getInstance().getAdaptersMap().get(ruleEngineName);
         } catch (Exception e) {
@@ -223,7 +225,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
 
     @Override
-    public void addDocument(Document doc, List<String>roles) throws CmsException {
+    public void addDocument(Document doc, List<String> roles) throws CmsException {
         if (doc.getLanguage() == null || !supportedLanguages.contains(doc.getLanguage())) {
             throw new CmsException(CmsException.UNSUPPORTED_LANGUAGE);
         }
@@ -247,7 +249,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
 
     @Override
-    public void addDocument(Map parameters, String userID, List<String>roles) throws CmsException {
+    public void addDocument(Map parameters, String userID, List<String> roles) throws CmsException {
         Document doc = new Document();
         try {
             //System.out.println("SETTING UID:" + (String) parameters.get("uid"));
@@ -306,7 +308,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
 
     @Override
-    public void updateDocument(Document doc, List<String>roles) throws CmsException {
+    public void updateDocument(Document doc, List<String> roles) throws CmsException {
 
         //TODO: when status changes from wip to published then doc should be removed from wip table
         if (doc.getLanguage() == null || !supportedLanguages.contains(doc.getLanguage())) {
@@ -345,7 +347,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
 
     @Override
-    public void updateDocument(String uid, String language, Map parameters, List<String>roles) throws CmsException {
+    public void updateDocument(String uid, String language, Map parameters, List<String> roles) throws CmsException {
         boolean statusChanged = false;
         Document doc = getDocument(uid, language);
         if (doc == null) {
@@ -394,7 +396,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 }
                 doc.setStatus(newStatus);
             }
-            
+
             //if (doc.getType().equals(Document.FILE)) {
             if (Document.FILE.equals(doc.getType())) {
                 String fileLocation = (String) parameters.getOrDefault("file", "");
@@ -446,7 +448,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     }
 
     @Override
-    public void removeDocument(String uid, List<String>roles) throws CmsException {
+    public void removeDocument(String uid, List<String> roles) throws CmsException {
         boolean removed = false;
         Document doc = getDocument(uid, null, null, null);
         ruleEngine.checkDocument(doc, roles);
@@ -519,7 +521,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             throw new CmsException(CmsException.HELPER_EXCEPTION, ex.getMessage());
         }
         //TODO: check access rules
-        list = (ArrayList)ruleEngine.processDocumentsList(list, roles);
+        list = (ArrayList) ruleEngine.processDocumentsList(list, roles);
         return list;
     }
 
@@ -663,6 +665,15 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 modificationPoint = dt1.parse(modificationString);
             } catch (ParseException e) {
                 e.printStackTrace();
+            }
+            if (null == modificationPoint) {
+                modificationString = modificationString.substring(modificationString.indexOf(",") + 2);
+                dt1 = new SimpleDateFormat("d MMM yyyy HH:mm:ss z");
+                try {
+                    modificationPoint = dt1.parse(modificationString);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
             }
         }
         FileObject fo = null;

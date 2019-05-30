@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.microsite;
 
+import java.sql.SQLException;
 import org.cricketmsf.Event;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.StandardResult;
@@ -34,6 +35,7 @@ import org.cricketmsf.microsite.user.HashMaker;
 import org.cricketmsf.microsite.user.User;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
+import org.cricketmsf.out.db.SqlDBIface;
 
 /**
  *
@@ -99,7 +101,7 @@ public class SiteAdministrationModule {
                     break;
                 case "shutdown":
                     result.setCode(HttpAdapter.SC_ACCEPTED);
-                    result.setData("the service will be stopped within few seconds");
+                    result.setData("the service will be stopped within a few seconds");
                     Kernel.getInstance().dispatchEvent(
                             new Event(
                                     this.getClass().getSimpleName(),
@@ -112,6 +114,34 @@ public class SiteAdministrationModule {
                     break;
                 default:
                     result.setCode(HttpAdapter.SC_BAD_REQUEST);
+            }
+        } else if ("POST".equalsIgnoreCase(method)) {
+            switch (moduleName.toLowerCase()) {
+                case "database":
+                    String adapterName = (String) request.parameters.getOrDefault("adapter", "");
+                    String query = (String) request.parameters.get("query");
+                    if (null != query) {
+                        SqlDBIface adapter = (SqlDBIface) Kernel.getInstance().getAdaptersMap().get(adapterName);
+                        try {
+                            result.setData(adapter.execute(query));
+                        } catch (SQLException ex) {
+                            result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                            result.setData(ex.getMessage());
+                        }
+                    } else {
+                        result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                        result.setData("query not set");
+                    }
+                    break;
+                case "status":
+                    String newStatus = (String) request.parameters.getOrDefault("status", "");
+                    if ("online".equalsIgnoreCase(newStatus)) {
+                        Kernel.getInstance().setStatus(Kernel.ONLINE);
+                    } else if ("maintenance".equalsIgnoreCase(newStatus)) {
+                        Kernel.getInstance().setStatus(Kernel.MAINTENANCE);
+                    }
+                    result = getServiceInfo();
+                    break;
             }
         } else {
             result.setCode(HttpAdapter.SC_METHOD_NOT_ALLOWED);

@@ -48,6 +48,11 @@ import org.cricketmsf.out.log.StandardLogger;
  * @author Grzegorz Skorupa
  */
 public abstract class Kernel {
+    
+    public final static int STARTING = 0;
+    public final static int ONLINE = 1;
+    public final static int MAINTENANCE = 2;
+    public final static int SHUTDOWN = 3;
 
     // emergency LOGGER
     private static final Logger LOGGER = Logger.getLogger(org.cricketmsf.Kernel.class.getName());
@@ -90,6 +95,8 @@ public abstract class Kernel {
     private long startedAt = 0;
     private boolean started = false;
     private boolean initialized = false;
+    
+    private int status = STARTING;
 
     public Kernel() {
     }
@@ -489,6 +496,7 @@ public abstract class Kernel {
             runFinalTasks();
             Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
             started = true;
+            setStatus(ONLINE);
         } else {
             getLogger().print("Couldn't find any http request hook method. Exiting ...");
             System.exit(MIN_PRIORITY);
@@ -525,7 +533,7 @@ public abstract class Kernel {
     }
 
     public void shutdown() {
-
+        setStatus(SHUTDOWN);
         getLogger().print("Shutting down ...");
         for (Map.Entry<String, Object> adapterEntry : getAdaptersMap().entrySet()) {
             if (adapterEntry.getValue() instanceof org.cricketmsf.in.InboundAdapter) {
@@ -680,7 +688,7 @@ public abstract class Kernel {
      */
     public Map reportStatus() {
         HashMap status = new HashMap();
-
+        status.put("status", getStatusName());
         status.put("name", getName());
         status.put("id", getId());
         status.put("uuid", getUuid().toString());
@@ -742,6 +750,34 @@ public abstract class Kernel {
      */
     public void setShutdownDelay(int shutdownDelay) {
         this.shutdownDelay = shutdownDelay;
+    }
+
+    /**
+     * @return the status
+     */
+    public int getStatus() {
+        return status;
+    }
+    
+    public String getStatusName(){
+        switch (getStatus()) {
+            case ONLINE:
+                return "online";
+            case STARTING:
+                return "starting";
+            case MAINTENANCE:
+                return "maintenance";
+            case SHUTDOWN:
+                return "shutdown";
+        }
+        return "";
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(int status) {
+        this.status = status;
     }
 
 }

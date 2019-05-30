@@ -221,9 +221,8 @@ function sendFormData(formData, method, url, token, callback, eventListener, err
             } else {
                 eventListener.trigger(getDataCallEventName(true));
             }
-        }else if (this.readyState == 4 && (this.status == 401 || this.status == 403)) {
-//            app.log('sendFormData.onreadystatechange: '+this.readyState+' '+this.status);
-            eventListener.trigger(getDataCallEventName(false,null,this.status));
+        }else if (this.readyState == 4 && (this.status >= 400)) {
+            eventListener.trigger(getDataCallEventName(false,null,this.status)+' '+this.responseText);
         } else{
 //            app.log('sendFormData.onreadystatechange: '+this.readyState+' '+this.status)
         }

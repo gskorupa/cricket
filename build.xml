@@ -8,7 +8,7 @@
     </target>
     <!-- set global properties for this build -->
     <property name="targetJava10+" value="false"/>
-    <property name="mainVersion" value="1.3.0-alpha.8"/>
+    <property name="mainVersion" value="1.3.0-alpha.9"/>
     <property name="version" value="${mainVersion}"/>
     <!-- default JDK == 1.12 -->
     <!-- alternate JDK compiler will be used if declared (not empty) -->
@@ -392,6 +392,7 @@
             <formatter type="xml"/>
             <test name="org.cricketmsf.test.microsite.GdprStandardUserTest" haltonfailure="no" todir="${reports}"/>
             <test name="org.cricketmsf.test.microsite.CmsTests" haltonfailure="no" todir="${reports}"/>
+            <test name="org.cricketmsf.test.microsite.SystemTests" haltonfailure="no" todir="${reports}"/>
         </junit>
         <junitreport todir="${reports}">
             <fileset dir="${reports}">

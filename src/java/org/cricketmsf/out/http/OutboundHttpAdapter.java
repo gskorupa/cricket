@@ -21,8 +21,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -310,6 +312,32 @@ public class OutboundHttpAdapter extends OutboundAdapter implements OutboundHttp
             //TODO: serialize to JSON?
             return "";
         }
+    }
+    
+    protected String encode(Object data){
+        if(!(data instanceof String)){
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this, "encoded data is not String"));
+            return "";
+        }
+        if(null==data){
+            return "";
+        }
+        String input = (String)data;
+        StringBuilder sb = new StringBuilder();
+        String[] params = input.split("&");
+        String[] param;
+        try{
+        for(int i=0; i<params.length; i++){
+            param=params[i].split("=");
+            sb.append(param[0]).append("=").append(URLEncoder.encode(param[1], "UTF-8"));
+            if(i<params.length-1){
+                sb.append("&");
+            }
+        }
+        }catch(UnsupportedEncodingException e){
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this, e.getMessage()));
+        }
+        return sb.toString();
     }
 
     private SSLSocketFactory getTrustAllSocketFactory() throws NoSuchAlgorithmException, KeyManagementException {

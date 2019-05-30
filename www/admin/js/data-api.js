@@ -199,7 +199,7 @@ function sendFormData(formData, method, url, token, callback, eventListener, err
     }
     oReq.onloadend = function(oEvent){
         app.log('sendFormData.onloadend: '+oEvent)
-        //app.log(oEvent)
+        app.log(oEvent)
         app.requests--;
         eventListener.trigger(getDataCallEventName(true), oEvent);
     }
@@ -219,9 +219,8 @@ function sendFormData(formData, method, url, token, callback, eventListener, err
             } else {
                 eventListener.trigger(getDataCallEventName(true));
             }
-        }else if (this.readyState == 4 && (this.status == 401 || this.status == 403)) {
-//            app.log('sendFormData.onreadystatechange: '+this.readyState+' '+this.status);
-            eventListener.trigger(getDataCallEventName(false,null,this.status));
+        }else if (this.readyState == 4 && (this.status >= 400)) {
+            eventListener.trigger(getDataCallEventName(false,null,this.status)+' '+this.responseText);
         } else{
 //            app.log('sendFormData.onreadystatechange: '+this.readyState+' '+this.status)
         }
@@ -309,11 +308,6 @@ function deleteConditional(data, url, token, callback, eventBus, successEventNam
                     eventBus.trigger(successEventName);
                 }
             } else {
-                /*if (errorEventName == null) {
-                    eventBus.trigger(defaultErrorEventName + this.status);
-                } else {
-                    eventBus.trigger(errorEventName);
-                }*/
                 var tmpErrName
                 if (errorEventName == null) {
                     tmpErrName=defaultErrorEventName + this.status

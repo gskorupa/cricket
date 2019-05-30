@@ -42,7 +42,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.util.HashMap;
-import java.util.Map;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.out.OutboundAdapterIface;
 
@@ -58,6 +57,7 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
     private final String HTML = "text/html";
     private final String TEXT = "text/plain";
     private final String XML = "text/xml";
+    private final String X_WWW_FORM = "application/x-www-form-urlencoded";
 
     //protected int timeout = 0;
     //protected boolean ignoreCertificateCheck = false;
@@ -88,6 +88,9 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
                     break;
                 case HTML:
                     requestData = translateToHtml(request.data);
+                    break;
+                case X_WWW_FORM:
+                    requestData = encode(request.data);
                     break;
                 default:
                     Kernel.getInstance().dispatchEvent(

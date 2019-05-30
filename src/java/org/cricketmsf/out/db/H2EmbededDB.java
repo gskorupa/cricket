@@ -19,7 +19,9 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,9 +71,9 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         Kernel.getLogger().print("\tencrypted=" + isEncrypted());
         setFilePassword(properties.get("filePassword"));
         Kernel.getLogger().print("\tfilePassword=" + getFilePassword());
-        setAutocommit(properties.getOrDefault("autocommit","true"));
+        setAutocommit(properties.getOrDefault("autocommit", "true"));
         Kernel.getLogger().print("\tautocommit=" + autocommit);
-        setIgnorecase("true".equalsIgnoreCase(properties.getOrDefault("ignorecase","false")));
+        setIgnorecase("true".equalsIgnoreCase(properties.getOrDefault("ignorecase", "false")));
         Kernel.getLogger().print("\tignorecase=" + ignorecase);
         try {
             start();
@@ -132,11 +134,11 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     @Override
     public void start() throws KeyValueDBException {
         String connectString = "jdbc:h2:" + getLocation();
-        if(true){
-            connectString=connectString.concat(";IGNORECASE=TRUE");
+        if (true) {
+            connectString = connectString.concat(";IGNORECASE=TRUE");
         }
         if (isEncrypted()) {
-            cp = JdbcConnectionPool.create(connectString+";CIPHER=AES", getUserName(), getFilePassword()+" "+getPassword());
+            cp = JdbcConnectionPool.create(connectString + ";CIPHER=AES", getUserName(), getFilePassword() + " " + getPassword());
         } else {
             cp = JdbcConnectionPool.create(connectString, getUserName(), getPassword());
         }
@@ -379,7 +381,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
             throw new KeyValueDBException(KeyValueDBException.CANNOT_DELETE, "backup error - " + e.getMessage());
         }
     }
-    
+
     @Override
     public void restore(String fileLocation) throws KeyValueDBException {
         //String query = "backup to '" + fileLocation + "'";
@@ -472,5 +474,46 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
      */
     public void setIgnorecase(boolean ignorecase) {
         this.ignorecase = ignorecase;
+    }
+
+    @Override
+    public List execute(String query) throws SQLException {
+        ArrayList<List> result = new ArrayList<>();
+        try (Connection conn = cp.getConnection()) {
+            ArrayList row;
+            Statement stmt = conn.createStatement();
+            boolean browsable = stmt.execute(query);
+            if (browsable) {
+                ArrayList<Integer> types = new ArrayList<>();
+                ResultSet rs = stmt.getResultSet();
+                ResultSetMetaData rsm = rs.getMetaData();
+                int numberOfColumns = 1;
+                row = new ArrayList();
+                boolean end =false;
+                while (!end) {
+                    try {
+                        row.add(rsm.getColumnLabel(numberOfColumns));
+                        types.add(rsm.getColumnType(numberOfColumns));
+                        numberOfColumns++;
+                    } catch (Exception e) {
+                        end=true;
+                    }
+                }
+                result.add(row);
+                numberOfColumns--;
+                while (rs.next()) {
+                    row = new ArrayList();
+                    for (int i = 1; i <= numberOfColumns; i++) {
+                        row.add("" + rs.getObject(i));
+                    }
+                    result.add(row);
+                }
+            } else {
+                row = new ArrayList();
+                row.add("Count: " + stmt.getUpdateCount());
+                result.add(row);
+            }
+            return result;
+        }
     }
 }
