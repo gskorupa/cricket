@@ -42,6 +42,8 @@ import java.util.Map;
  */
 public class ParameterFilter extends Filter {
 
+    public final static char CR = (char) 0x0D;
+    public final static char LF = (char) 0x0A;
     private String parameterEncoding = null;
     private long fileSizeLimit = 0;
 
@@ -66,34 +68,34 @@ public class ParameterFilter extends Filter {
             init();
         }
         String method = exchange.getRequestMethod().toUpperCase();
-        try{
-        switch (method) {
-            case "GET":
-                exchange.setAttribute("parameters", parseGetParameters(exchange));
-                break;
-            case "POST":
-            case "PUT":
-            case "DELETE":
-                try {
-                    Map<String, Object> tmp;
-                    tmp = parsePostParameters(exchange);
-                    if (tmp.containsKey("&&&data")) {
-                        exchange.setAttribute("body", tmp.get("&&&data"));
-                        tmp.remove("&&&data");
+        try {
+            switch (method) {
+                case "GET":
+                    exchange.setAttribute("parameters", parseGetParameters(exchange));
+                    break;
+                case "POST":
+                case "PUT":
+                case "DELETE":
+                    try {
+                        Map<String, Object> tmp;
+                        tmp = parsePostParameters(exchange);
+                        if (tmp.containsKey("&&&data")) {
+                            exchange.setAttribute("body", tmp.get("&&&data"));
+                            tmp.remove("&&&data");
+                        }
+                        exchange.setAttribute("parameters", tmp);
+                    } catch (IOException e) {
+                        exchange.sendResponseHeaders(400, e.getMessage().length());
+                        exchange.getResponseBody().write(e.getMessage().getBytes());
+                        exchange.getResponseBody().close();
+                        exchange.close();
+                        return;
                     }
-                    exchange.setAttribute("parameters", tmp);
-                } catch (IOException e) {
-                    exchange.sendResponseHeaders(400, e.getMessage().length());
-                    exchange.getResponseBody().write(e.getMessage().getBytes());
-                    exchange.getResponseBody().close();
-                    exchange.close();
-                    return;
-                }
-                break;
-            default:
-                exchange.setAttribute("parameters", parseGetParameters(exchange));
-        }
-        }catch(Exception e){
+                    break;
+                default:
+                    exchange.setAttribute("parameters", parseGetParameters(exchange));
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
         chain.doFilter(exchange);
@@ -132,11 +134,8 @@ public class ParameterFilter extends Filter {
         BufferedReader br;
         String query;
         StringBuilder content = new StringBuilder();
-        //System.out.println("ParameterFilter: " + contentType);
         switch (contentType.toLowerCase()) {
             case "multipart/form-data":
-            //case "application/x-www-form-urlencoded": // default algorithm will be used
-                //parameters = parseForm(contentTypeHeader.substring(30), br);
                 try {
                     parameters = parseForm(contentTypeHeader.substring(contentType.length() + 11), exchange.getRequestBody());
                 } catch (IndexOutOfBoundsException e) {
@@ -153,10 +152,8 @@ public class ParameterFilter extends Filter {
                     content.append(query);
                     content.append("\r\n");
                 }
-                //System.out.println(content.toString());
                 parameters.put("data", content.toString()); //TODO: remove "data" parameter
                 parameters.put("&&&data", content.toString());
-                //exchange.setAttribute("body", content.toString());
                 isr.close();
                 break;
             case "application/x-www-form-urlencoded":
@@ -187,7 +184,7 @@ public class ParameterFilter extends Filter {
                 isr.close();
                 break;
             default:
-                /*
+            /*
                 isr = new InputStreamReader(exchange.getRequestBody(), "utf-8");
                 br = new BufferedReader(isr);
                 ArrayList<RequestParameter> list;
@@ -213,7 +210,7 @@ public class ParameterFilter extends Filter {
                     }
                 }
                 isr.close();
-                */
+             */
         }
         return parameters;
     }
@@ -231,7 +228,7 @@ public class ParameterFilter extends Filter {
         String fileName;
         FileParameter fileParameter;
         line = readLine(br);
-        //System.out.println(line);
+
         try {
             do {
                 //first line is boundary
@@ -251,7 +248,7 @@ public class ParameterFilter extends Filter {
                     }
                     parameters.put(paramName, value);
                 } else {
-                    fileParameter = readFileContent(br, startLine + "\r\n", endLine + "\r\n", getFileSizeLimit(), fileName);
+                    fileParameter = readFileContent(br, startLine + CR + LF, endLine + CR + LF, getFileSizeLimit(), fileName);
                     parameters.put(paramName, contentType + ";" + fileParameter.fileSize + ";" + fileParameter.fileLocation);
                     line = fileParameter.nextLine;
                 }
@@ -271,10 +268,11 @@ public class ParameterFilter extends Filter {
         int pos = 0;
         long totalSize = 0;
         int b;
-        String line;
+        String line, sline;
         boolean startLineFound = false;
+        boolean endLineFound = false;
         int targetPos;
-        int bytesMoved;
+        int bytesToMove;
         Path filePath;
         OutputStream output;
         boolean writingStarted = false;
@@ -294,76 +292,77 @@ public class ParameterFilter extends Filter {
         output = Files.newOutputStream(filePath);
         do {
             b = is.read();
-            if (b != -1) {
-                buffer[pos] = (byte) b;
-                pos++;
-                if (pos > endLineLength1) {
-                    //check
-                    try {
-                        //TODO: optimization?
-                        line = new String(Arrays.copyOfRange(buffer, pos - endLine.length(), pos));
-                    } catch (Exception e) {
-                        line = null;
-                    }
-                    if (startLine.equals(line) || endLine.equals(line)) {
-                        startLineFound = true;
-                        fileParameter.nextLine = line.substring(0, line.length() - 2);
-                        fileParameter.fileLocation = "" + filePath;
-                    }
-                }
-                if (pos == bufferLength) {
-                    bytesMoved = bufferLength - endLine.length();
-                    if (output != null && !fileTooLarge) {
-                        if (writingStarted) {
-                            output.write(Arrays.copyOfRange(buffer, 0, bytesMoved));
-                            totalSize = totalSize + bytesMoved;
-                        } else {
-                            //because first buffer starts with CRLF
-                            output.write(Arrays.copyOfRange(buffer, 2, bytesMoved));
-                            totalSize = totalSize + bytesMoved - 2;
-                            writingStarted = true;
-                        }
-                    }
-                    //shift buffer
-                    targetPos = 0;
-                    for (int i = bufferLength - endLine.length(); i < bufferLength; i++) {
-                        buffer[targetPos] = buffer[i];
-                        targetPos++;
-                    }
-                    pos = targetPos;
-                    if (fileSizeLimit > 0 && totalSize > fileSizeLimit) {
-                        fileTooLarge = true;
-                        //TODO: fileSizeLimit reached
-                        /*
-                        if (output != null) {
-                            output.close();
-                        }
-                        throw new IOException("uploaded file too large");
-                         */
-                    }
-                } else if (startLineFound) {
-                    //save to file - WITHOUT ENDING CRLF!
-                    //TODO: byte to file
-                    bytesMoved = pos - endLine.length();
-                    if (output != null) {
-                        if (writingStarted) {
-                            //last buffer ends with CRLF
-                            output.write(Arrays.copyOfRange(buffer, 0, bytesMoved - 2));
-                            totalSize = totalSize + bytesMoved - 2;
-                        } else {
-                            //because first buffer starts with CRLF
-                            //last buffer ends with CRLF
-                            output.write(Arrays.copyOfRange(buffer, 2, bytesMoved - 2));
-                            writingStarted = true;
-                            totalSize = totalSize + bytesMoved - 4;
-                        }
-                    }
-                }
-            } else {
-                //System.out.println("EOF at "+pos);
+            if (b == -1) {
                 break;
             }
-        } while (!startLineFound && !fileTooLarge);
+            buffer[pos] = (byte) b;
+            pos++;
+            if (pos > endLineLength1) {
+                //check
+                try {
+                    //TODO: optimization?
+                    line = new String(Arrays.copyOfRange(buffer, pos - endLine.length(), pos));
+                    sline = new String(Arrays.copyOfRange(buffer, pos - startLine.length(), pos));
+                } catch (Exception e) {
+                    line = null;
+                    sline = null;
+                }
+                if (startLine.equals(sline)) {
+                    startLineFound = true;
+                    fileParameter.nextLine = line.substring(0, startLine.length() - 2);
+                    fileParameter.fileLocation = "" + filePath;
+                } else if (endLine.equals(line)) {
+                    endLineFound = true;
+                    fileParameter.nextLine = line.substring(0, endLine.length() - 2);
+                    fileParameter.fileLocation = "" + filePath;
+                }
+            }
+            if (startLineFound || endLineFound) {
+                //save to file - WITHOUT ENDING CRLF!
+                //TODO: byte to file
+                if (startLineFound) {
+                    bytesToMove = pos - startLine.length();
+                } else {
+                    bytesToMove = pos - endLine.length();
+                }
+                if (output != null) {
+                    if (writingStarted) {
+                        //last buffer ends with CRLF
+                        output.write(Arrays.copyOfRange(buffer, 0, bytesToMove - 2));
+                        totalSize = totalSize + bytesToMove - 2;
+                    } else {
+                        //because first buffer starts with CRLF
+                        //last buffer ends with CRLF
+                        output.write(Arrays.copyOfRange(buffer, 2, bytesToMove - 2));
+                        writingStarted = true;
+                        totalSize = totalSize + bytesToMove - 4;
+                    }
+                }
+            } else if (pos == bufferLength) {
+                bytesToMove = bufferLength - endLine.length();
+                if (output != null && !fileTooLarge) {
+                    if (writingStarted) {
+                        output.write(Arrays.copyOfRange(buffer, 0, bytesToMove));
+                        totalSize = totalSize + bytesToMove;
+                    } else {
+                        //because first buffer starts with CRLF
+                        output.write(Arrays.copyOfRange(buffer, 2, bytesToMove));
+                        totalSize = totalSize + bytesToMove - 2;
+                        writingStarted = true;
+                    }
+                }
+                //shift buffer
+                targetPos = 0;
+                for (int i = bufferLength - endLine.length(); i < bufferLength; i++) {
+                    buffer[targetPos] = buffer[i];
+                    targetPos++;
+                }
+                pos = targetPos;
+                if (fileSizeLimit > 0 && totalSize > fileSizeLimit) {
+                    fileTooLarge = true;
+                }
+            }
+        } while (!startLineFound && !endLineFound && !fileTooLarge);
         if (output != null) {
             output.close();
         }
