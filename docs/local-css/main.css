@@ -1,3 +1,11 @@
+body{
+    font-family: 'Lato', sans-serif;
+    font-weight: 400;
+}
+h1 {
+    font-family: 'Lato', sans-serif;
+    font-weight: 900;
+}
 .row-centered {
     text-align:center;
 }

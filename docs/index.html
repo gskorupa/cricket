@@ -1,196 +1,199 @@
-    <head>
-        <title>Cricket MSF</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-        <!-- icon IE -->
-        <link rel="shortcut icon" type="image/x-icon" href="/local-resources/favicon.ico" />
-        <!-- icon other browsers -->
-        <link rel="icon" type="image/x-icon" href="/Cricket/local-resources/favicon.ico" />
-        <link rel="stylesheet" href="/local-css/main.css">
-        <script>
-            (function (i, s, o, g, r, a, m) {
-                i['GoogleAnalyticsObject'] = r;
-                i[r] = i[r] || function () {
-                    (i[r].q = i[r].q || []).push(arguments)
-                }, i[r].l = 1 * new Date();
-                a = s.createElement(o),
-                        m = s.getElementsByTagName(o)[0];
-                a.async = 1;
-                a.src = g;
-                m.parentNode.insertBefore(a, m)
-            })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
-            ga('create', 'UA-76100103-1', 'auto');
-            ga('send', 'pageview');
-        </script>
-    </head>
-    <body>
-        <main>
-            <div class="container" style="max-width: 800px; margin-top: 2em;">
-                <div class="row row-centered">
-                    <div class="col-sm-12" align="center">
-                        <h1>Cricket Microservices Framework</h1>
-                        <h6 style="margin-top: 30px; margin-bottom: 20px;"><i>You do not need to download a half of the Internet to have your job done</i></h6>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12" align="center">
-                        <img class="img-responsive" src="/local-resources/cricket-head1.svg" width="300px" alt="Cricket Microservices Framework"/>
-                    </div>
-                </div>
-                <div class="row row-centered">
-                    <div class="col-sm-4 intro" >
-                        <h2 style="margin-top: 0px; margin-bottom: 20px;">Lightweight</h2>
-                        256 KB (core classes), 2.8 MB with external libraries (fat jar)<br>
-                        10 k LOC<br>
-                        Java 10 ready<br>
-                        Runs on 1 MB RAM<sup>*</sup>
-                    </div>
-                    <div class="col-sm-4 intro">
-                        <h2 style="margin-top: 0px; margin-bottom: 20px;">Free</h2>
-                        Apache 2.0 licensed.<br>
-                        Hosted on <a href="https://github.com/gskorupa/Cricket">GitHub.</a>
-                    </div>
-                    <div class="col-sm-4 intro">
-                        <h2 style="margin-top: 0px; margin-bottom: 20px;">Minimalistic</h2>
-                        Plain Old Java<br>
-                        Configuration&nbsp;over&nbsp;convention<br>
-                        No hidden magic
-                    </div>
-                </div>
-                <div class="row row-centered">
-                    <div id="feat1" class="col-sm-12 feature">
-                        <img src="/local-resources/cricket-head1.svg" width="90px"/>
-                    </div>
-                </div>
-                <div class="row row-centered">
-                    <div id="feat1" class="col-sm-6 feature">
-                        <h4><span class="glyphicon glyphicon-cloud"></span> Cloud Ready</h4>
-                        <p>
-                            Services build with Cricket can be deployed in cloud environments that supports Java or Docker containers.
-                        </p>
-                    </div>
-                    <div id="feat1" class="col-sm-6 feature">
-                        <h4><span class="glyphicon glyphicon-flash"></span> Clear architecture</h4>
-                        <p>
-                            Implements the "ports and adapters" (hexagonal) architecture pattern. 
-                            Event driven services  with the smallest necessary dose of dependency injection.
-                        </p>
-                    </div>
-                </div>
-                <div class="row row-centered">
-                    <div id="feat2" class="col-sm-6 feature">
-                        <h4><span class="glyphicon glyphicon-globe"></span> HTTP server</h4>
-                        <p>
-                            HTTP/S requests handled internally to serve both REST and HTML page calls.
-                        </p>
-                    </div>
-                    <div id="feat2" class="col-sm-6 feature">
-                        <h4><span class="glyphicon glyphicon-folder-open"></span> Key-Value database</h4>
-                        <p>
-                            Built-in, in-memory key-value database can be used for fast prototyping. 
-                        </p>
-                    </div>
-                </div>
-                <div class="row row-centered">
-                    <div id="feat1" class="col-sm-6 feature">
-                        <h4><span class="glyphicon glyphicon-briefcase"></span> Data to JSON serializer</h4>
-                        <p>
-                            Automatic JSON serialization/deserialization thanks to the json-io project.
-                        </p>
-                    </div>
-                    <div id="feat2" class="col-sm-6 feature">
-                        <h4><span class="glyphicon glyphicon-time"></span> Scheduler</h4>
-                        <p>
-                            One-time or repetitive tasks based on configuration or defined in code.
-                        </p>
-                    </div>
-                </div>
-                <div class="row row-centered">
-                    <div id="feat1" class="col-sm-6 feature">
-                        <h4><span class="glyphicon glyphicon-pencil"></span> Logging</h4>
-                        <p>
-                            The StandardLogger (using Java Logger) can be replaced with other adapter of your choice, eg. centralized logging system.
-                        </p>
-                    </div>
-                    <div id="feat2" class="col-sm-6 feature">
-                        <h4><span class="glyphicon glyphicon-eye-open"></span> Monitoring</h4>
-                        <p>
-                            Your service can monitor it's sensitive parameters or external services. 
-                            Example adapters to monitor memory and disk space are included.
-                        </p>
-                    </div>
-                </div>
-                <div class="row row-centered">
-                    <div id="feat1" class="col-sm-12" style="color: darkslategray; padding-top: 10px; padding-bottom: 30px;">
-                        <img src="/local-resources/cricket-head1.svg" width="90px"/>
-                    </div>
-                </div>
-                <div class="row row-centered">
-                    <div class="col-sm-12" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
-                        <h3 style="margin-top: 0px; margin-bottom: 0px;">Quick start</h3>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12 feature" style="color: darkslategray; padding-top: 0px; padding-bottom: 30px;">
-                        <h5>Running your static web page in 1 minute</h5>
-                        <ol>
-                            <li>Open terminal window in the newly created directory</li>
-                            <li>Download Cricket MSF library from the GitHub repository</li>
-                            <li>Create web page file</li>
-                            <li>Start the service</li>
-                            <li>Display your page in web browser at http://localhost:8080</li>
-                            <li>Call example echo service API at http://localhost:8080/api/echo?some_param=test</li>
-                            <li>Stop the service by pressing Ctrl-C in the terminal window</li>
-                        </ol>
-<pre>
-wget https://github.com/gskorupa/Cricket/releases/download/1.2.37/cricket-1.2.37.jar
+<head>
+    <title>Cricket MSF</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- icon IE -->
+    <link rel="shortcut icon" type="image/x-icon" href="local-resources/favicon.ico" />
+    <!-- icon other browsers -->
+    <link rel="icon" type="image/x-icon" href="local-resources/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,900&display=swap" rel="stylesheet"> 
+    <link rel="stylesheet" href="local-css/main.css">
+    <script>
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r;
+            i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date();
+            a = s.createElement(o),
+                    m = s.getElementsByTagName(o)[0];
+            a.async = 1;
+            a.src = g;
+            m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+        ga('create', 'UA-76100103-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+</head>
+<body>
+    <div class="container" style="max-width: 800px; margin-top: 2em;">
+        <div class="row row-centered">
+            <div class="col-sm-12" align="center">
+                <h1>Cricket Microservices Framework</h1>
+                <h6 style="margin-top: 30px; margin-bottom: 20px;"><i>You do not need to download a half of the Internet to have your job done</i></h6>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12" align="center">
+                <img class="img-responsive" src="local-resources/cricket-head1.svg" width="340px" alt="Cricket Microservices Framework"/>
+            </div>
+        </div>
+        <div class="row row-centered">
+            <div class="col-sm-4 intro" >
+                <h2 style="margin-top: 0px; margin-bottom: 20px;">Lightweight</h2>
+                3.6MB fat jar, including external libraries<br>
+                10k LOC<br>
+                Java 10 ready
+            </div>
+            <div class="col-sm-4 intro">
+                <h2 style="margin-top: 0px; margin-bottom: 20px;">Free</h2>
+                Apache 2.0 licensed.<br>
+                Hosted on <a href="https://github.com/gskorupa/Cricket">GitHub.</a>
+            </div>
+            <div class="col-sm-4 intro">
+                <h2 style="margin-top: 0px; margin-bottom: 20px;">Minimalistic</h2>
+                Plain Old Java<br>
+                Configuration&nbsp;over&nbsp;convention<br>
+                No hidden magic
+            </div>
+        </div>
+        <div class="row row-centered">
+            <div id="feat1" class="col-sm-12 feature">
+                <img src="local-resources/cricket-head1.svg" width="90px"/>
+            </div>
+        </div>
+        <div class="row row-centered">
+            <div id="feat1" class="col-sm-6 feature">
+                <h4>Cloud Ready</h4>
+                <p>
+                    Services build with Cricket can be deployed in cloud environments that supports Java or Docker containers.
+                </p>
+            </div>
+            <div id="feat1" class="col-sm-6 feature">
+                <h4>Clear architecture</h4>
+                <p>
+                    Implements the "ports and adapters" (hexagonal) architecture pattern. 
+                    Event driven architecture with the smallest necessary dose of dependency injection.
+                </p>
+            </div>
+        </div>
+        <div class="row row-centered">
+            <div id="feat2" class="col-sm-6 feature">
+                <h4>Embeded HTTP server</h4>
+                <p>
+                    HTTP/S requests handled internally to serve both REST and HTML page calls.
+                </p>
+            </div>
+            <div id="feat2" class="col-sm-6 feature">
+                <h4>Embeded databases</h4>
+                <p>
+                    Two, ready to use, in-memory databases: key-value (no sql) and H2 Database (sql). 
+                </p>
+            </div>
+        </div>
+        <div class="row row-centered">
+            <div id="feat1" class="col-sm-6 feature">
+                <h4>JSON handling</h4>
+                <p>
+                    Automatic JSON serialization/deserialization.
+                </p>
+            </div>
+            <div id="feat2" class="col-sm-6 feature">
+                <h4>Scheduler</h4>
+                <p>
+                    One-time or repetitive tasks can be configured or created programatically.
+                </p>
+            </div>
+        </div>
+        <div class="row row-centered">
+            <div id="feat1" class="col-sm-6 feature">
+                <h4>Logging</h4>
+                <p>
+                    The StandardLogger (using Java Logger) can be replaced with other adapter of your choice, eg. centralized logging system.
+                </p>
+            </div>
+            <div id="feat2" class="col-sm-6 feature">
+                <h4>Monitoring</h4>
+                <p>
+                    Your service can monitor it's sensitive parameters or external services. 
+                    Example adapters to monitor memory and disk space are included.
+                </p>
+            </div>
+        </div>
+        <div class="row row-centered">
+            <div id="feat1" class="col-sm-12" style="color: darkslategray; padding-top: 10px; padding-bottom: 30px;">
+                <img src="local-resources/cricket-head1.svg" width="90px"/>
+            </div>
+        </div>
+        <div class="row row-centered">
+            <div class="col-sm-12" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
+                <h2 style="margin-top: 0px; margin-bottom: 1rem;">Quick start</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 feature" style="color: darkslategray; padding-top: 0px; padding-bottom: 30px;">
+                <h5>Running your static web page in 1 minute</h5>
+                <br>
+                <ol>
+                    <li>Open terminal window in the newly created directory</li>
+                    <li>Download Cricket MSF library from the GitHub repository</li>
+                    <li>Create required subfolders and the web page file (index.html)</li>
+                    <li>Start the service</li>
+                    <li>Display your page in web browser at http://localhost:8080</li>
+                    <li>Call example echo service API at http://localhost:8080/api/echo?some_param=test</li>
+                    <li>Stop the service by pressing Ctrl-C in the terminal window</li>
+                </ol>
+                <br>
+                Example code:
+                <pre>
+mkdir myservice
+cd myservice
+wget https://github.com/gskorupa/Cricket/releases/download/1.3.0-alpha.10/cricket-1.3.0-alpha.10.jar
 mkdir work
 mkdir work/log
 mkdir work/data
 mkdir work/www
 echo "Hello World!">work/www/index.html
-java -jar cricket-1.2.37.jar -r</pre>
-                    </div>
-                </div>
-                <div class="row row-centered">
-                    <div class="col-sm-12" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
-                        <h3 style="margin-top: 0px; margin-bottom: 0px;">Resources</h3>
-                    </div>
-                </div>
-                 <div class="row">
-                    <div class="col-sm-12" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
-                        In recent months, Cricket has undergone a lot of changes and gained some interesting features. 
-                        For this reason, the documentation that has already been created is outdated in many parts.<br>  
-                        I will consistently post new articles on the <a href="https://www.signocom.com/category/microservices/">Signocom's blog</a> 
-                        or in the <a href="https://github.com/gskorupa/Cricket">GitHub repository</a>.<br>Stay tuned.<br>
-                    </div>
-                </div>
-                <div class="row row-centered">
-                    <div class="col-sm-12" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
-                        <h3 style="margin-top: 0px; margin-bottom: 0px;">Sponsors</h3>
-                    </div>
-                </div>
-                <div class="row row-centered">
-                    <div class="col-sm-12" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
-                        <a href="https://experiot.com.pl"><img src="/local-resources/experiot-logo.svg" width="150px;"/></a><br>&nbsp;
-                    </div>
-                    <div class="col-sm-12" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
-                        <a href="https://www.signocom.com"><img src="/local-resources/signocom.png" width="150px;"/></a><br>&nbsp;
-                    </div>
-                </div>
+java -jar cricket-1.3.0-alpha.10.jar -r</pre>
             </div>
+        </div>
+        <div class="row row-centered">
+            <div class="col-sm-12" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
+                <h2 style="margin-top: 0px; margin-bottom: 1rem;">Resources</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
+                In recent months, Cricket has undergone a lot of changes and gained some interesting features. 
+                For this reason, the documentation that has already been created is outdated in many parts.<br>  
+                I will consistently post new articles on the <a href="https://www.signocom.com/category/microservices/">Signocom's blog</a> 
+                or in the <a href="https://github.com/gskorupa/Cricket">GitHub repository</a>.<br>Stay tuned.<br>
+            </div>
+        </div>
+        <div class="row row-centered">
+            <div class="col-sm-12" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
+                <h2 style="margin-top: 0px; margin-bottom: 1rem;">Sponsors</h2>
+            </div>
+        </div>
+        <div class="row row-centered">
+            <div class="col-sm-6" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
+                <a href="https://experiot.com.pl"><img src="local-resources/experiot-logo.svg" width="150px;"/></a><br>&nbsp;
+            </div>
+            <div class="col-sm-6" style="color: darkslategray; padding-top: 0px; padding-bottom: 10px;">
+                <a href="https://www.signocom.com"><img src="local-resources/signocom.png" width="200px;"/></a><br>&nbsp;
+            </div>
+        </div>
+    </div>
 
-            <footer class="container footer" style="max-width: 800px;">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <p id="about">&copy; 2015-2018 by Grzegorz Skorupa</p>
-                    </div>
-                    <div class="col-sm-6">
-                        <p id="about" style="text-align: right;">powered by Cricket MSF</p>
-                    </div>
-                </div>
-            </footer>
-        </main>
-    </body>
+    <footer class="container footer" style="max-width: 800px;">
+        <div class="row">
+            <div class="col-sm-6">
+                <p id="about">&copy; 2015-2018 by Grzegorz Skorupa</p>
+            </div>
+            <div class="col-sm-6">
+                <p id="about" style="text-align: right;">powered by Cricket MSF</p>
+            </div>
+        </div>
+    </footer>
+</body>
