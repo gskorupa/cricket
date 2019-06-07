@@ -6,7 +6,7 @@
     </div>
     <div class="row" >
         <div class="col-md-12 text-center">
-            <img src="resources/cricket-head1.png" alt="Clicket logo"/>
+            <img src="resources/cricket-logo.svg" width="280px" alt="Clicket logo"/>
         </div>
     </div>
     <div class="row" >
