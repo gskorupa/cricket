@@ -1,10 +1,18 @@
 body{
     font-family: 'Lato', sans-serif;
     font-weight: 400;
+    color: darkslategray;
 }
 h1 {
     font-family: 'Lato', sans-serif;
     font-weight: 900;
+}
+h2 {
+    margin-bottom: 1rem;
+}
+h6 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
 }
 .row-centered {
     text-align:center;
@@ -29,7 +37,7 @@ h1 {
 }
 .footer{
      color: darkslategray; 
-     margin-top: 0px; 
+     margin-top: 2rem; 
      border-top-style: solid;
      border-top-color: darkslategray;
      border-top-width: 1px;
