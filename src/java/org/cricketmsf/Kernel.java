@@ -303,7 +303,8 @@ public abstract class Kernel {
                 ac = adapterEntry.getValue();
                 getLogger().print("ADAPTER: " + adapterName);
                 try {
-                    Class c = Class.forName(ac.getClassFullName());
+                    //Class c = Class.forName(ac.getClassFullName());
+                    Class c = Class.forName(ac.getAdapterClassName());
                     adaptersMap.put(adapterName, c.newInstance());
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.http.HttpAdapter) {
                         setHttpHandlerLoaded(true);

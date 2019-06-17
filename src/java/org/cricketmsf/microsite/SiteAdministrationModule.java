@@ -26,13 +26,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.config.AdapterConfiguration;
+import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.microsite.out.auth.Token;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.microsite.user.HashMaker;
 import org.cricketmsf.microsite.user.User;
+import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
 import org.cricketmsf.out.db.SqlDBIface;
@@ -142,6 +146,34 @@ public class SiteAdministrationModule {
                     }
                     result = getServiceInfo();
                     break;
+                case "adapter":
+                    String name = (String) request.parameters.getOrDefault("name", "");
+                    String propertyName = (String) request.parameters.getOrDefault("property", "");
+                    String newValue = (String) request.parameters.getOrDefault("value", "");
+                    if (name.isEmpty()) {
+                        result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                        result.setData("At least adapter name must be specified");
+                        break;
+                    }
+                    Object adapter = Kernel.getInstance().getAdaptersMap().getOrDefault(name, null);
+                    if (null == adapter) {
+                        result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                        result.setData("Adapter not found");
+                        break;
+                    }
+                    if (adapter instanceof InboundAdapter) {
+                        if (!newValue.isEmpty() && !propertyName.isEmpty()) {
+                            ((InboundAdapter) adapter).setProperty(propertyName, newValue);
+
+                        }
+                    } else if (adapter instanceof OutboundAdapter) {
+                        if (!newValue.isEmpty() && !propertyName.isEmpty()) {
+                            ((OutboundAdapter) adapter).setProperty(propertyName, newValue);
+                        }
+                    }
+                    result.setData(new AdapterConfiguration((Adapter) adapter));
+                    break;
+
             }
         } else {
             result.setCode(HttpAdapter.SC_METHOD_NOT_ALLOWED);

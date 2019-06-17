@@ -85,7 +85,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     }
 
     @Override
-    public String getName() {
+    public String getDbName() {
         return getFileName();
     }
 
@@ -398,7 +398,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
 
     @Override
     public String getBackupFileName() {
-        return getName() + ".zip";
+        return getDbName() + ".zip";
     }
 
     public final void updateStructure(Connection conn, String from, String to) throws KeyValueDBException {
@@ -419,7 +419,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
             updateStructureTo(conn, i + 1);
         }
 
-        String query = "update serviceversion set version='" + to + "' where version='" + from + "'";
+        String query = "update serviceversion set version='" + to + "'";
         try {
             conn.createStatement().execute(query);
             conn.close();

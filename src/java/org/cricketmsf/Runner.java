@@ -16,6 +16,7 @@
 package org.cricketmsf;
 
 import com.cedarsoftware.util.io.JsonReader;
+import com.cedarsoftware.util.io.JsonReader.ClassFactory;
 import com.cedarsoftware.util.io.JsonWriter;
 import org.cricketmsf.config.ConfigSet;
 import org.cricketmsf.config.Configuration;
@@ -30,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
+import org.cricketmsf.config.AdapterConfiguration;
 
 /**
  * Runner class is used when running JAR distribution. The class parses the

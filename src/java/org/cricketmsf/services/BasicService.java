@@ -125,9 +125,6 @@ public class BasicService extends Kernel {
     public Object doGet(Event event) {
         try {
             RequestObject request = event.getRequest();
-            if ("true".equalsIgnoreCase(((HttpAdapter) Kernel.getInstance().getAdaptersMap().get("WWWService")).getProperty("dump-request"))) {
-                System.out.println(HttpAdapter.dumpRequest(request));
-            }
             ParameterMapResult result
                     = (ParameterMapResult) fileReader
                             .getFile(request, htmlAdapter.useCache() ? database : null, "webcache");
@@ -144,9 +141,6 @@ public class BasicService extends Kernel {
     public Object doTest(Event event) {
         try {
             RequestObject request = event.getRequest();
-            if ("true".equalsIgnoreCase(((HttpAdapter) Kernel.getInstance().getAdaptersMap().get("Test")).getProperty("dump-request"))) {
-                System.out.println(HttpAdapter.dumpRequest(request));
-            }
             StandardResult result = new StandardResult();
             result.setData("");
             Kernel.getInstance().dispatchEvent(new Event(this.getName(), "TEST", "", null, ""));

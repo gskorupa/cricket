@@ -28,7 +28,7 @@ public interface KeyValueDBIface {
      * Returns database name (from adapter configuration)
      * @return name database name
      */
-    public String getName();
+    public String getDbName();
     
     /**
      * Returns default name of the backup file

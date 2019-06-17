@@ -16,6 +16,7 @@
 package org.cricketmsf.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -23,42 +24,68 @@ import java.util.HashMap;
  * @author greg
  */
 public class Configuration {
-    
+
     private String id;
     private String service;
     private String host;
     private String port;
     private int threads;
     private String filter;
-    private ArrayList<HttpHeader> cors;
+    //private ArrayList<HttpHeader> cors;
     private HashMap<String, Object> properties;
     private HashMap<String, AdapterConfiguration> adapters;
-    
-    public Configuration(){
-        adapters=new HashMap<>();
-        properties=new HashMap<>();
+    private AdapterConfiguration[] ports;
+
+    public Configuration() {
+        adapters = new HashMap<>();
+        properties = new HashMap<>();
+        ports = null;
     }
 
-    public AdapterConfiguration getAdapterConfiguration(String name){
-        return adapters.get(name);
-    }
-    
-    public void putAdapterConfiguration(AdapterConfiguration config){
-        adapters.put(config.getName(), config);
+    public AdapterConfiguration getAdapterConfiguration(String name) {
+        if (null==ports || ports.length==0) {
+            return adapters.get(name);
+        } else {
+            for (int i = 0; i < ports.length; i++) {
+                if (name.equals(ports[i].getName())) {
+                    return ports[i];
+                }
+            }
+            return null;
+        }
     }
 
-    public String getProperty(String name){
-        return (String)properties.get(name);
+    public void putAdapterConfiguration(AdapterConfiguration config) {
+        if (null==ports || ports.length==0) {
+            adapters.put(config.getName(), config);
+        } else {
+            boolean found = false;
+            for (int i = 0; i < ports.length; i++) {
+                if (config.getName().equals(ports[i].getName())) {
+                    ports[i]=config;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                ports = Arrays.copyOf(ports, ports.length+1);
+                ports[ports.length-1]=config;
+            }
+        }
     }
-    
-    public String getProperty(String name, String defaultValue){
-        return (String)properties.getOrDefault(name, defaultValue);
+
+    public String getProperty(String name) {
+        return (String) properties.get(name);
     }
-    
-    public void putProperty(String name, Object value){
+
+    public String getProperty(String name, String defaultValue) {
+        return (String) properties.getOrDefault(name, defaultValue);
+    }
+
+    public void putProperty(String name, Object value) {
         properties.put(name, value);
     }
-    
+
     /**
      * @return the host
      */
@@ -101,30 +128,20 @@ public class Configuration {
         this.threads = threads;
     }
 
-    /**
-     * @return the adapters
-     */
     public HashMap getAdapters() {
+        if(null!=ports && ports.length>0){
+            adapters = new HashMap<>();
+            for(int i=0; i<ports.length; i++){
+                adapters.put(ports[i].getName(),ports[i]);
+            }
+        }
         return adapters;
     }
 
-    /**
-     * @param adapters the adapters to set
-     */
-    public void setAdapters(HashMap adapters) {
-        this.adapters = adapters;
-    }
-
-    /**
-     * @return the service
-     */
     public String getService() {
         return service;
     }
 
-    /**
-     * @param service the service to set
-     */
     public void setService(String service) {
         this.service = service;
     }
@@ -157,7 +174,6 @@ public class Configuration {
         this.id = id;
     }
 
-
     /**
      * @return the properties
      */
@@ -171,9 +187,15 @@ public class Configuration {
     public void setProperties(HashMap<String, Object> properties) {
         this.properties = properties;
     }
-    
-    public void joinProps(){
-        adapters.forEach((k,v) -> v.joinProps());
+
+    public void joinProps() {
+        if(null==ports || ports.length==0){
+            adapters.forEach((k, v) -> v.joinProps());
+        }else{
+            for(int i=0;i<ports.length;i++){
+                ports[i].joinProps();
+            }
+        }
     }
-    
+
 }

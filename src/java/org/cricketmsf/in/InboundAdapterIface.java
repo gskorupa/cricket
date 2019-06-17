@@ -23,6 +23,7 @@ import java.util.Map;
  */
 public interface InboundAdapterIface {
     public String getProperty(String name);
+    public String setProperty(String name, String value);
     public Map<String,String> getStatus(String name);
     public String getName();
 }

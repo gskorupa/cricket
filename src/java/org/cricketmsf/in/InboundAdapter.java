@@ -15,12 +15,8 @@
  */
 package org.cricketmsf.in;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import org.cricketmsf.Event;
-import org.cricketmsf.Kernel;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.EventException;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
@@ -29,15 +25,15 @@ import org.cricketmsf.out.dispatcher.DispatcherIface;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class InboundAdapter implements Runnable {
+public class InboundAdapter implements Runnable, InboundAdapterIface {
 
     protected HashMap<String, String> hookMethodNames;
-    protected HashMap<String, String> properties = null;
+    public HashMap<String, String> properties = null;
     protected HashMap<String, String> statusMap = null;
     protected String name;
 
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
-        this.name = name;
+        this.name = adapterName;
         if(properties == null){
             this.properties = new HashMap<>();
         }else{
@@ -46,8 +42,14 @@ public class InboundAdapter implements Runnable {
         getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
     }
 
+    @Override
     public String getProperty(String name) {
         return properties.get(name);
+    }
+    
+    @Override
+    public String setProperty(String name, String value){
+        return properties.put(name, value);
     }
 
     public InboundAdapter() {
@@ -62,51 +64,10 @@ public class InboundAdapter implements Runnable {
     }
 
     protected Result handle(String method, String payload) {
-        /*
-        String hookMethodName = getHookMethodNameForMethod(method);
-        Result result = null;
-        if (hookMethodName == null) {
-            Kernel.getInstance().dispatchEvent(
-                    Event.logWarning(this.getClass().getSimpleName(), "hook is not defined for " + method)
-            );
-        }
-        try {
-            Kernel.getInstance().dispatchEvent(
-                    Event.logFine(this.getClass().getSimpleName(), "sending event to hook " + method)
-            );
-            Event event = new Event();
-            event.setOrigin(this.getClass().getSimpleName());
-            event.setPayload(payload);
-            Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
-            result = (Result) m.invoke(Kernel.getInstance(), event);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return result;
-         */
         return null;
     }
 
     protected void getServiceHooks(String adapterName) {
-        /*
-        if (hookMethodNames == null) {
-            hookMethodNames = new HashMap<>();
-        }
-        InboundAdapterHook ah;
-        String requestMethod = "X";
-        // for every method of a Kernel instance (our service class extending Kernel)
-        for (Method m : Kernel.getInstance().getClass().getMethods()) {
-            ah = (InboundAdapterHook) m.getAnnotation(InboundAdapterHook.class);
-            // we search for annotated method
-            if (ah != null) {
-                requestMethod = ah.inputMethod();
-                if (ah.adapterName().equals(adapterName)) {
-                    addHookMethodNameForMethod(requestMethod, m.getName());
-                    Kernel.getInstance().getLogger().print("\tservice hook for method " + requestMethod + " : " + m.getName());
-                }
-            }
-        }
-         */
     }
 
     public void addHookMethodNameForMethod(String requestMethod, String hookMethodName) {
@@ -114,18 +75,10 @@ public class InboundAdapter implements Runnable {
     }
 
     public String getHookMethodNameForMethod(String requestMethod) {
-        /*
-        String result = null;
-        
-        result = hookMethodNames.get(requestMethod);
-        if (null == result) {
-            result = hookMethodNames.get("*");
-        }
-        return result;
-         */
         return null;
     }
 
+    @Override
     public Map<String, String> getStatus(String name) {
         if (statusMap == null) {
             statusMap = new HashMap();

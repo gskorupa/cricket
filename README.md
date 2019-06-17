@@ -2,25 +2,25 @@
 
 ## Quick start
 
-Get latest Cricket distribution from [GitHub](https://github.com/gskorupa/Cricket/releases):
+Get latest Cricket distribution from [GitHub](https://github.com/gskorupa/Cricket/releases). For example:
 
-    wget https://github.com/gskorupa/Cricket/releases/download/1.2.38/cricket-1.2.38.jar
+    wget https://github.com/gskorupa/Cricket/releases/download/1.3.0-alpha.11/cricket-1.3.0-alpha.11.jar
 
 Run default service:
 
-    java -jar cricket-1.2.38.jar -r
+    java -jar cricket-1.3.0-alpha.11.jar -r
 
 Test built-in echo API using web browser or cURL:
 
-    curl -i http://localhost:8080/api/echo 
-    curl -i http://localhost:8080/api/echo?myparam=abcd
+    curl -i http://localhost:7070/api/echo 
+    curl -i http://localhost:7070/api/echo?myparam=abcd
 
 You can also try built-in webserver by creating files in www subfolder (this is preconfigured location):
 
     mkdir www
     echo "Hello World" > www/index.html
-    java -jar cricket-1.2.38.jar -r
-    curl http://localhost:8080
+    java -jar cricket-1.3.0-alpha.11.jar -r
+    curl http://localhost:7070
 
 ## Rapid prototyping of microservices
 
@@ -68,21 +68,21 @@ handler method with expected logic.
 
 After compiling the class:
 
-    javac -classpath cricket-1.2.38.jar MyService.java
+    javac -classpath cricket-1.3.0-alpha.11.jar MyService.java
 
 We can run the service using Cricket's "lift" mode:
 
-    java -cp .:cricket-1.2.38.jar org.cricketmsf.Runner -r -l MyService
+    java -cp .:cricket-1.3.0-alpha.11.jar org.cricketmsf.Runner -r -l MyService
 
 Our service will be accessible on localhost so we can request it on it's defined 
 context "/test":
 
-    curl -i http://localhost:8080/test
+    curl -i http://localhost:7070/test
     
     HTTP/1.1 200 OK
     Pragma: no-cache
-    Date: Thu, 16 Mar 2017 12:31:17 GMT
-    Last-modified: Cz, 16 mar 2017 13:31:17 CET
+    Date: Thu, 16 Mar 2019 12:31:17 GMT
+    Last-modified: Cz, 16 mar 2019 13:31:17 CET
     Content-type: application/json; charset=UTF-8
     Content-length: 26
     

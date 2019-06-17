@@ -69,7 +69,6 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
     public final static int SC_INTERNAL_SERVER_ERROR = 500;
     public final static int SC_NOT_IMPLEMENTED = 501;
     public final static int SC_UNAVAILABLE = 503;
-    
 
     public final static int SERVICE_MODE = 0;
     public final static int WEBSITE_MODE = 1;
@@ -84,7 +83,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
     protected HashMap<String, String> acceptedTypesMap;
 
     private String context;
-    private boolean extendedResponse = true;
+    private boolean extendedResponse = false;
     SimpleDateFormat dateFormat;
 
     protected int mode = SERVICE_MODE;
@@ -97,7 +96,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         }
         dateFormat = Kernel.getInstance().dateFormat;
     }
-    
+
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
@@ -126,9 +125,9 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         new Thread(() -> {
             try {
                 doHandle(exchange);
-            } catch (NullPointerException|IOException e) {
-                Kernel.getInstance().dispatchEvent(Event.logFinest(this.getClass().getSimpleName()+".handle()", e.getMessage()));
-            } catch(Exception e){
+            } catch (NullPointerException | IOException e) {
+                Kernel.getInstance().dispatchEvent(Event.logFinest(this.getClass().getSimpleName() + ".handle()", e.getMessage()));
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
@@ -182,21 +181,21 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                         headers.set("Content-type", getMimeType(result.getFileExtension()));
                         responseData = result.getPayload();
                     }
-                }else{
+                } else {
                     responseData = result.getPayload();
-                }   
+                }
                 headers.set("Last-Modified", result.getModificationDateFormatted());
                 //TODO: get max age and no-cache info from the result object
                 if (result.getMaxAge() > 0) {
                     headers.set("Cache-Control", "max-age=" + result.getMaxAge());  // 1 hour
                 } else {
                     headers.set("Pragma", "no-cache");
-                }   
+                }
                 if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
                     CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
-                }else if(exchange.getRequestURI().getPath().startsWith("/api/")){ //TODO: this is workaround
+                } else if (exchange.getRequestURI().getPath().startsWith("/api/")) { //TODO: this is workaround
                     CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
-                }else if(exchange.getRequestURI().getPath().endsWith(".tag")){ //TODO: this is workaround
+                } else if (exchange.getRequestURI().getPath().endsWith(".tag")) { //TODO: this is workaround
                     CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
                 }
                 if (result.getCode() == 0) {
@@ -207,7 +206,8 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                             responseData = result.getMessage().getBytes("UTF-8");
                         }
                     }
-                }   break;
+                }
+                break;
         }
 
         //TODO: format logs to have clear info about root event id
@@ -225,7 +225,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         }
         sendLogEvent(exchange, responseData.length);
         exchange.close();
-}
+    }
 
     private String getMimeType(String fileExt) {
         switch (fileExt.toLowerCase()) {
@@ -271,11 +271,11 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         String formattedResponse;
         switch (type) {
             case JSON:
-                formattedResponse = JsonFormatter.getInstance().format(true, extendedResponse ? result : result.getData());
+                formattedResponse = JsonFormatter.getInstance().format(true, isExtendedResponse() ? result : result.getData());
                 break;
             case XML:
                 //TODO: extended response is not possible because of "java.util.List is an interface, and JAXB can't handle interfaces"
-                formattedResponse = XmlFormatter.getInstance().format(true,result.getData());
+                formattedResponse = XmlFormatter.getInstance().format(true, result.getData());
                 break;
             case CSV:
                 // formats only Result.getData() object
@@ -328,6 +328,9 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
 
     private Result createResponse(RequestObject requestObject, long rootEventId) {
 
+        if (null != properties.get("dump-request") && "true".equalsIgnoreCase(properties.get("dump-request"))) {
+            Kernel.getInstance().getLogger().print(dumpRequest(requestObject));
+        }
         Result result = new StandardResult();
         if (mode == WEBSITE_MODE) {
             if (!requestObject.uri.endsWith("/")) {
@@ -362,8 +365,8 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             result.setMessage("handler method error");
             result.setFileExtension(null);
         }
-        if(null==result){
-            result=new StandardResult("null result returned by the service");
+        if (null == result) {
+            result = new StandardResult("null result returned by the service");
             result.setCode(HttpAdapter.SC_INTERNAL_SERVER_ERROR);
         }
         return result;
@@ -388,9 +391,9 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
     @Override
     public String getHookMethodNameForMethod(String requestMethod) {
         String result = null;
-        if("HEAD".equalsIgnoreCase(requestMethod)){
+        if ("HEAD".equalsIgnoreCase(requestMethod)) {
             result = hookMethodNames.get("GET");
-        }else{
+        } else {
             result = hookMethodNames.get(requestMethod);
         }
         if (null == result) {
@@ -471,8 +474,8 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
     public DateFormat getDateFormat() {
         return dateFormat;
     }
-    
-    public static String dumpRequest(RequestObject req){
+
+    public static String dumpRequest(RequestObject req) {
         StringBuilder sb = new StringBuilder();
         sb.append("************** REQUEST ****************").append("\r\n");
         sb.append("URI:").append(req.uri).append("\r\n");

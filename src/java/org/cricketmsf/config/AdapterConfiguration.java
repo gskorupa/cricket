@@ -18,44 +18,60 @@ package org.cricketmsf.config;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.cricketmsf.Adapter;
+import org.cricketmsf.in.InboundAdapter;
+import org.cricketmsf.out.OutboundAdapter;
 
 /**
  *
  * @author greg
  */
 public class AdapterConfiguration {
-    
+
     private String name;
     private String interfaceName;
     private String classFullName;
-    private HashMap<String,String> properties;
-    
-    public AdapterConfiguration(){
-        properties= new HashMap<>();
+    private String adapterClassName;
+    private HashMap<String, String> properties;
+
+    public AdapterConfiguration() {
+        properties = new HashMap<>();
     }
-    
-    public String getProperty(String name){
+
+    public AdapterConfiguration(String name, String interfaceName, String className, HashMap<String, String> properties) {
+        this.properties = properties;
+        this.name = name;
+        this.interfaceName = interfaceName;
+        this.classFullName = className;
+    }
+
+    public AdapterConfiguration(Adapter adapter) {
+        name = adapter.getName();
+        classFullName = adapter.getClass().getName();
+        if (adapter instanceof InboundAdapter) {
+            setProperties(((InboundAdapter) adapter).properties);
+        } else if (adapter instanceof OutboundAdapter) {
+            setProperties(((OutboundAdapter) adapter).properties);
+        }
+    }
+
+    public String getProperty(String name) {
         return properties.get(name);
     }
-    
-    public void putProperty(String name, String value){
+
+    public void putProperty(String name, String value) {
         properties.put(name, value);
     }
 
-    /**
-     * @return the interfaceName
-     */
+    /*
     public String getInterfaceName() {
         return interfaceName;
     }
 
-    /**
-     * @param interfaceName the interfaceName to set
-     */
     public void setInterfaceName(String interfaceName) {
         this.interfaceName = interfaceName;
     }
-
+     */
     /**
      * @return the classFullName
      */
@@ -73,14 +89,14 @@ public class AdapterConfiguration {
     /**
      * @return the properties
      */
-    public HashMap<String,String> getProperties() {
+    public HashMap<String, String> getProperties() {
         return properties;
     }
 
     /**
      * @param properties the properties to set
      */
-    public void setProperties(HashMap<String,String> properties) {
+    public void setProperties(HashMap<String, String> properties) {
         this.properties = properties;
     }
 
@@ -88,9 +104,10 @@ public class AdapterConfiguration {
      * @return the name
      */
     public String getName() {
-        if(name==null||name.isEmpty()){
-            return getInterfaceName();
-        }else{
+        if (name == null || name.isEmpty()) {
+            //return getInterfaceName();
+            return "";
+        } else {
             return name;
         }
     }
@@ -101,9 +118,9 @@ public class AdapterConfiguration {
     public void setName(String name) {
         this.name = name;
     }
-    
-    public void joinProps(){
-        HashMap<String,String> newProperties = new HashMap<>();
+
+    public void joinProps() {
+        HashMap<String, String> newProperties = new HashMap<>();
         Iterator<Map.Entry<String, String>> it = properties.entrySet().iterator();
         String key;
         String value;
@@ -112,26 +129,58 @@ public class AdapterConfiguration {
         int i;
         while (it.hasNext()) {
             Map.Entry<String, String> pair = it.next();
-            tmpKey=pair.getKey();
-            if(tmpKey.endsWith(".0")){
+            tmpKey = pair.getKey();
+            if (tmpKey.endsWith(".0")) {
                 value = properties.get(tmpKey);
-                key = tmpKey.substring(0,tmpKey.length()-2);
-                i=1;
-                tmpValue=properties.get(key+"."+i);
-                while(tmpValue != null){
-                    value=value.concat(tmpValue);
+                key = tmpKey.substring(0, tmpKey.length() - 2);
+                i = 1;
+                tmpValue = properties.get(key + "." + i);
+                while (tmpValue != null) {
+                    value = value.concat(tmpValue);
                     i++;
-                    tmpValue=properties.get(key+"."+i);
+                    tmpValue = properties.get(key + "." + i);
                 }
                 newProperties.put(key, value);
-            }else if(tmpKey.indexOf(".")>0){
+            } else if (tmpKey.indexOf(".") > 0) {
                 // do nothing
-            }else if(tmpKey.indexOf(".")==0){
+            } else if (tmpKey.indexOf(".") == 0) {
                 // do nothing - property name starting from "."
-            }else{
+            } else {
                 newProperties.put(tmpKey, properties.get(tmpKey));
             }
         }
         properties = newProperties;
     }
+
+    /**
+     * @return the interfaceName
+     */
+    public String getInterfaceName() {
+        return interfaceName;
+    }
+
+    /**
+     * @param interfaceName the interfaceName to set
+     */
+    public void setInterfaceName(String interfaceName) {
+        this.interfaceName = interfaceName;
+    }
+
+    /**
+     * @return the adapterClassName
+     */
+    public String getAdapterClassName() {
+        if(null==adapterClassName){
+            return getClassFullName();
+        }
+        return adapterClassName;
+    }
+
+    /**
+     * @param adapterClassName the adapterClassName to set
+     */
+    public void setAdapterClassName(String adapterClassName) {
+        this.adapterClassName = adapterClassName;
+    }
+
 }

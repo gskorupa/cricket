@@ -622,9 +622,9 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         result.setMessage("");
         result.setPayload(doc.getContent().getBytes());
         String fileExtension = "";
-        int index = doc.getName().lastIndexOf(".");
+        int index = doc.getDbName().lastIndexOf(".");
         if (index > 0) {
-            fileExtension = doc.getName().substring(index);
+            fileExtension = doc.getDbName().substring(index);
         }
         result.setFileExtension(fileExtension);
         result.setModificationDate(Date.from(doc.getModified()));

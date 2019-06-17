@@ -38,11 +38,17 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        super.loadProperties(properties, adapterName);
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         Kernel.getInstance().getLogger().print("\tcontext=" + getContext());
         setSilent(properties.get("silent-mode"));
         Kernel.getInstance().getLogger().print("\tsilent-mode=" + isSilent());
+        setExtendedResponse(properties.getOrDefault("extended-response", "false"));
+        Kernel.getInstance().getLogger().print("\textended-response=" + isExtendedResponse());
+        //when you need to force date format different then used by Kernel
+        setDateFormat(properties.get("date-format"));
+        Kernel.getInstance().getLogger().print("\tdate-format=" + dateFormat);
     }
     
     @Override

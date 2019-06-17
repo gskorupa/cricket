@@ -81,3 +81,4 @@ hs_err_pid*
 !/lib/httpclient-4.5.5.jar
 !/lib/httpcore-4.4.9.jar
 !/lib/junit-4.12.jar
+!/docs/cricket-latest.jar

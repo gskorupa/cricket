@@ -41,10 +41,6 @@ public class StandardHttpAdapter extends HttpAdapter implements HttpAdapterIface
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         Kernel.getInstance().getLogger().print("\tcontext=" + getContext());
-        setExtendedResponse(properties.getOrDefault("extended-response","false"));
-        Kernel.getInstance().getLogger().print("\textended-response=" + isExtendedResponse());
-        setDateFormat(properties.get("date-format"));
-        Kernel.getInstance().getLogger().print("\tdate-format=" + dateFormat);
         defaultContentType = properties.getOrDefault("content-type", "application/json");
         Kernel.getInstance().getLogger().print("\tcontent-type=" + defaultContentType);
     }

@@ -63,7 +63,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     }
 
     @Override
-    public String getName() {
+    public String getDbName() {
         return dbName;
     }
 
@@ -100,7 +100,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
             /*
             try {
             FileWriter fw = new FileWriter(filePath);
-            fw.write("# "+this.getClass().getName()+"\r\n");
+            fw.write("# "+this.getClass().getDbName()+"\r\n");
             fw.write("# DO NOT MODIFY\r\n");
             fw.write("#\r\n");
             tables.keySet().forEach((key) -> {
@@ -251,7 +251,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public String getBackupFileName() {
-        return getName() + ".db";
+        return getDbName() + ".db";
     }
 
     @Override

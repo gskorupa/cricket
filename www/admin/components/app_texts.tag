@@ -99,7 +99,17 @@
         }
         
      app.texts.app_system_form = {
-            "adapter": {
+            "title": {
+                "en": "system",
+                "fr": "system",
+                "pl": "system"
+            },
+            "message": {
+                "en": "Attention! The changes introduced here can have serious consequences. Act carefully.",
+                "fr": "Attention! The changes introduced here can have serious consequences. Act carefully.",
+                "pl": "Attention! The changes introduced here can have serious consequences. Act carefully."
+            },
+            "db_adapter": {
                 "en": "Database adapter",
                 "fr": "Database adapter",
                 "pl": "Database adapter"
@@ -108,6 +118,21 @@
                 "en": "Query",
                 "fr": "Query",
                 "pl": "Query"
+            },
+            "ad_adapter": {
+                "en": "Adapter name",
+                "fr": "Adapter name",
+                "pl": "Adapter name"
+            },
+            "ad_property": {
+                "en": "Property name",
+                "fr": "Property name",
+                "pl": "Property name"
+            },
+            "ad_value": {
+                "en": "New value",
+                "fr": "New value",
+                "pl": "New value"
             },
             "save": {
                 "en": "Save",
