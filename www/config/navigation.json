@@ -16,40 +16,8 @@
                 "link": "#!en"
             },
             {
-                "name": "French",
-                "link": "#!fr"
-            },
-            {
                 "name": "Polish",
                 "link": "#!pl"
-            }
-        ]
-    }
-],
-"fr": [
-    {
-        "name": "Accueil",
-        "link": "#"
-    },
-    {
-        "name": "À propos",
-        "link": "#articles,about"
-    },
-    {
-        "name": "La langue",
-        "id": "lang",
-        "options": [
-            {
-                "name": "anglaise",
-                "link": "#en"
-            },
-            {
-                "name": "française",
-                "link": "#fr"
-            },
-            {
-                "name": "polonaise",
-                "link": "#pl"
             }
         ]
     }
@@ -57,11 +25,11 @@
 "pl": [
     {
         "name": "Home",
-        "link": "#"
+        "link": "#!"
     },
     {
         "name": "O nas",
-        "link": "#articles,about"
+        "link": "#!articles,about"
     },
     {
         "name": "Język",
@@ -69,15 +37,11 @@
         "options": [
             {
                 "name": "Angielski",
-                "link": "#en"
-            },
-            {
-                "name": "Francuski",
-                "link": "#fr"
+                "link": "#!en"
             },
             {
                 "name": "Polski",
-                "link": "#pl"
+                "link": "#!pl"
             }
         ]
     }

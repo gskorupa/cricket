@@ -18,18 +18,14 @@ package org.cricketmsf.services;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
-import java.util.HashMap;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.EventException;
-import org.cricketmsf.exception.QueueException;
-import org.cricketmsf.in.http.EchoHttpAdapterIface;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.http.StandardResult;
-import org.cricketmsf.in.queue.SubscriberIface;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
@@ -42,29 +38,34 @@ import org.cricketmsf.out.log.LoggerAdapterIface;
  * @author greg
  */
 public class BasicService extends Kernel {
-
+    
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
-    EchoHttpAdapterIface echoAdapter = null;
-    KeyValueDBIface database = null;
+    //EchoHttpAdapterIface echoAdapter = null;
+    protected KeyValueDBIface cacheDB = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
-    FileReaderAdapterIface fileReader = null;
-    SubscriberIface queueSubscriber = null;
+    FileReaderAdapterIface wwwFileReader = null;
+    //SubscriberIface queueSubscriber = null;
     // optional
     //HttpAdapterIface scriptingService = null;
     //ScriptingAdapterIface scriptingEngine = null;
+    
+    public BasicService() {
+        super();
+        this.configurationBaseName = "BasicService";
+    }
 
     @Override
     public void getAdapters() {
         // standard Cricket adapters
         logAdapter = (LoggerAdapterIface) getRegistered("Logger");
-        echoAdapter = (EchoHttpAdapterIface) getRegistered("Echo");
-        database = (KeyValueDBIface) getRegistered("Database");
+        //echoAdapter = (EchoHttpAdapterIface) getRegistered("Echo");
+        cacheDB = (KeyValueDBIface) getRegistered("CacheDB");
         scheduler = (SchedulerIface) getRegistered("Scheduler");
-        htmlAdapter = (HtmlGenAdapterIface) getRegistered("WWWService");
-        fileReader = (FileReaderAdapterIface) getRegistered("FileReader");
-        queueSubscriber = (SubscriberIface) getRegistered("QueueSubscriber");
+        htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
+        wwwFileReader = (FileReaderAdapterIface) getRegistered("WwwFileReader");
+        //queueSubscriber = (SubscriberIface) getRegistered("QueueSubscriber");
         // optional
         //scriptingService = (HttpAdapterIface) getRegistered("ScriptingService");
         //scriptingEngine = (ScriptingAdapterIface) getRegistered("ScriptingEngine");
@@ -79,21 +80,25 @@ public class BasicService extends Kernel {
             ex.printStackTrace();
             shutdown();
         }
+        /*
         try {
             if(null!=queueSubscriber){
                 queueSubscriber.init();
             }
         } catch (QueueException ex) {
         }
+         */
         try {
-            database.addTable("webcache", 100, false);
+            cacheDB.addTable("webcache", 100, false);
         } catch (KeyValueDBException e) {
         }
+        /*
         try {
-            database.addTable("counters", 1, false);
+            cacheDB.addTable("counters", 1, false);
         } catch (KeyValueDBException e) {
         }
-        
+         */
+
     }
 
     @Override
@@ -121,13 +126,13 @@ public class BasicService extends Kernel {
      * @param event
      * @return ParameterMapResult with the file content as a byte array
      */
-    @HttpAdapterHook(adapterName = "WWWService", requestMethod = "GET")
+    @HttpAdapterHook(adapterName = "WwwService", requestMethod = "GET")
     public Object doGet(Event event) {
         try {
             RequestObject request = event.getRequest();
             ParameterMapResult result
-                    = (ParameterMapResult) fileReader
-                            .getFile(request, htmlAdapter.useCache() ? database : null, "webcache");
+                    = (ParameterMapResult) wwwFileReader
+                            .getFile(request, htmlAdapter.useCache() ? cacheDB : null, "webcache");
             // caching policy 
             result.setMaxAge(120);
             return result;
@@ -159,11 +164,12 @@ public class BasicService extends Kernel {
         return result;
     }
 
+    /*
     @HttpAdapterHook(adapterName = "Echo", requestMethod = "*")
     public Object doGetEcho(Event requestEvent) {
         return sendEcho(requestEvent.getRequest());
     }
-
+     */
     @EventHook(eventCategory = Event.CATEGORY_LOG)
     @EventHook(eventCategory = "Category-Test")
     public void logEvent(Event event) {
@@ -180,10 +186,11 @@ public class BasicService extends Kernel {
         if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
         } else {
-            Kernel.getInstance().dispatchEvent(Event.logInfo("Event category "+event.getCategory()+" is not handled by BasicService. Payload: ", event.getPayload().toString()));
+            Kernel.getInstance().dispatchEvent(Event.logInfo("Event category " + event.getCategory() + " is not handled by BasicService. Payload: ", event.getPayload().toString()));
         }
     }
 
+    /*
     public Object sendEcho(RequestObject request) {
         StandardResult r = new StandardResult();
         r.setCode(HttpAdapter.SC_OK);
@@ -191,16 +198,16 @@ public class BasicService extends Kernel {
             if (!echoAdapter.isSilent()) {
                 // with echo counter
                 Long counter;
-                counter = (Long) database.get("counters", "echo.count", new Long(0));
+                counter = (Long) cacheDB.get("counters", "echo.count", new Long(0));
                 counter++;
-                database.put("counters", "echo.count", counter);
+                cacheDB.put("counters", "echo.count", counter);
                 HashMap<String, Object> data = new HashMap<>(request.parameters);
                 data.put("service.id", getId());
                 data.put("service.uuid", getUuid().toString());
                 data.put("service.name", getName());
                 data.put("request.method", request.method);
                 data.put("request.pathExt", request.pathExt);
-                data.put("echo.counter", database.get("counters", "echo.count"));
+                data.put("echo.counter", cacheDB.get("counters", "echo.count"));
                 if (data.containsKey("error")) {
                     int errCode = HttpAdapter.SC_INTERNAL_SERVER_ERROR;
                     try {
@@ -220,4 +227,5 @@ public class BasicService extends Kernel {
         }
         return r;
     }
+     */
 }

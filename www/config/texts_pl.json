@@ -1,0 +1,6 @@
+{
+    "notfound": "Nie znaleziono pliku!",
+    "home_hello": "Hello!",
+    "home_notconfigured": "Wygląda na to, że aplikacja nie została poprawnie skonfigurowana. Więcej informacji: <a href='https://github.com/gskorupa/Cricket/wiki/Microsite-Quickstart'>Microsite Quickstart</a>",
+    "details": "Pokaż szczegóły"
+}

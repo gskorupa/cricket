@@ -16,7 +16,6 @@
 package org.cricketmsf;
 
 import com.cedarsoftware.util.io.JsonReader;
-import com.cedarsoftware.util.io.JsonReader.ClassFactory;
 import com.cedarsoftware.util.io.JsonWriter;
 import org.cricketmsf.config.ConfigSet;
 import org.cricketmsf.config.Configuration;
@@ -31,7 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
-import org.cricketmsf.config.AdapterConfiguration;
 
 /**
  * Runner class is used when running JAR distribution. The class parses the
@@ -41,10 +39,11 @@ import org.cricketmsf.config.AdapterConfiguration;
  * @author greg
  */
 public class Runner {
-    
-    public static Kernel getService(String[] args){
+
+    public static Kernel getService(String[] args) {
         long runAt = System.currentTimeMillis();
         final Kernel service;
+        final ConfigSet defaultConfigSet;
         final ConfigSet configSet;
         Runner runner = new Runner();
 
@@ -57,6 +56,7 @@ public class Runner {
             System.exit(-1);
         }
 
+        defaultConfigSet = runner.readConfig(null);
         configSet = runner.readConfig(arguments);
 
         Class serviceClass = null;
@@ -102,7 +102,7 @@ public class Runner {
         }
         System.out.println("CRICKET RUNNER");
         try {
-            service = (Kernel) Kernel.getInstanceWithProperties(serviceClass, configuration);
+            service = Kernel.getInstanceWithProperties(serviceClass, configuration, defaultConfigSet);
             service.configSet = configSet;
             service.liftMode = arguments.containsKey("lift");
             if (arguments.containsKey("run")) {
@@ -202,7 +202,7 @@ public class Runner {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        */
+         */
     }
 
     /**
@@ -257,34 +257,40 @@ public class Runner {
 
     public ConfigSet readConfig(ArgumentParser arguments) {
         ConfigSet configSet = null;
-        if (arguments.containsKey("config")) {
+        Map args = new HashMap();
+        args.put(JsonReader.USE_MAPS, false);
+        Map types = new HashMap();
+        types.put("java.utils.HashMap", "adapters");
+        types.put("java.utils.HashMap", "properties");
+        args.put(JsonReader.TYPE_NAME_MAP, types);
+        InputStream propertyFile=null;
+        if (null!=arguments && arguments.containsKey("config")) {
             //Properties props;
-            Map args = new HashMap();
-            args.put(JsonReader.USE_MAPS, false);
-            Map types = new HashMap();
-            types.put("java.utils.HashMap", "adapters");
-            types.put("java.utils.HashMap", "properties");
-            args.put(JsonReader.TYPE_NAME_MAP, types);
             try {
-                InputStream propertyFile = new FileInputStream(new File((String) arguments.get("config")));
-                String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
-                configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
+                propertyFile = new FileInputStream(new File((String) arguments.get("config")));
+                //String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
+                //configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
             } catch (Exception e) {
                 e.printStackTrace();
                 //LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration: {0}", path);
             }
         } else {
             String propsName = "cricket.json";
-            InputStream propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
-            String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
-            Map args = new HashMap();
-            args.put(JsonReader.USE_MAPS, false);
-            Map types = new HashMap();
-            types.put("java.utils.HashMap", "adapters");
-            types.put("java.utils.HashMap", "properties");
-            args.put(JsonReader.TYPE_NAME_MAP, types);
-            configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
+            propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
+            //String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
+            //Map args = new HashMap();
+            //args.put(JsonReader.USE_MAPS, false);
+            //Map types = new HashMap();
+            //types.put("java.utils.HashMap", "adapters");
+            //types.put("java.utils.HashMap", "properties");
+            //args.put(JsonReader.TYPE_NAME_MAP, types);
+            //configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
         }
+        if(null==propertyFile){
+            return null;
+        }
+        String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
+        configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
         // read Kernel version
         Properties prop = new Properties();
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cricket.properties")) {
@@ -295,13 +301,12 @@ public class Runner {
         }
         configSet.setKernelVersion(prop.getProperty("version", "unknown"));
         // force property changes based on command line --force param
-        if (arguments.containsKey("force")) {
+        if (null!=arguments && arguments.containsKey("force")) {
             ArrayList<String> forcedProps = (ArrayList) arguments.get("force");
             for (int i = 0; i < forcedProps.size(); i++) {
                 configSet.forceProperty(forcedProps.get(i));
             }
         }
-        
         configSet.joinProps();
         return configSet;
     }

@@ -23,13 +23,16 @@
                 "admin-notification-email": "",
                 "restricted-resources": "DELETE@/api/auth GET@/api/user PUT@/api/user DELETE@/api/user *@/api/cm *@/api/alert *@/api/system",
                 "file.upload.maxsize": "1000000",
+                "backup-folder": "./work/backup",
+                "backup-strategy": "week",
                 "request-encoding": "UTF-8",
-                "serviceurl": "http://localhost:7070",
+                "serviceurl": "http://localhost:8080",
                 "servicename": "",
                 "maintenance-paths": "/api/system /api/cm /api/auth /api/user /admin",
                 "default-language": "en",
                 "SRVC_NAME_ENV_VARIABLE": "CRICKET_SERVICE_NAME",
                 "SRVC_URL_ENV_VARIABLE": "CRICKET_URL",
+                "SSL_ENV_VARIABLE": "CRICKET_SSL",
                 "www-theme": "theme1"
             },
             "adapters": {
@@ -212,7 +215,7 @@
                     "interfaceName": "SqlDBIface",
                     "classFullName": "org.cricketmsf.microsite.out.db.H2CmsDB",
                     "properties": {
-                        "path": "./work/data",
+                        "path":"./work/data",
                         "file": "cms",
                         "test-query": "select * from serviceversion",
                         "version": "1",
@@ -271,7 +274,7 @@
             "service": "org.cricketmsf.services.BasicService",
             "properties": {
                 "host": "0.0.0.0",
-                "port": "7070",
+                "port": "8080",
                 "ssl": "false",
                 "keystore": "./work/data/cricket_publickeystore.jks",
                 "keystore-password": "cricket15$#17",
@@ -316,7 +319,7 @@
                     }
                 },
                 {
-                    "name": "Database",
+                    "name": "CacheDB",
                     "interfaceName": "KeyValueDBIface",
                     "classFullName": "org.cricketmsf.out.db.KeyValueDB",
                     "properties": {
@@ -372,7 +375,7 @@
                     }
                 },
                 {
-                    "name": "WWWService",
+                    "name": "WwwService",
                     "interfaceName": "HtmlGenAdapterIface",
                     "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
                     "properties": {
@@ -383,23 +386,12 @@
                     }
                 },
                 {
-                    "name": "FileReader",
+                    "name": "WwwFileReader",
                     "interfaceName": "FileReaderAdapterIface",
                     "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
                         "root": "./www/",
                         "index-file": "index.html"
-                    }
-                },
-                {
-                    "name": "Test",
-                    "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.StandardHttpAdapter",
-                    "properties": {
-                        "context": "/test",
-                        "use-cache": "true",
-                        "page-processor": "false",
-                        "dump-request": "false"
                     }
                 }
             ]

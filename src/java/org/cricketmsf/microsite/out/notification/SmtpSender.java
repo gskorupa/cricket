@@ -51,7 +51,7 @@ public class SmtpSender extends OutboundAdapter implements EmailSenderIface, Ada
     
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
-
+        super.loadProperties(properties, adapterName);
         from = properties.getOrDefault("from", "");
         cc = properties.getOrDefault("cc", "");
         bcc = properties.getOrDefault("bcc", "");

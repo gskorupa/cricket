@@ -48,6 +48,7 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        super.loadProperties(properties, adapterName);
         helperAdapterName = properties.get("helper-name");
         Kernel.getInstance().getLogger().print("\thelper-name: " + helperAdapterName);
     }

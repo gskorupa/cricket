@@ -4,10 +4,11 @@
  */
 
 route(function (id) {
+    console.log('ID:'+id)
     if (app.languages.indexOf(id) > -1) {
         app.language = id
+        app.getTranslation()
         globalEvents.trigger('pageselected')
-        riot.mount('raw')
         riot.update()
         return
     }
@@ -28,6 +29,5 @@ route(function (id) {
     }
     
     globalEvents.trigger('pageselected')
-    
     riot.update()
 })

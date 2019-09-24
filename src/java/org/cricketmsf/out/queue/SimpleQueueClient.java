@@ -92,8 +92,6 @@ public class SimpleQueueClient extends OutboundAdapter implements QueueClientIfa
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        //this.properties = (HashMap<String,String>)properties.clone();        
-        //getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
         queueAdapterName = properties.get("queue-adapter-name");
         if (null == queueAdapterName || queueAdapterName.isEmpty()) {
             Kernel.getInstance().getLogger().print("\tWARNING! queue-adapter-name parameter is not set.");

@@ -53,6 +53,17 @@ public class JsonFormatter {
         args.put(JsonWriter.DATE_FORMAT, "dd/MMM/yyyy:kk:mm:ss Z");
         args.put(JsonWriter.TYPE, false);
         return JsonWriter.objectToJson(o, args)+"\r\n";
+        /*StringWriter sw = new StringWriter();
+        sw.write("");
+        try {
+            JsonReaderExt js=new JsonReaderExt();
+            js.write(o, false, sw, args);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        System.out.println(">>>>>>>>>>>>>>>>>!!!!!!!!!!!!!!!!!!!");
+        sw.flush();
+        return sw.toString();*/
     }
 
 }

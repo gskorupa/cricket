@@ -42,8 +42,45 @@ public class Configuration {
         ports = null;
     }
 
+    public Configuration join(Configuration overwritten) {
+        //simply replace
+        if (null == overwritten) {
+            System.out.println("NULL DEFAULT CONFIG");
+            return this;
+        }
+        //overwrite properties
+        properties.forEach((k, v) -> {
+            overwritten.properties.put(k, v);
+        });
+        //overwrite adapters
+        adapters.forEach((k, v) -> {
+            overwritten.adapters.put(k, v);
+        });
+
+        //overwrite ports
+        AdapterConfiguration ac;
+        boolean found;
+        ArrayList<AdapterConfiguration> al = new ArrayList<>();
+        for (int i = 0; i < overwritten.ports.length; i++) {
+            al.add(overwritten.ports[i]);
+        }
+        for (int j = 0; j < ports.length; j++) {
+            found = false;
+            for (int i = 0; i < al.size(); i++) {
+                if (ports[j].getName().equals(al.get(i).getName())) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                al.add(ports[j]);
+            }
+        }
+        overwritten.ports = al.toArray(new AdapterConfiguration[al.size()]);
+        return overwritten;
+    }
+
     public AdapterConfiguration getAdapterConfiguration(String name) {
-        if (null==ports || ports.length==0) {
+        if (null == ports || ports.length == 0) {
             return adapters.get(name);
         } else {
             for (int i = 0; i < ports.length; i++) {
@@ -56,20 +93,20 @@ public class Configuration {
     }
 
     public void putAdapterConfiguration(AdapterConfiguration config) {
-        if (null==ports || ports.length==0) {
+        if (null == ports || ports.length == 0) {
             adapters.put(config.getName(), config);
         } else {
             boolean found = false;
             for (int i = 0; i < ports.length; i++) {
                 if (config.getName().equals(ports[i].getName())) {
-                    ports[i]=config;
+                    ports[i] = config;
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                ports = Arrays.copyOf(ports, ports.length+1);
-                ports[ports.length-1]=config;
+                ports = Arrays.copyOf(ports, ports.length + 1);
+                ports[ports.length - 1] = config;
             }
         }
     }
@@ -129,10 +166,10 @@ public class Configuration {
     }
 
     public HashMap getAdapters() {
-        if(null!=ports && ports.length>0){
+        if (null != ports && ports.length > 0) {
             adapters = new HashMap<>();
-            for(int i=0; i<ports.length; i++){
-                adapters.put(ports[i].getName(),ports[i]);
+            for (int i = 0; i < ports.length; i++) {
+                adapters.put(ports[i].getName(), ports[i]);
             }
         }
         return adapters;
@@ -189,10 +226,10 @@ public class Configuration {
     }
 
     public void joinProps() {
-        if(null==ports || ports.length==0){
+        if (null == ports || ports.length == 0) {
             adapters.forEach((k, v) -> v.joinProps());
-        }else{
-            for(int i=0;i<ports.length;i++){
+        } else {
+            for (int i = 0; i < ports.length; i++) {
                 ports[i].joinProps();
             }
         }

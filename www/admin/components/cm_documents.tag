@@ -133,6 +133,8 @@
                 readPaths()
             }else if(eventName.startsWith('cancelled')){
                 self.selected = ''
+                riot.update()
+                updateSelectors()
             }else{
                 app.log('DOCUMENTS: ' + eventName)
             }
@@ -155,21 +157,28 @@
         }
 
         var updatePaths = function (text) {
-            app.log("PATHS: " + text)
             self.paths = JSON.parse(text)
             riot.update()
-            if (self.paths.length > 0){
-                //self.path = self.paths[0]
-                var index = self.paths.indexOf(self.path)
-                app.log('PATH INDEX:'+index)
-                document.getElementById("pathsDropdown").selectedIndex = index
-            } else{
-                //self.path = '/'
-                document.getElementById("pathsDropdown").selectedIndex = - 1
-            }
+            //if (self.paths.length > 0){
+            //    var index = self.paths.indexOf(self.path)
+            //    document.getElementById("pathsDropdown").selectedIndex = index
+            //} else{
+            //    document.getElementById("pathsDropdown").selectedIndex = - 1
+            //}
+            updateSelectors()
             readContentList()
             riot.update()
-            
+        }
+        
+        var updateSelectors = function(){
+            if (self.paths.length > 0){
+                var index = self.paths.indexOf(self.path)
+                document.getElementById("pathsDropdown").selectedIndex = index
+            } else{
+                document.getElementById("pathsDropdown").selectedIndex = - 1
+            }
+            var index2 = self.statuses.indexOf(self.status)
+            document.getElementById("statusesDropdown").selectedIndex = index2
         }
 
         var updateList = function (text) {
@@ -211,13 +220,10 @@
 
         self.afterPublish = function(object){
             var text = '' + object
-            app.log('CALBACK: ' + object)
             if (text.startsWith('{')){
                 readContentList()
             } else if (text.startsWith('error')){
-                //alert(text)
             } else if (text.startsWith('[object MouseEvent')){
-                //self.callbackListener.trigger('cancelled')
             }   
         }
 

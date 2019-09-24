@@ -72,6 +72,7 @@ public class ContentRequestProcessor {
     }
 
     public Object processGetPublished(Event event, CmsIface adapter) {
+        System.out.println("EVENT CLASS: "+event.getClass());
         RequestObject request = event.getRequest();
         StandardResult result = new StandardResult();
         String language = (String) request.parameters.getOrDefault("language", "");

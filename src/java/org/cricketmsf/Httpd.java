@@ -55,7 +55,13 @@ public class Httpd {
         }
         keystore = (String) service.getProperties().getOrDefault("keystore", "");
         password = (String) service.getProperties().getOrDefault("keystore-password", "");
-        ssl = "true".equalsIgnoreCase("" + service.getProperties().getOrDefault("ssl", "false"));
+        //ssl = "true".equalsIgnoreCase("" + service.getProperties().getOrDefault("ssl", "false"));
+        if("false".equalsIgnoreCase(service.getSslAlgorithm()) || "no".equalsIgnoreCase(service.getSslAlgorithm())){
+            ssl=false;
+        }else{
+            ssl=true;
+        }
+        
         if (ssl && (keystore.isEmpty() || password.isEmpty())) {
             System.out.println("SSL not configured properly");
             System.exit(100);
@@ -89,7 +95,7 @@ public class Httpd {
                 if (adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter) {
                     Kernel.getLogger().print("context: " + ((HttpAdapter) adapterEntry.getValue()).getContext());
                     if (ssl) {
-                        scontext = SSLContext.getInstance("TLS");
+                        scontext = SSLContext.getInstance(service.getSslAlgorithm());
                         // keystore
                         char[] keystorePassword = password.toCharArray();
                         KeyStore ks = KeyStore.getInstance("JKS");

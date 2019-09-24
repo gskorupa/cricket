@@ -39,7 +39,13 @@ public class Request {
     }
     
     public Request setProperty(String key, String value){
-        properties.put(key, value);
+        if("content-type".equalsIgnoreCase(key)){
+            properties.put("Content-Type", value);
+        }else if("user-agent".equalsIgnoreCase(key)){
+            properties.put("User-Agent", value);
+        }else{
+            properties.put(key, value);
+        }
         return this;
     }
     

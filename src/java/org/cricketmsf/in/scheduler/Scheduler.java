@@ -29,10 +29,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import org.cricketmsf.event.EventDecorator;
 import org.cricketmsf.exception.DispatcherException;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
 
@@ -50,13 +53,14 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     protected boolean restored = false;
     long threadsCounter = 0;
     private String initialTasks;
-    private HashMap<String, String> killList;
+    private ConcurrentHashMap<String, String> killList;
 
-    private long MINIMAL_DELAY = 5000;
+    private long MINIMAL_DELAY = 1000;
 
+    private ThreadFactory factory = Kernel.getInstance().getThreadFactory();
     public final ScheduledExecutorService scheduler
-            = Executors.newScheduledThreadPool(1);
-
+            = Executors.newScheduledThreadPool(10,factory);
+    
     /**
      * This method is executed while adapter is instantiated during the service
      * start. It's used to configure the adapter according to the configuration.
@@ -99,7 +103,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         database.read();
         setRestored(database.getSize() > 0);
         processDatabase();
-        killList = new HashMap<>();
+        killList = new ConcurrentHashMap<>();
 
     }
     
@@ -138,7 +142,6 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         if (event.getTimePoint() == null) {
             return false;
         }
-
         if (systemStart) {
             String oldCopy = "";
             //when events initialized on the service start, we need to create new instances of these events
@@ -203,10 +206,10 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         }.init(event);
 
         Delay delay = getDelayForEvent(event, restored);
-        if ((delay.getDelay() >= 0) && systemStart) {
-            Kernel.getLogger().log(Event.logInfo(this, "event " + event.getName() + " will start in " + (delay.getDelay() / 1000) + " seconds"));
-        }
         if (delay.getDelay() >= 0) {
+            if(systemStart){
+                Kernel.getLogger().log(Event.logInfo(this, "event " + event.getName() + " will start in " + (delay.getDelay() / 1000) + " seconds"));
+            }
             if (!restored) {
                 if (event.getName() != null && !event.getName().isEmpty()) {
                     database.put(event.getName(), event);
@@ -215,16 +218,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                 }
             }
             threadsCounter++;
-            final ScheduledFuture<?> workerHandle
-                    = scheduler.schedule(runnable, delay.getDelay(), delay.getUnit());
+            final ScheduledFuture<?> workerHandle  = scheduler.schedule(runnable, delay.getDelay(), delay.getUnit());
         }
-        /*
-        scheduler.schedule(new Runnable() {
-            public void run() {
-                workerHandle.cancel(true);
-            }
-        }, 60 * 60, SECONDS);
-         */
         return true;
     }
 
@@ -362,6 +357,10 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     public long getThreadsCount() {
         return threadsCounter;
     }
+    
+    private String getThreadsInfo(){
+        return "";
+    }
 
     @Override
     public Map<String, String> getStatus(String name) {
@@ -402,7 +401,16 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     @Override
     public void dispatch(Event event) throws DispatcherException {
         if(event.getTimePoint()==null){
-            Kernel.getInstance().handleEvent(event);
+            Kernel.getInstance().getEventProcessingResult(event);
+        }else{
+            handleEvent(event);
+        }
+    }
+    
+    @Override
+    public void dispatch(EventDecorator event) throws DispatcherException {
+        if(event.getTimePoint()==null){
+            Kernel.getInstance().getEventProcessingResult(event);
         }else{
             handleEvent(event);
         }

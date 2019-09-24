@@ -62,6 +62,7 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        super.loadProperties(properties, adapterName);
         helperAdapterName = properties.get("helper-name");
         Kernel.getInstance().getLogger().print("\thelper-name: " + helperAdapterName);
         helperAdapterName2 = properties.get("helper-name-2");

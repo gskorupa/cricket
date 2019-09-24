@@ -16,6 +16,8 @@
 package org.cricketmsf.event;
 
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.cricketmsf.exception.EventException;
 
 /**
@@ -23,18 +25,30 @@ import org.cricketmsf.exception.EventException;
  * @author greg
  */
 public class EventMaster {
-    
-    public static TreeMap<String,String> register = new TreeMap<>();
-    
+
+    public static TreeMap<String, String> register = new TreeMap<>();
+
     public static void registerEventCategories(String[] categories, String eventClassName) throws EventException {
-        
-        for(int i=0; i<categories.length; i++){
-            if(register.containsKey(categories[i])){
-                throw new EventException(EventException.CATEGORY_ALREADY_DEFINED, "Event category "+categories[i]+" alredy registered by "+register.get(categories[i]));
+
+        for (int i = 0; i < categories.length; i++) {
+            if (register.containsKey(categories[i])) {
+                throw new EventException(EventException.CATEGORY_ALREADY_DEFINED, "Event category " + categories[i] + " alredy registered by " + register.get(categories[i]));
             }
             register.put(categories[i], eventClassName);
         }
-        
+
     }
-    
+
+    public static void registerEventCategories(Class cls) throws EventException {
+        try {
+            if (cls.getSuperclass().isInstance(cls.newInstance())) {
+                register.put(cls.getName(), cls.getName());
+            } else {
+                throw new EventException(EventException.MUST_EXTEND_DECORATOR, cls.getSuperclass().getName()+" is not EventDecorator subclass");
+            }
+        } catch (InstantiationException|IllegalAccessException ex) {
+            throw new EventException(EventException.MUST_EXTEND_DECORATOR, cls.getSuperclass().getName()+" is not EventDecorator subclass");
+        }
+    }
+
 }

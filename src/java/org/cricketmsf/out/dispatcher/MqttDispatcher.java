@@ -17,9 +17,11 @@ package org.cricketmsf.out.dispatcher;
 
 import org.cricketmsf.exception.DispatcherException;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.event.EventDecorator;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.mqtt.MqttPublisher;
 import org.cricketmsf.out.mqtt.MqttPublisherException;
@@ -35,7 +37,7 @@ public class MqttDispatcher extends OutboundAdapter implements Adapter, Dispatch
     private boolean debug = false;
     private int qos = 1;
     private String rootTopic = "events/";
-    private HashMap eventMap = new HashMap();
+    private ConcurrentHashMap eventMap = new ConcurrentHashMap();
 
     @Override
     public void dispatch(Event event) throws DispatcherException {
@@ -112,4 +114,14 @@ public class MqttDispatcher extends OutboundAdapter implements Adapter, Dispatch
         }
     }
 
+    //TODO: all EventDecorator events are handled by the Kernel. Should be send to the queue?
+    @Override
+    public void dispatch(EventDecorator event) throws DispatcherException {
+        throw new DispatcherException(DispatcherException.UNKNOWN_EVENT);
+    }
+
+    @Override
+    public DispatcherIface getDispatcher() {
+        return this;
+    }
 }

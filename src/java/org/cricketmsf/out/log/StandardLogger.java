@@ -107,8 +107,9 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         if (isMuted()) {
             return;
         }
-
-        new Thread(() -> {
+        
+        Kernel.getInstance().getThreadFactory().newThread(() -> {
+        //new Thread(() -> {
             Level tmpLevel;
             switch (event.getType()) {
                 case "LOG_INFO":
@@ -140,7 +141,7 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
                     break;
             }
             logger.log(tmpLevel, event.toLogString());
-        }).start();
+        },"StandardLogger").start();
 
     }
 

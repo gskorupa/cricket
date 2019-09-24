@@ -1,6 +1,8 @@
 /* Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
  * Licensed under the Apache License, Version 2.0 */
 
+var globalEvents = riot.observable();
+
 var app = {
     "user": {
         "name": "",
@@ -23,6 +25,7 @@ var app = {
                 ]}
             ]
     },
+    "texts":{},
     "offline": false,
     "authAPI": "http://localhost:8080/api/auth",
     "csAPI": "http://localhost:8080/api/cs",
@@ -37,10 +40,14 @@ var app = {
         if (app.debug) {
             console.log(message)
         }
+    },
+    "getTranslation": function(){
+        getData('/config/texts_'+app.language+'.json',null,null,app.updateTranslation,globalEvents)
+    },
+    "updateTranslation": function(text){
+        app.texts = JSON.parse(text)
     }
 }
-
-var globalEvents = riot.observable();
 
 function decodeDocument(doc){
   var result = doc  

@@ -8,7 +8,7 @@
     </target>
     <!-- set global properties for this build -->
     <property name="targetJava10+" value="false"/>
-    <property name="mainVersion" value="1.3.0-alpha.11"/>
+    <property name="mainVersion" value="1.3.1"/>
     <property name="version" value="${mainVersion}"/>
     <!-- default JDK == 1.12 -->
     <!-- alternate JDK compiler will be used if declared (not empty) -->
@@ -56,6 +56,7 @@
     <property name="json-bind-lib" value="javax.json.bind-api-1.0.jar"/>
     <property name="json-lib" value="javax.json-1.1.4.jar"/>
     <property name="mqtt-lib" value="org.eclipse.paho.client.mqttv3-1.2.0.jar"/>
+    <property name="livingdocumentation-lib" value="LivingDocumentation.jar"/>
     
     
     <path id="project-classpath">
@@ -67,6 +68,7 @@
         <pathelement location="${lib}/${yasson-lib}"/>
         <pathelement location="${lib}/${json-lib}"/>
         <pathelement location="${lib}/${json-bind-lib}"/>
+        <pathelement location="${lib}/${livingdocumentation-lib}"/>
     </path>
 
     <target name="init">
@@ -129,6 +131,29 @@
         </javadoc>
         <jar basedir="docs/javadoc" destfile="${javadoc-jar}" />
     </target>
+    
+    <target name="documentation" depends="init">
+        <javadoc packagenames="org.cricketmsf.*"
+                 sourcepath="${src}">
+            <classpath>
+                <fileset dir="${lib}"/>
+            </classpath>
+            <doclet name="org.cricketmsf.livingdocumentation.LivingDocDoclet"  path="${lib}/${livingdocumentation-lib}">
+                <param name="-category" value="glossary"/>
+                <param name="-file" value="${basedir}/docs/documentation/glossary.md"/>
+            </doclet>
+        </javadoc>
+        <javadoc packagenames="org.cricketmsf.*"
+                 sourcepath="${src}">
+            <classpath>
+                <fileset dir="${lib}"/>
+            </classpath>
+            <doclet name="org.cricketmsf.livingdocumentation.LivingDocDoclet"  path="${lib}/${livingdocumentation-lib}">
+                <param name="-category" value="architecture"/>
+                <param name="-file" value="${basedir}/docs/documentation/architecture.md"/>
+            </doclet>
+        </javadoc>
+    </target>
 
     <target name="dist" depends="clean, compile"
             description="generate the distribution">
@@ -151,7 +176,7 @@
                 keysize="2048" 
                 validity="720">
             <dname>
-                <param name="CN" value="localhost"/>
+                <param name="CN" value="selfsigned"/>
                 <param name="OU" value="Cricket MSF"/>
             </dname>
         </genkey>
@@ -179,7 +204,7 @@
     </target>
     <target name="copy8run" if="${targetJava8}">
         <copy tofile="${dist}/run.sh" file="${src-other}/run_8.sh"/>
-        <copy file="Dockerfile.template" tofile="Dockerfile" overwrite="true"/>
+        <copy file="Dockerfile_8.template" tofile="Dockerfile" overwrite="true"/>
     </target>
     
     <target name="distribution" depends="dist"
@@ -248,6 +273,12 @@
         <get
             src="https://search.maven.org/remotecontent?filepath=com/cedarsoftware/json-io/4.10.1/json-io-4.10.1.jar"
             dest="lib/json-io-4.10.1.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
+        <get
+            src="https://github.com/gskorupa/livingdocumentation/releases/download/v0.1/LivingDocumentation.jar"
+            dest="lib/LivingDocumentation.jar" 
             usetimestamp="true" 
             ignoreerrors="true"
         />

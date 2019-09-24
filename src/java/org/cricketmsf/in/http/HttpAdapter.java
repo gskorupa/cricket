@@ -33,6 +33,7 @@ import org.cricketmsf.in.InboundAdapter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.cricketmsf.Stopwatch;
@@ -122,21 +123,23 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        new Thread(() -> {
+        //Event rootEvent = new Event();
+        Kernel.getInstance().getThreadFactory().newThread(()-> {
+        //new Thread(() -> {
             try {
-                doHandle(exchange);
+                doHandle(exchange, Kernel.getEventId());
             } catch (NullPointerException | IOException e) {
                 Kernel.getInstance().dispatchEvent(Event.logFinest(this.getClass().getSimpleName() + ".handle()", e.getMessage()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }).start();
+        },this.getName()).start();
     }
 
-    public void doHandle(HttpExchange exchange) throws IOException {
+    public void doHandle(HttpExchange exchange, long rootEventId) throws IOException {
 
         Stopwatch timer = new Stopwatch();
-        Event rootEvent = new Event();
+        //Event rootEvent = new Event();
         String acceptedResponseType = JSON;
 
         try {
@@ -147,7 +150,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         }
 
         // cerating Result object
-        Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEvent.getId());
+        Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEventId);
 
         acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
 
@@ -155,13 +158,26 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData;
 
+        Iterator it = result.getHeaders().keySet().iterator();
+        String key;
+        while(it.hasNext()){
+            key=(String)it.next();
+            List<String> values = result.getHeaders().get(key);
+            for(int i=0; i<values.size();i++){
+                headers.set(key, values.get(i));
+            }
+            //values.forEach((value) -> {
+            //    headers.set(key, value);
+            //});
+        }
+        /*
         result.getHeaders().keySet().forEach((key) -> {
             List<String> values = result.getHeaders().get(key);
             values.forEach((value) -> {
                 headers.set(key, value);
             });
         });
-
+        */
         switch (result.getCode()) {
             case SC_MOVED_PERMANENTLY:
             case SC_MOVED_TEMPORARY:
@@ -212,7 +228,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
 
         //TODO: format logs to have clear info about root event id
         Kernel.getInstance().dispatchEvent(
-                Event.logFinest("HttpAdapter", "event " + rootEvent.getId() + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
+                Event.logFinest("HttpAdapter", "event " + rootEventId + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
         );
 
         if (responseData.length > 0) {
@@ -224,6 +240,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             exchange.sendResponseHeaders(result.getCode(), -1);
         }
         sendLogEvent(exchange, responseData.length);
+        result=null;
         exchange.close();
     }
 

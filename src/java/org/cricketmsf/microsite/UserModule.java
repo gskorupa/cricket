@@ -23,13 +23,18 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.StandardResult;
+import org.cricketmsf.livingdoc.design.BoundedContext;
+import org.cricketmsf.livingdoc.design.Service;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.microsite.out.user.UserException;
 
 /**
- *
+ * Service providing business logic related to the user management
+ * 
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
+@BoundedContext(name="User Management")
+@Service
 public class UserModule extends UserBusinessLogic {
 
     private static UserModule self;
@@ -49,7 +54,13 @@ public class UserModule extends UserBusinessLogic {
         }
         return isAdmin;
     }
-
+    /**
+     * Get user data data. 
+     * 
+     * @param event http request event
+     * @param userAdapter port to ...
+     * @return 
+     */
     @Override
     public Object handleGetRequest(Event event, UserAdapterIface userAdapter) {
         RequestObject request = event.getRequest();

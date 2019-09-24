@@ -32,6 +32,8 @@ import org.cricketmsf.config.AdapterConfiguration;
 import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.scheduler.SchedulerIface;
+import org.cricketmsf.microsite.event.ShutdownRequested;
+import org.cricketmsf.microsite.event.StatusRequested;
 import org.cricketmsf.microsite.out.auth.Token;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.microsite.user.HashMaker;
@@ -52,6 +54,7 @@ public class SiteAdministrationModule {
     private boolean backupDaily = false;
     private final int maxCacheSize = 1000;
     private final int maxUsers = 100;
+    private String backupStrategy;
 
     private final String ADMIN = "admin";
 
@@ -98,7 +101,8 @@ public class SiteAdministrationModule {
         if ("GET".equalsIgnoreCase(method)) {
             switch (moduleName.toLowerCase()) {
                 case "status":
-                    result = getServiceInfo();
+                    //result = getServiceInfo();
+                    result=(StandardResult)Kernel.getInstance().getEventProcessingResult(new StatusRequested());
                     break;
                 case "config":
                     result = getServiceConfig();
@@ -106,7 +110,7 @@ public class SiteAdministrationModule {
                 case "shutdown":
                     result.setCode(HttpAdapter.SC_ACCEPTED);
                     result.setData("the service will be stopped within a few seconds");
-                    Kernel.getInstance().dispatchEvent(
+                    /*Kernel.getInstance().dispatchEvent(
                             new Event(
                                     this.getClass().getSimpleName(),
                                     Event.CATEGORY_GENERIC,
@@ -114,7 +118,8 @@ public class SiteAdministrationModule {
                                     "+5s",
                                     ""
                             )
-                    );
+                    );*/
+                    Kernel.getInstance().dispatchEvent(new ShutdownRequested().setDelay(10));
                     break;
                 default:
                     result.setCode(HttpAdapter.SC_BAD_REQUEST);
@@ -181,7 +186,7 @@ public class SiteAdministrationModule {
         return result;
     }
 
-    private StandardResult getServiceInfo() {
+    public StandardResult getServiceInfo() {
         StandardResult result = new StandardResult();
         result.setData(Kernel.getInstance().reportStatus());
         return result;
@@ -207,8 +212,10 @@ public class SiteAdministrationModule {
     ) {
         backupFolder = (String) Kernel.getInstance().getProperties().get("backup-folder");
         try {
-            backupDaily = Boolean.parseBoolean((String) Kernel.getInstance().getProperties().get("backup-daily"));
+            //backupDaily = Boolean.parseBoolean((String) Kernel.getInstance().getProperties().get("backup-daily"));
+            backupStrategy = ((String)Kernel.getInstance().getProperties().getOrDefault("backup-strategy","")).toLowerCase();
         } catch (ClassCastException e) {
+            backupStrategy = "";
         }
         if (backupFolder == null) {
             Kernel.getInstance().dispatchEvent(Event.logSevere(this, "Kernel parameter \"backup-folder\" not configured"));
@@ -243,7 +250,7 @@ public class SiteAdministrationModule {
             String initialAdminEmail = (String) Kernel.getInstance().getProperties().getOrDefault("initial-admin-email", "");
             String initialAdminPassword = (String) Kernel.getInstance().getProperties().getOrDefault("initial-admin-password", "");
             if (initialAdminEmail.isEmpty() || initialAdminPassword.isEmpty()) {
-                Kernel.getInstance().dispatchEvent(Event.logSevere(this, "initial-admin-email or initial-admin-secret properties not set. Stop the server now!"));
+                Kernel.getInstance().dispatchEvent(Event.logSevere(this, "initial-admin-password property not set. Login to the administrator's account will be impossible!"));
             }
             User newUser;
             //create admin account
@@ -341,9 +348,6 @@ public class SiteAdministrationModule {
      * @param userDB
      * @param authDB
      * @param cmsDB
-     * @param thingsDB
-     * @param iotDataDB
-     * @param actuatorCommandsDB
      */
     public void backupDatabases(
             KeyValueDBIface database,
@@ -351,7 +355,23 @@ public class SiteAdministrationModule {
             KeyValueDBIface authDB,
             KeyValueDBIface cmsDB
     ) {
-        String prefix = backupDaily ? getDateString() : "";
+        String prefix; // = backupDaily ? getDateString() : "";
+        switch(backupStrategy){
+            case "overwrite":
+                prefix="";
+                break;
+            case "day":
+                prefix = getDateString("yyyyMMdd-");
+                break;
+            case "week":
+                prefix = getDateString("E-");
+                break;
+            case "month":
+                prefix = getDateString("d-");
+                break;
+            default:
+                prefix = "";
+        }
         try {
             database.backup(backupFolder + prefix + database.getBackupFileName());
         } catch (KeyValueDBException ex) {
@@ -422,9 +442,9 @@ public class SiteAdministrationModule {
 
     }
 
-    private String getDateString() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-");
+    private String getDateString(String format) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
         return sdf.format(new Date());
     }
-
+    
 }

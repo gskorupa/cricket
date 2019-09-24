@@ -82,3 +82,5 @@ hs_err_pid*
 !/lib/httpcore-4.4.9.jar
 !/lib/junit-4.12.jar
 !/docs/cricket-latest.jar
+/docs/documentation/
+/lib/work/data/cms.mv.db

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2019 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.out.db;
+package org.cricketmsf.microsite.event;
+
+import org.cricketmsf.Event;
+import org.cricketmsf.event.EventDecorator;
+import org.cricketmsf.event.EventIface;
 
 /**
- *
+ * To be removed
  * @author greg
  */
-public interface JdbcIface {
+@org.cricketmsf.livingdoc.design.BoundedContext(name="System Management")
+@org.cricketmsf.livingdoc.design.Event()
+public class ShutdownRequested extends EventDecorator implements EventIface {
+    
+    public Event setDelay(int numberOfSeconds){
+        setTimePoint("+"+numberOfSeconds+"s");
+        return originalEvent;
+    }
     
 }

@@ -152,6 +152,7 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
                     }
                     result.setPayload(response.toString().getBytes());
                 } else {
+                    System.out.println("CODE:"+result.getCode()+" "+result.getMessage());
                     //result.setContent("");
                 }
             } else {
@@ -207,9 +208,14 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
                 }
             }
         } catch (IOException e) {
+            e.printStackTrace();
             String message = e.getMessage();
             Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), message));
-            result.setCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
+            if(message.toLowerCase().indexOf("connection refused")>-1){
+                result.setCode(444);
+            }else{
+                result.setCode(HttpURLConnection.HTTP_INTERNAL_ERROR);
+            }
             result.setMessage(message);
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             String message = e.getMessage();

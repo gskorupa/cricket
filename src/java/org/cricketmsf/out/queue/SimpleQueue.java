@@ -18,6 +18,7 @@ package org.cricketmsf.out.queue;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.exception.QueueException; 
 import org.cricketmsf.out.OutboundAdapter;
@@ -30,15 +31,15 @@ import org.cricketmsf.in.queue.QueueCallbackIface;
  */
 public class SimpleQueue extends OutboundAdapter implements QueueIface, OutboundAdapterIface, Adapter {
 
-    private HashMap<String, ArrayList<QueueCallbackIface>> subscribers;
-    private HashMap<String, HashMap<String, Object>> channels;
-    private HashMap<String, ArrayList<Object>> listChannels;
+    private ConcurrentHashMap<String, ArrayList<QueueCallbackIface>> subscribers;
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> channels;
+    private ConcurrentHashMap<String, ArrayList<Object>> listChannels;
     private int notificationMode = NOTIFY_ALL;
 
     @Override
     public void add(String channel, String key, Object value) throws QueueException {
         if (!channels.containsKey(channel)) {
-            channels.put(channel, new HashMap<String, Object>());
+            channels.put(channel, new ConcurrentHashMap<String, Object>());
         }
         if(!notify(channel, value)){
             channels.get(channel).put(key, value);
@@ -161,11 +162,9 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        //this.properties = (HashMap<String,String>)properties.clone();        
-        //getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
-        subscribers = new HashMap<>();
-        channels = new HashMap<>();
-        listChannels = new HashMap<>();
+        subscribers = new ConcurrentHashMap<>();
+        channels = new ConcurrentHashMap<>();
+        listChannels = new ConcurrentHashMap<>();
     }
 
     @Override

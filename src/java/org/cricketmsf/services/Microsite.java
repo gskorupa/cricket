@@ -31,6 +31,7 @@ import org.cricketmsf.microsite.user.User;
 import org.cricketmsf.out.db.*;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.List;
+import org.cricketmsf.annotation.EventClassHook;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.EventException;
@@ -39,6 +40,8 @@ import org.cricketmsf.microsite.in.http.ContentRequestProcessor;
 import org.cricketmsf.microsite.user.UserEvent;
 import org.cricketmsf.microsite.out.notification.*;
 import org.cricketmsf.microsite.*;
+import org.cricketmsf.microsite.event.GetContent;
+import org.cricketmsf.microsite.event.StatusRequested;
 
 /**
  * Microsite
@@ -110,7 +113,7 @@ public class Microsite extends Kernel {
             }
         }
         SiteAdministrationModule.getInstance().initDatabases(database, userDB, authDB);
-        SiteAdministrationModule.getInstance().initScheduledTasks(scheduler);
+        //SiteAdministrationModule.getInstance().initScheduledTasks(scheduler);
         emailSender.send(
                 (String) getProperties().getOrDefault("admin-notification-email", ""),
                 "Microsite started", "Microsite service has been started."
@@ -123,12 +126,12 @@ public class Microsite extends Kernel {
 
     @Override
     public void runFinalTasks() {
-            /*
+        /*
             // CLI adapter doesn't start automaticaly as other inbound adapters
             if (cli != null) {
             cli.start();
             }
-            */
+         */
     }
 
     /**
@@ -192,7 +195,7 @@ public class Microsite extends Kernel {
             rd.put("user", event.getRequest().headers.getFirst("X-user-id"));
             rd.put("environmentName", getName());
             rd.put("javaversion", System.getProperty("java.version"));
-            rd.put("wwwTheme", getProperties().getOrDefault("www-theme","theme1"));
+            rd.put("wwwTheme", getProperties().getOrDefault("www-theme", "theme1"));
             List<String> roles = event.getRequest().headers.get("X-user-role");
             if (roles != null && roles.size() > 0) {
                 StringBuilder sb = new StringBuilder("[");
@@ -316,14 +319,25 @@ public class Microsite extends Kernel {
 
     @HttpAdapterHook(adapterName = "ContentService", requestMethod = "GET")
     public Object contentGetPublished(Event event) {
+        //synchronous processing
+        return getEventProcessingResult(new GetContent(event));
+    }
+
+    @EventClassHook(className = "org.cricketmsf.microsite.event.GetContent")
+    public Object getPublishedContent(GetContent event) {
         try {
-            return new ContentRequestProcessor().processGetPublished(event, cms);
+            return new ContentRequestProcessor().processGetPublished(event.getOriginalEvent(), cms);
         } catch (Exception e) {
             e.printStackTrace();
             StandardResult r = new StandardResult();
             r.setCode(HttpAdapter.SC_NOT_FOUND);
             return r;
         }
+    }
+
+    @EventClassHook(className = "org.cricketmsf.microsite.event.StatusRequested")
+    public Object getStatusInfo(StatusRequested event) {
+        return SiteAdministrationModule.getInstance().getServiceInfo();
     }
 
     @HttpAdapterHook(adapterName = "ContentManager", requestMethod = "OPTIONS")
@@ -490,8 +504,8 @@ public class Microsite extends Kernel {
     @EventHook(eventCategory = "*")
     public void processEvent(Event event) {
         dispatchEvent(Event.logWarning(
-                "Event category/type " + event.getCategory() + "/" + event.getType()+" not handled",
-                 event.getPayload().toString()
+                "Event category/type " + event.getCategory() + "/" + event.getType() + " not handled",
+                event.getPayload().toString()
         ));
     }
 

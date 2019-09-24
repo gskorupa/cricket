@@ -1,7 +1,7 @@
 <cs_article3>
     <h1 class='display-3'><raw html="{article.title}"/></h1>
     <p><raw html="{article.summary}"/></p>
-    <p ><a class="btn btn-outline-dark btn-lg" href="{article.link}" role="button">{ text.details[app.language] } &raquo;</a></p>    
+    <p ><a class="btn btn-outline-dark btn-lg" href="{article.link}" role="button">{ app.texts.details } &raquo;</a></p>    
     <script charset="UTF-8">
         var self = this
         self.opts = opts
@@ -34,14 +34,6 @@
                 } catch (e) {
                     self.article.summary = unescape(opts.summary)
                 }
-            }
-        }
-        
-        self.text = {
-            "details": {
-                "en": "View details",
-                "fr": "View details",
-                "pl": "Więcej"
             }
         }
     </script>

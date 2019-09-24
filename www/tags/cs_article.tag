@@ -6,8 +6,8 @@
         </header>
         <div if={content}><raw html={content}/></div>
         <footer><div class="author'>{ author }</div><div class="published'>{ published }</div></footer>
-        <div if={ mode=='view' }><a href="#" onClick="history.back()" }>{ texts.back[app.language]}</a></div>
-        <div  if={ mode=='list' }><a href={detailsLink}>{ texts.details[app.language]}</a></div>
+        <div if={ mode=='view' }><a href="#!" onClick="history.back()" }>{ app.texts.back}</a></div>
+        <div  if={ mode=='list' }><a href={detailsLink}>{ app.texts.details}</a></div>
     </article>
     <script>
         var self=this
@@ -26,18 +26,5 @@
         }
         self.detailsLink=''+self.page+self.uid
         self.detailsLink=self.detailsLink.replace(/\//g , ',')
-        
-        self.texts = {
-            "details": {
-                "en": "View details",
-                "fr": "View details",
-                "pl": "Więcej"
-            },
-            "back": {
-                "en": "Back",
-                "fr": "Back",
-                "pl": "Wróć"
-            }
-        }
     </script>
 </cs_article>

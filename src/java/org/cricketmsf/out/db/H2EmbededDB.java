@@ -38,8 +38,8 @@ import org.h2.jdbcx.JdbcConnectionPool;
  */
 public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter {
 
-    private JdbcConnectionPool cp;
-    private String location;
+    protected JdbcConnectionPool cp;
+    protected String location;
     private String path;
     private String fileName;
     private String testQuery;
@@ -48,8 +48,8 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     private String systemVersion;
     private boolean encrypted;
     private String filePassword;
-    private boolean autocommit;
-    private boolean ignorecase = false;
+    protected boolean autocommit;
+    protected boolean ignorecase = false;
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {

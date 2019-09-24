@@ -26,6 +26,7 @@ public class EventException extends Exception {
     public static final int NOT_IMPLEMENTED = 1;
     public static final int CATEGORY_ALREADY_DEFINED = 2;
     public static final int MUST_OVERRIDE_REGISTER = 3;
+    public static final int MUST_EXTEND_DECORATOR = 4;
 
     private int code = NOT_IMPLEMENTED;
     private String message;
@@ -41,6 +42,9 @@ public class EventException extends Exception {
                 break;
             case 3:
                 message = "class does not override required method";
+                break;
+            case 4:
+                message = "class does not extend EventDecoraor";
                 break;
             case 999:
                 message = "unknown error";
