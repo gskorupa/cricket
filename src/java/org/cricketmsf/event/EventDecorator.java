@@ -1,7 +1,6 @@
 package org.cricketmsf.event;
 
 import org.cricketmsf.Event;
-import org.cricketmsf.exception.EventException;
 
 /**
  *
@@ -22,6 +21,10 @@ public class EventDecorator extends Event{
     
     public Event getOriginalEvent(){
         return originalEvent;
+    }
+    
+    public void setOriginalEvent(Event event){
+        originalEvent=event;
     }
     
 }

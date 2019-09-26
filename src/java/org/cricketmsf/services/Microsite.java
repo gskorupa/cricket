@@ -31,10 +31,14 @@ import org.cricketmsf.microsite.user.User;
 import org.cricketmsf.out.db.*;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.cricketmsf.annotation.EventClassHook;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.EventException;
+import org.cricketmsf.exception.QueueException;
+import org.cricketmsf.in.queue.SubscriberIface;
 import org.cricketmsf.microsite.auth.AuthBusinessLogic;
 import org.cricketmsf.microsite.in.http.ContentRequestProcessor;
 import org.cricketmsf.microsite.user.UserEvent;
@@ -69,6 +73,7 @@ public class Microsite extends Kernel {
     AuthAdapterIface authAdapter = null;
     //
     EmailSenderIface emailSender = null;
+    SubscriberIface queueSubscriber = null;
 
     @Override
     public void getAdapters() {
@@ -89,6 +94,9 @@ public class Microsite extends Kernel {
         authDB = (KeyValueDBIface) getRegistered("authDB");
         //
         emailSender = (EmailSenderIface) getRegistered("emailSender");
+        
+        queueSubscriber = (SubscriberIface) getRegistered("QueueSubscriber");
+        
     }
 
     @Override
@@ -118,6 +126,12 @@ public class Microsite extends Kernel {
                 (String) getProperties().getOrDefault("admin-notification-email", ""),
                 "Microsite started", "Microsite service has been started."
         );
+        try {
+            queueSubscriber.init();
+        } catch (QueueException ex) {
+            ex.printStackTrace();
+            shutdown();
+        }
         setInitialized(true);
         dispatchEvent(
                 new Event(this.getName(), "SYSTEM", "message", "+10s", getUuid() + " service started")

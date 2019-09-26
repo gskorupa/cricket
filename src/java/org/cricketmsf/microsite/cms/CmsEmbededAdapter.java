@@ -62,7 +62,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     String helperAdapterName = null;
     KeyValueDBIface database = null;
     String ruleEngineName = null;
-    RuleEngineIface ruleEngine = new DefaultRuleEngine();
+    RuleEngineIface ruleEngine = null;
 
     int status = NOT_INITIALIZED;
 
@@ -73,11 +73,13 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
 
     private void initRuleEngine() {
         if (ruleEngineName == null) {
+            ruleEngine = new DefaultRuleEngine();
             return;
         }
         try {
             ruleEngine = (RuleEngineIface) Kernel.getInstance().getAdaptersMap().get(ruleEngineName);
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -215,6 +217,9 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             }
         } else {
             throw new CmsException(CmsException.UNSUPPORTED_STATUS, "unsupported status");
+        }
+        if(null==ruleEngine){
+            initRuleEngine();
         }
         doc = ruleEngine.processDocument(doc, roles);
         return doc;
@@ -556,7 +561,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         helperAdapterName = properties.get("helper-name");
         Kernel.getInstance().getLogger().print("\thelper-name: " + helperAdapterName);
         ruleEngineName = properties.get("rule-engine");
-        Kernel.getInstance().getLogger().print("\trule-engine-name: " + ruleEngineName);
+        Kernel.getInstance().getLogger().print("\trule-engine: " + ruleEngineName);
         initRuleEngine();
         setWwwRoot(properties.get("root-path"));
         Kernel.getInstance().getLogger().print("\troot-path: " + getWwwRoot());

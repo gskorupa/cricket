@@ -20,7 +20,7 @@ import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.db.KeyValueStore;
 import org.cricketmsf.in.InboundAdapter;
-import org.cricketmsf.scheduler.Delay;
+import org.cricketmsf.event.Delay;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;

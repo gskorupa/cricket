@@ -17,31 +17,37 @@ package org.cricketmsf.out.queue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.exception.QueueException; 
+import org.cricketmsf.Kernel;
+import org.cricketmsf.exception.QueueException;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.OutboundAdapterIface;
 import org.cricketmsf.in.queue.QueueCallbackIface;
 
 /**
  *
+ * If there are no subscribers connected, the oldest objects are deleted when
+ * the maximum queue volume is exceeded.
+ *
  * @author greg
  */
 public class SimpleQueue extends OutboundAdapter implements QueueIface, OutboundAdapterIface, Adapter {
 
     private ConcurrentHashMap<String, ArrayList<QueueCallbackIface>> subscribers;
-    private ConcurrentHashMap<String, ConcurrentHashMap<String, Object>> channels;
+    private ConcurrentHashMap<String, QueueLinkedMap> channels;
     private ConcurrentHashMap<String, ArrayList<Object>> listChannels;
     private int notificationMode = NOTIFY_ALL;
+    int sizeLimit = 100;
 
     @Override
-    public void add(String channel, String key, Object value) throws QueueException {
+    public synchronized void add(String channel, String key, Object value) throws QueueException {
         if (!channels.containsKey(channel)) {
-            channels.put(channel, new ConcurrentHashMap<String, Object>());
+            channels.put(channel, new QueueLinkedMap(sizeLimit, sizeLimit));
         }
-        if(!notify(channel, value)){
+        if (!notify(channel, value)) {
             channels.get(channel).put(key, value);
         }
     }
@@ -65,7 +71,7 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
         }
         return channels.get(channel).get(key);
     }
-    
+
     @Override
     public Object show(String channel) throws QueueException {
         if (!listChannels.containsKey(channel)) {
@@ -80,6 +86,9 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
 
     @Override
     public void subscribe(String channel, QueueCallbackIface callback) throws QueueException {
+        if (getSubscribtionMode() == NOTIFY_NONE) {
+            throw new QueueException(QueueException.SUBSCRIPTION_NOT_POSSIBLE, "Subscribing not possible in DETACHED mode");
+        }
         if (!subscribers.containsKey(channel)) {
             subscribers.put(channel, new ArrayList<>());
         }
@@ -115,11 +124,14 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
     }
 
     @Override
-    public void push(String channel, Object value) throws QueueException {
+    public synchronized void push(String channel, Object value) throws QueueException {
         if (!listChannels.containsKey(channel)) {
             listChannels.put(channel, new ArrayList<>());
         }
-        if(!notify(channel, value)){
+        if (!notify(channel, value)) {
+            if (listChannels.get(channel).size() == sizeLimit) {
+                listChannels.get(channel).remove(sizeLimit - 1);
+            }
             listChannels.get(channel).add(value);
         }
     }
@@ -137,31 +149,71 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
     }
 
     private boolean notify(String channel, Object value) {
-        if(!subscribers.containsKey(channel)){
+        boolean notified = false;
+        if (notificationMode == NOTIFY_NONE) {
+            return false;
+        }
+        if (!subscribers.containsKey(channel)) {
             subscribers.put(channel, new ArrayList<>());
-            return false;
         }
-        if(subscribers.get(channel).isEmpty()){
-            return false;
+        if (!subscribers.containsKey("*")) {
+            subscribers.put("*", new ArrayList<>());
         }
-        if(notificationMode == NOTIFY_NONE){
+        if (subscribers.get(channel).isEmpty() && subscribers.get("*").isEmpty()) {
             return false;
         }
         if (subscribers.containsKey(channel)) {
             if (notificationMode == NOTIFY_ALL) {
                 subscribers.get(channel).forEach((QueueCallbackIface client) -> {
-                    client.call(value);
+                    client.call(channel, value);
                 });
             } else {
-                subscribers.get(channel).get(0).call(value);
+                if (!subscribers.get(channel).isEmpty()) {
+                    subscribers.get(channel).get(0).call(channel, value);
+                    return true;
+                }
             }
+            notified = true;
         }
-        return true;
+        if (subscribers.containsKey("*")) {
+            if (notificationMode == NOTIFY_ALL) {
+                subscribers.get("*").forEach((QueueCallbackIface client) -> {
+                    client.call(channel, value);
+                });
+            } else {
+                if (!subscribers.get("*").isEmpty()) {
+                    subscribers.get("*").get(0).call(channel, value);
+                    return true;
+                }
+            }
+            notified = true;
+        }
+        return notified;
     }
-    
+
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
+        String mode = properties.getOrDefault("mode", "queue").toUpperCase();
+        try {
+            switch (mode) {
+                case "QUEUE":
+                    setSubscribtionMode(NOTIFY_FIRST);
+                    break;
+                case "TOPIC":
+                    setSubscribtionMode(NOTIFY_ALL);
+                    break;
+                case "DETACHED":
+                    setSubscribtionMode(NOTIFY_NONE);
+                    break;
+                default:
+                    setSubscribtionMode(NOTIFY_NONE);
+                    break;
+            }
+            Kernel.getInstance().getLogger().print("\tmode: " + mode);
+        } catch (QueueException e) {
+            Kernel.getInstance().getLogger().print("\tERROR mode " + mode + " not implemented");
+        }
         subscribers = new ConcurrentHashMap<>();
         channels = new ConcurrentHashMap<>();
         listChannels = new ConcurrentHashMap<>();
@@ -173,22 +225,22 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
         final int MAP = 2;
         int type = 0;
         if (listChannels.containsKey(channel)) {
-            type=LIST;
-        }else if (channels.containsKey(channel)) {
-            type=MAP;
-        }else{
+            type = LIST;
+        } else if (channels.containsKey(channel)) {
+            type = MAP;
+        } else {
             throw new QueueException(QueueException.QUEUE_NOT_DEFINED);
         }
-        if(type==LIST){
+        if (type == LIST) {
             return listChannels.get(channel).size();
-        }else{
+        } else {
             return channels.get(channel).size();
         }
     }
 
     @Override
     public void setSubscribtionMode(int newMode) throws QueueException {
-        if(newMode<0 || newMode >2){
+        if (newMode < 0 || newMode > 2) {
             throw new QueueException(QueueException.NOT_IMPLEMENTED);
         }
         notificationMode = newMode;
@@ -197,5 +249,18 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
     @Override
     public int getSubscribtionMode() {
         return notificationMode;
+    }
+
+    class QueueLinkedMap extends LinkedHashMap {
+
+        private int maxSize = 32;
+
+        QueueLinkedMap(int initialCapacity, int limit) {
+            maxSize = limit;
+        }
+
+        protected boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > maxSize;
+        }
     }
 }

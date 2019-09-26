@@ -40,6 +40,7 @@ import org.cricketmsf.config.HttpHeader;
 import org.cricketmsf.event.EventDecorator;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.DispatcherException;
+import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import org.cricketmsf.out.log.StandardLogger;
@@ -243,22 +244,40 @@ public abstract class Kernel {
      * result of the Kernel.handle(event) method
      */
     public Object dispatchEvent(Event event) {
+        if(null!=event.getTimePoint()){
+            try{
+                ((SchedulerIface)getAdaptersMap().get("Scheduler")).handleEvent(event);
+            }catch(NullPointerException|ClassCastException e){
+                return getEventProcessingResult(event);
+            }
+        }
         try {
             eventDispatcher.dispatch(event);
             return null;
         } catch (NullPointerException | DispatcherException ex) {
-            //return handleEvent(event);
             return getEventProcessingResult(event);
+        } catch (Exception ex){
+            ex.printStackTrace();
+            return null;
         }
     }
 
     public Object dispatchEvent(EventDecorator event) {
+        if(null!=event.getOriginalEvent().getTimePoint()){
+            try{
+                ((SchedulerIface)getAdaptersMap().get("Scheduler")).handleEvent(event);
+            }catch(NullPointerException|ClassCastException e){
+                return getEventProcessingResult(event);
+            }
+        }
         try {
             eventDispatcher.dispatch(event);
             return null;
         } catch (NullPointerException | DispatcherException ex) {
-            //return handleEvent(event);
             return getEventProcessingResult(event);
+        } catch (Exception ex){
+            ex.printStackTrace();
+            return null;
         }
     }
 
@@ -427,7 +446,7 @@ public abstract class Kernel {
         if (adapter != null) {
             // Scheduler can be used only if there is no other dispatcher configured
             //if (null == eventDispatcher && !"org.cricketmsf.in.scheduler.Scheduler".equals(adapter.getClass().getName())) {
-            if (null == eventDispatcher) {
+            if (null == eventDispatcher || eventDispatcher.getName().equals("Scheduler")) {
                 eventDispatcher = (DispatcherIface) adapter;
             }
         }

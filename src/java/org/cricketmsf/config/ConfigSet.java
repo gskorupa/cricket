@@ -68,6 +68,9 @@ public class ConfigSet {
     }
 
     public Configuration getConfigurationById(String id) {
+        if(null==id){
+            return null;
+        }
         Configuration c;
         for (int i = 0; i < services.size(); i++) {
             c = services.get(i);

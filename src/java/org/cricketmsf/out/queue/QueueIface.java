@@ -28,12 +28,49 @@ public interface QueueIface {
     public static int NOTIFY_FIRST = 1;
     public static int NOTIFY_ALL = 2;
     
+    /**
+     * Adds object to specified channel overwriting object with the same key (if exists)
+     * @param channel channel name
+     * @param key
+     * @param value
+     * @throws QueueException 
+     */
     public void add(String channel, String key, Object value) throws QueueException;
-    public void push(String channel, Object value) throws QueueException;
+    /**
+     * Gets object of the required key from the channel without removing it from the channel
+     * @param channel channel name
+     * @param key object key
+     * @return object
+     * @throws QueueException 
+     */
     public Object show(String channel, String key) throws QueueException;
-    public Object show(String channel) throws QueueException;
+    /**
+     * Gets object of the required key from the channel
+     * @param channel channel name
+     * @param key object key
+     * @return object
+     * @throws QueueException 
+     */
     public Object get(String channel, String key) throws QueueException;
+    
+    
+    /**
+     * Adds new object to the channel as the last element
+     * @param channel channel name
+     * @param value object to addd
+     * @throws QueueException 
+     */
+    public void push(String channel, Object value) throws QueueException;
+    /**
+     * Get the first object from the channel but not remove it
+     * @param channel channel name
+     * @return first object on the channel's list of objects
+     * @throws QueueException 
+     */
+    public Object show(String channel) throws QueueException;
     public Object pop(String channel) throws QueueException;
+    
+    
     public void subscribe(String channel, QueueCallbackIface callback) throws QueueException;
     public void unsubscribe(String channel, QueueCallbackIface callback) throws QueueException;
     public void purge(String channel) throws QueueException;

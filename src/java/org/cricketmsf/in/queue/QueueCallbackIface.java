@@ -21,6 +21,6 @@ package org.cricketmsf.in.queue;
  */
 public interface QueueCallbackIface {
     
-    public void call(Object value);
+    public void call(String channel, Object value);
     
 }

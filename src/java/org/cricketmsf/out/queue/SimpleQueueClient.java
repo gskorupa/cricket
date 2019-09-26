@@ -98,7 +98,6 @@ public class SimpleQueueClient extends OutboundAdapter implements QueueClientIfa
         }else{
             Kernel.getInstance().getLogger().print("\tqueue-adapter-name: " + queueAdapterName);
         }
-        Kernel.getInstance().getLogger().print("\tqueue-adapter-name: " + queueAdapterName);
     }
     
 }

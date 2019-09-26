@@ -19,6 +19,7 @@ import java.util.HashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.event.EventDecorator;
 import org.cricketmsf.exception.QueueException;
 import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.out.queue.QueueIface;
@@ -61,17 +62,22 @@ public class SimpleQueueSubscriber extends InboundAdapter implements SubscriberI
     }
 
     @Override
-    public void call(Object value) {
-        Kernel.getInstance().handleEvent(Event.fromJson((String) value));
+    public void call(String channelName, Object value) {
+        EventDecorator dev;
+        Event ev;
+        try {
+            dev = (EventDecorator)Class.forName(channelName).newInstance();
+            dev.setOriginalEvent(Event.fromJson((String) value));
+            Kernel.getInstance().getEventProcessingResult(dev);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            Kernel.getInstance().getEventProcessingResult(Event.fromJson((String) value));
+        }
     }
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        //this.properties = (HashMap<String,String>)properties.clone();        
-        //getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
         queueAdapterName = properties.get("queue-adapter-name");
-        Kernel.getInstance().getLogger().print("\tqueue-adapter-name: " + queueAdapterName);
         if (null == queueAdapterName || queueAdapterName.isEmpty()) {
             Kernel.getInstance().getLogger().print("\tWARNING! queue-adapter-name parameter is not set.");
         } else {

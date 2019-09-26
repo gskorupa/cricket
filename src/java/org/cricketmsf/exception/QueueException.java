@@ -15,24 +15,24 @@
  */
 package org.cricketmsf.exception;
 
-
 /**
  *
  * @author greg
  */
 public class QueueException extends Exception {
-    
+
     public static final int UNKNOWN = 888;
     public static int NOT_IMPLEMENTED = 887;
     public static int QUEUE_NOT_DEFINED = 886;
     public static int CLIENT_NOT_DEFINED = 885;
+    public static int SUBSCRIPTION_NOT_POSSIBLE = 884;
 
     private int code = NOT_IMPLEMENTED;
     private String message;
-    
-    public QueueException(int code){
+
+    public QueueException(int code) {
         this.code = code;
-        switch (code){
+        switch (code) {
             case 887:
                 message = "operation not implemented";
                 break;
@@ -44,18 +44,18 @@ public class QueueException extends Exception {
                 break;
         }
     }
-    
-    public QueueException(int code, String message){
+
+    public QueueException(int code, String message) {
         this.code = code;
         this.message = message;
     }
-    
-    public String getMessage(){
+
+    public String getMessage() {
         return message;
     }
-    
-    public int getCode(){
+
+    public int getCode() {
         return code;
     }
-    
+
 }

@@ -15,7 +15,7 @@
  */
 package org.cricketmsf;
 
-import org.cricketmsf.scheduler.Delay;
+import org.cricketmsf.event.Delay;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

@@ -34,21 +34,22 @@ public class QueueDispatcher extends OutboundAdapter implements Adapter, Dispatc
 
     private ConcurrentHashMap eventMap = new ConcurrentHashMap();
     private String queueClientName = null;
+    private boolean handleAll = false;
 
     @Override
     public void dispatch(Event event) throws DispatcherException {
         if (null == queueClientName) {
             throw new DispatcherException(DispatcherException.QUEUE_CLIENT_NOT_DEFINED);
         }
-        if (eventMap.containsKey(event.getCategory())) {
+        if (handleAll || eventMap.containsKey(event.getCategory())) {
             try {
                 ((QueueClientIface) Kernel.getInstance().getAdaptersMap().get(queueClientName)).publish(event.getCategory(), event.toJson());
             } catch (QueueException ex) {
-                Kernel.getInstance().dispatchEvent(Event.logSevere(this, ex.getCode() + " " + ex.getMessage()));
-                throw new DispatcherException(DispatcherException.QUEUE_EXCEPTION);
-            } catch(Exception ex){
-                Kernel.getInstance().dispatchEvent(Event.logSevere(this, ex.getMessage()));
-                throw new DispatcherException(DispatcherException.QUEUE_EXCEPTION);
+                ex.printStackTrace();
+                throw new DispatcherException(DispatcherException.QUEUE_EXCEPTION, ex.getMessage());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                throw new DispatcherException(DispatcherException.QUEUE_EXCEPTION, ex.getMessage());
             }
         } else {
             throw new DispatcherException(DispatcherException.UNKNOWN_EVENT);
@@ -64,7 +65,7 @@ public class QueueDispatcher extends OutboundAdapter implements Adapter, Dispatc
         queueClientName = properties.get("queue-client-name");
         if (null == queueClientName || queueClientName.isEmpty()) {
             Kernel.getInstance().getLogger().print("\tWARNING! queue-client-name parameter is not set.");
-        }else{
+        } else {
             Kernel.getInstance().getLogger().print("\tqueue-client-name: " + queueClientName);
         }
     }
@@ -74,6 +75,10 @@ public class QueueDispatcher extends OutboundAdapter implements Adapter, Dispatc
         String[] categories = categoriesConfig.split(";");
         for (String category : categories) {
             if (!category.isEmpty()) {
+                if ("*".equals(category)) {
+                    handleAll = true;
+                    continue;
+                }
                 eventMap.put(category, category);
             }
         }
@@ -87,7 +92,20 @@ public class QueueDispatcher extends OutboundAdapter implements Adapter, Dispatc
     //TODO: all EventDecorator events are handled by the Kernel. Should be send to the queue?
     @Override
     public void dispatch(EventDecorator event) throws DispatcherException {
-        throw new DispatcherException(DispatcherException.UNKNOWN_EVENT);
+        if (null == queueClientName) {
+            throw new DispatcherException(DispatcherException.QUEUE_CLIENT_NOT_DEFINED);
+        }
+        if (handleAll || eventMap.containsKey(event.getClass().getName())) {
+            try {
+                ((QueueClientIface) Kernel.getInstance().getAdaptersMap().get(queueClientName)).publish(event.getClass().getName(), event.getOriginalEvent().toJson());
+            } catch (QueueException ex) {
+                throw new DispatcherException(DispatcherException.QUEUE_EXCEPTION, ex.getMessage());
+            } catch (Exception ex) {
+                throw new DispatcherException(DispatcherException.QUEUE_EXCEPTION, ex.getMessage());
+            }
+        } else {
+            throw new DispatcherException(DispatcherException.UNKNOWN_EVENT);
+        }
     }
 
 }
