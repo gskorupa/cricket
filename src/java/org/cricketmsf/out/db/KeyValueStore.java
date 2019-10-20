@@ -15,7 +15,6 @@
  */
 package org.cricketmsf.out.db;
 
-import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.OutboundAdapter;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
@@ -31,8 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.out.db.ComparatorIface;
-import org.cricketmsf.out.db.LimitedMap;
 
 /**
  *

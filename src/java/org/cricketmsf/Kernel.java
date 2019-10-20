@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import org.cricketmsf.annotation.EventClassHook;
 import org.cricketmsf.annotation.HttpAdapterHook;
@@ -90,7 +91,8 @@ public abstract class Kernel {
     private boolean inboundAdaptersLoaded = false;
     private int shutdownDelay = 5;
 
-    private static long eventSeed = System.currentTimeMillis();
+    //private static long eventSeed = System.currentTimeMillis();
+    private static AtomicLong eventSeed = new AtomicLong(System.currentTimeMillis());
 
     public String configurationBaseName = null;
     protected ConfigSet configSet = null;
@@ -184,7 +186,6 @@ public abstract class Kernel {
         String methodName = "unknown";
         try {
             Method m;
-
             methodName = getHookMethodNameForEvent(event.getClass());
             //Method m = getClass().getMethod(methodName, Event.class);
             if (null == methodName) {
@@ -244,10 +245,11 @@ public abstract class Kernel {
      * result of the Kernel.handle(event) method
      */
     public Object dispatchEvent(Event event) {
-        if(null!=event.getTimePoint()){
-            try{
-                ((SchedulerIface)getAdaptersMap().get("Scheduler")).handleEvent(event);
-            }catch(NullPointerException|ClassCastException e){
+        if (null != event.getTimePoint()) {
+            try {
+                ((SchedulerIface) getAdaptersMap().get("Scheduler")).handleEvent(event);
+                return null;
+            } catch (NullPointerException | ClassCastException e) {
                 return getEventProcessingResult(event);
             }
         }
@@ -256,17 +258,18 @@ public abstract class Kernel {
             return null;
         } catch (NullPointerException | DispatcherException ex) {
             return getEventProcessingResult(event);
-        } catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }
     }
 
     public Object dispatchEvent(EventDecorator event) {
-        if(null!=event.getOriginalEvent().getTimePoint()){
-            try{
-                ((SchedulerIface)getAdaptersMap().get("Scheduler")).handleEvent(event);
-            }catch(NullPointerException|ClassCastException e){
+        if (null != event.getOriginalEvent().getTimePoint()) {
+            try {
+                ((SchedulerIface) getAdaptersMap().get("Scheduler")).handleEvent(event);
+                return null;
+            } catch (NullPointerException | ClassCastException e) {
                 return getEventProcessingResult(event);
             }
         }
@@ -275,7 +278,7 @@ public abstract class Kernel {
             return null;
         } catch (NullPointerException | DispatcherException ex) {
             return getEventProcessingResult(event);
-        } catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
             return null;
         }
@@ -289,16 +292,13 @@ public abstract class Kernel {
         return adaptersMap.get(adapterName);
     }
 
-    //protected Object registerAdapter(String adapterName, Object adapter) {
-    //    return adaptersMap.put(adapterName, adapter);
-    //}
     /**
      * Returns next unique identifier for Event.
      *
      * @return next unique identifier
      */
     public static long getEventId() {
-        return eventSeed += 1;
+        return eventSeed.getAndIncrement();
     }
 
     /**
@@ -319,9 +319,11 @@ public abstract class Kernel {
             Configuration cfg = config;
             instance = (Kernel) c.newInstance();
             System.out.println("DEFAULT CONFIG: " + instance.configurationBaseName);
-            Configuration defaultCfg = defaultConfigSet.getConfigurationById(instance.configurationBaseName);
-            if (null != defaultCfg) {
-                cfg = cfg.join(defaultCfg);
+            if (null != instance.configurationBaseName) {
+                Configuration defaultCfg = defaultConfigSet.getConfigurationById(instance.configurationBaseName);
+                if (null != defaultCfg) {
+                    cfg = cfg.join(defaultCfg);
+                }
             }
             ((Kernel) instance).setUuid(UUID.randomUUID());
             ((Kernel) instance).setId(config.getId());

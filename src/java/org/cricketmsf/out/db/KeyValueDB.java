@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
@@ -36,7 +37,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     private String storagePath;
     private String dbName;
     private String filePath;
-    private HashMap<String, KeyValueTable> tables;
+    private ConcurrentHashMap<String, KeyValueTable> tables;
 
     @Override
     public void loadProperties(HashMap properties, String name) {
@@ -256,7 +257,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public void restore(String fileLocation) throws KeyValueDBException {
-        tables = new HashMap<>();
+        tables = new ConcurrentHashMap<>();
         //read lines from file with: tableName,capacity
         //table.read
         //taples.put(name,table)

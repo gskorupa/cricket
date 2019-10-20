@@ -60,6 +60,9 @@ public class SecurityFilter extends Filter {
             String tmpPath;
             String tmpMethod;
             for (String r1 : r) {
+                if(r1.isEmpty()){
+                    continue;
+                }
                 String[] r2 = r1.split("\\@");
                 tmpMethod = r2[0];
                 tmpPath = r2[1];
@@ -176,6 +179,7 @@ public class SecurityFilter extends Filter {
         try {
             authorizationNotRequired = !isRestrictedPath(exchange.getRequestMethod(), path);
         } catch (Exception e) {
+            e.printStackTrace();
             Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
         }
         Map parameters = (Map) exchange.getAttribute("parameters");
@@ -231,6 +235,7 @@ public class SecurityFilter extends Filter {
                     tokenID = tokenID.substring(0, tokenID.length() - 1);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
             }
         }
