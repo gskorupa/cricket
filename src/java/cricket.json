@@ -33,7 +33,7 @@
                 "SRVC_NAME_ENV_VARIABLE": "CRICKET_SERVICE_NAME",
                 "SRVC_URL_ENV_VARIABLE": "CRICKET_URL",
                 "SSL_ENV_VARIABLE": "CRICKET_SSL",
-                "www-theme": "theme1"
+                "www-theme": "theme0"
             },
             "ports": [
                 {
@@ -60,7 +60,7 @@
                     "classFullName": "org.cricketmsf.out.log.StandardLogger",
                     "properties": {
                         "name": "Microsite",
-                        "level": "FINEST",
+                        "level": "FINE",
                         "log-file-name": "./work/log/cricket%g.log",
                         "max-size": "1000000",
                         "count": "10",

@@ -1,0 +1,97 @@
+<app-main>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+        <a class="navbar-brand" href="#">{ state.config.brand }</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar1" aria-controls="navbar1" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbar1">
+            <ul class="navbar-nav mr-auto">
+                <template each={item in state.navigation[state.language]}>
+                    <li class={ (item.link===state.path?'nav-item active':'nav-item') } if={ item.link }>
+                        <a class="nav-link" name={item.link} href={ item.link } onclick={ changePath } data-toggle="collapse" data-target="#navbar1">{ item.name }</a>
+                    </li>
+                    <li class="nav-item dropdown" if={ item.options }>
+                        <a class="nav-link dropdown-toggle" id={ item.id } data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{ item.name }</a>
+                        <div class="dropdown-menu" aria-labelledby={ item.id }>
+                            <a each={ option in item.options } class="dropdown-item" name={option.link} href={ option.link } onclick={ changePath } data-toggle="collapse" data-target="#navbar1">{ option.name }</a>
+                        </div>
+                    </li>
+                </template>
+            </ul>
+            <form class="form-inline my-2 my-lg-0" onsubmit="return false;">
+                <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">                
+                <button onclick={search} class="btn btn-outline-light my-2 my-sm-0" >{state.texts.search}</button>
+            </form>
+        </div>
+    </nav>
+    <app-home path="/" docuid="/intro" viewpage="/articles" texts={state.texts} language={state.language} show={state.path=='/'} csapi={state.csapi}/>
+    <app-articles path={state.path} texts={state.texts} language={state.language} show={state.path!='/'} csapi={state.csapi}/>
+    <app-footer language={state.language} cright={state.config.copyright}/>
+    <script>
+        export default {
+            state:{
+                config:{brand:''},
+                navigation:{},
+                language:'',
+                path:'',
+                texts:{},
+                url:'',
+                csapi:''
+            },
+            onMounted() {
+                this.update({
+                    language: this.props.language,
+                    config: this.props.config,
+                    navigation: this.props.navigation,
+                    texts: this.props.texts,
+                    url: this.props.url,
+                    csapi: this.props.csAPI
+                })
+                //console.log(this.state.csapi)
+                //console.log(this.state.config)
+                getData(this.state.url + '/config/site.json?language=' + this.state.language, null, null, this.setConfig)
+                getData(this.state.url + '/config/navigation.json?language=' + this.state.language, null, null, this.setNavigation)
+                getData(this.state.url + '/config/texts_'+this.state.language+'.json',null,null,this.updateTranslation)
+            },
+            newLang(lang) {
+                this.update({
+                    language: lang
+                })
+                getData(window.app.url + '/config/texts_'+this.state.language+'.json',null,null,this.updateTranslation)
+            },
+            changePath(e) {
+                e.preventDefault()
+                var newPath = e.target.name
+                if(newPath.startsWith('language:')) {
+                    this.newLang(newPath.substring(newPath.indexOf(':')+1))
+                    return
+                }else if(newPath.startsWith('/')){
+                    this.update({
+                        path: newPath
+                    })
+                }
+            },
+            search(e) {
+                e.preventDefault()
+            },
+            setConfig(respCode,text){
+                if(respCode!=200) return
+                this.update({
+                    config: JSON.parse(text)
+                })
+            },
+            setNavigation(respCode,text){
+                if(respCode!=200) return
+                this.update({
+                    navigation: JSON.parse(text)
+                })
+            },
+            updateTranslation: function(respCode, text){
+                if(respCode!=200) return
+                this.update({
+                    texts: JSON.parse(text)
+                })
+            }
+        }
+    </script>
+</app-main>

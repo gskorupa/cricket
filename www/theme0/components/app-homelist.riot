@@ -1,0 +1,39 @@
+<app-homelist>
+    <div class="row">
+        <div each="{item in this.articles}" class="col-md-4">
+            <cs_article2 title="{item.title}" summary="{item.summary}" type="list" viewpage={props.viewpage} texts={props.texts} uid="{ item.uid }" />
+        </div>
+    </div>
+    <script charset="UTF-8">
+    export default {
+        state: {
+            language: '',
+            csapi: '',
+            path: ''
+        },
+        articles: [],
+        onMounted() {
+            this.update({
+                language: this.props.language,
+                csapi: this.props.csapi,
+                path: this.props.path
+            })
+        },
+        onBeforeUpdate() {
+            if(this.state.csapi!=this.props.csapi || this.state.language!=this.props.language || this.state.path!=this.props.path){
+                if(!(this.props.csapi==''||this.props.language==''||this.props.path=='')){
+                    getData(this.props.csapi + '?path='+this.props.path + '/'+'&language=' + this.props.language, null, null, this.setDocumentList)
+                }
+                this.state.csapi=this.props.csapi
+                this.state.language=this.props.language
+                this.state.path=this.props.path
+            }
+        },
+        setDocumentList(respCode, text) {
+            if(respCode!=200) return
+            this.articles=JSON.parse(text)
+            this.update()
+        }
+    }
+</script>
+</app-homelist>

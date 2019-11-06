@@ -1,10 +1,4 @@
 <app-404>
-    <div class="container top-spacing">
-        <div class="row">
-            <div class="col-md-12">
-                <h2>404</h2>
-                <h4>{ app.texts.notfound}</h4>
-            </div>
-        </div>
-    </div>
+    <h2>404</h2>
+    <h4>{ props.texts.notfound}</h4>
 </app-404>

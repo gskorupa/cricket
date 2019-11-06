@@ -27,4 +27,5 @@ public interface LoggerAdapterIface {
     public void print(String message);
     public void printIndented(String message);
     public boolean isAvailable();
+    public boolean isFineLevel();
 }

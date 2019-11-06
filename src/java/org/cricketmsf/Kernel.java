@@ -103,7 +103,7 @@ public abstract class Kernel {
     private long startedAt = 0;
     private boolean started = false;
     private boolean initialized = false;
-
+    private boolean fineLevel = true;
     private int status = STARTING;
 
     private CricketThreadFactory threadFactory;
@@ -303,7 +303,8 @@ public abstract class Kernel {
 
     /**
      * Must be used to set adapter variables after instantiating them according
-     * to the configuration in cricket.json file. Look at EchoService example.
+     * to the configuration in the configuration file (settings.json). 
+     * Look at EchoService example.
      */
     public abstract void getAdapters();
 
@@ -369,9 +370,9 @@ public abstract class Kernel {
     }
 
     /**
-     * Instantiates adapters following configuration in cricket.json
+     * Instantiates adapters following configuration file (settings.json)
      *
-     * @param config Configuration object loaded from cricket.json
+     * @param config Configuration object loaded from the configuration file
      * @throws Exception
      */
     private synchronized void loadAdapters(Configuration config) throws Exception {
@@ -424,9 +425,13 @@ public abstract class Kernel {
                     java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class, String.class);
                     loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
                     setEventDispatcher(((Adapter) adaptersMap.get(adapterName)).getDispatcher());
+                    if(adaptersMap.get(adapterName) instanceof org.cricketmsf.out.log.LoggerAdapterIface){
+                        setFineLevel(((LoggerAdapterIface) adaptersMap.get(adapterName)).isFineLevel());
+                    }
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                     adaptersMap.put(adapterName, null);
                     getLogger().print("ERROR: " + adapterName + " configuration: " + ex.getClass().getSimpleName());
+                    ex.printStackTrace();
                 }
             }
         } catch (Exception e) {
@@ -930,6 +935,20 @@ public abstract class Kernel {
         } else {
             this.sslAlgorithm = (String) getProperties().getOrDefault("ssl", "false");
         }
+    }
+
+    /**
+     * @return the fineLevel
+     */
+    public boolean isFineLevel() {
+        return fineLevel;
+    }
+
+    /**
+     * @param fineLevel the fineLevel to set
+     */
+    public void setFineLevel(boolean fineLevel) {
+        this.fineLevel = fineLevel;
     }
 
 }

@@ -17,6 +17,9 @@ public class EventDecorator extends Event{
     
     public EventDecorator(Event event){
         originalEvent =event;
+        setTimePoint(event.getTimePoint());
+        setId(event.getId());
+        setName(event.getName());
     }
     
     public Event getOriginalEvent(){

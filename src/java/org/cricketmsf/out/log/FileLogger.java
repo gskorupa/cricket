@@ -127,4 +127,9 @@ public class FileLogger extends OutboundAdapter implements Adapter, LoggerAdapte
         return available;
     }
 
+    @Override
+    public boolean isFineLevel() {
+        return true;
+    }
+
 }

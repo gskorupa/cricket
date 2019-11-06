@@ -34,27 +34,28 @@ import org.cricketmsf.out.OutboundAdapter;
  */
 public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adapter {
 
-    private String storagePath;
-    private String dbName;
+    private String storagePath = "./";
+    private String dbName = null;
     private String filePath;
     private ConcurrentHashMap<String, KeyValueTable> tables;
 
     @Override
     public void loadProperties(HashMap properties, String name) {
-        storagePath = (String) properties.getOrDefault("path", "./");
-        Kernel.getInstance().getLogger().print("\tpath: " + storagePath);
-        // fix to handle '.'
-        if (storagePath.startsWith(".")) {
-            storagePath = System.getProperty("user.dir") + storagePath.substring(1);
+        if (null != properties) {
+            storagePath = (String) properties.getOrDefault("path", "./");
+            dbName = (String) properties.get("name");
         }
-        dbName = (String) properties.get("name");
-        Kernel.getInstance().getLogger().print("\tdatabase name: " + dbName);
         String pathSeparator = System.getProperty("file.separator");
         if (!storagePath.endsWith(pathSeparator)) {
             storagePath = storagePath + pathSeparator + dbName;
         }
-        filePath
-                = storagePath + ".db";
+        // fix to handle '.'
+        if (storagePath.startsWith(".")) {
+            storagePath = System.getProperty("user.dir") + storagePath.substring(1);
+        }
+        filePath = storagePath + ".db";
+        Kernel.getInstance().getLogger().print("\tpath: " + storagePath);
+        Kernel.getInstance().getLogger().print("\tdatabase name: " + dbName);
         Kernel.getInstance().getLogger().print("\tdatabase file: " + filePath);
         try {
             start();
@@ -71,53 +72,12 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
     @Override
     public void start() throws KeyValueDBException {
         restore(filePath);
-        /*
-        tables = new HashMap<>();
-        try {
-            FileReader fr = new FileReader(filePath);
-            BufferedReader bufr = new BufferedReader(fr);
-            int count = 1;
-            String line = bufr.readLine();
-            String[] params;
-            while (line != null) {
-                line = line.trim();
-                if (!line.startsWith("#")) {
-                    params = line.split(",");
-                    addTable(params[0], Integer.parseInt(params[1]), Boolean.valueOf(params[2]).booleanValue());
-                }
-                line = bufr.readLine();
-            }
-            bufr.close();
-        } catch (IOException e) {
-
-        }
-        */
     }
 
     @Override
     public void stop() {
         try {
             backup(filePath);
-            /*
-            try {
-            FileWriter fw = new FileWriter(filePath);
-            fw.write("# "+this.getClass().getDbName()+"\r\n");
-            fw.write("# DO NOT MODIFY\r\n");
-            fw.write("#\r\n");
-            tables.keySet().forEach((key) -> {
-            if (tables.get(key).persistent) {
-            tables.get(key).write();
-            }
-            try {
-            fw.write(tables.get(key).name + "," + tables.get(key).capacity + "," + tables.get(key).persistent + "\r\n");
-            } catch (IOException e) {
-            }
-            });
-            fw.close();
-            } catch (IOException e) {
-            e.printStackTrace();
-            }
-             */
         } catch (KeyValueDBException ex) {
             ex.printStackTrace();
         }
@@ -130,6 +90,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public void addTable(String name, int capacity, boolean persistent) throws KeyValueDBException {
+        if(null==tables){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "not configured");
+        }
         if (tables.containsKey(name)) {
             throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "unable to create table " + name);
         }
@@ -138,6 +101,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public void deleteTable(String name) throws KeyValueDBException {
+        if(null==tables){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "not configured");
+        }
         if (!tables.containsKey(name)) {
             throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + name);
         }
@@ -146,7 +112,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public void put(String tableName, String key, Object value) throws KeyValueDBException {
-        try {
+        if(null==tables){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "not configured");
+        }try {
             tables.get(tableName).put(key, value);
         } catch (NullPointerException e) {
             throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + tableName);
@@ -155,6 +123,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public Object get(String tableName, String key) throws KeyValueDBException {
+        if(null==tables){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "not configured");
+        }
         try {
             return tables.get(tableName).get(key);
         } catch (NullPointerException e) {
@@ -164,6 +135,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public Object get(String tableName, String key, Object defaultValue) throws KeyValueDBException {
+        if(null==tables){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "not configured");
+        }
         try {
             return tables.get(tableName).get(key, defaultValue);
         } catch (NullPointerException e) {
@@ -173,7 +147,10 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public Map getAll(String tableName) throws KeyValueDBException {
-        //return (LimitedMap) cache.clone();
+        if(null==tables){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "not configured");
+        }
+//return (LimitedMap) cache.clone();
         try {
             return tables.get(tableName).getAll();
         } catch (NullPointerException e) {
@@ -183,6 +160,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public List search(String tableName, ComparatorIface comparator, Object pattern) throws KeyValueDBException {
+        if(null==tables){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "not configured");
+        }
         try {
             return tables.get(tableName).search(comparator, pattern);
         } catch (NullPointerException e) {
@@ -192,6 +172,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public boolean containsKey(String tableName, String key) throws KeyValueDBException {
+        if(null==tables){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "not configured");
+        }
         try {
             return tables.get(tableName).containsKey(key);
         } catch (NullPointerException e) {
@@ -214,6 +197,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public void clear(String tableName) throws KeyValueDBException {
+        if(null==tables){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "not configured");
+        }
         try {
             tables.get(tableName).clear();
         } catch (NullPointerException e) {
@@ -223,6 +209,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public List<String> getTableNames() throws KeyValueDBException {
+        if(null==tables){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "not configured");
+        }
         ArrayList<String> result = new ArrayList<>();
         tables.keySet().forEach(key -> result.add((String) key));
         return result;
@@ -230,6 +219,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public void backup(String fileLocation) throws KeyValueDBException {
+        if(null==dbName){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_WRITE, "database name not configured");
+        }
         try {
             FileWriter fw = new FileWriter(fileLocation);
             fw.write("# " + this.getClass().getName() + "\r\n");
@@ -257,10 +249,13 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
     @Override
     public void restore(String fileLocation) throws KeyValueDBException {
+        if(null==dbName){
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_RESTORE, "database name not configured");
+        }
         tables = new ConcurrentHashMap<>();
         //read lines from file with: tableName,capacity
         //table.read
-        //taples.put(name,table)
+        //tables.put(name,table)
         try {
             FileReader fr = new FileReader(fileLocation);
             BufferedReader bufr = new BufferedReader(fr);

@@ -26,6 +26,7 @@ public class KeyValueDBException extends Exception {
     public static int CANNOT_DELETE = 2;
     public static int TABLE_NOT_EXISTS = 3;
     public static int CANNOT_WRITE = 4;
+    public static int CANNOT_RESTORE = 5;
     
     private int code = UNKNOWN;
     private String message;

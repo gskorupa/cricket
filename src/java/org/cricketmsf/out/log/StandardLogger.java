@@ -264,4 +264,9 @@ public class StandardLogger extends OutboundAdapter implements Adapter, LoggerAd
         return true;
     }
 
+    @Override
+    public boolean isFineLevel() {
+        return level.equals(Level.FINE)||level.equals(Level.FINER)||level.equals(Level.FINEST);
+    }
+
 }

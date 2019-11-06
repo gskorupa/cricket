@@ -33,7 +33,7 @@ import java.util.Scanner;
 
 /**
  * Runner class is used when running JAR distribution. The class parses the
- * command line arguments, reads config from cricket.json, then creates and runs
+ * command line arguments, reads config, then creates and runs
  * the service instance according to the configuration.
  *
  * @author greg
@@ -127,82 +127,6 @@ public class Runner {
      */
     public static void main(String[] args) {
         getService(args);
-        /*
-        long runAt = System.currentTimeMillis();
-        final Kernel service;
-        final ConfigSet configSet;
-        Runner runner = new Runner();
-
-        ArgumentParser arguments = new ArgumentParser(args);
-        if (arguments.isProblem()) {
-            if (arguments.containsKey("error")) {
-                System.out.println(arguments.get("error"));
-            }
-            System.out.println(runner.getHelp());
-            System.exit(-1);
-        }
-
-        configSet = runner.readConfig(arguments);
-
-        Class serviceClass = null;
-        String serviceId;
-        String serviceName = null;
-        Configuration configuration = null;
-        if (arguments.containsKey("service")) {
-            // if service name provided as command line option
-            serviceId = (String) arguments.get("service");
-        } else {
-            // otherwise get first configured service
-            serviceId = configSet.getDefault().getId();
-        }
-
-        configuration = configSet.getConfigurationById(serviceId);
-
-        // if serviceName isn't configured print error and exit
-        if (configuration == null) {
-            System.out.println("Configuration not found for id=" + serviceId);
-            System.exit(-1);
-        } else if (arguments.containsKey("lift")) {
-            serviceName = (String) arguments.get("lift");
-            System.out.println("LIFT service " + serviceName);
-        } else {
-            serviceName = configuration.getService();
-        }
-
-        if (arguments.containsKey("help")) {
-            System.out.println(runner.getHelp(serviceName));
-            System.exit(0);
-        }
-
-        if (arguments.containsKey("print")) {
-            System.out.println(runner.getConfigAsString(configSet));
-            System.exit(0);
-        }
-
-        try {
-            serviceClass = Class.forName(serviceName);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
-        System.out.println("CRICKET RUNNER");
-        try {
-            service = (Kernel) Kernel.getInstanceWithProperties(serviceClass, configuration);
-            service.configSet = configSet;
-            service.liftMode = arguments.containsKey("lift");
-            if (arguments.containsKey("run")) {
-                service.setStartedAt(runAt);
-                service.start();
-            } else {
-                //service.setScheduler(new Scheduler());
-                //System.out.println("Executing runOnce method");
-                service.runOnce();
-                service.shutdown();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-         */
     }
 
     /**
@@ -268,23 +192,16 @@ public class Runner {
             //Properties props;
             try {
                 propertyFile = new FileInputStream(new File((String) arguments.get("config")));
-                //String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
-                //configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
             } catch (Exception e) {
                 e.printStackTrace();
-                //LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration: {0}", path);
             }
         } else {
-            String propsName = "cricket.json";
+            String propsName = "settings.json";
             propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
-            //String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
-            //Map args = new HashMap();
-            //args.put(JsonReader.USE_MAPS, false);
-            //Map types = new HashMap();
-            //types.put("java.utils.HashMap", "adapters");
-            //types.put("java.utils.HashMap", "properties");
-            //args.put(JsonReader.TYPE_NAME_MAP, types);
-            //configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
+            if(null==propertyFile){
+                propsName = "cricket.json";
+                propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
+            }
         }
         if(null==propertyFile){
             return null;

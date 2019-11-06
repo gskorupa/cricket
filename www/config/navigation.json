@@ -1,23 +1,23 @@
 {"en": [
     {
         "name": "Home",
-        "link": "#!"
+        "link": "/"
     },
     {
         "name": "About",
-        "link": "#!articles,about"
+        "link": "/about"
     },
     {
         "name": "Language",
-        "id": "lang",
+        "id": "language",
         "options": [
             {
                 "name": "English",
-                "link": "#!en"
+                "link": "language:en"
             },
             {
                 "name": "Polish",
-                "link": "#!pl"
+                "link": "language:pl"
             }
         ]
     }
@@ -25,23 +25,23 @@
 "pl": [
     {
         "name": "Home",
-        "link": "#!"
+        "link": "/"
     },
     {
         "name": "O nas",
-        "link": "#!articles,about"
+        "link": "/about"
     },
     {
         "name": "Język",
-        "id": "lang",
+        "id": "language",
         "options": [
             {
                 "name": "Angielski",
-                "link": "#!en"
+                "link": "language:en"
             },
             {
                 "name": "Polski",
-                "link": "#!pl"
+                "link": "language:pl"
             }
         ]
     }

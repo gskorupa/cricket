@@ -208,7 +208,7 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             String message = e.getMessage();
             Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), message));
             if(message.toLowerCase().indexOf("connection refused")>-1){

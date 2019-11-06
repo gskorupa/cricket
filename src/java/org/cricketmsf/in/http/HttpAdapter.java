@@ -103,6 +103,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         super.loadProperties(properties, adapterName);
     }
 
+    
     @Override
     protected void getServiceHooks(String adapterName) {
         HttpAdapterHook ah;
@@ -120,12 +121,11 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             }
         }
     }
-
+    
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         //Event rootEvent = new Event();
-        Kernel.getInstance().getThreadFactory().newThread(()-> {
-        //new Thread(() -> {
+        Kernel.getInstance().getThreadFactory().newThread(() -> {
             try {
                 doHandle(exchange, Kernel.getEventId());
             } catch (NullPointerException | IOException e) {
@@ -133,19 +133,20 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        },this.getName()).start();
+        }, this.getName()).start();
     }
 
     public void doHandle(HttpExchange exchange, long rootEventId) throws IOException {
 
-        Stopwatch timer = new Stopwatch();
-        //Event rootEvent = new Event();
+        Stopwatch timer=null;
+        if (Kernel.getInstance().isFineLevel()) {
+            timer= new Stopwatch();
+        }
         String acceptedResponseType = JSON;
 
         try {
             acceptedResponseType
                     = acceptedTypesMap.getOrDefault(exchange.getRequestHeaders().get("Accept").get(0), JSON);
-
         } catch (Exception e) {
         }
 
@@ -160,10 +161,10 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
 
         Iterator it = result.getHeaders().keySet().iterator();
         String key;
-        while(it.hasNext()){
-            key=(String)it.next();
+        while (it.hasNext()) {
+            key = (String) it.next();
             List<String> values = result.getHeaders().get(key);
-            for(int i=0; i<values.size();i++){
+            for (int i = 0; i < values.size(); i++) {
                 headers.set(key, values.get(i));
             }
             //values.forEach((value) -> {
@@ -177,7 +178,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 headers.set(key, value);
             });
         });
-        */
+         */
         switch (result.getCode()) {
             case SC_MOVED_PERMANENTLY:
             case SC_MOVED_TEMPORARY:
@@ -227,9 +228,11 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         }
 
         //TODO: format logs to have clear info about root event id
-        Kernel.getInstance().dispatchEvent(
-                Event.logFinest("HttpAdapter", "event " + rootEventId + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
-        );
+        if (Kernel.getInstance().isFineLevel()) {
+            Kernel.getInstance().dispatchEvent(
+                    Event.logFinest("HttpAdapter", "event " + rootEventId + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
+            );
+        }
 
         if (responseData.length > 0) {
             exchange.sendResponseHeaders(result.getCode(), responseData.length);
@@ -240,7 +243,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             exchange.sendResponseHeaders(result.getCode(), -1);
         }
         sendLogEvent(exchange, responseData.length);
-        result=null;
+        result = null;
         exchange.close();
     }
 

@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.cricketmsf.Adapter;
+import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.exception.QueueException;
 import org.cricketmsf.out.OutboundAdapter;
@@ -93,6 +94,7 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
             subscribers.put(channel, new ArrayList<>());
         }
         subscribers.get(channel).add(callback);
+        Kernel.getInstance().dispatchEvent(Event.logFinest(this, channel+" subscriber "+callback.getClass().getName()));
     }
 
     @Override

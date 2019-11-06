@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Cricket" default="all" basedir="."
-    xmlns:if="ant:if"
-         xmlns:unless="ant:unless">
+>
     <description>Builds, tests, and runs the project Cricket.</description>
     <target name="all" depends="dist">
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
-    <property name="targetJava10+" value="false"/>
-    <property name="mainVersion" value="1.3.3"/>
+    <property name="targetJava10+" value="true"/>
+    <property name="mainVersion" value="1.3.5"/>
     <property name="version" value="${mainVersion}"/>
     <!-- default JDK == 1.12 -->
     <!-- alternate JDK compiler will be used if declared (not empty) -->
-    <property name="alternateJDK" value="/usr/lib/jvm/java-8-oracle"/>
+    <!--<property name="alternateJDK" value="/usr/lib/jvm/java-8-oracle"/>-->
     
     <!--
     <condition property="version" value="${mainVersion}">
@@ -46,15 +45,11 @@
     
     <!-- external libraries used by Cricket-->
     <!-- REMEMBER to download these libraries before building Cricket -->
-    <property name="json-io-lib" value="json-io-4.10.1.jar"/>
+    <property name="json-io-lib" value="json-io-4.11.1.jar"/>
     <property name="commons-csv-lib" value="commons-csv-1.5.jar"/>
     <property name="h2-lib" value="h2-1.4.197.jar"/>
-    
+    <property name="jaxb-lib" value="jaxb-api-2.3.1.jar"/>
     <property name="javamail-lib" value="javax.mail-1.6.1.jar"/>
-    
-    <property name="yasson-lib" value="yasson-1.0.3.jar"/>
-    <property name="json-bind-lib" value="javax.json.bind-api-1.0.jar"/>
-    <property name="json-lib" value="javax.json-1.1.4.jar"/>
     <property name="mqtt-lib" value="org.eclipse.paho.client.mqttv3-1.2.0.jar"/>
     <property name="livingdocumentation-lib" value="LivingDocumentation.jar"/>
     
@@ -65,9 +60,7 @@
         <pathelement location="${lib}/${h2-lib}"/>
         <pathelement location="${lib}/${javamail-lib}"/>
         <pathelement location="${lib}/${mqtt-lib}"/>
-        <pathelement location="${lib}/${yasson-lib}"/>
-        <pathelement location="${lib}/${json-lib}"/>
-        <pathelement location="${lib}/${json-bind-lib}"/>
+        <pathelement location="${lib}/${jaxb-lib}"/>
         <pathelement location="${lib}/${livingdocumentation-lib}"/>
     </path>
 
@@ -84,22 +77,14 @@
             <entry  key="version" value="${version}"/>
         </propertyfile>
     </target>
-
-    <target name="compile" depends="init" description="compile the source">
+    
+    <target name="compile" depends="init,compile8,compile12" description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
+    </target>
+    <target name="compile8" if="alternateJDK">
         <copy file="${src}/BasicService-help.template" tofile="${src}/BasicService-help.txt" overwrite="true"/>
         <replace file="${src}/BasicService-help.txt" token="{{version}}" value="${version}" summary="true"/>
-        <javac if:blank="${alternateJDK}"
-            target="1.8" 
-            source="1.8" 
-            srcdir="${src}" 
-            destdir="${build}"
-            includeantruntime="false" 
-            debug="on"
-            classpathref="project-classpath">
-            <!--<compilerarg value="-Xlint:unchecked"/>-->
-        </javac>
-        <javac  unless:blank="${alternateJDK}"
+        <javac 
             executable="${alternateJDK}/bin/javac"
             fork="true"
             target="1.8" 
@@ -110,6 +95,20 @@
             debug="on"
             classpathref="project-classpath"
             verbose="false">
+            <!--<compilerarg value="-Xlint:unchecked"/>-->
+        </javac>
+    </target>
+    <target name="compile12" unless="alternateJDK">
+        <copy file="${src}/BasicService-help.template" tofile="${src}/BasicService-help.txt" overwrite="true"/>
+        <replace file="${src}/BasicService-help.txt" token="{{version}}" value="${version}" summary="true"/>
+        <javac 
+            target="12" 
+            source="12" 
+            srcdir="${src}" 
+            destdir="${build}"
+            includeantruntime="false" 
+            debug="on"
+            classpathref="project-classpath">
             <!--<compilerarg value="-Xlint:unchecked"/>-->
         </javac>
     </target>
@@ -155,8 +154,7 @@
         </javadoc>
     </target>
 
-    <target name="dist" depends="clean, compile"
-            description="generate the distribution">
+    <target name="dist" description="generate the distribution">
         <!-- Create the distribution directory -->
         <mkdir dir="${dist}"/>
         <mkdir dir="${dist}/work"/>
@@ -240,9 +238,7 @@
             <zipfileset src="${lib}/${h2-lib}" includes="org/**/*"/>
             <zipfileset src="${lib}/${mqtt-lib}" includes="org/**/*"/>
             <zipfileset src="${lib}/${javamail-lib}" includes="com/**/*,javax/**/*"/>
-            <zipfileset src="${lib}/${yasson-lib}" includes="org/**/*,yasson-messages.properties"/>
-            <zipfileset src="${lib}/${json-lib}" includes="org/**/*,javax/**/*"/>
-            <zipfileset src="${lib}/${json-bind-lib}" includes="javax/**/*"/>
+            <zipfileset src="${lib}/${jaxb-lib}" includes="javax/**/*"/>
         </jar>
     </target>
     
@@ -271,8 +267,8 @@
     <target name="get-dependencies" depends="init" description="upload external libraries">
         <mkdir dir="lib"/> 
         <get
-            src="https://search.maven.org/remotecontent?filepath=com/cedarsoftware/json-io/4.10.1/json-io-4.10.1.jar"
-            dest="lib/json-io-4.10.1.jar" 
+            src="https://search.maven.org/remotecontent?filepath=com/cedarsoftware/json-io/4.11.1/json-io-4.11.1.jar"
+            dest="lib/json-io-4.11.1.jar" 
             usetimestamp="true" 
             ignoreerrors="true"
         />
@@ -291,6 +287,12 @@
         <get
             src="https://search.maven.org/remotecontent?filepath=com/h2database/h2/1.4.197/h2-1.4.197.jar"
             dest="lib/h2-1.4.197.jar" 
+            usetimestamp="true" 
+            ignoreerrors="true"
+        />
+        <get
+            src="https://repo1.maven.org/maven2/javax/xml/bind/jaxb-api/2.3.1/jaxb-api-2.3.1.jar"
+            dest="lib/jaxb-api-2.3.1.jar" 
             usetimestamp="true" 
             ignoreerrors="true"
         />
@@ -335,24 +337,6 @@
         <get
             src="http://central.maven.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar"
             dest="lib/commons-logging-1.2.jar" 
-            usetimestamp="true" 
-            ignoreerrors="true"
-        />
-        <get
-            src="https://github.com/eclipse-ee4j/yasson/releases/download/1.0.3-RELEASE/yasson-1.0.3.jar"
-            dest="lib/yasson-1.0.3.jar" 
-            usetimestamp="true" 
-            ignoreerrors="true"
-        />
-        <get
-            src="https://search.maven.org/classic/remotecontent?filepath=javax/json/bind/javax.json.bind-api/1.0/javax.json.bind-api-1.0.jar"
-            dest="lib/javax.json.bind-api-1.0.jar" 
-            usetimestamp="true" 
-            ignoreerrors="true"
-        />
-        <get
-            src="https://search.maven.org/classic/remotecontent?filepath=org/glassfish/javax.json/1.1.4/javax.json-1.1.4.jar"
-            dest="lib/javax.json-1.1.4.jar" 
             usetimestamp="true" 
             ignoreerrors="true"
         />

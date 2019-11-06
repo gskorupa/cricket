@@ -15,14 +15,13 @@
  */
 package org.cricketmsf;
 
+import com.cedarsoftware.util.io.JsonWriter;
 import org.cricketmsf.event.Delay;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
 import org.cricketmsf.event.EventIface;
 import org.cricketmsf.exception.EventException;
 
@@ -739,13 +738,11 @@ public class Event implements EventIface {
     }
 
     public String toJson() {
-        Jsonb jsonb = JsonbBuilder.create();
-        return jsonb.toJson(this);
+        return JsonWriter.objectToJson(this);
     }
 
     public static Event fromJson(String json) {
-        Jsonb jsonb = JsonbBuilder.create();
-        return jsonb.fromJson(json, Event.class);
+        return (Event)JsonReader.jsonToJava(json);
     }
 
     @Override

@@ -1,0 +1,119 @@
+<app-articles>
+    <div class="container top-spacing" show="{ !state.found }">
+        <div class="row">
+            <div class="col-md-12">
+                <app-404 texts="{props.text}"/>
+            </div>
+        </div>
+        <app-artlist list={list}/>
+    </div>
+    <div class="container top-spacing" show="{ found && folder }">
+        <div class="row">
+            <div class="col-md-12">
+                <article class='standard'>
+                    <header>
+                        <h1>{title}</h1>
+                        <div class='intro' if={summary}><raw html={summary}/></div>
+                    </header>
+                    <div if="{content}"><raw html="{content}"/></div>
+                    <footer><div class="author">{ author }</div><div class="published">{ published }</div></footer>
+                    <div if="{ mode=='view' }"><a href="#" onClick="history.back()">{ app.texts.back}</a></div>
+                    <div  if="{ mode=='list' }"><a href="{detailsLink}">{ app.texts.details}</a></div>
+                </article>
+            </div>
+        </div>
+        <app-artlist list={list}/>
+    </div>
+    <div class="container top-spacing" show="{ found && !folder }">
+        <div class="row">
+            <div class="col-md-12">
+                <article class='standard'>
+                    <header>
+                        <h1>{title}</h1>
+                        <div class='intro' if={summary}><raw html={summary}/></div>
+                    </header>
+                    <div if={content}><raw html={content}/></div>
+                    <footer><div class="author">{ author }</div><div class="published">{ published }</div></footer>
+                    <div if="{ mode=='view' }"><a href="#" onClick="history.back()">{ app.texts.back}</a></div>
+                    <div  if="{ mode=='list' }"><a href={detailsLink}>{ app.texts.details}</a></div>
+                </article>
+            </div>
+        </div>
+    </div>
+    <script>
+        export default {
+        state: {
+            path:'',
+            language: '',
+            csapi: '',
+            found: false
+        },
+        doc: {
+            title: '',
+            summary: '',
+            content:'',
+            link: ''
+        },
+        list:[],
+        onMounted() {
+            this.update({
+                language: this.props.language,
+                csapi: this.props.csapi,
+                path: this.props.path
+            })
+        },
+        onBeforeUpdate() {
+            if(this.state.csapi!=this.props.csapi || this.state.language!=this.props.language || this.state.path!=this.props.path){
+                if(!(this.props.csapi==''||this.props.language==''||this.props.path=='')){
+                    getData(this.props.csapi + this.props.path + '?language=' + this.props.language, null, null, this.setDocument)
+                }
+                this.state.csapi=this.props.csapi
+                this.state.language=this.props.language
+                this.state.path=this.props.path
+            }
+        },
+        setDocument(respCode, text) {
+            if(respCode!=200) return
+            this.doc=JSON.parse(text)
+            this.state.found = true
+            this.state.folder = (self.doc.mimeType == 'application/x-folder')
+            if (this.state.folder) {
+                getData(this.props.csapi + '?path=/' + this.props.path + '/&language=' + this.props.language, null, null, setDocList)
+            }
+            this.state.csapi=this.props.csapi
+            this.state.language=this.props.language
+            this.state.path=this.props.path
+            if (this.doc.title) {
+                try {
+                    this.doc.title = decodeURIComponent(this.doc.title)
+                } catch (e) {
+                    this.doc.title = unescape(this.doc.title)
+                }
+            }
+            if (this.props.viewpage && this.props.docuid) {
+                this.doc.link = (this.props.viewpage + this.props.docuid).replace(/\//g, ',')
+            }
+            if (this.doc.summary) {
+                try {
+                    this.doc.summary = decodeURIComponent(this.doc.summary)
+                } catch (e) {
+                    this.doc.summary = unescape(this.doc.summary)
+                }
+            }
+            if (this.doc.content) {
+                try {
+                    this.doc.content = decodeURIComponent(this.doc.content)
+                } catch (e) {
+                    this.doc.content = unescape(this.doc.content)
+                }
+            }
+            this.update()
+        },
+        setDocList(respCode, text){
+            if(respCode!=200) return
+            this.list=JSON.parse(text)
+            this.update()
+        }
+        }
+    </script>
+</app-articles>

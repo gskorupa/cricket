@@ -1,0 +1,58 @@
+<cs_article3>
+    <h1 class='display-3'><raw html="{doc.title}"/></h1>
+    <p><raw html="{doc.summary}"/></p>
+    <p ><a class="btn btn-outline-dark btn-lg" href="{doc.link}" role="button">{ props.texts.details } <span>&raquo;</span></a></p>    
+<script charset="UTF-8">
+    export default {
+        state: {
+            language: '',
+            csapi: '',
+            docuid: ''
+        },
+        doc: {
+            title: '',
+            summary: '',
+            link: ''
+        },
+        onMounted() {
+            this.update({
+                language: this.props.language,
+                csapi: this.props.csapi,
+                docuid: this.props.docuid
+            })
+        },
+        onBeforeUpdate() {
+            if(this.state.csapi!=this.props.csapi || this.state.language!=this.props.language || this.state.docuid!=this.props.docuid){
+                if(!(this.props.csapi==''||this.props.language==''||this.props.docuid=='')){
+                    getData(this.props.csapi + this.props.docuid + '?language=' + this.props.language, null, null, this.setDocument)
+                }
+                this.state.csapi=this.props.csapi
+                this.state.language=this.props.language
+                this.state.docuid=this.props.docuid
+            }
+        },
+        setDocument(respCode, text) {
+            if(respCode!=200) return
+            this.doc=JSON.parse(text)
+            if (this.doc.title) {
+                try {
+                    this.doc.title = decodeURIComponent(this.doc.title)
+                } catch (e) {
+                    this.doc.title = unescape(this.doc.title)
+                }
+            }
+            if (this.props.viewpage && this.props.docuid) {
+                this.doc.link = (this.props.viewpage + this.props.docuid).replace(/\//g, ',')
+            }
+            if (this.doc.summary) {
+                try {
+                    this.doc.summary = decodeURIComponent(this.doc.summary)
+                } catch (e) {
+                    this.doc.summary = unescape(this.doc.summary)
+                }
+            }
+            this.update()
+        }
+    }
+</script>
+</cs_article3>

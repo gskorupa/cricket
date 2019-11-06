@@ -669,7 +669,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             try {
                 modificationPoint = dt1.parse(modificationString);
             } catch (ParseException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
             if (null == modificationPoint) {
                 modificationString = modificationString.substring(modificationString.indexOf(",") + 2);
@@ -677,7 +677,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 try {
                     modificationPoint = dt1.parse(modificationString);
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
             }
         }

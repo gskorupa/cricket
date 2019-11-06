@@ -1,0 +1,15 @@
+<cs_article2>
+    <article class="{ props.type }">
+        <header>
+            <h1><raw html="{props.title}"/></h1>
+        </header>
+        <section if="{props.type=='list'}"><raw html="{props.summary}"/></section>
+        <section if="{props.type=='folder'||props.type=='main'}"><raw html="{props.content}"/></section>
+        <p if="{ props.type=='list' && props.viewpage && props.uid }" class="top-spacing">
+            <a class="btn btn-outline-secondary" href="#" role="button">{ props.texts.details }<span style="margin-left: 0.5rem">&raquo;</span></a>
+        </p>
+        <p if="{ props.type=='main' && props.viewpage }" class="top-spacing">
+            <a class="btn btn-outline-secondary" role="button"><span style="margin-right: 0.5rem">&laquo;</span>{ app.texts.back }</a>
+        </p>
+    </article>
+</cs_article2>
