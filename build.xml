@@ -7,7 +7,7 @@
     </target>
     <!-- set global properties for this build -->
     <property name="targetJava10+" value="true"/>
-    <property name="mainVersion" value="1.3.5"/>
+    <property name="mainVersion" value="1.3.6"/>
     <property name="version" value="${mainVersion}"/>
     <!-- default JDK == 1.12 -->
     <!-- alternate JDK compiler will be used if declared (not empty) -->
@@ -47,7 +47,7 @@
     <!-- REMEMBER to download these libraries before building Cricket -->
     <property name="json-io-lib" value="json-io-4.11.1.jar"/>
     <property name="commons-csv-lib" value="commons-csv-1.5.jar"/>
-    <property name="h2-lib" value="h2-1.4.197.jar"/>
+    <property name="h2-lib" value="h2-1.4.200.jar"/>
     <property name="jaxb-lib" value="jaxb-api-2.3.1.jar"/>
     <property name="javamail-lib" value="javax.mail-1.6.1.jar"/>
     <property name="mqtt-lib" value="org.eclipse.paho.client.mqttv3-1.2.0.jar"/>
@@ -102,12 +102,13 @@
         <copy file="${src}/BasicService-help.template" tofile="${src}/BasicService-help.txt" overwrite="true"/>
         <replace file="${src}/BasicService-help.txt" token="{{version}}" value="${version}" summary="true"/>
         <javac 
-            target="12" 
-            source="12" 
+            target="13" 
+            source="13" 
             srcdir="${src}" 
             destdir="${build}"
             includeantruntime="false" 
             debug="on"
+            verbose="true"
             classpathref="project-classpath">
             <!--<compilerarg value="-Xlint:unchecked"/>-->
         </javac>
@@ -157,17 +158,16 @@
     <target name="dist" description="generate the distribution">
         <!-- Create the distribution directory -->
         <mkdir dir="${dist}"/>
-        <mkdir dir="${dist}/work"/>
         <antcall inheritall="true" target="jar"/>
-        <mkdir dir="${dist}/work/config"/>
-        <mkdir dir="${dist}/work/files"/>
-        <mkdir dir="${dist}/work/data"/>
-        <mkdir dir="${dist}/work/log"/>
+        <mkdir dir="${dist}/config"/>
+        <mkdir dir="${dist}/files"/>
+        <mkdir dir="${dist}/data"/>
+        <mkdir dir="${dist}/log"/>
         <mkdir dir="${dist}/www"/>
         <mkdir dir="${dist}/www/assets"/>
-        <delete file="${dist}/work/data/cricket_publickeystore.jks" failonerror="false"></delete>
+        <delete file="${dist}/data/cricket_publickeystore.jks" failonerror="false"></delete>
         <genkey alias="cricket" 
-                keystore="${dist}/work/data/cricket_publickeystore.jks" 
+                keystore="${dist}/data/cricket_publickeystore.jks" 
                 storepass="cricket15$#17" 
                 keypass="cricket15$#17" 
                 keyalg="RSA" 
@@ -182,7 +182,7 @@
             <fileset dir="www"/>
         </copy>
         <echo message="Building distribution package"/>
-        <copy todir="${dist}/work/config" file="${src}/cricket.json"/>
+        <copy todir="${dist}/config" file="${src}/cricket.json"/>
         <copy todir="${dist}" file="${src-other}/build.xml"/>
         <antcall target="copy10run">
             <param name="targetJava10+" value="${targetJava10+}"/>
@@ -285,8 +285,8 @@
             ignoreerrors="true"
         />
         <get
-            src="https://search.maven.org/remotecontent?filepath=com/h2database/h2/1.4.197/h2-1.4.197.jar"
-            dest="lib/h2-1.4.197.jar" 
+            src="http://repo2.maven.org/maven2/com/h2database/h2/1.4.200/h2-1.4.200.jar"
+            dest="lib/h2-1.4.200.jar" 
             usetimestamp="true" 
             ignoreerrors="true"
         />
@@ -365,7 +365,7 @@
         <input message="Please enter service name to run [BasicService|Microsite]:" addproperty="service.name" defaultvalue="BasicService"/>
         <java jar="${dist}/${jar-name}" dir="${dist}" jvm="">
             <arg value="-c"/>
-            <arg value="work/config/cricket.json"/>
+            <arg value="config/cricket.json"/>
             <arg value="-s"/>
             <arg value="${service.name}"/>
             <arg value="-r"/>
@@ -374,7 +374,7 @@
      <target name="run-microsite" depends="dist" if="${targetJava10+}">
         <java jar="${dist}/${jar-name}" dir="${dist}" jvm="">
             <arg value="-c"/>
-            <arg value="work/config/cricket.json"/>
+            <arg value="config/cricket.json"/>
             <arg value="-s"/>
             <arg value="Microsite"/>
             <arg value="-r"/>
@@ -384,7 +384,7 @@
         <input message="Please enter service name to run [BasicService|Microsite]:" addproperty="service.name" defaultvalue="BasicService"/>
         <java jar="${dist}/${jar-name}" dir="${dist}" jvm="${alternateJDK}/bin/java">
             <arg value="-c"/>
-            <arg value="work/config/cricket.json"/>
+            <arg value="config/cricket.json"/>
             <arg value="-s"/>
             <arg value="${service.name}"/>
             <arg value="-r"/>
@@ -392,7 +392,7 @@
     </target>
     <target name="test" depends="compile.tests">
         <delete dir="${reports}"/>
-        <mkdir dir="${reports}/work/log"/>
+        <mkdir dir="${reports}/log"/>
         <junit fork="yes" printsummary="yes" showoutput="yes" dir="${reports}">
             <classpath>
                 <pathelement path="${build.test}"/>

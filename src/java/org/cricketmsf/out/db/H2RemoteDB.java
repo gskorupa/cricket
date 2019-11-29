@@ -59,6 +59,8 @@ public class H2RemoteDB extends H2EmbededDB implements SqlDBIface, Adapter {
         Kernel.getLogger().print("\tautocommit=" + autocommit);
         setIgnorecase("true".equalsIgnoreCase(properties.getOrDefault("ignorecase", "false")));
         Kernel.getLogger().print("\tignorecase=" + ignorecase);
+        setSkipUpdate("true".equalsIgnoreCase(properties.getOrDefault("skip-update", "false")));
+        Kernel.getLogger().print("\tskip-update=" + skipUpdate);
         try {
             start();
         } catch (KeyValueDBException ex) {

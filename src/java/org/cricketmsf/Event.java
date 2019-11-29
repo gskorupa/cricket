@@ -76,6 +76,7 @@ public class Event implements EventIface {
         serviceUuid = Kernel.getInstance().getUuid();
         category = Event.CATEGORY_GENERIC;
         type = Event.TYPE_DEFAULT;
+        timePoint="+0s";
         calculateTimePoint();
     }
 
@@ -121,7 +122,7 @@ public class Event implements EventIface {
         this.type = "";
         this.payload = null;
         this.request = request;
-        this.timePoint = null;
+        this.timePoint = "+0s";
         createdAt = System.currentTimeMillis();
         calculateTimePoint();
     }
@@ -189,7 +190,7 @@ public class Event implements EventIface {
                 source.getClass().getSimpleName(),
                 Event.CATEGORY_LOG,
                 level,
-                null,
+                "+0s",
                 message);
     }
 
@@ -206,7 +207,7 @@ public class Event implements EventIface {
                 source,
                 Event.CATEGORY_LOG,
                 level,
-                null,
+                "+0s",
                 message);
     }
 
@@ -222,7 +223,7 @@ public class Event implements EventIface {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_SEVERE,
-                null,
+                "+0s",
                 message);
     }
 
@@ -238,7 +239,7 @@ public class Event implements EventIface {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_WARNING,
-                null,
+                "+0s",
                 message);
     }
 
@@ -254,7 +255,7 @@ public class Event implements EventIface {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_INFO,
-                null,
+                "+0s",
                 message);
     }
 
@@ -270,7 +271,7 @@ public class Event implements EventIface {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_FINE,
-                null,
+                "+0s",
                 message);
     }
 
@@ -286,7 +287,7 @@ public class Event implements EventIface {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_FINER,
-                null,
+                "+0s",
                 message);
     }
 
@@ -302,7 +303,7 @@ public class Event implements EventIface {
                 source,
                 Event.CATEGORY_LOG,
                 Event.LOG_FINEST,
-                null,
+                "+0s",
                 message);
     }
 

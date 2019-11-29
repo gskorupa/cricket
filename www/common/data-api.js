@@ -89,14 +89,12 @@ function getDataCallEventName(success, defaultName, status){
 }
 
 function getData(url, query, token, callback) {
-    var oReq = new XMLHttpRequest();
+    const oReq = new XMLHttpRequest();
     oReq.onerror = function (oEvent) {
         window.app.requests--;
-        //eventListener.trigger(getDataCallEventName(false,errName,this.status));
     }
     oReq.onloadend = function(oEvent){
         window.app.requests--;
-        //eventListener.trigger(getDataCallEventName(true));
     }
     oReq.onabort = function(oEvent){
         window.app.requests--;
@@ -106,15 +104,7 @@ function getData(url, query, token, callback) {
     }
     oReq.onreadystatechange = function () {
         if (this.readyState == 4) {
-            if (this.status == 200) {
-                callback(this.status, this.responseText);
-            }else if (this.status == 401 || this.status == 403) {
-                callback(this.status, this.responseText);
-            } else{
-//                app.log('getData.onreadystatechange: '+this.readyState+' '+this.status)
-            }
-        } else {
-            //
+            callback(this.status, this.responseText);
         }
     };
     oReq.open("get", url, true);
@@ -128,17 +118,15 @@ function getData(url, query, token, callback) {
 }
 
 function sendData(data, method, url, token, callback, eventListener, errName) {
-//    app.log("sendData ...")
-    var urlEncodedData = "";
-    var urlEncodedDataPairs = [];
-    var name;
-    var oReq = new XMLHttpRequest();
-    for (name in data) {
-        urlEncodedDataPairs.push(encodeURIComponent(name) + '=' + encodeURIComponent(data[name]));
-    }
+    const urlEncodedData = "";
+    const urlEncodedDataPairs = [];
+    const oReq = new XMLHttpRequest();
+    data.forEach((name)=>urlEncodedDataPairs.push(encodeURIComponent(name)+'='+encodeURIComponent(data[name])));
+    //for (name in data) {
+    //    urlEncodedDataPairs.push(encodeURIComponent(name) + '=' + encodeURIComponent(data[name]));
+    //}
     urlEncodedData = urlEncodedDataPairs.join('&').replace(/%20/g, '+');
     oReq.onerror = function (oEvent) {
-//        app.log("onerror " + this.status + " " + oEvent.toString())
         app.requests--;
         eventListener.trigger(getDataCallEventName(false,errName,this.status));
     }
@@ -158,14 +146,10 @@ function sendData(data, method, url, token, callback, eventListener, errName) {
                 app.log(JSON.parse(this.responseText));
                 callback(this.responseText);
             }else if (this.status == 401 || this.status == 403) {
-//                app.log('sendData.onreadystatechange: '+this.readyState+' '+this.status);
                 eventListener.trigger(getDataCallEventName(false,null,this.status));
             } else{
-//                app.log('sendData.onreadystatechange: '+this.readyState+' '+this.status)
             }
         } else {
-//                app.log('sendData.onreadystatechange: '+this.readyState+' '+this.status)
-                //eventListener.trigger(getDataCallEventName(false,errName,this.status));
         }
     }
 
@@ -182,30 +166,23 @@ function sendData(data, method, url, token, callback, eventListener, errName) {
 }
 
 function sendFormData(formData, method, url, token, callback, eventListener, errName) {
-//    app.log("sendFormData ...");
     var oReq = new XMLHttpRequest();
     oReq.onerror = function (oEvent) {
-        app.log("sendFormData.onerror " + this.status + " " + oEvent.toString())
         app.requests--;
         eventListener.trigger(getDataCallEventName(false,errName,this.status));
     }
     oReq.onloadend = function(oEvent){
-        app.log('sendFormData.onloadend: '+oEvent)
-        //app.log(oEvent)
         app.requests--;
         eventListener.trigger(getDataCallEventName(true), oEvent);
     }
     oReq.onabort = function(oEvent){
-        app.log('sendFormData.onAbort: '+oEvent)
         app.requests--;
     }
     oReq.timeout = function(oEvent){
-        app.log('sendFormData.timeout: '+oEvent)
         app.requests--;
     }   
     oReq.onreadystatechange = function () {
         if (this.readyState == 4 && (this.status == 200 || this.status == 201)) {
-            app.log(JSON.parse(this.responseText));
             if (callback != null) {
                 callback(this.responseText);
             } else {
@@ -213,8 +190,6 @@ function sendFormData(formData, method, url, token, callback, eventListener, err
             }
         }else if (this.readyState == 4 && (this.status >= 400)) {
             eventListener.trigger(getDataCallEventName(false,null,this.status)+' '+this.responseText);
-        } else{
-//            app.log('sendFormData.onreadystatechange: '+this.readyState+' '+this.status)
         }
     };
     app.requests++;
@@ -231,7 +206,6 @@ function sendFormData(formData, method, url, token, callback, eventListener, err
 function deleteData(url, token, callback, eventListener, successEventName, errorEventName, debug, appEventBus) {
     var oReq = new XMLHttpRequest();
     oReq.onerror = function (oEvent) {
-//        app.log("onerror " + this.status + " " + oEvent.toString())
         app.requests--;
         eventListener.trigger(getDataCallEventName(false,errName,this.status));
     }
@@ -254,10 +228,7 @@ function deleteData(url, token, callback, eventListener, successEventName, error
                 eventListener.trigger(getDataCallEventName(true));
             }
         }else if (this.status == 401 || this.status == 403) {
-//            app.log('deleteData.onreadystatechange: '+this.readyState+' '+this.status);
             eventListener.trigger(getDataCallEventName(false,null,this.status));
-        } else{
-//            app.log('deleteData.onreadystatechange: '+this.readyState+' '+this.status)
         }
     };
     app.requests++;
@@ -305,7 +276,6 @@ function loginSubmit(oFormElement, eventListener, successEventName, errName) {
     }
     var oReq = new XMLHttpRequest();
     oReq.onerror = function (oEvent) {
-//        app.log("onerror " + this.status + " " + oEvent.toString())
         app.requests--;
         eventListener.trigger(getDataCallEventName(false,errName,this.status));
     }

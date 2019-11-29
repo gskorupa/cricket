@@ -148,4 +148,8 @@ public class ConfigSet {
         }
         
     }
+    
+    public ArrayList<Configuration> getServices(){
+        return services;
+    }
 }

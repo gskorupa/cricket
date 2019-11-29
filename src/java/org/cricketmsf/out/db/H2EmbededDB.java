@@ -50,6 +50,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     private String filePassword;
     protected boolean autocommit;
     protected boolean ignorecase = false;
+    protected boolean skipUpdate = false;
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -75,6 +76,8 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         Kernel.getLogger().print("\tautocommit=" + autocommit);
         setIgnorecase("true".equalsIgnoreCase(properties.getOrDefault("ignorecase", "false")));
         Kernel.getLogger().print("\tignorecase=" + ignorecase);
+        setSkipUpdate("true".equalsIgnoreCase(properties.getOrDefault("skip-update", "false")));
+        Kernel.getLogger().print("\tskip-update=" + skipUpdate);
         try {
             start();
         } catch (KeyValueDBException ex) {
@@ -160,7 +163,9 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         }
         String version = getVersion();
         try {
-            updateStructure(cp.getConnection(), version, getSystemVersion());
+            if(!isSkipUpdate()) {
+                updateStructure(cp.getConnection(), version, getSystemVersion());
+            }
         } catch (SQLException e) {
             throw new KeyValueDBException(KeyValueDBException.CANNOT_WRITE, "cannot update database version information");
         }
@@ -515,5 +520,19 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
             }
             return result;
         }
+    }
+
+    /**
+     * @return the skipUpdate
+     */
+    public boolean isSkipUpdate() {
+        return skipUpdate;
+    }
+
+    /**
+     * @param skipUpdate the skipUpdate to set
+     */
+    public void setSkipUpdate(boolean skipUpdate) {
+        this.skipUpdate = skipUpdate;
     }
 }

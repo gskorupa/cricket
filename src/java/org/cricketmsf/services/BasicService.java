@@ -42,7 +42,7 @@ public class BasicService extends Kernel {
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
     //EchoHttpAdapterIface echoAdapter = null;
-    protected KeyValueDBIface cacheDB = null;
+    KeyValueDBIface cacheDB = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
     FileReaderAdapterIface wwwFileReader = null;
@@ -186,7 +186,7 @@ public class BasicService extends Kernel {
         if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
         } else {
-            Kernel.getInstance().dispatchEvent(Event.logInfo("Event category " + event.getCategory() + " is not handled by BasicService. Payload: ", event.getPayload().toString()));
+            Kernel.getInstance().dispatchEvent(Event.logWarning("Event category " + event.getCategory() + " is not handled by BasicService", event.getPayload()!=null?event.getPayload().toString():""));
         }
     }
 

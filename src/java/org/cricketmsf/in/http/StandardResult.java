@@ -17,7 +17,6 @@ package org.cricketmsf.in.http;
 
 import com.sun.net.httpserver.Headers;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -153,7 +152,7 @@ public class StandardResult implements Result {
     
     @Override
     public void setHeader(String name, List values){
-        headers.put(name, (ArrayList)values);
+        headers.put(name, values);
     }
     
     @Override

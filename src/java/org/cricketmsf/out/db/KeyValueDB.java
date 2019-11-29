@@ -94,7 +94,7 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
             throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "not configured");
         }
         if (tables.containsKey(name)) {
-            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "unable to create table " + name);
+            throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "table " + name + "already exists");
         }
         tables.put(name, new KeyValueTable(name, capacity, persistent, storagePath));
     }

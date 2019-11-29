@@ -319,13 +319,17 @@ public abstract class Kernel {
         try {
             Configuration cfg = config;
             instance = (Kernel) c.newInstance();
-            System.out.println("DEFAULT CONFIG: " + instance.configurationBaseName);
+            Configuration defaultCfg=null;
             if (null != instance.configurationBaseName) {
-                Configuration defaultCfg = defaultConfigSet.getConfigurationById(instance.configurationBaseName);
+                defaultCfg = defaultConfigSet.getConfigurationById(instance.configurationBaseName);
                 if (null != defaultCfg) {
                     cfg = cfg.join(defaultCfg);
+                }else{
+                    defaultConfigSet.getServices().forEach(cf->{System.out.println(cf.getId()+" "+cf.getService());});
                 }
             }
+            System.out.println("DEFAULT CONFIG: " + instance.configurationBaseName+ " with "
+                    +(defaultCfg!=null?defaultCfg.getAdapters().size():"unknown")+" adapters");
             ((Kernel) instance).setUuid(UUID.randomUUID());
             ((Kernel) instance).setId(config.getId());
             ((Kernel) instance).setName((String) cfg.getProperties().getOrDefault("SRVC_NAME_ENV_VARIABLE", "CRICKET_NAME"));

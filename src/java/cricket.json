@@ -10,7 +10,7 @@
                 "host": "0.0.0.0",
                 "port": "7070",
                 "ssl": "false",
-                "keystore": "./work/data/cricket_publickeystore.jks",
+                "keystore": "./data/cricket_publickeystore.jks",
                 "keystore-password": "cricket15$#17",
                 "threads": "0",
                 "shutdown-delay":"2",
@@ -23,7 +23,7 @@
                 "admin-notification-email": "",
                 "restricted-resources": "DELETE@/api/auth GET@/api/user PUT@/api/user DELETE@/api/user *@/api/cm *@/api/alert *@/api/system",
                 "file.upload.maxsize": "1000000",
-                "backup-folder": "./work/backup",
+                "backup-folder": "./backup",
                 "backup-strategy": "week",
                 "request-encoding": "UTF-8",
                 "serviceurl": "http://localhost:7070",
@@ -61,7 +61,7 @@
                     "properties": {
                         "name": "Microsite",
                         "level": "FINE",
-                        "log-file-name": "./work/log/cricket%g.log",
+                        "log-file-name": "./log/cricket%g.log",
                         "max-size": "1000000",
                         "count": "10",
                         "console": "true"
@@ -73,7 +73,7 @@
                     "classFullName": "org.cricketmsf.out.log.FileLogger",
                     "properties": {
                         "name": "Microsite",
-                        "log-file-name": "./work/log/gdpr.log"
+                        "log-file-name": "./log/gdpr.log"
                     }
                 },
                 {
@@ -81,7 +81,7 @@
                     "interfaceName": "KeyValueDBIface",
                     "classFullName": "org.cricketmsf.out.db.KeyValueDB",
                     "properties": {
-                        "path": "./work/data",
+                        "path": "./data",
                         "name": "local"
                     }
                 },
@@ -90,7 +90,7 @@
                     "interfaceName": "SchedulerIface",
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
-                        "path": "./work/data",
+                        "path": "./data",
                         "envVariable": "SCHEDULER_DB_PATH",
                         "file": "scheduler.xml",
                         "init.0":"Data1,MICROSITE,EVENT,CLEAR_DATA,05:00:00 GMT|*24h,_|_;",
@@ -175,7 +175,7 @@
                     "interfaceName": "SqlDBIface",
                     "classFullName": "org.cricketmsf.microsite.out.db.H2UserDB",
                     "properties": {
-                        "path": "./work/data",
+                        "path": "./data",
                         "file": "user",
                         "test-query": "select * from serviceversion",
                         "version": "2",
@@ -201,7 +201,7 @@
                     "interfaceName": "SqlDBIface",
                     "classFullName": "org.cricketmsf.microsite.out.db.H2AuthDB",
                     "properties": {
-                        "path": "./work/data",
+                        "path": "./data",
                         "file": "auth",
                         "test-query": "select * from serviceversion",
                         "version": "1",
@@ -215,7 +215,7 @@
                     "interfaceName": "SqlDBIface",
                     "classFullName": "org.cricketmsf.microsite.out.db.H2CmsDB",
                     "properties": {
-                        "path":"./work/data",
+                        "path":"./data",
                         "file": "cms",
                         "test-query": "select * from serviceversion",
                         "version": "1",
@@ -239,7 +239,7 @@
                         "helper-name": "cmsDB",
                         "rule-engine": "cmsRuleEngine",
                         "root-path": "./www/",
-                        "file-path": "./work/files/",
+                        "file-path": "./files/",
                         "file-path-published": "./www/assets/",
                         "index-file": "index.html"
                     }
@@ -261,7 +261,7 @@
                     "interfaceName": "WatchdogIface",
                     "classFullName": "org.cricketmsf.in.file.FileTailer",
                     "properties": {
-                        "path": "/home/greg/tmp/test.txt",
+                        "path": "./tmp/test.txt",
                         "sampling-interval": "1000",
                         "event-category": "FILE_CHANGED"
                     }
@@ -314,7 +314,7 @@
                 "host": "0.0.0.0",
                 "port": "8080",
                 "ssl": "false",
-                "keystore": "./work/data/cricket_publickeystore.jks",
+                "keystore": "./data/cricket_publickeystore.jks",
                 "keystore-password": "cricket15$#17",
                 "threads": "0",
                 "filter": "org.cricketmsf.SecurityFilter",
@@ -350,7 +350,7 @@
                     "properties": {
                         "name": "BasicService",
                         "level": "FINEST",
-                        "log-file-name": "./work/log/cricket%g.log",
+                        "log-file-name": "./log/cricket%g.log",
                         "max-size": "1000000",
                         "count": "10",
                         "console": "true"
@@ -361,7 +361,7 @@
                     "interfaceName": "KeyValueDBIface",
                     "classFullName": "org.cricketmsf.out.db.KeyValueDB",
                     "properties": {
-                        "path": "./work/data",
+                        "path": "./data",
                         "name": "local"
                     }
                 },
@@ -370,7 +370,7 @@
                     "interfaceName": "SchedulerIface",
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
-                        "path": "./work/data",
+                        "path": "./data",
                         "envVariable": "SCHEDULER_DB_PATH",
                         "file": "scheduler.xml"
                     }

@@ -2,16 +2,15 @@
 FROM openjdk:10-jre-slim
 
 RUN mkdir /cricket
-RUN mkdir /cricket/work
-RUN mkdir /cricket/work/data
-RUN mkdir /cricket/work/files
-RUN mkdir /cricket/work/backup
-COPY dist/cricket-1.3.5.jar /cricket
-COPY dist/work/config/cricket.json /cricket/work/config/
+RUN mkdir /cricket/data
+RUN mkdir /cricket/files
+RUN mkdir /cricket/backup
+COPY dist/cricket-1.3.6.jar /cricket
+COPY dist/config/cricket.json /cricket/config/
 COPY dist/www /cricket/www
-COPY dist/work/data/cricket_publickeystore.jks /cricket/work/data
-VOLUME /cricket/work
+COPY dist/data/cricket_publickeystore.jks /cricket/data
+VOLUME /cricket
 volume /cricket/www
 WORKDIR /cricket
 
-CMD ["java", "--illegal-access=deny", "--add-modules", "java.xml.bind", "--add-modules", "java.activation", "-jar", "cricket-1.3.5.jar", "-r", "-c", "/cricket/work/config/cricket.json", "-s", "Microsite"]
+CMD ["java", "--illegal-access=deny", "--add-modules", "java.xml.bind", "--add-modules", "java.activation", "-jar", "cricket-1.3.6.jar", "-r", "-c", "/cricket/config/cricket.json", "-s", "Microsite"]

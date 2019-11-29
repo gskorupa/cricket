@@ -31,8 +31,6 @@ import org.cricketmsf.microsite.user.User;
 import org.cricketmsf.out.db.*;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.cricketmsf.annotation.EventClassHook;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.event.EventMaster;

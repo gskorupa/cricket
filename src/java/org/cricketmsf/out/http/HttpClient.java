@@ -42,6 +42,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 import java.util.HashMap;
+import java.util.Map;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.out.OutboundAdapterIface;
 
@@ -139,6 +140,8 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
                 scon.connect();
                 //print_https_cert(scon);
                 result.setCode(scon.getResponseCode());
+                Map<String,List<String>> headers=scon.getHeaderFields();
+                headers.keySet().forEach(key->{result.setHeader(key, headers.get(key));});
                 if (isRequestSuccessful(result.getCode())) {
                     StringBuilder response;
                     try ( // success
@@ -181,6 +184,8 @@ public class HttpClient extends OutboundHttpAdapter implements OutboundAdapterIf
                 }
                 con.connect();
                 result.setCode(con.getResponseCode());
+                Map<String,List<String>> headers=con.getHeaderFields();
+                headers.keySet().forEach(key->{result.setHeader(key, headers.get(key));});
                 StringBuilder response;
                 String inputLine;
                 try {
