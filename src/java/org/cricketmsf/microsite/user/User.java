@@ -37,6 +37,8 @@ public class User {
     private int type = USER;
     private String uid;
     private String email;
+    private String name;
+    private String surname;
     private String role;
     private boolean confirmed;
     private boolean unregisterRequested;
@@ -217,6 +219,34 @@ public class User {
      */
     public void setNumber(long number) {
         this.number = number;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @return the surname
+     */
+    public String getSurname() {
+        return surname;
+    }
+
+    /**
+     * @param surname the surname to set
+     */
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
 }

@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.services;
 
+import java.util.HashMap;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
@@ -38,7 +39,7 @@ import org.cricketmsf.out.log.LoggerAdapterIface;
  * @author greg
  */
 public class BasicService extends Kernel {
-    
+
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
     //EchoHttpAdapterIface echoAdapter = null;
@@ -50,7 +51,7 @@ public class BasicService extends Kernel {
     // optional
     //HttpAdapterIface scriptingService = null;
     //ScriptingAdapterIface scriptingEngine = null;
-    
+
     public BasicService() {
         super();
         this.configurationBaseName = "BasicService";
@@ -164,12 +165,11 @@ public class BasicService extends Kernel {
         return result;
     }
 
-    /*
     @HttpAdapterHook(adapterName = "Echo", requestMethod = "*")
     public Object doGetEcho(Event requestEvent) {
         return sendEcho(requestEvent.getRequest());
     }
-     */
+
     @EventHook(eventCategory = Event.CATEGORY_LOG)
     @EventHook(eventCategory = "Category-Test")
     public void logEvent(Event event) {
@@ -186,46 +186,36 @@ public class BasicService extends Kernel {
         if (event.getTimePoint() != null) {
             scheduler.handleEvent(event);
         } else {
-            Kernel.getInstance().dispatchEvent(Event.logWarning("Event category " + event.getCategory() + " is not handled by BasicService", event.getPayload()!=null?event.getPayload().toString():""));
+            Kernel.getInstance().dispatchEvent(Event.logWarning("Event category " + event.getCategory() + " is not handled by BasicService", event.getPayload() != null ? event.getPayload().toString() : ""));
         }
     }
 
-    /*
     public Object sendEcho(RequestObject request) {
         StandardResult r = new StandardResult();
         r.setCode(HttpAdapter.SC_OK);
-        try {
-            if (!echoAdapter.isSilent()) {
-                // with echo counter
-                Long counter;
-                counter = (Long) cacheDB.get("counters", "echo.count", new Long(0));
-                counter++;
-                cacheDB.put("counters", "echo.count", counter);
-                HashMap<String, Object> data = new HashMap<>(request.parameters);
-                data.put("service.id", getId());
-                data.put("service.uuid", getUuid().toString());
-                data.put("service.name", getName());
-                data.put("request.method", request.method);
-                data.put("request.pathExt", request.pathExt);
-                data.put("echo.counter", cacheDB.get("counters", "echo.count"));
-                if (data.containsKey("error")) {
-                    int errCode = HttpAdapter.SC_INTERNAL_SERVER_ERROR;
-                    try {
-                        errCode = Integer.parseInt((String) data.get("error"));
-                    } catch (Exception e) {
-                    }
-                    r.setCode(errCode);
-                    data.put("error", "error forced by request");
-                }
-                r.setData(data);
-                r.setHeader("x-echo-greeting", "hello");
-            } else {
-                Kernel.getInstance().dispatchEvent(Event.logFine("BasicService", "echo service is silent"));
+        //if (!echoAdapter.isSilent()) {
+        HashMap<String, Object> data = new HashMap<>(request.parameters);
+        data.put("&_service.id", getId());
+        data.put("&_service.uuid", getUuid().toString());
+        data.put("&_service.name", getName());
+        data.put("&_request.method", request.method);
+        data.put("&_request.pathExt", request.pathExt);
+        data.put("&_request.body", request.body);
+        if (data.containsKey("error")) {
+            int errCode = HttpAdapter.SC_INTERNAL_SERVER_ERROR;
+            try {
+                errCode = Integer.parseInt((String) data.get("error"));
+            } catch (Exception e) {
             }
-        } catch (KeyValueDBException e) {
-            Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), e.getMessage()));
+            r.setCode(errCode);
+            data.put("error", "error forced by request");
         }
+        r.setData(data);
+        r.setHeader("x-echo-greeting", "hello");
+        //} else {
+        //    Kernel.getInstance().dispatchEvent(Event.logFine("BasicService", "echo service is silent"));
+        //}
         return r;
     }
-     */
+
 }

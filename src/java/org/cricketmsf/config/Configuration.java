@@ -59,20 +59,22 @@ public class Configuration {
 
         //overwrite ports
         AdapterConfiguration ac;
-        boolean found;
+        int found;
         ArrayList<AdapterConfiguration> al = new ArrayList<>();
         for (int i = 0; i < overwritten.ports.length; i++) {
             al.add(overwritten.ports[i]);
         }
         for (int j = 0; j < ports.length; j++) {
-            found = false;
+            found = -1;
             for (int i = 0; i < al.size(); i++) {
                 if (ports[j].getName().equals(al.get(i).getName())) {
-                    found = true;
+                    found = i;
                 }
             }
-            if (!found) {
+            if (found<0) {
                 al.add(ports[j]);
+            }else{
+                al.set(found, ports[j]);
             }
         }
         overwritten.ports = al.toArray(new AdapterConfiguration[al.size()]);

@@ -64,6 +64,8 @@ public class ParameterFilter extends Filter {
     @Override
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
+        exchange.setAttribute("body", null);
+        exchange.setAttribute("parameters",null);
         if (null == parameterEncoding) {
             init();
         }
@@ -212,6 +214,7 @@ public class ParameterFilter extends Filter {
                 isr.close();
              */
         }
+        exchange.getRequestBody().close();
         return parameters;
     }
 

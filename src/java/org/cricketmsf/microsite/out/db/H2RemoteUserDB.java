@@ -50,6 +50,8 @@ public class H2RemoteUserDB extends H2RemoteDB implements SqlDBIface, Adapter {
                 .append("uid varchar primary key,")
                 .append("type int,")
                 .append("email varchar,")
+                .append("name varchar,")
+                .append("surname varchar,")
                 .append("role varchar,")
                 .append("secret varchar,")
                 .append("password varchar,")
@@ -95,19 +97,21 @@ public class H2RemoteUserDB extends H2RemoteDB implements SqlDBIface, Adapter {
 
     private void putUser(String tableName, String key, User user) throws KeyValueDBException {
         try (Connection conn = getConnection()) {
-            String query = "merge into ?? (uid,type,email,role,secret,password,confirmed,unregisterreq,authstatus,created) key (uid) values (?,?,?,?,?,?,?,?,?,?)";
+            String query = "merge into ?? (uid,type,email,name,surname,role,secret,password,confirmed,unregisterreq,authstatus,created) key (uid) values (?,?,?,?,?,?,?,?,?,?)";
             query = query.replaceFirst("\\?\\?", tableName);
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, user.getUid());
             pstmt.setInt(2, user.getType());
             pstmt.setString(3, user.getEmail());
-            pstmt.setString(4, user.getRole());
-            pstmt.setString(5, user.getConfirmString());
-            pstmt.setString(6, user.getPassword());
-            pstmt.setBoolean(7, user.isConfirmed());
-            pstmt.setBoolean(8, user.isUnregisterRequested());
-            pstmt.setInt(9, user.getStatus());
-            pstmt.setTimestamp(10, new Timestamp(user.getCreatedAt()));
+            pstmt.setString(4, user.getName());
+            pstmt.setString(5, user.getSurname());
+            pstmt.setString(6, user.getRole());
+            pstmt.setString(7, user.getConfirmString());
+            pstmt.setString(8, user.getPassword());
+            pstmt.setBoolean(9, user.isConfirmed());
+            pstmt.setBoolean(10, user.isUnregisterRequested());
+            pstmt.setInt(11, user.getStatus());
+            pstmt.setTimestamp(12, new Timestamp(user.getCreatedAt()));
             int updated = pstmt.executeUpdate();
             //check?
         } catch (SQLException e) {
@@ -210,14 +214,16 @@ public class H2RemoteUserDB extends H2RemoteDB implements SqlDBIface, Adapter {
         user.setUid(rs.getString(1));
         user.setType(rs.getInt(2));
         user.setEmail(rs.getString(3));
-        user.setRole(rs.getString(4));
-        user.setConfirmString(rs.getString(5));
-        user.setPassword(rs.getString(6));
-        user.setConfirmed(rs.getBoolean(7));
-        user.setUnregisterRequested(rs.getBoolean(8));
-        user.setStatus(rs.getInt(9));
-        user.setCreatedAt(rs.getTimestamp(10).getTime());
-        user.setNumber(rs.getLong(11));
+        user.setName(rs.getString(4));
+        user.setSurname(rs.getString(5));
+        user.setRole(rs.getString(6));
+        user.setConfirmString(rs.getString(7));
+        user.setPassword(rs.getString(8));
+        user.setConfirmed(rs.getBoolean(9));
+        user.setUnregisterRequested(rs.getBoolean(10));
+        user.setStatus(rs.getInt(11));
+        user.setCreatedAt(rs.getTimestamp(12).getTime());
+        user.setNumber(rs.getLong(13));
         return user;
     }
 

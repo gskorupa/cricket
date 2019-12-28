@@ -93,7 +93,8 @@ public class UserBusinessLogic {
             User newUser = new User();
             newUser.setUid(event.getRequestParameter("uid"));
             newUser.setEmail(event.getRequestParameter("email"));
-            newUser.setType(User.USER);
+            newUser.setName(event.getRequestParameter("name"));
+            newUser.setSurname(event.getRequestParameter("surname"));
             newUser.setRole("");
             newUser.setPassword(HashMaker.md5Java(event.getRequestParameter("password")));
             String type = event.getRequestParameter("type");
@@ -198,9 +199,17 @@ public class UserBusinessLogic {
             String role = event.getRequestParameter("role");
             String password = event.getRequestParameter("password");
             String confirmed = event.getRequestParameter("confirmed");
+            String name = event.getRequestParameter("name");
+            String surname = event.getRequestParameter("surname");
             String unregisterRequested = event.getRequestParameter("unregisterRequested");
             if (email != null) {
                 user.setEmail(email);
+            }
+            if (name != null) {
+                user.setName(name);
+            }
+            if (surname != null) {
+                user.setSurname(surname);
             }
             if (role != null && isAdmin(request)) {
                 user.setRole(role);

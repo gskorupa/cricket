@@ -137,28 +137,23 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
     }
 
     public void doHandle(HttpExchange exchange, long rootEventId) throws IOException {
-
+        try{
         Stopwatch timer=null;
         if (Kernel.getInstance().isFineLevel()) {
             timer= new Stopwatch();
         }
         String acceptedResponseType = JSON;
-
         try {
             acceptedResponseType
                     = acceptedTypesMap.getOrDefault(exchange.getRequestHeaders().get("Accept").get(0), JSON);
         } catch (Exception e) {
         }
-
         // cerating Result object
         Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEventId);
-
         acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
-
         //set content type and print response to string format as JSON if needed
         Headers headers = exchange.getResponseHeaders();
         byte[] responseData;
-
         Iterator it = result.getHeaders().keySet().iterator();
         String key;
         while (it.hasNext()) {
@@ -244,6 +239,9 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         }
         sendLogEvent(exchange, responseData.length);
         result = null;
+        }catch(Exception e){
+            e.printStackTrace();
+        }
         exchange.close();
     }
 
@@ -313,6 +311,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         try {
             r = formattedResponse.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
             Kernel.getInstance().dispatchEvent(Event.logSevere("HttpAdapter", e.getMessage()));
         }
         return r;

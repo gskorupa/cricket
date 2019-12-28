@@ -19,6 +19,7 @@ import com.sun.net.httpserver.Headers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  *
@@ -113,7 +114,7 @@ public class FileResult implements Result {
 
     public void setModificationDate(Date date) {
         modificationDate = date;
-        SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
+        SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z",Locale.ENGLISH);
         modificationDateFormatted = dt1.format(modificationDate);
 
     }
