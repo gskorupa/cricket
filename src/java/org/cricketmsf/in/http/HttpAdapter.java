@@ -177,8 +177,13 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         switch (result.getCode()) {
             case SC_MOVED_PERMANENTLY:
             case SC_MOVED_TEMPORARY:
-                headers.set("Location", result.getMessage());
-                responseData = ("moved to ".concat(result.getMessage())).getBytes("UTF-8");
+                if(!headers.containsKey("Location")){
+                    String newLocation = result.getMessage()!=null?result.getMessage():"/";
+                    headers.set("Location", newLocation);
+                    responseData = ("moved to ".concat(newLocation)).getBytes("UTF-8");
+                }else{
+                    responseData="".getBytes();
+                }
                 break;
             case SC_NOT_FOUND:
                 headers.set("Content-type", "text/html");

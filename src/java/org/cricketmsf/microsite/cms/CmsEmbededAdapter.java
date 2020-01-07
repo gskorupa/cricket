@@ -70,6 +70,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     private String fileRoot = null; //cms document files root path in the filesystem
     private String publishedFilesRoot = null;
     String indexFileName = "index.html";
+    
+    private String defaultLanguage = null; // if not null we will be able to get document in the default language when requested language version is not found
 
     private void initRuleEngine() {
         if (ruleEngineName == null) {
@@ -569,6 +571,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         Kernel.getInstance().getLogger().print("\tfile-path: " + getFileRoot());
         setPublishedFilesRoot(properties.get("file-path-published"));
         Kernel.getInstance().getLogger().print("\tfile-path-published: " + getPublishedFilesRoot());
+        setDefaultLanguage(properties.get("default-language"));
+        Kernel.getInstance().getLogger().print("\tdefault-language: " + getDefaultLanguage());
 
         supportedLanguages = new ArrayList<>();
         supportedLanguages.add("pl");
@@ -940,5 +944,17 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             e.printStackTrace();
             return "";
         }
+    }
+
+    @Override
+    public String getDefaultLanguage() {
+        return defaultLanguage;
+    }
+
+    /**
+     * @param defaultLanguage the defaultLanguage to set
+     */
+    public void setDefaultLanguage(String defaultLanguage) {
+        this.defaultLanguage = defaultLanguage;
     }
 }

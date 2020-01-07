@@ -47,4 +47,5 @@ public interface CmsIface {
     public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName, String language);
     public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName, String language, boolean updateCache);
     public void updateCache(RequestObject request, KeyValueDBIface cache, String tableName, String language, String fileContent);
+    public String getDefaultLanguage();
 }

@@ -84,11 +84,13 @@ public class ContentRequestProcessor {
         if (pathExt != null && !pathExt.isEmpty()) {
             try {
                 doc = adapter.getDocument("/" + pathExt, language, "published", null);
+                if(null==doc && null!=adapter.getDefaultLanguage()){
+                    doc = adapter.getDocument("/" + pathExt, adapter.getDefaultLanguage(), "published", null);
+                }
                 if (doc != null) {
                     if (doc.getType() == null ? false : doc.getType().equals(Document.FILE)) {
                         doc.setContent("*****");
                     }
-                    //System.out.println("DOCUMENT2 "+doc.getPublished());
                     result.setData(doc);
                 } else {
                     result.setCode(HttpAdapter.SC_NOT_FOUND);

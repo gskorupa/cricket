@@ -85,10 +85,12 @@ public abstract class Kernel {
     // http server
     private String host = null;
     private int port = 0;
+    private int websocketPort = 0;
     private String sslAlgorithm = "";
     private Httpd httpd;
     private boolean httpHandlerLoaded = false;
     private boolean inboundAdaptersLoaded = false;
+    private WebsocketServer websocketServer;
     private int shutdownDelay = 5;
 
     //private static long eventSeed = System.currentTimeMillis();
@@ -303,8 +305,8 @@ public abstract class Kernel {
 
     /**
      * Must be used to set adapter variables after instantiating them according
-     * to the configuration in the configuration file (settings.json). 
-     * Look at EchoService example.
+     * to the configuration in the configuration file (settings.json). Look at
+     * EchoService example.
      */
     public abstract void getAdapters();
 
@@ -319,17 +321,19 @@ public abstract class Kernel {
         try {
             Configuration cfg = config;
             instance = (Kernel) c.newInstance();
-            Configuration defaultCfg=null;
+            Configuration defaultCfg = null;
             if (null != instance.configurationBaseName) {
                 defaultCfg = defaultConfigSet.getConfigurationById(instance.configurationBaseName);
                 if (null != defaultCfg) {
                     cfg = cfg.join(defaultCfg);
-                }else{
-                    defaultConfigSet.getServices().forEach(cf->{System.out.println(cf.getId()+" "+cf.getService());});
+                } else {
+                    defaultConfigSet.getServices().forEach(cf -> {
+                        System.out.println(cf.getId() + " " + cf.getService());
+                    });
                 }
             }
-            System.out.println("DEFAULT CONFIG: " + instance.configurationBaseName+ " with "
-                    +(defaultCfg!=null?defaultCfg.getAdapters().size():"unknown")+" adapters");
+            System.out.println("DEFAULT CONFIG: " + instance.configurationBaseName + " with "
+                    + (defaultCfg != null ? defaultCfg.getAdapters().size() : "unknown") + " adapters");
             ((Kernel) instance).setUuid(UUID.randomUUID());
             ((Kernel) instance).setId(config.getId());
             ((Kernel) instance).setName((String) cfg.getProperties().getOrDefault("SRVC_NAME_ENV_VARIABLE", "CRICKET_NAME"));
@@ -395,6 +399,11 @@ public abstract class Kernel {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+            setWebsocketPort(Integer.parseInt(config.getProperty("wsport", "0")));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         getLogger().print("\tport=" + getPort());
         try {
             setShutdownDelay(Integer.parseInt(config.getProperty("shutdown-delay", "2")));
@@ -429,7 +438,7 @@ public abstract class Kernel {
                     java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class, String.class);
                     loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
                     setEventDispatcher(((Adapter) adaptersMap.get(adapterName)).getDispatcher());
-                    if(adaptersMap.get(adapterName) instanceof org.cricketmsf.out.log.LoggerAdapterIface){
+                    if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.log.LoggerAdapterIface) {
                         setFineLevel(((LoggerAdapterIface) adaptersMap.get(adapterName)).isFineLevel());
                     }
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
@@ -614,6 +623,13 @@ public abstract class Kernel {
             } else {
                 getLogger().print("# HTTP listening on port " + getPort());
             }
+            if (getWebsocketPort() > 0) {
+                websocketServer = new WebsocketServer(this);
+                websocketServer.start();
+                getLogger().print("# Websocket server listening on port " + getWebsocketPort());
+            }else{
+                getLogger().print("# Websocket server not listening (port not configured)");
+            }
             getLogger().print("#");
             getLogger().print("# Started in " + startedIn + "ms. Press Ctrl-C to stop");
             getLogger().print("");
@@ -670,6 +686,13 @@ public abstract class Kernel {
         try {
             getHttpd().stop();
         } catch (NullPointerException e) {
+        }
+        try {
+            if(null!=websocketServer){
+                websocketServer.stop();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         System.out.println("Kernel stopped\r\n");
     }
@@ -953,6 +976,20 @@ public abstract class Kernel {
      */
     public void setFineLevel(boolean fineLevel) {
         this.fineLevel = fineLevel;
+    }
+
+    /**
+     * @return the websocketPort
+     */
+    public int getWebsocketPort() {
+        return websocketPort;
+    }
+
+    /**
+     * @param websocketPort the websocketPort to set
+     */
+    public void setWebsocketPort(int websocketPort) {
+        this.websocketPort = websocketPort;
     }
 
 }

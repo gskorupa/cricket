@@ -1,7 +1,7 @@
 
 Usage: 
-java -jar cricketms-1.3.7.jar [options]
-java -cp cricketms-1.3.7.jar org.cricketmsf.Runner [options]
+java -jar cricketms-1.3.8.jar [options]
+java -cp cricketms-1.3.8.jar org.cricketmsf.Runner [options]
 
 Runs selected service class.
 
