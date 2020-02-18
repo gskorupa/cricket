@@ -22,14 +22,18 @@ import java.util.Map;
  *
  * @author greg
  */
-public class LimitedMap extends LinkedHashMap{
-    
-    private int maxSize =0;
-    
+public class LimitedMap extends LinkedHashMap {
+
+    private int maxSize = 0;
+
     @Override
     protected boolean removeEldestEntry(Map.Entry eldest) {
-        return maxSize>0 ? size() > maxSize : false;
-     }
+        return removeEldest(eldest);
+    }
+    
+    private synchronized boolean removeEldest(Map.Entry eldest) {
+        return maxSize > 0 ? size() > maxSize : false;
+    }
 
     /**
      * @return the maxSize
@@ -44,27 +48,27 @@ public class LimitedMap extends LinkedHashMap{
     public void setMaxSize(int maxSize) {
         this.maxSize = maxSize;
     }
-    
+
     @Override
-    public synchronized void clear(){
+    public synchronized void clear() {
         super.clear();
     }
-    
+
     @Override
-    public Object clone(){
-        LimitedMap result = (LimitedMap)super.clone();
+    public Object clone() {
+        LimitedMap result = (LimitedMap) super.clone();
         /*super.keySet().forEach( key -> {
             result.put(key, super.get(key));
         });*/
         return result;
     }
-    
+
     public synchronized Object remove(String key) {
         return super.remove(key);
     }
-    
+
     public synchronized void put(String key, Object value) {
         super.put(key, value);
     }
-    
+
 }

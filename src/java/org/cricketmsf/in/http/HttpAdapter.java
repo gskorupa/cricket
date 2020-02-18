@@ -103,7 +103,6 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         super.loadProperties(properties, adapterName);
     }
 
-    
     @Override
     protected void getServiceHooks(String adapterName) {
         HttpAdapterHook ah;
@@ -116,12 +115,12 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 requestMethod = ah.requestMethod();
                 if (ah.adapterName().equals(adapterName)) {
                     addHookMethodNameForMethod(requestMethod, m.getName());
-                    //System.out.println("hook method for http method " + requestMethod + " : " + m.getName());
+                    //System.out.println("hook method for http method " + requestMethod + " : " + m.getName()+ " : " + m.getDeclaringClass().getName());
                 }
             }
         }
     }
-    
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         //Event rootEvent = new Event();
@@ -132,120 +131,122 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 Kernel.getInstance().dispatchEvent(Event.logFinest(this.getClass().getSimpleName() + ".handle()", e.getMessage()));
             } catch (Exception e) {
                 e.printStackTrace();
+                Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName() + ".handle()", exchange.getRequestURI().getPath()));
             }
         }, this.getName()).start();
     }
 
     public void doHandle(HttpExchange exchange, long rootEventId) throws IOException {
-        try{
-        Stopwatch timer=null;
-        if (Kernel.getInstance().isFineLevel()) {
-            timer= new Stopwatch();
-        }
-        String acceptedResponseType = JSON;
         try {
-            acceptedResponseType
-                    = acceptedTypesMap.getOrDefault(exchange.getRequestHeaders().get("Accept").get(0), JSON);
-        } catch (Exception e) {
-        }
-        // cerating Result object
-        Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEventId);
-        acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
-        //set content type and print response to string format as JSON if needed
-        Headers headers = exchange.getResponseHeaders();
-        byte[] responseData;
-        Iterator it = result.getHeaders().keySet().iterator();
-        String key;
-        while (it.hasNext()) {
-            key = (String) it.next();
-            List<String> values = result.getHeaders().get(key);
-            for (int i = 0; i < values.size(); i++) {
-                headers.set(key, values.get(i));
+            Stopwatch timer = null;
+            if (Kernel.getInstance().isFineLevel()) {
+                timer = new Stopwatch();
             }
-            //values.forEach((value) -> {
-            //    headers.set(key, value);
-            //});
-        }
-        /*
+            String acceptedResponseType = JSON;
+            try {
+                acceptedResponseType
+                        = acceptedTypesMap.getOrDefault(exchange.getRequestHeaders().get("Accept").get(0), JSON);
+            } catch (Exception e) {
+            }
+            // cerating Result object
+            Result result = createResponse(buildRequestObject(exchange, acceptedResponseType), rootEventId);
+            acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
+            //set content type and print response to string format as JSON if needed
+            Headers headers = exchange.getResponseHeaders();
+            byte[] responseData;
+            Iterator it = result.getHeaders().keySet().iterator();
+            String key;
+            while (it.hasNext()) {
+                key = (String) it.next();
+                List<String> values = result.getHeaders().get(key);
+                for (int i = 0; i < values.size(); i++) {
+                    headers.set(key, values.get(i));
+                }
+                //values.forEach((value) -> {
+                //    headers.set(key, value);
+                //});
+            }
+            /*
         result.getHeaders().keySet().forEach((key) -> {
             List<String> values = result.getHeaders().get(key);
             values.forEach((value) -> {
                 headers.set(key, value);
             });
         });
-         */
-        switch (result.getCode()) {
-            case SC_MOVED_PERMANENTLY:
-            case SC_MOVED_TEMPORARY:
-                if(!headers.containsKey("Location")){
-                    String newLocation = result.getMessage()!=null?result.getMessage():"/";
-                    headers.set("Location", newLocation);
-                    responseData = ("moved to ".concat(newLocation)).getBytes("UTF-8");
-                }else{
-                    responseData="".getBytes();
-                }
-                break;
-            case SC_NOT_FOUND:
-                headers.set("Content-type", "text/html");
-                responseData = result.getPayload();
-                break;
-            default:
-                if (!headers.containsKey("Content-type")) {
-                    if (acceptedTypesMap.containsKey(acceptedResponseType)) {
-                        headers.set("Content-type", acceptedResponseType.concat("; charset=UTF-8"));
-                        responseData = formatResponse(acceptedResponseType, result);
+             */
+            switch (result.getCode()) {
+                case SC_MOVED_PERMANENTLY:
+                case SC_MOVED_TEMPORARY:
+                    if (!headers.containsKey("Location")) {
+                        String newLocation = result.getMessage() != null ? result.getMessage() : "/";
+                        headers.set("Location", newLocation);
+                        responseData = ("moved to ".concat(newLocation)).getBytes("UTF-8");
                     } else {
-                        headers.set("Content-type", getMimeType(result.getFileExtension()));
+                        responseData = "".getBytes();
+                    }
+                    break;
+                case SC_NOT_FOUND:
+                    headers.set("Content-type", "text/html");
+                    responseData = result.getPayload();
+                    break;
+                default:
+                    if (!headers.containsKey("Content-type")) {
+                        if (acceptedTypesMap.containsKey(acceptedResponseType)) {
+                            headers.set("Content-type", acceptedResponseType.concat("; charset=UTF-8"));
+                            responseData = formatResponse(acceptedResponseType, result);
+                        } else {
+                            headers.set("Content-type", getMimeType(result.getFileExtension()));
+                            responseData = result.getPayload();
+                        }
+                    } else {
                         responseData = result.getPayload();
                     }
-                } else {
-                    responseData = result.getPayload();
-                }
-                headers.set("Last-Modified", result.getModificationDateFormatted());
-                //TODO: get max age and no-cache info from the result object
-                if (result.getMaxAge() > 0) {
-                    headers.set("Cache-Control", "max-age=" + result.getMaxAge());  // 1 hour
-                } else {
-                    headers.set("Pragma", "no-cache");
-                }
-                if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
-                    CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
-                } else if (exchange.getRequestURI().getPath().startsWith("/api/")) { //TODO: this is workaround
-                    CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
-                } else if (exchange.getRequestURI().getPath().endsWith(".tag")) { //TODO: this is workaround
-                    CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
-                }
-                if (result.getCode() == 0) {
-                    result.setCode(SC_OK);
-                } else {
-                    if (responseData.length == 0) {
-                        if (result.getMessage() != null) {
-                            responseData = result.getMessage().getBytes("UTF-8");
+                    headers.set("Last-Modified", result.getModificationDateFormatted());
+                    //TODO: get max age and no-cache info from the result object
+                    if (result.getMaxAge() > 0) {
+                        headers.set("Cache-Control", "max-age=" + result.getMaxAge());  // 1 hour
+                    } else {
+                        headers.set("Pragma", "no-cache");
+                    }
+                    if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+                        CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
+                    } else if (exchange.getRequestURI().getPath().startsWith("/api/")) { //TODO: this is workaround
+                        CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
+                    } else if (exchange.getRequestURI().getPath().endsWith(".tag")) { //TODO: this is workaround
+                        CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
+                    }
+                    if (result.getCode() == 0) {
+                        result.setCode(SC_OK);
+                    } else {
+                        if (responseData.length == 0) {
+                            if (result.getMessage() != null) {
+                                responseData = result.getMessage().getBytes("UTF-8");
+                            }
                         }
                     }
-                }
-                break;
-        }
-
-        //TODO: format logs to have clear info about root event id
-        if (Kernel.getInstance().isFineLevel()) {
-            Kernel.getInstance().dispatchEvent(
-                    Event.logFinest("HttpAdapter", "event " + rootEventId + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
-            );
-        }
-
-        if (responseData.length > 0) {
-            exchange.sendResponseHeaders(result.getCode(), responseData.length);
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(responseData);
+                    break;
             }
-        } else {
-            exchange.sendResponseHeaders(result.getCode(), -1);
-        }
-        sendLogEvent(exchange, responseData.length);
-        result = null;
-        }catch(Exception e){
-            e.printStackTrace();
+
+            //TODO: format logs to have clear info about root event id
+            if (Kernel.getInstance().isFineLevel()) {
+                Kernel.getInstance().dispatchEvent(
+                        Event.logFinest("HttpAdapter", "event " + rootEventId + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
+                );
+            }
+
+            if (responseData.length > 0) {
+                exchange.sendResponseHeaders(result.getCode(), responseData.length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(responseData);
+                }
+            } else {
+                exchange.sendResponseHeaders(result.getCode(), -1);
+            }
+            sendLogEvent(exchange, responseData.length);
+            result = null;
+        } catch (IOException e) {
+            //e.printStackTrace();
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this, exchange.getRequestURI().getPath()+" "+e.getMessage()));
         }
         exchange.close();
     }
@@ -317,7 +318,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             r = formattedResponse.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-            Kernel.getInstance().dispatchEvent(Event.logSevere("HttpAdapter", e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logSevere("HttpAdapter.formatResponse()", e.getClass().getSimpleName() + " " + e.getMessage()));
         }
         return r;
     }
@@ -383,8 +384,18 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             event.setPayload(requestObject);
             Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
             result = (Result) m.invoke(Kernel.getInstance(), event);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            sendLogEvent(Event.LOG_SEVERE, e.getMessage());
+        } catch (NoSuchMethodException e) {
+            sendLogEvent(Event.LOG_SEVERE, "handler method NoSuchMethodException "+hookMethodName+" "+e.getMessage());
+            result.setCode(SC_INTERNAL_SERVER_ERROR);
+            result.setMessage("handler method error");
+            result.setFileExtension(null);
+        } catch (IllegalAccessException e) {
+            sendLogEvent(Event.LOG_SEVERE, "handler method IllegalAccessException "+hookMethodName+" "+e.getMessage());
+            result.setCode(SC_INTERNAL_SERVER_ERROR);
+            result.setMessage("handler method error");
+            result.setFileExtension(null);
+        } catch (InvocationTargetException e) {
+            sendLogEvent(Event.LOG_SEVERE, "handler method InvocationTargetException "+hookMethodName+" "+e.getMessage());
             result.setCode(SC_INTERNAL_SERVER_ERROR);
             result.setMessage("handler method error");
             result.setFileExtension(null);

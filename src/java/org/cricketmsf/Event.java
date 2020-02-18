@@ -662,6 +662,8 @@ public class Event implements EventIface {
             value = (String) getRequest().parameters.get(name);
         } catch (ClassCastException e) {
             value = (String) ((ArrayList) getRequest().parameters.get(name)).get(0);
+        } catch (NullPointerException e){
+            
         }
         return value;
     }
@@ -673,6 +675,8 @@ public class Event implements EventIface {
         } catch (ClassCastException e) {
             values = new ArrayList();
             values.add((String)getRequest().parameters.get(name));
+        } catch (NullPointerException e){
+            
         }
         return values;
     }

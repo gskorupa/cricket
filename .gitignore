@@ -84,3 +84,4 @@ hs_err_pid*
 !/docs/cricket-latest.jar
 /docs/documentation/
 /lib/work/data/cms.mv.db
+/.vscode/settings.json

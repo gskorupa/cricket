@@ -38,4 +38,5 @@ public interface FileReaderAdapterIface {
     public byte[] getFileBytes(File file, String filePath);
     public Result getFile(RequestObject request, KeyValueCacheAdapterIface cache);
     public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName);
+    public String getRootPath();
 }

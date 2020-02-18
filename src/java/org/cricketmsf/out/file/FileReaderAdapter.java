@@ -359,7 +359,8 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
      *
      * @return root path
      */
-    private String getRootPath() {
+    @Override
+    public String getRootPath() {
         return rootPath;
     }
 }

@@ -665,7 +665,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         byte[] content;
         byte[] emptyContent = {};
         ParameterMapResult result = new ParameterMapResult();
-        result.setData(request.parameters);
+        result.setData(null!=request.parameters?request.parameters:new HashMap());
         String modificationString = request.headers.getFirst("If-Modified-Since");
         Date modificationPoint = null;
         if (modificationString != null) {
@@ -798,7 +798,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             fo.modified = new Date(file.lastModified());
             fo.filePath = filePath;
             fo.fileExtension = getFileExt(filePath);
-            if (cache != null && content.length > 0) {
+            if (cache != null) {
                 try {
                     cache.put(tableName, filePath, fo);
                 } catch (KeyValueDBException e) {
@@ -873,6 +873,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             }
             //input.close();
         } catch (IOException ex) {
+            ex.printStackTrace();
             byte[] emptyContent = {};
             result = emptyContent;
         } finally {
