@@ -169,6 +169,11 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
             throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + tableName);
         }
     }
+    
+    @Override
+    public List search(String tableName, String statement, Object[] parameters) throws KeyValueDBException{
+        return new ArrayList();
+    }
 
     @Override
     public boolean containsKey(String tableName, String key) throws KeyValueDBException {

@@ -24,6 +24,7 @@ import org.cricketmsf.microsite.user.User;
  */
 public interface UserAdapterIface {
     public User get(String uid) throws UserException;
+    public User getByNumber(long number) throws UserException;
     public Map getAll() throws UserException;
     public User register(User user) throws UserException;
     public void modify(User user) throws UserException;

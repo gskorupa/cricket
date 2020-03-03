@@ -52,7 +52,7 @@ public interface SqlDBIface extends KeyValueDBIface{
      * @return list of objects matching the statement
      * @throws KeyValueDBException
      */
-    public List search(String tableName, String statement, String[] parameters) throws KeyValueDBException;
+    public List search(String tableName, String statement, Object[] parameters) throws KeyValueDBException;
     
     /**
      * Executes database query

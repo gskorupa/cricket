@@ -132,6 +132,8 @@ public interface KeyValueDBIface {
      * @throws KeyValueDBException 
      */
     public List search(String tableName, ComparatorIface comparator, Object pattern) throws KeyValueDBException;
+    
+    public List search(String tableName, String statement, Object[] parameters) throws KeyValueDBException;
 
     /**
      * Returns information if the given key is stored in database table

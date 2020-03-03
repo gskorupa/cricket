@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,7 +141,7 @@ public class H2RemoteUserDB extends H2RemoteDB implements SqlDBIface, Adapter {
         HashMap<String, User> map = new HashMap<>();
         //TODO: nie używać, zastąpić konkretnymi search'ami
         if (tableName.equals("users")) {
-            String query = "select uid,type,email,role,secret,password,confirmed,unregisterreq,authstatus,created,user_number from users";
+            String query = "select uid,type,email,name,surname,role,secret,password,confirmed,unregisterreq,authstatus,created,user_number from users";
             try (Connection conn = getConnection()) {
                 PreparedStatement pstmt = conn.prepareStatement(query);
                 ResultSet rs = pstmt.executeQuery();
@@ -198,9 +199,21 @@ public class H2RemoteUserDB extends H2RemoteDB implements SqlDBIface, Adapter {
     }
 
     @Override
-    public List search(String tableName, String statement, String[] parameters) throws KeyValueDBException {
-        //TODO
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public List search(String tableName, String statement, Object[] parameters) throws KeyValueDBException {
+        ArrayList<User> result = new ArrayList<>();
+        User user = null;
+        try (Connection conn = getConnection()) {
+            String query = "select uid,type,email,name,surname,role,secret,password,confirmed,unregisterreq,authstatus,created,user_number from " + tableName + " where user_number=?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setLong(1, (Long) parameters[0]);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                result.add(buildUser(rs));
+    }
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+        return result;
     }
 
     @Override
@@ -230,7 +243,7 @@ public class H2RemoteUserDB extends H2RemoteDB implements SqlDBIface, Adapter {
     private Object getUser(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         User user = null;
         try (Connection conn = getConnection()) {
-            String query = "select uid,type,email,role,secret,password,confirmed,unregisterreq,authstatus,created,user_number from " + tableName + " where uid=?";
+            String query = "select uid,type,email,name,surname,role,secret,password,confirmed,unregisterreq,authstatus,created,user_number from " + tableName + " where uid=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
             ResultSet rs = pstmt.executeQuery();

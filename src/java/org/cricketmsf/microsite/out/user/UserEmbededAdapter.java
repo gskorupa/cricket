@@ -17,6 +17,7 @@ package org.cricketmsf.microsite.out.user;
 
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import org.cricketmsf.Adapter;
@@ -64,6 +65,18 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
         }
     }
 
+    @Override
+    public User getByNumber(long number) throws UserException {
+        List users;
+        try {
+            Object[] params={number};
+            users = getDatabase().search("users", "where number=?",params);
+            return (User)users.get(0);
+        } catch (KeyValueDBException | ClassCastException | NullPointerException e) {
+            throw new UserException(UserException.HELPER_EXCEPTION, e.getMessage());
+        }
+    }
+    
     @Override
     public Map getAll() throws UserException {
         HashMap<String, User> map;

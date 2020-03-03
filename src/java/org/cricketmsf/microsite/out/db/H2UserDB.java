@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -198,9 +199,20 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
     }
 
     @Override
-    public List search(String tableName, String statement, String[] parameters) throws KeyValueDBException {
-        //TODO
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public List search(String tableName, String statement, Object[] parameters) throws KeyValueDBException {
+        ArrayList<User> result = new ArrayList<>();
+        try (Connection conn = getConnection()) {
+            String query = "select uid,type,email,name,surname,role,secret,password,confirmed,unregisterreq,authstatus,created,user_number from " + tableName + " where user_number=?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setLong(1, (Long) parameters[0]);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                result.add(buildUser(rs));
+            }
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+        return result;
     }
 
     @Override

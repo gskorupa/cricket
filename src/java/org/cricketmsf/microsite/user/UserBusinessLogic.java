@@ -57,6 +57,11 @@ public class UserBusinessLogic {
         RequestObject request = event.getRequest();
         String uid = request.pathExt;
         String requesterID = request.headers.getFirst("X-user-id");
+        String userNumber = (String)request.parameters.getOrDefault("n", "");
+        long number=-1;
+        try{
+            number=Long.parseLong(userNumber);
+        }catch(NumberFormatException e){}
         boolean admin = isAdmin(request);
 
         StandardResult result = new StandardResult();
@@ -66,6 +71,10 @@ public class UserBusinessLogic {
                 result.setData(m);
             } else if (uid.equals(requesterID) || admin) {
                 User u = (User) userAdapter.get(uid);
+                result.setData(u);
+            } else if (uid.isEmpty() && !userNumber.isEmpty()) {
+                User u = (User) userAdapter.getByNumber(number);
+                if(requesterID.equals(u.getUid()))
                 result.setData(u);
             } else {
                 result.setCode(HttpAdapter.SC_FORBIDDEN);

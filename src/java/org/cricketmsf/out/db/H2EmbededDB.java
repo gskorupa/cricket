@@ -271,7 +271,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     }
 
     @Override
-    public List search(String tableName, String statement, String[] parameters) throws KeyValueDBException {
+    public List search(String tableName, String statement, Object[] parameters) throws KeyValueDBException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
