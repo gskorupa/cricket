@@ -98,7 +98,7 @@ public class H2RemoteUserDB extends H2RemoteDB implements SqlDBIface, Adapter {
 
     private void putUser(String tableName, String key, User user) throws KeyValueDBException {
         try (Connection conn = getConnection()) {
-            String query = "merge into ?? (uid,type,email,name,surname,role,secret,password,confirmed,unregisterreq,authstatus,created) key (uid) values (?,?,?,?,?,?,?,?,?,?)";
+            String query = "merge into ?? (uid,type,email,name,surname,role,secret,password,confirmed,unregisterreq,authstatus,created) key (uid) values (?,?,?,?,?,?,?,?,?,?,?,?)";
             query = query.replaceFirst("\\?\\?", tableName);
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, user.getUid());

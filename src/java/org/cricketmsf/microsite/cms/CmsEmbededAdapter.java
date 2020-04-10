@@ -784,6 +784,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         // if not found in CMS
         // read from disk
         if (!fileReady) {
+            System.out.println("READING FILE:"+getWwwRoot() + filePath);
             File file = new File(getWwwRoot() + filePath);
             content = readFile(file);
             if (content.length == 0) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2015-2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,9 @@ import org.cricketmsf.in.InboundAdapterIface;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, HttpHandler, InboundAdapterIface {
+public class HttpAdapter
+        extends InboundAdapter
+        implements HttpAdapterIface, HttpHandler, InboundAdapterIface/*, org.eclipse.jetty.server.Handler*/ {
 
     public final static String JSON = "application/json";
     public final static String XML = "text/xml";
@@ -115,28 +117,27 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 requestMethod = ah.requestMethod();
                 if (ah.adapterName().equals(adapterName)) {
                     addHookMethodNameForMethod(requestMethod, m.getName());
-                    //System.out.println("hook method for http method " + requestMethod + " : " + m.getName()+ " : " + m.getDeclaringClass().getName());
                 }
             }
         }
     }
 
     @Override
-    public void handle(HttpExchange exchange) throws IOException {
-        //Event rootEvent = new Event();
-        Kernel.getInstance().getThreadFactory().newThread(() -> {
-            try {
-                doHandle(exchange, Kernel.getEventId());
-            } catch (NullPointerException | IOException e) {
-                Kernel.getInstance().dispatchEvent(Event.logFinest(this.getClass().getSimpleName() + ".handle()", e.getMessage()));
-            } catch (Exception e) {
-                e.printStackTrace();
-                Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName() + ".handle()", exchange.getRequestURI().getPath()));
-            }
-        }, this.getName()).start();
-    }
-
-    public void doHandle(HttpExchange exchange, long rootEventId) throws IOException {
+    //public synchronized void handle(HttpExchange exchange) throws IOException {
+        //Kernel.getInstance().getThreadFactory().newThread(() -> {
+        //    try {
+        //        doHandle(exchange, Kernel.getEventId());
+        //    } catch (NullPointerException | IOException e) {
+        //        Kernel.getInstance().dispatchEvent(Event.logFinest(this.getClass().getSimpleName() + ".handle()", e.getMessage()));
+        //    } catch (Exception e) {
+        //        e.printStackTrace();
+        //        Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName() + ".handle()", exchange.getRequestURI().getPath()));
+        //    }
+        //}, this.getName()).start();
+    //}
+    //public synchronized void doHandle(HttpExchange exchange, long rootEventId) throws IOException {
+    public synchronized void handle(HttpExchange exchange) throws IOException {
+        long rootEventId=Kernel.getEventId();
         try {
             Stopwatch timer = null;
             if (Kernel.getInstance().isFineLevel()) {
@@ -162,18 +163,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 for (int i = 0; i < values.size(); i++) {
                     headers.set(key, values.get(i));
                 }
-                //values.forEach((value) -> {
-                //    headers.set(key, value);
-                //});
             }
-            /*
-        result.getHeaders().keySet().forEach((key) -> {
-            List<String> values = result.getHeaders().get(key);
-            values.forEach((value) -> {
-                headers.set(key, value);
-            });
-        });
-             */
             switch (result.getCode()) {
                 case SC_MOVED_PERMANENTLY:
                 case SC_MOVED_TEMPORARY:
@@ -246,12 +236,15 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             result = null;
         } catch (IOException e) {
             //e.printStackTrace();
-            Kernel.getInstance().dispatchEvent(Event.logWarning(this, exchange.getRequestURI().getPath()+" "+e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this, exchange.getRequestURI().getPath() + " " + e.getMessage()));
         }
         exchange.close();
     }
 
     private String getMimeType(String fileExt) {
+        if(null==fileExt){
+            return TEXT;
+        }
         switch (fileExt.toLowerCase()) {
             case ".ico":
                 return "image/x-icon";
@@ -271,6 +264,9 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
                 return "text/javascript";
             case ".svg":
                 return "image/svg+xml";
+            case ".htm":
+            case ".html":
+                return "text/html; charset=utf-8";
             case ".json":
                 return JSON;
             default:
@@ -344,6 +340,9 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         requestObject.clientIp = exchange.getRemoteAddress().getAddress().getHostAddress();
         requestObject.acceptedResponseType = acceptedResponseType;
         requestObject.body = (String) exchange.getAttribute("body");
+        if(null==requestObject.body){
+            requestObject.body=(String)parameters.getOrDefault("&&&data","");
+        }
         return requestObject;
     }
 
@@ -356,6 +355,7 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         if (null != properties.get("dump-request") && "true".equalsIgnoreCase(properties.get("dump-request"))) {
             Kernel.getInstance().getLogger().print(dumpRequest(requestObject));
         }
+        String methodName = null;
         Result result = new StandardResult();
         if (mode == WEBSITE_MODE) {
             if (!requestObject.uri.endsWith("/")) {
@@ -383,19 +383,20 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
             event.setRootEventId(rootEventId);
             event.setPayload(requestObject);
             Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
+            methodName = m.getName();
             result = (Result) m.invoke(Kernel.getInstance(), event);
         } catch (NoSuchMethodException e) {
-            sendLogEvent(Event.LOG_SEVERE, "handler method NoSuchMethodException "+hookMethodName+" "+e.getMessage());
+            sendLogEvent(Event.LOG_SEVERE, "handler method NoSuchMethodException " + hookMethodName + " " + e.getMessage());
             result.setCode(SC_INTERNAL_SERVER_ERROR);
             result.setMessage("handler method error");
             result.setFileExtension(null);
         } catch (IllegalAccessException e) {
-            sendLogEvent(Event.LOG_SEVERE, "handler method IllegalAccessException "+hookMethodName+" "+e.getMessage());
+            sendLogEvent(Event.LOG_SEVERE, "handler method IllegalAccessException " + hookMethodName + " " + e.getMessage());
             result.setCode(SC_INTERNAL_SERVER_ERROR);
             result.setMessage("handler method error");
             result.setFileExtension(null);
         } catch (InvocationTargetException e) {
-            sendLogEvent(Event.LOG_SEVERE, "handler method InvocationTargetException "+hookMethodName+" "+e.getMessage());
+            sendLogEvent(Event.LOG_SEVERE, "handler method InvocationTargetException " + hookMethodName + " " + e.getMessage());
             result.setCode(SC_INTERNAL_SERVER_ERROR);
             result.setMessage("handler method error");
             result.setFileExtension(null);
@@ -540,4 +541,146 @@ public class HttpAdapter extends InboundAdapter implements HttpAdapterIface, Htt
         return sb.toString();
     }
 
+    /*
+    @Override
+    public void handle(String string, Request rqst, HttpServletRequest hsr, HttpServletResponse hsr1) throws IOException, ServletException {
+        Stopwatch timer = null;
+        if (Kernel.getInstance().isFineLevel()) {
+            timer = new Stopwatch();
+        }
+        Result result = new StandardResult();
+        boolean problemFound = false;
+        if (mode == WEBSITE_MODE) {
+            if (!rqst.getRequestURI().endsWith("/")) {
+                if (rqst.getRequestURI().lastIndexOf("/") > rqst.getPathInfo().lastIndexOf(".")) {
+                    // redirect to index.file but only if property index.file is not null
+                    hsr1.sendRedirect(rqst.getRequestURI().concat("/"));
+
+                    return;
+                }
+            }
+        }
+
+        String hookMethodName = getHookMethodNameForMethod(rqst.getMethod());
+        if (hookMethodName == null) {
+            sendLogEvent(Event.LOG_WARNING, "hook method is not defined for " + rqst.getMethod());
+            hsr1.sendError(SC_METHOD_NOT_ALLOWED, rqst.getMethod() + " is not allowed");
+            return;
+        }
+
+        String methodName = null;
+        long rootEventID = Kernel.getEventId();
+        try {
+            sendLogEvent(Event.LOG_FINE, "sending request to hook method " + hookMethodName);
+            Event event = new Event("HttpAdapter", new RequestObject(rqst));
+            event.setRootEventId(rootEventID);
+            event.setPayload(rqst);
+            Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
+            methodName = m.getName();
+            result = (Result) m.invoke(Kernel.getInstance(), event);
+        } catch (NoSuchMethodException e) {
+            sendLogEvent(Event.LOG_SEVERE, "handler method NoSuchMethodException " + hookMethodName + " " + e.getMessage());
+            hsr1.sendError(SC_INTERNAL_SERVER_ERROR, "handler method error");
+            return;
+        } catch (IllegalAccessException e) {
+            sendLogEvent(Event.LOG_SEVERE, "handler method IllegalAccessException " + hookMethodName + " " + e.getMessage());
+            hsr1.sendError(SC_INTERNAL_SERVER_ERROR, "handler method error");
+            return;
+        } catch (InvocationTargetException e) {
+            sendLogEvent(Event.LOG_SEVERE, "handler method InvocationTargetException " + hookMethodName + " " + e.getMessage());
+            hsr1.sendError(SC_INTERNAL_SERVER_ERROR, "handler method error");
+            return;
+        }
+        if (null == result) {
+            hsr1.sendError(SC_INTERNAL_SERVER_ERROR, "null result returned by the service");
+            return;
+        }
+        if (result.getCode() == SC_BAD_REQUEST) {
+            hsr1.sendError(SC_BAD_REQUEST, methodName + " " + result.getMessage() + " " + result.getData());
+            return;
+        }
+
+        //create response
+        hsr1.setStatus(result.getCode());
+        String acceptedResponseType = rqst.getHeader("Accept");
+        if (acceptedTypesMap.containsKey(acceptedResponseType)) {
+            hsr1.setContentType(acceptedResponseType.concat("; charset=UTF-8"));
+            hsr1.getWriter().println(new String(formatResponse(acceptedResponseType, result)));
+        } else {
+            hsr1.setContentType(getMimeType(result.getFileExtension()));
+            hsr1.getWriter().println(new String(result.getPayload()));
+        }
+        if (Kernel.getInstance().isFineLevel()) {
+            Kernel.getInstance().dispatchEvent(
+                    Event.logInfo("HttpAdapter", "event " + rootEventID + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
+            );
+        }
+        rqst.setHandled(true);
+    }
+
+    @Override
+    public void setServer(Server server) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Server getServer() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
+    public void start() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void stop() throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean isRunning() {
+        return true;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean isStarted() {
+        return true;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean isStarting() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean isStopping() {
+        return false;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean isStopped() {
+        return false;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean isFailed() {
+        return false;
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void addLifeCycleListener(Listener ll) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removeLifeCycleListener(Listener ll) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+*/
 }

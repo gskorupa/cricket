@@ -4,7 +4,12 @@
             <cm_document_form ref="doc_edit"></cm_document_form>
         </div>
     </div>
-    <div class="row" if={ !selected }>
+    <div class="row" if={ selected4translate }>
+         <div class="col-md-12">
+            <cm_translate_form ref="doc_translate"></cm_translate_form>
+        </div>
+    </div>
+    <div class="row" if={ !selected && !selected4translate}>
         <div class="col-md-12">
             <h2>{app.texts.cm_documents.title[app.language]} 
                 <virtual each={ lang, i in app.languages}>
@@ -15,7 +20,7 @@
             </h2>
         </div>
     </div>
-    <div class="row" if={ !selected }>
+    <div class="row" if={ !selected && !selected4translate}>
         <div class="col-md-12">
             <form class="form-inline">
                 <label class="mr-2" for="pathsDropdown">{ app.texts.cm_documents.path_status[app.language] }</label>
@@ -30,7 +35,7 @@
             </form>
         </div>
     </div>
-    <div class="row" if={ !selected }>
+    <div class="row" if={ !selected && !selected4translate}>
         <div class="col-md-12">
             <table id="doclist" class="table table-condensed topspacing-sm">
                 <thead>
@@ -56,6 +61,7 @@
                         <!--<td>{ doc.status }</td>-->
                         <td class="col-3 text-right">
                             <i class="material-icons clickable" onclick={ editDocument(doc.uid, false) }>open_in_browser</i>
+                            <i class="material-icons clickable" if={ doc.rights=='rw'} onclick={ translateDocument(doc.uid, true) }>translate</i>
                             <i class="material-icons clickable" if={ doc.rights=='rw'} onclick={ editDocument(doc.uid, true) }>mode_edit</i>
                             <i class="material-icons clickable" if={ doc.status=='wip' && doc.rights=='rw'} onclick={ setPublished(doc.uid, true) }>visibility</i>
                             <i class="material-icons clickable" if={ doc.status=='published' && doc.rights=='rw'} onclick={ setPublished(doc.uid, false) }>visibility_off</i>
@@ -97,6 +103,7 @@
         self.statuses = ['wip', 'published']
         self.documents = []
         self.selected = ''
+        self.selected4translate = ''
         self.selectedLanguage = 'EN'
         self.doctag = ''
         self.removing = ''
@@ -104,6 +111,7 @@
         //globalEvents.on('pageselected:documents', function (eventName) {
         this.on('mount', function(){
             self.selected = ''
+            self.selected4translate = ''
             self.selectedLanguage = app.language
             app.log('PAGE DOCUMENTS')
             app.log(self.statuses)
@@ -123,6 +131,7 @@
             if(!eventName) return;
             if(eventName.startsWith('submitted:')){
                 self.selected = ''
+                self.selected4translate = ''
                 var currentPath=eventName.substring(10)
                 app.log('CURRENT PATH: '+currentPath)
                 if(currentPath.length>0){
@@ -133,6 +142,7 @@
                 readPaths()
             }else if(eventName.startsWith('cancelled')){
                 self.selected = ''
+                self.selected4translate = ''
                 riot.update()
                 updateSelectors()
             }else{
@@ -197,6 +207,16 @@
                 riot.update()
                 app.log('SELECTED FOR EDITING: ' + docId)
                 self.refs.doc_edit.init(self.listener, docId, allowEdit, self.selectedLanguage, self.status, self.path)
+            }
+        }
+        
+        translateDocument(docId){
+            return function(e){
+                e.preventDefault()
+                self.selected4translate = docId
+                riot.update()
+                app.log('SELECTED FOR TRANSLATE: ' + docId)
+                self.refs.doc_translate.init(self.listener, docId, self.selectedLanguage, self.status, self.path)
             }
         }
 

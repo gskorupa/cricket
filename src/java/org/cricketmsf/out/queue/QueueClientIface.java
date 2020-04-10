@@ -33,4 +33,5 @@ public interface QueueClientIface {
     public Object pop(String channel) throws QueueException;
     public void purge(String channel) throws QueueException;
     public long getQueueSize(String channel) throws QueueException;
+    public long getQueueSize() throws QueueException;
 }

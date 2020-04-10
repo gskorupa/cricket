@@ -35,6 +35,10 @@ public class CmsException extends Exception {
     public static int NOT_FOUND = 404;
     public static int ALREADY_EXISTS = 409;
     
+    public static int LANGUAGE_NOT_SUPPORTED = 600;
+    public static int TRANSLATION_NOT_POSSIBLE = 601;
+    public static int TRANSLATION_NOT_CONFIGURED = 603;
+    
     public static int UNKNOWN = 1000;
     
     private String message;

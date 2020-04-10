@@ -25,6 +25,7 @@ import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.microsite.cms.CmsException;
 import org.cricketmsf.microsite.cms.CmsIface;
 import org.cricketmsf.microsite.cms.Document;
+import org.cricketmsf.microsite.cms.TranslatorIface;
 
 /**
  *
@@ -45,7 +46,7 @@ public class ContentRequestProcessor {
             return true;
         } else {
             for (String role : roles) {
-                if(role.startsWith(LANG_REDACTOR)){
+                if (role.startsWith(LANG_REDACTOR)) {
                     return true;
                 }
             }
@@ -53,7 +54,7 @@ public class ContentRequestProcessor {
         }
     }
 
-    public Object processRequest(Event event, CmsIface adapter) {
+    public Object processRequest(Event event, CmsIface adapter, TranslatorIface translator) {
         String method = event.getRequest().method.toUpperCase();
         switch (method) {
             case "GET":
@@ -62,6 +63,8 @@ public class ContentRequestProcessor {
                 return processPost(event, adapter);
             case "PUT":
                 return processPut(event, adapter);
+            case "PATCH":
+                return processPatch(event, adapter, translator);
             case "DELETE":
                 return processDelete(event, adapter);
             default:
@@ -72,9 +75,15 @@ public class ContentRequestProcessor {
     }
 
     public Object processGetPublished(Event event, CmsIface adapter) {
-        System.out.println("EVENT CLASS: "+event.getClass());
+        System.out.println("EVENT CLASS: " + event.getClass());
         RequestObject request = event.getRequest();
+        if (null == request) {
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "null request"));
+        }
         StandardResult result = new StandardResult();
+        if (null == request.parameters) {
+            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "null parameters map"));
+        }
         String language = (String) request.parameters.getOrDefault("language", "");
 
         String pathExt = request.pathExt;
@@ -84,7 +93,7 @@ public class ContentRequestProcessor {
         if (pathExt != null && !pathExt.isEmpty()) {
             try {
                 doc = adapter.getDocument("/" + pathExt, language, "published", null);
-                if(null==doc && null!=adapter.getDefaultLanguage()){
+                if (null == doc && null != adapter.getDefaultLanguage()) {
                     doc = adapter.getDocument("/" + pathExt, adapter.getDefaultLanguage(), "published", null);
                 }
                 if (doc != null) {
@@ -302,6 +311,69 @@ public class ContentRequestProcessor {
                 }
                 //read original document, update parameters and adapter.modify(original)
 
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public Object processPatch(Event event, CmsIface adapter, TranslatorIface translator) {
+
+        StandardResult result = new StandardResult();
+        try {
+            RequestObject request = event.getRequest();
+
+            String userID = request.headers.getFirst("X-user-id");
+            List<String> roles = request.headers.get("X-user-role");
+            if (!hasAccessRights(userID, roles)) {
+                result.setCode(HttpAdapter.SC_FORBIDDEN);
+                return result;
+            }
+
+            String uid = "/" + event.getRequest().pathExt;
+            if (uid == null || uid.isEmpty()) {
+                result.setCode(HttpAdapter.SC_NOT_FOUND);
+                return result;
+            }
+            String newLanguage = request.headers.getFirst("requested-language");
+            if (null == newLanguage || newLanguage.isEmpty()) {
+                result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                result.setMessage("empty request parameter: requested-language");
+                return result;
+            }
+
+            String contentType = request.headers.getFirst("Content-Type");
+
+            Document doc = null;
+
+            if ("application/json".equalsIgnoreCase(contentType)) {
+                //create new document and adapter.modify(document)
+                String jsonString = request.body;
+                jsonString
+                        = "{\"@type\":\"org.cricketmsf.microsite.cms.Document\","
+                        + jsonString.substring(jsonString.indexOf("{") + 1);
+
+                try {
+                    doc = (Document) JsonReader.jsonToJava(jsonString);
+                    doc.setUid(uid); //overwrite uid and path from JSON representation
+                } catch (Exception e) {
+                    Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), "deserialization problem - check @type declaration"));
+                    e.printStackTrace();
+                    result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                    return result;
+                }
+                try {
+                    doc = translator.translate(doc, newLanguage);
+                    adapter.updateDocument(doc, roles);
+                    result.setData(doc);
+                } catch (CmsException ex) {
+                    Kernel.getInstance().dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), ex.getMessage()));
+                    result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                }
+            } else {
+                result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                result.setMessage("Not supported Content-type");
             }
         } catch (Exception e) {
             e.printStackTrace();

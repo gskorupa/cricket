@@ -90,6 +90,11 @@ public class SimpleQueueClient extends OutboundAdapter implements QueueClientIfa
     }
     
     @Override
+    public long getQueueSize() throws QueueException {
+        return getQueue().getSize();
+    }
+    
+    @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
         queueAdapterName = properties.get("queue-adapter-name");

@@ -75,6 +75,7 @@ public interface QueueIface {
     public void unsubscribe(String channel, QueueCallbackIface callback) throws QueueException;
     public void purge(String channel) throws QueueException;
     public long getSize(String channel) throws QueueException;
+    public long getSize() throws QueueException;
     public void setSubscribtionMode(int newMode) throws QueueException;
     public int getSubscribtionMode();
 }

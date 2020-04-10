@@ -17,7 +17,9 @@ package org.cricketmsf.out.queue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.cricketmsf.Adapter;
@@ -251,6 +253,20 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
     @Override
     public int getSubscribtionMode() {
         return notificationMode;
+    }
+
+    @Override
+    public long getSize() throws QueueException {
+        long size=0;
+        Iterator it=listChannels.values().iterator();
+        while(it.hasNext()){
+            size+=((List)it.next()).size();
+        }
+        it=channels.values().iterator();
+        while(it.hasNext()){
+            size+=((Map)it.next()).size();
+        }
+        return size;
     }
 
     class QueueLinkedMap extends LinkedHashMap {

@@ -42,6 +42,7 @@ import org.cricketmsf.microsite.in.http.ContentRequestProcessor;
 import org.cricketmsf.microsite.user.UserEvent;
 import org.cricketmsf.microsite.out.notification.*;
 import org.cricketmsf.microsite.*;
+import org.cricketmsf.microsite.cms.TranslatorIface;
 import org.cricketmsf.microsite.event.GetContent;
 import org.cricketmsf.microsite.event.StatusRequested;
 
@@ -63,6 +64,7 @@ public class Microsite extends Kernel {
     KeyValueDBIface cmsDatabase = null;
     //   FileReaderAdapterIface cmsFileReader = null;
     CmsIface cms = null;
+    TranslatorIface translator = null;
     //user module
     KeyValueDBIface userDB = null;
     UserAdapterIface userAdapter = null;
@@ -84,6 +86,7 @@ public class Microsite extends Kernel {
         //cms
         cmsDatabase = (KeyValueDBIface) getRegistered("cmsDB");
         cms = (CmsIface) getRegistered("cmsAdapter");
+        translator = (TranslatorIface) getRegistered("cmsTranslator");
         //user
         userAdapter = (UserAdapterIface) getRegistered("userAdapter");
         userDB = (KeyValueDBIface) getRegistered("userDB");
@@ -361,7 +364,7 @@ public class Microsite extends Kernel {
 
     @HttpAdapterHook(adapterName = "ContentManager", requestMethod = "*")
     public Object contentManagerHandle(Event event) {
-        return new ContentRequestProcessor().processRequest(event, cms);
+        return new ContentRequestProcessor().processRequest(event, cms, translator);
     }
 
     @HttpAdapterHook(adapterName = "SystemService", requestMethod = "*")

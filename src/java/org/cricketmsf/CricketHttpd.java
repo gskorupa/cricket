@@ -37,7 +37,7 @@ import javax.net.ssl.SSLContext;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class Httpd {
+public class CricketHttpd implements HttpdIface{
 
     public HttpServer server = null;
     public HttpsServer sserver = null;
@@ -46,7 +46,7 @@ public class Httpd {
     String password;
 
     //For SSL see: https://www.sothawo.com/2011/10/java-webservice-using-https/
-    public Httpd(Kernel service) {
+    public CricketHttpd(Kernel service) {
         String host = service.getHost();
         int backlog = 0;
         try {

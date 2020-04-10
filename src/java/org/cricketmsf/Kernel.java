@@ -87,7 +87,7 @@ public abstract class Kernel {
     private int port = 0;
     private int websocketPort = 0;
     private String sslAlgorithm = "";
-    private Httpd httpd;
+    private HttpdIface httpd;
     private boolean httpHandlerLoaded = false;
     private boolean inboundAdaptersLoaded = false;
     private WebsocketServer websocketServer;
@@ -99,7 +99,9 @@ public abstract class Kernel {
     public String configurationBaseName = null;
     protected ConfigSet configSet = null;
 
-    private Filter securityFilter = new SecurityFilter();
+    //private Filter securityFilter = new SecurityFilter();
+    private Object securityFilter = null;
+    private String securityFilterName = "";
     private ArrayList corsHeaders;
 
     private long startedAt = 0;
@@ -391,6 +393,7 @@ public abstract class Kernel {
         getLogger().print("\tUUID=" + getUuid().toString());
         getLogger().print("\tenv name=" + getName());
         //setHost(config.getHost());
+        getLogger().print("\thttpd=" + config.getProperty("httpd", ""));
         setHost(config.getProperty("host", "0.0.0.0"));
         getLogger().print("\thost=" + getHost());
         try {
@@ -412,7 +415,11 @@ public abstract class Kernel {
         }
         getLogger().print("\tshutdown-delay=" + getShutdownDelay());
         setSecurityFilter(config.getProperty("filter"));
-        getLogger().print("\tfilter=" + getSecurityFilter().getClass().getName());
+        //if ("jetty".equalsIgnoreCase(config.getProperty("httpd", ""))) {
+        //    getLogger().print("\tfilter=" + getJettySecurityFilter().getClass().getName());
+        //} else {
+            getLogger().print("\tfilter=" + getSecurityFilter().getClass().getName());
+        //}
         setCorsHeaders(config.getProperty("cors"));
         getLogger().print("\tCORS=" + getCorsHeaders());
         getLogger().print("\tExtended properties: " + getProperties().toString());
@@ -473,9 +480,11 @@ public abstract class Kernel {
     }
 
     private void setSecurityFilter(String filterName) {
+        securityFilterName = filterName;
         try {
             Class c = Class.forName(filterName);
-            securityFilter = (Filter) c.newInstance();
+            //securityFilter = (Filter) c.newInstance();
+            securityFilter = c.newInstance();
         } catch (ClassCastException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             e.printStackTrace();
             securityFilter = new SecurityFilter();
@@ -483,9 +492,35 @@ public abstract class Kernel {
     }
 
     public Filter getSecurityFilter() {
-        return securityFilter;
+        if (null == securityFilter) {
+            try {
+                Class c = Class.forName(securityFilterName);
+                securityFilter = (Filter) c.newInstance();
+                securityFilter = c.newInstance();
+            } catch (ClassCastException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+                securityFilter = new SecurityFilter();
+            }
+        }
+        return (Filter) securityFilter;
     }
 
+    /*
+    public javax.servlet.Filter getJettySecurityFilter() {
+        if (null == securityFilter) {
+            try {
+                Class c = Class.forName(securityFilterName);
+                securityFilter = (javax.servlet.Filter) c.newInstance();
+                securityFilter = c.newInstance();
+            } catch (ClassCastException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+                securityFilter = new SecurityFilter();
+            }
+        }
+        return (javax.servlet.Filter) securityFilter;
+    }
+*/
+    
     /**
      * @return the host
      */
@@ -517,14 +552,14 @@ public abstract class Kernel {
     /**
      * @return the httpd
      */
-    private Httpd getHttpd() {
+    private HttpdIface getHttpd() {
         return httpd;
     }
 
     /**
      * @param httpd the httpd to set
      */
-    private void setHttpd(Httpd httpd) {
+    private void setHttpd(HttpdIface httpd) {
         this.httpd = httpd;
     }
 
@@ -604,8 +639,10 @@ public abstract class Kernel {
             runListeners();
 
             getLogger().print("Starting http listener ...");
-            setHttpd(new Httpd(this));
-            getHttpd().run();
+            if (!"jetty".equalsIgnoreCase((String) getProperties().getOrDefault("httpd", ""))) {
+                setHttpd(new CricketHttpd(this));
+                getHttpd().run();
+            }
 
             long startedIn = System.currentTimeMillis() - startedAt;
             printHeader(Kernel.getInstance().configSet.getKernelVersion());
@@ -618,16 +655,18 @@ public abstract class Kernel {
             getLogger().print("# NAME: " + getName());
             getLogger().print("# JAVA: " + System.getProperty("java.version"));
             getLogger().print("#");
-            if (getHttpd().isSsl()) {
-                getLogger().print("# HTTPS listening on port " + getPort());
-            } else {
-                getLogger().print("# HTTP listening on port " + getPort());
+            if (!"jetty".equalsIgnoreCase((String) getProperties().getOrDefault("httpd", ""))) {
+                if (getHttpd().isSsl()) {
+                    getLogger().print("# HTTPS listening on port " + getPort());
+                } else {
+                    getLogger().print("# HTTP listening on port " + getPort());
+                }
             }
             if (getWebsocketPort() > 0) {
                 websocketServer = new WebsocketServer(this);
                 websocketServer.start();
                 getLogger().print("# Websocket server listening on port " + getWebsocketPort());
-            }else{
+            } else {
                 getLogger().print("# Websocket server not listening (port not configured)");
             }
             getLogger().print("#");
@@ -637,6 +676,12 @@ public abstract class Kernel {
             Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
             started = true;
             setStatus(ONLINE);
+            /*
+            if ("jetty".equalsIgnoreCase((String) getProperties().getOrDefault("httpd", ""))) {
+                setHttpd(new JettyHttpd(this));
+                getHttpd().run();
+            }
+            */
         } else {
             getLogger().print("Couldn't find any http request hook method. Exiting ...");
             System.exit(MIN_PRIORITY);
@@ -688,7 +733,7 @@ public abstract class Kernel {
         } catch (NullPointerException e) {
         }
         try {
-            if(null!=websocketServer){
+            if (null != websocketServer) {
                 websocketServer.stop();
             }
         } catch (Exception e) {

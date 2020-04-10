@@ -7,6 +7,7 @@
             "id": "Microsite",
             "service": "org.cricketmsf.services.Microsite",
             "properties": {
+                "httpd-not-used":"jetty",
                 "host": "0.0.0.0",
                 "port": "7070",
                 "wsport": "7071",
@@ -19,8 +20,9 @@
                 "keystore_bak": "./data/cricket_publickeystore.jks",
                 "keystore-password_bak": "cricket15$#17",
                 "shutdown-delay":"2",
+                "filter-not-used": "org.cricketmsf.microsite.auth.SecurityJettyFilter",
                 "filter": "org.cricketmsf.microsite.auth.SecurityFilter",
-                "cors": "Access-Control-Allow-Origin:*|Access-Control-Allow-Credentials:true|Access-Control-Allow-Methods: POST, GET, OPTIONS, DELETE, PUT|Access-Control-Allow-Headers:Authentication|Access-Control-Max-Age: 1728000",
+                "cors": "Access-Control-Allow-Origin:*|Access-Control-Allow-Credentials:true|Access-Control-Allow-Methods: POST, PATCH, GET, OPTIONS, DELETE, PUT|Access-Control-Allow-Headers:Authentication|Access-Control-Max-Age: 1728000",
                 "time-zone": "GMT",
                 "user-confirm": "true",
                 "initial-admin-email": "user@domain",

@@ -16,6 +16,7 @@
 package org.cricketmsf;
 
 import com.sun.net.httpserver.Filter;
+import com.sun.net.httpserver.Filter.Chain;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 /**
  * This filter is used to recognize, parse and transform request parameters into
@@ -65,7 +67,7 @@ public class ParameterFilter extends Filter {
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
         exchange.setAttribute("body", null);
-        exchange.setAttribute("parameters",null);
+        exchange.setAttribute("parameters", new HashMap<String, Object>());
         if (null == parameterEncoding) {
             init();
         }
@@ -78,23 +80,30 @@ public class ParameterFilter extends Filter {
                 case "POST":
                 case "PUT":
                 case "DELETE":
-                    try {
-                        Map<String, Object> tmp;
-                        tmp = parsePostParameters(exchange);
-                        if (tmp.containsKey("&&&data")) {
-                            exchange.setAttribute("body", tmp.get("&&&data"));
-                            tmp.remove("&&&data");
-                        }
-                        exchange.setAttribute("parameters", tmp);
-                    } catch (IOException e) {
-                        exchange.sendResponseHeaders(400, e.getMessage().length());
-                        exchange.getResponseBody().write(e.getMessage().getBytes());
-                        exchange.getResponseBody().close();
-                        exchange.close();
-                        return;
+                    //try {
+                    Map<String, Object> tmp;
+                    tmp = parsePostParameters(exchange);
+                    /*
+                    System.out.println("BODY PARMS PARSED:" + tmp.size());
+                    tmp.forEach((k, v) -> {
+                        System.out.println("BODY P:" + k + ":" + v);
+                    });
+                    */
+                    if (tmp.containsKey("&&&data")) {
+                        exchange.setAttribute("body", tmp.get("&&&data"));
+                        //tmp.remove("&&&data");
                     }
+                    exchange.setAttribute("parameters", tmp);
+                    //} catch (IOException e) {
+                    //    exchange.sendResponseHeaders(400, e.getMessage().length());
+                    //    exchange.getResponseBody().write(e.getMessage().getBytes());
+                    //    exchange.getResponseBody().close();
+                    //    exchange.close();
+                    //    return;
+                    //}
                     break;
                 default:
+                    //System.out.println("BODY METHOD:" + method);
                     exchange.setAttribute("parameters", parseGetParameters(exchange));
             }
         } catch (Exception e) {
@@ -118,12 +127,12 @@ public class ParameterFilter extends Filter {
             throws IOException {
 
         String contentTypeHeader = exchange.getRequestHeaders().getFirst("Content-Type");
-        String contentType = "";
+        String contentType;
         if (contentTypeHeader != null) {
             if (contentTypeHeader.indexOf(";") > 0) {
-                contentType = contentTypeHeader.substring(0, contentTypeHeader.indexOf(";"));
+                contentType = contentTypeHeader.substring(0, contentTypeHeader.indexOf(";")).toLowerCase();
             } else {
-                contentType = contentTypeHeader;
+                contentType = contentTypeHeader.toLowerCase();
             }
         } else {
             //throw new IOException("no conent type header received");
@@ -136,27 +145,44 @@ public class ParameterFilter extends Filter {
         BufferedReader br;
         String query;
         StringBuilder content = new StringBuilder();
-        switch (contentType.toLowerCase()) {
+        switch (contentType) {
             case "multipart/form-data":
                 try {
-                    parameters = parseForm(contentTypeHeader.substring(contentType.length() + 11), exchange.getRequestBody());
-                } catch (IndexOutOfBoundsException e) {
-                    throw new IOException("request content inconsistent with declared content type");
-                }
-                break;
+                parameters = parseForm(contentTypeHeader.substring(contentType.length() + 11), exchange.getRequestBody());
+            } catch (IndexOutOfBoundsException e) {
+                throw new IOException("request content inconsistent with declared content type");
+            }
+            break;
             case "text/plain":
             case "text/csv":
             case "application/json":
             case "text/xml":
-                isr = new InputStreamReader(exchange.getRequestBody(), "utf-8");
+                //try {
+                //isr = new InputStreamReader(exchange.getRequestBody(), "utf-8");
+                /*
                 br = new BufferedReader(isr);
                 while ((query = br.readLine()) != null) {
                     content.append(query);
                     content.append("\r\n");
                 }
-                parameters.put("data", content.toString()); //TODO: remove "data" parameter
-                parameters.put("&&&data", content.toString());
-                isr.close();
+                 */
+                Scanner sc = new Scanner(exchange.getRequestBody());
+                //Reading line by line from scanner to StringBuffer
+                StringBuilder sb = new StringBuilder();
+                while (sc.hasNext()) {
+                    sb.append(sc.nextLine());
+                }
+                //System.out.println("BODY:" + sb.toString());
+                //} catch (IOException e) {
+                //} finally {
+                //    if (null != isr) {
+                //        isr.close();
+                //    }
+                //}
+                //parameters.put("data", content.toString()); //TODO: remove "data" parameter
+                //parameters.put("&&&data", content.toString());
+                parameters.put("data", sb.toString()); //TODO: remove "data" parameter
+                parameters.put("&&&data", sb.toString());
                 break;
             case "application/x-www-form-urlencoded":
                 isr = new InputStreamReader(exchange.getRequestBody(), "utf-8");
@@ -231,7 +257,6 @@ public class ParameterFilter extends Filter {
         String fileName;
         FileParameter fileParameter;
         line = readLine(br);
-
         try {
             do {
                 //first line is boundary
