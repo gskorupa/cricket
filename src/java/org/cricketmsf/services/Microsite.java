@@ -75,6 +75,11 @@ public class Microsite extends Kernel {
     EmailSenderIface emailSender = null;
     SubscriberIface queueSubscriber = null;
 
+    public Microsite() {
+        super();
+        this.configurationBaseName = "Microsite";
+    }
+
     @Override
     public void getAdapters() {
         // standard Cricket adapters
