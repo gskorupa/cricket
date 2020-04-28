@@ -438,13 +438,19 @@ public abstract class Kernel {
                     adaptersMap.put(adapterName, c.newInstance());
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.http.HttpAdapter) {
                         setHttpHandlerLoaded(true);
+                    } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.websocket.WebsocketAdapter) {
+                        
                     } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.InboundAdapter) {
                         setInboundAdaptersLoaded(true);
                     }
                     // loading properties
                     java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class, String.class);
                     loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
-                    setEventDispatcher(((Adapter) adaptersMap.get(adapterName)).getDispatcher());
+                    try{
+                        setEventDispatcher(((Adapter) adaptersMap.get(adapterName)).getDispatcher());
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.log.LoggerAdapterIface) {
                         setFineLevel(((LoggerAdapterIface) adaptersMap.get(adapterName)).isFineLevel());
                     }
@@ -643,7 +649,11 @@ public abstract class Kernel {
                 setHttpd(new CricketHttpd(this));
                 getHttpd().run();
             }
-
+            if (getWebsocketPort() > 0) {
+                websocketServer = new WebsocketServer(this);
+                websocketServer.start();
+            }
+            
             long startedIn = System.currentTimeMillis() - startedAt;
             printHeader(Kernel.getInstance().configSet.getKernelVersion());
             if (liftMode) {
@@ -657,18 +667,17 @@ public abstract class Kernel {
             getLogger().print("#");
             if (!"jetty".equalsIgnoreCase((String) getProperties().getOrDefault("httpd", ""))) {
                 if (getHttpd().isSsl()) {
-                    getLogger().print("# HTTPS listening on port " + getPort());
+                    getLogger().print("# HTTPS server listening on port " + getPort());
                 } else {
-                    getLogger().print("# HTTP listening on port " + getPort());
+                    getLogger().print("# HTTP server listening on port " + getPort());
                 }
             }
             if (getWebsocketPort() > 0) {
-                websocketServer = new WebsocketServer(this);
-                websocketServer.start();
                 getLogger().print("# Websocket server listening on port " + getWebsocketPort());
             } else {
                 getLogger().print("# Websocket server not listening (port not configured)");
             }
+            
             getLogger().print("#");
             getLogger().print("# Started in " + startedIn + "ms. Press Ctrl-C to stop");
             getLogger().print("");
@@ -709,7 +718,9 @@ public abstract class Kernel {
     protected void runListeners() {
         for (Map.Entry<String, Object> adapterEntry : getAdaptersMap().entrySet()) {
             if (adapterEntry.getValue() instanceof org.cricketmsf.in.InboundAdapter) {
-                if (!(adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter)) {
+                if (adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter) {
+                }else if(adapterEntry.getValue() instanceof org.cricketmsf.in.websocket.WebsocketAdapter){
+                }else {
                     //(new Thread((InboundAdapter) adapterEntry.getValue(), adapterEntry.getKey())).start();
                     getThreadFactory().newThread((InboundAdapter) adapterEntry.getValue(), adapterEntry.getKey()).start();
                     getLogger().print(adapterEntry.getKey() + " (" + adapterEntry.getValue().getClass().getSimpleName() + ")");

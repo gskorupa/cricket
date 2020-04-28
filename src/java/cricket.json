@@ -10,7 +10,7 @@
                 "httpd-not-used":"jetty",
                 "host": "0.0.0.0",
                 "port": "7070",
-                "wsport": "7071",
+                "wsport": "",
                 "ssl": "false",
                 "keystore": "",
                 "keystore-password": "",
@@ -319,7 +319,8 @@
             "service": "org.cricketmsf.services.BasicService",
             "properties": {
                 "host": "0.0.0.0",
-                "port": "8080",
+                "port": "7070",
+                "wsport": "7071",
                 "ssl": "false",
                 "keystore": "./data/cricket_publickeystore.jks",
                 "keystore-password": "cricket15$#17",
@@ -437,6 +438,15 @@
                     "properties": {
                         "root": "./www/",
                         "index-file": "index.html"
+                    }
+                },
+                {
+                    "name": "WsAdapter",
+                    "interfaceName": "InboundAdapterIface",
+                    "classFullName": "org.cricketmsf.in.websocket.WebsocketAdapter",
+                    "description": "default websocket adapter",
+                    "properties": {
+                        "context":"/test"
                     }
                 }
             ]

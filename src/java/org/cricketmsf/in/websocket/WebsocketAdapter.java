@@ -3,7 +3,7 @@ Idea from:
 https://stackoverflow.com/users/2876079/stefan
 https://stackoverflow.com/questions/43163592/standalone-websocket-server-without-jee-application-server
 Thanks a lot!
-*/
+ */
 package org.cricketmsf.in.websocket;
 
 import java.io.IOException;
@@ -13,44 +13,79 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.bind.DatatypeConverter;
+import org.cricketmsf.Adapter;
+import org.cricketmsf.Kernel;
+import org.cricketmsf.WebsocketServer;
+import org.cricketmsf.in.InboundAdapter;
+import org.cricketmsf.in.InboundAdapterIface;
 
 /**
  *
  * @author greg
  */
-public class WebsocketAdapter implements Runnable {
+public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIface, Runnable {
+
+    public static final int DIALOG = 0;
+    public static final int INPUT = 1;
+    public static final int OUTPUT = 2;
+
+    public int serviceType = DIALOG;
+    public boolean sendHello = true;
+    
+    private Adapter handler=null;
 
     private Socket socket;
     InputStream inputStream;
     OutputStream outputStream;
-    private String path;
-
-    public WebsocketAdapter(Socket socket) {
-        this.socket = socket;
+    private String context;
+    private String dataToSend = null;
+    private WebsocketServer server;
+    private boolean running=false;
+    
+    public WebsocketAdapter(){
+        super();
     }
 
-    public void sendMessage(String message) {
+    public WebsocketAdapter(Socket socket, WebsocketServer server) {
+        this.socket = socket;
+        this.server = server;
+        
+    }
+    
+    @Override
+    public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        super.loadProperties(properties, adapterName);
+        setContext(properties.getOrDefault("context",""));
+        if(!context.isBlank()){
+            Kernel.getLogger().printIndented("context="+getContext());
+        }else{
+            //
+        }
+    }
+
+    public void sendMessage(String message) throws IOException {
         try {
             outputStream.write(encode(message));
             outputStream.flush();
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            throw new IOException("unsupported encoding");
         }
     }
 
-    private void printInputStream(InputStream inputStream) {
+    private void readInputStream(InputStream inputStream) {
         int len = 0;
         byte[] b = new byte[1024];
         //rawIn is a Socket.getInputStream();
-        while (true) {
+        boolean waiting = true;
+        while (waiting) {
             try {
                 len = inputStream.read(b);
                 if (len != -1) {
@@ -89,13 +124,18 @@ public class WebsocketAdapter implements Runnable {
                         message[j] = (byte) (b[i] ^ masks[j % 4]);
                     }
 
-                    System.out.println(new String(message));
-
+                    setReceivedData(new String(message));
                     b = new byte[1024];
+
+                    if (DIALOG == serviceType) {
+                        setOutcomingData(new String(message));
+                        sendMessage(getData());
+                    }
 
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                waiting = false;
             }
         }
     }
@@ -154,12 +194,12 @@ public class WebsocketAdapter implements Runnable {
         Matcher get = Pattern.compile("^GET.*HTTP").matcher(data);
 
         if (get.find()) {
-            String pathWithQuery=get.group();
+            String pathWithQuery = get.group();
             String[] parts = pathWithQuery.split(" ");
-            if(parts.length==3){
-                path=parts[1].split("\\?")[0];
-            }else{
-                path="/";
+            if (parts.length == 3) {
+                path = parts[1].split("\\?")[0];
+            } else {
+                path = "/";
             }
             Matcher match = Pattern.compile("Sec-WebSocket-Key: (.*)").matcher(data);
             match.find();
@@ -208,22 +248,42 @@ public class WebsocketAdapter implements Runnable {
         }
 
         try {
-            path = doHandShakeToInitializeWebSocketConnection(inputStream, outputStream);
+            setContext(doHandShakeToInitializeWebSocketConnection(inputStream, outputStream));
         } catch (UnsupportedEncodingException handShakeException) {
             throw new IllegalStateException("Could not connect to client input stream", handShakeException);
         }
-
-        sendMessage("hello from server");
-
-        while (!this.socket.isClosed()) {
-            //printInputStream(inputStream);
-            sendMessage(""+System.currentTimeMillis());
+        if(null==server.getRegisteredContexts().get(getContext())){
             try {
-                Thread.sleep(10);
-            } catch (InterruptedException ex) {
-                
+                sendMessage("context "+getContext()+" is not supported");
+            } catch (IOException ex) {
+            }
+            this.stop();
+            return;
+        }
+        boolean ok = true;
+
+        if (sendHello) {
+            try {
+                sendMessage("hello");
+            } catch (IOException ex) {
+                ok = false;
             }
         }
+        setRunning(true);
+        while (ok && !this.socket.isClosed()) {
+            try {
+                if (DIALOG == serviceType || INPUT == serviceType) {
+                    readInputStream(inputStream);
+                } else {
+                    //setOutcomingData("" + System.currentTimeMillis());
+                    sendMessage(getData());
+                }
+                Thread.sleep(10);
+            } catch (InterruptedException | IOException e) {
+                ok = false;
+            }
+        }
+
         try {
             inputStream.readAllBytes();
             inputStream.close();
@@ -236,9 +296,35 @@ public class WebsocketAdapter implements Runnable {
         } catch (IOException e) {
 
         }
+        System.out.println("WS disconnected:" + getContext());
+    }
+
+    private void setReceivedData(String message) {
+        System.out.println("INCOMING WS MESSAGE: " + message);
+    }
+
+    private void setOutcomingData(String message) {
+        dataToSend = message;
+    }
+
+    private String getData() {
+        boolean interrupted = false;
+        String result;
+        while (!interrupted && null == dataToSend) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+                interrupted = true;
+                return "";
+            }
+        }
+        result = dataToSend;
+        dataToSend = null;
+        return result;
     }
 
     public void start() {
+        System.out.println("Starting WS adapter");
         Thread t = new Thread(this);
         t.start();
     }
@@ -249,5 +335,33 @@ public class WebsocketAdapter implements Runnable {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    /**
+     * @return the context
+     */
+    public String getContext() {
+        return context;
+    }
+
+    /**
+     * @param context the context to set
+     */
+    public void setContext(String context) {
+        this.context = context;
+    }
+
+    /**
+     * @return the running
+     */
+    public boolean isRunning() {
+        return running;
+    }
+
+    /**
+     * @param running the running to set
+     */
+    public void setRunning(boolean running) {
+        this.running = running;
     }
 }

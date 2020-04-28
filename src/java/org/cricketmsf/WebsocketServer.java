@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import org.cricketmsf.in.websocket.WebsocketAdapter;
 
 /**
@@ -31,6 +33,7 @@ public class WebsocketServer implements Runnable {
     private ServerSocket server = null;
     private boolean running = false;
     ArrayList<WebsocketAdapter> clients = new ArrayList<>();
+    private ConcurrentHashMap<String, String> registeredContexts = new ConcurrentHashMap<>();
 
     public WebsocketServer(Kernel service) {
         String host = service.getHost();
@@ -62,6 +65,14 @@ public class WebsocketServer implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        String ctx;
+        for (Map.Entry<String, Object> adapterEntry : service.getAdaptersMap().entrySet()) {
+            if (adapterEntry.getValue() instanceof org.cricketmsf.in.websocket.WebsocketAdapter) {
+                ctx = ((WebsocketAdapter) adapterEntry.getValue()).getContext();
+                registeredContexts.put(ctx, ctx);
+                Kernel.getLogger().print("ws context: " + ctx);
+            }
+        }
     }
 
     public void start() {
@@ -74,10 +85,12 @@ public class WebsocketServer implements Runnable {
         running = true;
         while (running) {
             try {
-                Socket socket=server.accept();
-                WebsocketAdapter client = new WebsocketAdapter(socket);
+                Socket socket = server.accept();
+                WebsocketAdapter client = new WebsocketAdapter(socket, this);
                 client.start();
-                clients.add(client);
+                if (client.isRunning()) {
+                    clients.add(client);
+                }
             } catch (IOException waitException) {
                 throw new IllegalStateException("Could not wait for client connection", waitException);
             }
@@ -87,11 +100,23 @@ public class WebsocketServer implements Runnable {
     public void stop() {
         try {
             running = false;
+            clients.forEach(client -> {
+                client.stop();
+            });
             server.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        clients.forEach(client->{client.stop();});
+        clients.forEach(client -> {
+            client.stop();
+        });
+    }
+
+    /**
+     * @return the registeredContexts
+     */
+    public ConcurrentHashMap<String, String> getRegisteredContexts() {
+        return registeredContexts;
     }
 
 }
