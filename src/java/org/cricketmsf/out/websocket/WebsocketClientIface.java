@@ -10,4 +10,7 @@ public interface WebsocketClientIface {
     public void onText(String message);
     public void onOpen();
     public void sendMessage(Object data);
+    public void start();
+    public void stop();
+    public int getStatusCode();
 }

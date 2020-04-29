@@ -23,7 +23,7 @@ public class WebsocketClient extends OutboundAdapter implements OutboundAdapterI
 
     public static int NOT_INITIALIZED = 0;
     public static int CONNECTED = 1;
-    
+
     private ExecutorService executor;
     private WebSocket webSocket;
     private String endpoint;
@@ -36,7 +36,6 @@ public class WebsocketClient extends OutboundAdapter implements OutboundAdapterI
         super();
         self = this;
         statusCode = WebsocketClient.NOT_INITIALIZED;
-        
         //endpoint = "wss://echo.websocket.org";
     }
 
@@ -50,29 +49,33 @@ public class WebsocketClient extends OutboundAdapter implements OutboundAdapterI
     }
 
     public void start() {
-        executor = Executors.newFixedThreadPool(6);
-        HttpClient httpClient = HttpClient.newBuilder().executor(executor).build();
-        Builder webSocketBuilder = httpClient.newWebSocketBuilder();
-        webSocket = webSocketBuilder.buildAsync(URI.create(endpoint), new WebSocket.Listener() {
-            @Override
-            public void onOpen(WebSocket webSocket) {
-                self.onOpen();
-                Listener.super.onOpen(webSocket);
-            }
+        try {
+            executor = Executors.newFixedThreadPool(6);
+            HttpClient httpClient = HttpClient.newBuilder().executor(executor).build();
+            Builder webSocketBuilder = httpClient.newWebSocketBuilder();
+            webSocket = webSocketBuilder.buildAsync(URI.create(endpoint), new WebSocket.Listener() {
+                @Override
+                public void onOpen(WebSocket webSocket) {
+                    self.onOpen();
+                    Listener.super.onOpen(webSocket);
+                }
 
-            @Override
-            public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
-                self.onText("" + data);
-                return Listener.super.onText(webSocket, data, last);
-            }
+                @Override
+                public CompletionStage<?> onText(WebSocket webSocket, CharSequence data, boolean last) {
+                    self.onText("" + data);
+                    return Listener.super.onText(webSocket, data, last);
+                }
 
-            @Override
-            public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
-                self.onClose(statusCode, reason);
-                executor.shutdown();
-                return Listener.super.onClose(webSocket, statusCode, reason);
-            }
-        }).join();
+                @Override
+                public CompletionStage<?> onClose(WebSocket webSocket, int statusCode, String reason) {
+                    self.onClose(statusCode, reason);
+                    executor.shutdown();
+                    return Listener.super.onClose(webSocket, statusCode, reason);
+                }
+            }).join();
+        } catch (Exception e) {
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this, e.getMessage()));
+        }
     }
 
     @Override
@@ -91,9 +94,6 @@ public class WebsocketClient extends OutboundAdapter implements OutboundAdapterI
         endpoint = properties.get("url");
         properties.put("url", endpoint);
         Kernel.getInstance().getLogger().print("\turl: " + endpoint);
-        if (null != endpoint) {
-            start();
-        }
     }
 
     /**
