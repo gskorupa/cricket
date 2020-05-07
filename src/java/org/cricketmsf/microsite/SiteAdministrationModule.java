@@ -102,7 +102,7 @@ public class SiteAdministrationModule {
             switch (moduleName.toLowerCase()) {
                 case "status":
                     //result = getServiceInfo();
-                    result=(StandardResult)Kernel.getInstance().getEventProcessingResult(new StatusRequested());
+                    result = (StandardResult) Kernel.getInstance().getEventProcessingResult(new StatusRequested());
                     break;
                 case "config":
                     result = getServiceConfig();
@@ -213,7 +213,7 @@ public class SiteAdministrationModule {
         backupFolder = (String) Kernel.getInstance().getProperties().get("backup-folder");
         try {
             //backupDaily = Boolean.parseBoolean((String) Kernel.getInstance().getProperties().get("backup-daily"));
-            backupStrategy = ((String)Kernel.getInstance().getProperties().getOrDefault("backup-strategy","")).toLowerCase();
+            backupStrategy = ((String) Kernel.getInstance().getProperties().getOrDefault("backup-strategy", "")).toLowerCase();
         } catch (ClassCastException e) {
             backupStrategy = "";
         }
@@ -353,12 +353,14 @@ public class SiteAdministrationModule {
             KeyValueDBIface database,
             KeyValueDBIface userDB,
             KeyValueDBIface authDB,
-            KeyValueDBIface cmsDB
+            KeyValueDBIface cmsDB,
+            String errorLevel
     ) {
+        String message = "";
         String prefix; // = backupDaily ? getDateString() : "";
-        switch(backupStrategy){
+        switch (backupStrategy) {
             case "overwrite":
-                prefix="";
+                prefix = "";
                 break;
             case "day":
                 prefix = getDateString("yyyyMMdd-");
@@ -375,22 +377,33 @@ public class SiteAdministrationModule {
         try {
             database.backup(backupFolder + prefix + database.getBackupFileName());
         } catch (KeyValueDBException ex) {
-            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "backup error - " + ex.getMessage()));
+            message = ex.getMessage();
         }
         try {
             cmsDB.backup(backupFolder + prefix + cmsDB.getBackupFileName());
         } catch (KeyValueDBException ex) {
-            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "backup error - " + ex.getMessage()));
+            message = ex.getMessage();
         }
         try {
             userDB.backup(backupFolder + prefix + userDB.getBackupFileName());
         } catch (KeyValueDBException ex) {
-            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "backup error - " + ex.getMessage()));
+            message = ex.getMessage();
         }
         try {
             authDB.backup(backupFolder + prefix + authDB.getBackupFileName());
         } catch (KeyValueDBException ex) {
-            Kernel.getInstance().dispatchEvent(Event.logSevere(this, "backup error - " + ex.getMessage()));
+            message = ex.getMessage();
+        }
+        if (!message.isEmpty()) {
+            if ("warning".equalsIgnoreCase(errorLevel)) {
+                Kernel.getInstance().dispatchEvent(Event.logWarning(this, "backup error - " + message));
+            } else if ("info".equalsIgnoreCase(errorLevel)) {
+                Kernel.getInstance().dispatchEvent(Event.logInfo(this, "backup error - " + message));
+            } else if ("debug".equalsIgnoreCase(errorLevel)) {
+                Kernel.getInstance().dispatchEvent(Event.logFine(this, "backup error - "+message));
+            } else {
+                Kernel.getInstance().dispatchEvent(Event.logSevere(this, "backup error - " + message));
+            }
         }
         //TODO: scheduler
         Kernel.getInstance().dispatchEvent(Event.logInfo(this, "database backup done"));
@@ -446,5 +459,5 @@ public class SiteAdministrationModule {
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         return sdf.format(new Date());
     }
-    
+
 }

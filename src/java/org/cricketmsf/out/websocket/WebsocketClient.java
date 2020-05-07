@@ -5,6 +5,9 @@ import java.net.http.HttpClient;
 import java.net.http.WebSocket;
 import java.net.http.WebSocket.Builder;
 import java.net.http.WebSocket.Listener;
+import java.net.http.WebSocketHandshakeException;
+import java.time.Duration;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
@@ -27,6 +30,10 @@ public class WebsocketClient extends OutboundAdapter implements OutboundAdapterI
     private ExecutorService executor;
     private WebSocket webSocket;
     private String endpoint;
+    private long timeout = 0;
+    private String user = "";
+    private String password = "";
+    private String credentials = "";
 
     private int statusCode = -1;
     private String reason = "";
@@ -53,6 +60,12 @@ public class WebsocketClient extends OutboundAdapter implements OutboundAdapterI
             executor = Executors.newFixedThreadPool(6);
             HttpClient httpClient = HttpClient.newBuilder().executor(executor).build();
             Builder webSocketBuilder = httpClient.newWebSocketBuilder();
+            if(timeout>0){
+                webSocketBuilder = webSocketBuilder.connectTimeout(Duration.ofSeconds(timeout));
+            }
+            if(!credentials.isBlank()){
+                webSocketBuilder = webSocketBuilder.header("Authorization", "Basic " + credentials);
+            }
             webSocket = webSocketBuilder.buildAsync(URI.create(endpoint), new WebSocket.Listener() {
                 @Override
                 public void onOpen(WebSocket webSocket) {
@@ -74,7 +87,7 @@ public class WebsocketClient extends OutboundAdapter implements OutboundAdapterI
                 }
             }).join();
         } catch (Exception e) {
-            Kernel.getInstance().dispatchEvent(Event.logWarning(this, e.getMessage()));
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this, "error connecting to "+endpoint+" : "+e.getMessage()));
         }
     }
 
@@ -94,6 +107,18 @@ public class WebsocketClient extends OutboundAdapter implements OutboundAdapterI
         endpoint = properties.get("url");
         properties.put("url", endpoint);
         Kernel.getInstance().getLogger().print("\turl: " + endpoint);
+        timeout = Long.parseLong(properties.getOrDefault("timeout","0"));
+        properties.put("timeout", ""+timeout);
+        Kernel.getInstance().getLogger().print("\ttimeout: " + timeout);
+        user = properties.getOrDefault("user","");
+        properties.put("user", user);
+        Kernel.getInstance().getLogger().print("\tuser: " + user);
+        password = properties.getOrDefault("password","");
+        properties.put("password", "***");
+        Kernel.getInstance().getLogger().print("\tpassword: " + "***");
+        if(!(user.isBlank()||password.isBlank())){
+            credentials=Base64.getUrlEncoder().encodeToString((user + ":" + password).getBytes());
+        }
     }
 
     /**

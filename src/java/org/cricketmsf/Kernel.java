@@ -211,6 +211,12 @@ public abstract class Kernel {
                     "Handler method " + methodName + " throwed exception",
                     " " + event.getClass().getName()
             ));
+        } catch(NullPointerException e){
+            e.printStackTrace();
+            dispatchEvent(Event.logWarning(
+                    "Unable to find handler method " + methodName,
+                    " " + event.getClass().getName()
+            ));
         }
         return o;
     }

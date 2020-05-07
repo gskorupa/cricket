@@ -509,7 +509,7 @@ public class Microsite extends Kernel {
                 System.out.println(printStatus());
                 break;
             case "BACKUP":
-                SiteAdministrationModule.getInstance().backupDatabases(database, userDB, authDB, cmsDatabase);
+                SiteAdministrationModule.getInstance().backupDatabases(database, userDB, authDB, cmsDatabase,(String)event.getPayload());
                 break;
             default:
                 dispatchEvent(Event.logWarning("Don't know how to handle event: " + event.getType(), event.getPayload().toString()));

@@ -38,8 +38,8 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
 
     public int serviceType = DIALOG;
     public boolean sendHello = true;
-    
-    private Adapter handler=null;
+
+    private Adapter handler = null;
 
     private Socket socket;
     InputStream inputStream;
@@ -47,25 +47,25 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
     private String context;
     private String dataToSend = null;
     private WebsocketServer server;
-    private boolean running=false;
-    
-    public WebsocketAdapter(){
+    private boolean running = false;
+
+    public WebsocketAdapter() {
         super();
     }
 
     public WebsocketAdapter(Socket socket, WebsocketServer server) {
         this.socket = socket;
         this.server = server;
-        
+
     }
-    
+
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        setContext(properties.getOrDefault("context",""));
-        if(!context.isBlank()){
-            Kernel.getLogger().printIndented("context="+getContext());
-        }else{
+        setContext(properties.getOrDefault("context", ""));
+        if (!context.isBlank()) {
+            Kernel.getLogger().printIndented("context=" + getContext());
+        } else {
             //
         }
     }
@@ -252,9 +252,9 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
         } catch (UnsupportedEncodingException handShakeException) {
             throw new IllegalStateException("Could not connect to client input stream", handShakeException);
         }
-        if(null==server.getRegisteredContexts().get(getContext())){
+        if (null == server.getRegisteredContexts().get(getContext())) {
             try {
-                sendMessage("context "+getContext()+" is not supported");
+                sendMessage("context " + getContext() + " is not supported");
             } catch (IOException ex) {
             }
             this.stop();

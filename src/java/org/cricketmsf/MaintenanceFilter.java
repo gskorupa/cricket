@@ -40,10 +40,26 @@ public class MaintenanceFilter extends Filter {
     @Override
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
+        String message;
         switch (Kernel.getInstance().getStatus()) {
-            case Kernel.ONLINE:
-                chain.doFilter(exchange);
-                break;
+            case Kernel.STARTING:
+                    message = "System is starting. Try again later.";
+                    exchange.sendResponseHeaders(HttpAdapter.SC_UNAVAILABLE, message.getBytes().length);
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(message.getBytes());
+                    }
+                    exchange.getResponseBody().close();
+                    exchange.close();
+                    break;
+            case Kernel.SHUTDOWN:
+                    message = "System shutdown in progress.";
+                    exchange.sendResponseHeaders(HttpAdapter.SC_UNAVAILABLE, message.getBytes().length);
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(message.getBytes());
+                    }
+                    exchange.getResponseBody().close();
+                    exchange.close();
+                    break;
             case Kernel.MAINTENANCE:
                 String[] paths = ((String) Kernel.getInstance().getProperties().getOrDefault("maintenance-paths", "")).toLowerCase().split(" ");
                 boolean ok = false;
@@ -56,7 +72,7 @@ public class MaintenanceFilter extends Filter {
                 if (ok) {
                     chain.doFilter(exchange);
                 } else {
-                    String message = "System in maintenance mode. Try again later.";
+                    message = "System in maintenance mode. Try again later.";
                     exchange.sendResponseHeaders(HttpAdapter.SC_UNAVAILABLE, message.getBytes().length);
                     try (OutputStream os = exchange.getResponseBody()) {
                         os.write(message.getBytes());
@@ -66,9 +82,7 @@ public class MaintenanceFilter extends Filter {
                 }
                 break;
             default:
-                exchange.sendResponseHeaders(HttpAdapter.SC_UNAVAILABLE, -1);
-                exchange.getResponseBody().close();
-                exchange.close();
+                chain.doFilter(exchange);
                 break;
         }
     }

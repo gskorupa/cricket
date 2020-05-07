@@ -102,6 +102,9 @@ public class StandardResult implements Result {
     }
 
     public byte[] getPayload() {
+        if(payload.length==0 && null!=data){
+            buildPayload(data.toString());
+        }
         return payload;
     }
 
