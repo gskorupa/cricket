@@ -30,7 +30,7 @@ public class UserEvent extends Event {
     public static final String USER_UPDATED = "USER_UPDATED";
     public static final String USER_RESET_PASSWORD = "USER_RESET_PASSWORD";
     public static final String USER_NEW_PERMALINK = "USER_NEW_PERMALINK";
-    
+        
     public UserEvent(){
         super();
         setCategory(CATEGORY_USER);

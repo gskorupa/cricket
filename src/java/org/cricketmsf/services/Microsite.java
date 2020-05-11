@@ -130,7 +130,7 @@ public class Microsite extends Kernel {
         //SiteAdministrationModule.getInstance().initScheduledTasks(scheduler);
         emailSender.send(
                 (String) getProperties().getOrDefault("admin-notification-email", ""),
-                "Microsite started", "Microsite service has been started."
+                getId()+" started", getId()+" service has been started."
         );
         try {
             queueSubscriber.init();
@@ -168,7 +168,7 @@ public class Microsite extends Kernel {
         try {
             emailSender.send(
                     (String) getProperties().getOrDefault("admin-notification-email", ""),
-                    "Microsite shutdown", "Microsite service is going down."
+                    getId()+" shutdown", getId()+" service is going down."
             );
         } catch (Exception e) {
             e.printStackTrace();
