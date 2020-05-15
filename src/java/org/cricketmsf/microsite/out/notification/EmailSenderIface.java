@@ -21,6 +21,7 @@ package org.cricketmsf.microsite.out.notification;
  */
 public interface EmailSenderIface {
     
-    public String send(String recipient, String topic, String text);
-    
+    public String send(String recipient, String subject, String text);
+    public String send(String to, String cc, String bcc, String subject, String text);
+    public String send(String[] recipients, String[] names, String subject, String text);
 }

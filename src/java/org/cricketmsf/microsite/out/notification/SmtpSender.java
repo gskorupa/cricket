@@ -36,19 +36,21 @@ import org.cricketmsf.out.OutboundAdapter;
  */
 public class SmtpSender extends OutboundAdapter implements EmailSenderIface, Adapter {
 
-    String from = "signode@signocom.com";
+    String from = "";
     String cc = null;
     String bcc = null;
-    String mailhost = "85.128.192.150";
-    String mailer = "msgsend";
+    String mailhost = "";
+    String mailer = "";
     String protocol = "SMTP";
-    String user = "signode@signocom.com";
-    String password = "Ypsylon#2017#";
+    String user = "";
+    String password = "";
     String debugSession = null;
+    boolean starttls = true;
+    int port = 465;
     boolean ready = true;
 
-    protected HashMap<String,String> statusMap=null;
-    
+    protected HashMap<String, String> statusMap = null;
+
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
@@ -64,11 +66,18 @@ public class SmtpSender extends OutboundAdapter implements EmailSenderIface, Ada
         if (from.isEmpty() || mailhost.isEmpty() || user.isEmpty() || password.isEmpty()) {
             ready = false;
         }
+        starttls = Boolean.parseBoolean(properties.getOrDefault("starttls", "true"));
+        try {
+            port = Integer.parseInt(properties.getOrDefault("port", "465"));
+        } catch (NumberFormatException e) {
+        }
         Kernel.getInstance().getLogger().print("\tfrom: " + from);
         Kernel.getInstance().getLogger().print("\tcc: " + cc);
         Kernel.getInstance().getLogger().print("\tbcc: " + bcc);
         Kernel.getInstance().getLogger().print("\tmailhost: " + mailhost);
+        Kernel.getInstance().getLogger().print("\tport: " + port);
         Kernel.getInstance().getLogger().print("\tprotocol: " + protocol);
+        Kernel.getInstance().getLogger().print("\tstarttls: " + starttls);
         Kernel.getInstance().getLogger().print("\tmailer: " + mailer);
         Kernel.getInstance().getLogger().print("\tuser: " + user);
         Kernel.getInstance().getLogger().print("\tpassword: " + (password.isEmpty() ? "" : "******"));
@@ -82,7 +91,7 @@ public class SmtpSender extends OutboundAdapter implements EmailSenderIface, Ada
             Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "not configured"));
             return "ERROR: not configured";
         }
-        if(recipient == null || recipient.isEmpty()){
+        if (recipient == null || recipient.isEmpty()) {
             return null;
         }
         boolean debug = "true".equalsIgnoreCase(debugSession);
@@ -91,8 +100,6 @@ public class SmtpSender extends OutboundAdapter implements EmailSenderIface, Ada
         String text = content;
 
         String result = "OK";
-
-        //System.out.println("mailhost:[" + mailhost + "]");
 
         try {
 
@@ -105,8 +112,10 @@ public class SmtpSender extends OutboundAdapter implements EmailSenderIface, Ada
                 props.put("mail.smtp.host", mailhost);
             }
             props.put("mail.smtp.auth", "true");
-            props.put("mail.smtp.socketFactory.port", "465");
-            props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+            props.put("mail.smtp.socketFactory.port", "" + port);
+            if (starttls) {
+                props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+            }
 
             // Get a Session object
             Session session = Session.getInstance(props, new javax.mail.Authenticator() {
@@ -114,7 +123,7 @@ public class SmtpSender extends OutboundAdapter implements EmailSenderIface, Ada
                     return new PasswordAuthentication(user, password);
                 }
             });
-            
+
             if (debug) {
                 session.setDebug(true);
             }
@@ -158,19 +167,29 @@ public class SmtpSender extends OutboundAdapter implements EmailSenderIface, Ada
 
         return result;
     }
-    
+
     @Override
-    public void updateStatusItem(String key, String value){
+    public void updateStatusItem(String key, String value) {
         statusMap.put(key, value);
     }
-    
+
     @Override
-    public Map<String,String> getStatus(String name){
-        if(statusMap==null){
+    public Map<String, String> getStatus(String name) {
+        if (statusMap == null) {
             statusMap = new HashMap();
             statusMap.put("name", name);
             statusMap.put("class", getClass().getName());
         }
         return statusMap;
+    }
+
+    @Override
+    public String send(String to, String cc, String bcc, String subject, String text) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String send(String[] recipients, String[] names, String subject, String text) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
