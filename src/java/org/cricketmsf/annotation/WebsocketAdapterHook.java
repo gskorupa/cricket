@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface WebSocketAdapterHook {
+public @interface WebsocketAdapterHook {
     public String adapterName();
-    public String requestMethod();
+    public String context();
 }

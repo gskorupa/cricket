@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -21,33 +23,44 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.bind.DatatypeConverter;
 import org.cricketmsf.Adapter;
+import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.RequestObject;
 import org.cricketmsf.WebsocketServer;
+import org.cricketmsf.annotation.HttpAdapterHook;
+import org.cricketmsf.annotation.WebsocketAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.in.InboundAdapterIface;
+import org.cricketmsf.in.http.HttpAdapter;
+import static org.cricketmsf.in.http.HttpAdapter.SC_INTERNAL_SERVER_ERROR;
+import static org.cricketmsf.in.http.HttpAdapter.SC_METHOD_NOT_ALLOWED;
+import org.cricketmsf.in.http.Result;
+import org.cricketmsf.in.http.StandardResult;
 
 /**
  *
  * @author greg
  */
-public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIface, Runnable {
+public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIface, Adapter, Runnable {
 
     public static final int DIALOG = 0;
     public static final int INPUT = 1;
     public static final int OUTPUT = 2;
 
     public int serviceType = DIALOG;
-    public boolean sendHello = true;
+    public boolean sendHello = false;
+    public boolean echo = false;
+    public String context=null;
+    public boolean stopped = false;
 
-    private Adapter handler = null;
-
+    //private Adapter handler = null;
     private Socket socket;
     InputStream inputStream;
     OutputStream outputStream;
-    private String context;
     private String dataToSend = null;
     private WebsocketServer server;
-    private boolean running = false;
+
+    private String serviceHookName = null;
 
     public WebsocketAdapter() {
         super();
@@ -56,17 +69,34 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
     public WebsocketAdapter(Socket socket, WebsocketServer server) {
         this.socket = socket;
         this.server = server;
-
     }
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
+        loadProperties(properties, adapterName, true);
+    }
+
+    public void loadProperties(HashMap<String, String> properties, String adapterName, boolean onStart) {
         super.loadProperties(properties, adapterName);
         setContext(properties.getOrDefault("context", ""));
-        if (!context.isBlank()) {
-            Kernel.getLogger().printIndented("context=" + getContext());
+        echo = Boolean.parseBoolean(properties.getOrDefault("echo", "false"));
+        sendHello = Boolean.parseBoolean(properties.getOrDefault("send-hello", "false"));
+        String tmpMode = properties.getOrDefault("mode", "input");
+        if ("dialog".equalsIgnoreCase(tmpMode)) {
+            serviceType = WebsocketAdapter.DIALOG;
+        } else if ("output".equalsIgnoreCase(tmpMode)) {
+            serviceType = WebsocketAdapter.OUTPUT;
         } else {
-            //
+            serviceType = WebsocketAdapter.INPUT;
+            tmpMode = "input";
+        }
+        if (!onStart) {
+            getServiceHook();
+        } else {
+            Kernel.getLogger().printIndented("context=" + getContext());
+            Kernel.getLogger().printIndented("echo=" + echo);
+            Kernel.getLogger().printIndented("send-hello=" + sendHello);
+            Kernel.getLogger().printIndented("mode=" + tmpMode);
         }
     }
 
@@ -80,64 +110,55 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
         }
     }
 
-    private void readInputStream(InputStream inputStream) {
+    private String readInputStream(InputStream inputStream) {
         int len = 0;
         byte[] b = new byte[1024];
         //rawIn is a Socket.getInputStream();
         boolean waiting = true;
-        while (waiting) {
-            try {
-                len = inputStream.read(b);
-                if (len != -1) {
+        //while (waiting) {
+        try {
+            len = inputStream.read(b);
+            if (len != -1) {
 
-                    byte rLength = 0;
-                    int rMaskIndex = 2;
-                    int rDataStart = 0;
-                    //b[0] is always text in my case so no need to check;
-                    byte data = b[1];
-                    byte op = (byte) 127;
-                    rLength = (byte) (data & op);
+                byte rLength = 0;
+                int rMaskIndex = 2;
+                int rDataStart = 0;
+                //b[0] is always text in my case so no need to check;
+                byte data = b[1];
+                byte op = (byte) 127;
+                rLength = (byte) (data & op);
 
-                    if (rLength == (byte) 126) {
-                        rMaskIndex = 4;
-                    }
-                    if (rLength == (byte) 127) {
-                        rMaskIndex = 10;
-                    }
-
-                    byte[] masks = new byte[4];
-
-                    int j = 0;
-                    int i = 0;
-                    for (i = rMaskIndex; i < (rMaskIndex + 4); i++) {
-                        masks[j] = b[i];
-                        j++;
-                    }
-
-                    rDataStart = rMaskIndex + 4;
-
-                    int messLen = len - rDataStart;
-
-                    byte[] message = new byte[messLen];
-
-                    for (i = rDataStart, j = 0; i < len; i++, j++) {
-                        message[j] = (byte) (b[i] ^ masks[j % 4]);
-                    }
-
-                    setReceivedData(new String(message));
-                    b = new byte[1024];
-
-                    if (DIALOG == serviceType) {
-                        setOutcomingData(new String(message));
-                        sendMessage(getData());
-                    }
-
+                if (rLength == (byte) 126) {
+                    rMaskIndex = 4;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-                waiting = false;
+                if (rLength == (byte) 127) {
+                    rMaskIndex = 10;
+                }
+
+                byte[] masks = new byte[4];
+
+                int j = 0;
+                int i = 0;
+                for (i = rMaskIndex; i < (rMaskIndex + 4); i++) {
+                    masks[j] = b[i];
+                    j++;
+                }
+
+                rDataStart = rMaskIndex + 4;
+
+                int messLen = len - rDataStart;
+
+                byte[] message = new byte[messLen];
+
+                for (i = rDataStart, j = 0; i < len; i++, j++) {
+                    message[j] = (byte) (b[i] ^ masks[j % 4]);
+                }
+                return new String(message);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
     public static byte[] encode(String mess) throws IOException {
@@ -190,7 +211,7 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
 
     private String doHandShakeToInitializeWebSocketConnection(InputStream inputStream, OutputStream outputStream) throws UnsupportedEncodingException {
         String data = new Scanner(inputStream, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
-        String path = null;
+        String path = "";
         Matcher get = Pattern.compile("^GET.*HTTP").matcher(data);
 
         if (get.find()) {
@@ -252,6 +273,7 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
         } catch (UnsupportedEncodingException handShakeException) {
             throw new IllegalStateException("Could not connect to client input stream", handShakeException);
         }
+
         if (null == server.getRegisteredContexts().get(getContext())) {
             try {
                 sendMessage("context " + getContext() + " is not supported");
@@ -259,72 +281,122 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
             }
             this.stop();
             return;
+        } else {
+            loadProperties(server.getRegisteredContexts().get(getContext()).properties, getName(), false);
         }
         boolean ok = true;
-
         if (sendHello) {
             try {
                 sendMessage("hello");
             } catch (IOException ex) {
+                ex.printStackTrace();
                 ok = false;
             }
         }
-        setRunning(true);
-        while (ok && !this.socket.isClosed()) {
+        while (ok && !this.socket.isClosed() && this.socket.isConnected()) {
             try {
-                if (DIALOG == serviceType || INPUT == serviceType) {
-                    readInputStream(inputStream);
-                } else {
-                    //setOutcomingData("" + System.currentTimeMillis());
+                if (OUTPUT == serviceType) {
                     sendMessage(getData());
+                } else {
+                    String message = readInputStream(inputStream);
+                    if (null != message && !message.isEmpty()) {
+                        setReceivedData(message);
+                        if (DIALOG == serviceType) {
+                            if (echo) {
+                                sendMessage(message);
+                            } else {
+                                sendMessage(getData());
+                            }
+                        }
+                    } else {
+                        ok = false;
+                    }
                 }
-                Thread.sleep(10);
-            } catch (InterruptedException | IOException e) {
+            } catch (Exception e) {
+                e.printStackTrace();
                 ok = false;
             }
         }
 
         try {
-            inputStream.readAllBytes();
             inputStream.close();
-        } catch (IOException e) {
-
+        } catch (Exception e) {
         }
         try {
             outputStream.flush();
             outputStream.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
 
         }
-        System.out.println("WS disconnected:" + getContext());
+        Kernel.getInstance().dispatchEvent(Event.logInfo(this, "WS client disconnected from " + getContext()));
+        stop();
     }
 
     private void setReceivedData(String message) {
-        System.out.println("INCOMING WS MESSAGE: " + message);
+        String result = null;
+        if (serviceHookName == null) {
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this, "hook method is not defined for context " + getContext()));
+            return;
+        }
+        try {
+            Method m = Kernel.getInstance().getClass().getMethod(serviceHookName, String.class);
+            result = (String) m.invoke(Kernel.getInstance(), message);
+        } catch (NoSuchMethodException e) {
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this, "handler method NoSuchMethodException " + serviceHookName + " " + e.getMessage()));
+        } catch (IllegalAccessException e) {
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this, "handler method IllegalAccessException " + serviceHookName + " " + e.getMessage()));
+        } catch (InvocationTargetException e) {
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this, "handler method InvocationTargetException " + serviceHookName + " " + e.getMessage()));
+        }
+        if (null != result) {
+            setOutcomingData(result);
+        }
     }
 
-    private void setOutcomingData(String message) {
-        dataToSend = message;
+    public void setOutcomingData(String message) {
+        if(!stopped)
+            dataToSend = message;
     }
 
-    private String getData() {
+    private synchronized String getData() {
         boolean interrupted = false;
-        String result;
-        while (!interrupted && null == dataToSend) {
+        String result=null;
+        while (!interrupted && null == dataToSend && !this.socket.isClosed() && this.socket.isConnected() ) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException ex) {
                 interrupted = true;
-                return "";
             }
         }
-        result = dataToSend;
+        if (interrupted) {
+            result = "interrupted";
+        } else {
+            result = dataToSend;
+        }
         dataToSend = null;
         return result;
     }
 
+    public String waitContext() {
+        boolean interrupted = false;
+        String result;
+        while (!interrupted && null == context) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+                interrupted = true;
+            }
+        }
+        if (interrupted) {
+            result = null;
+        } else {
+            result = context;
+        }
+        return result;
+    }
+    
     public void start() {
-        System.out.println("Starting WS adapter");
+        //System.out.println("Starting WS adapter");
         Thread t = new Thread(this);
         t.start();
     }
@@ -332,9 +404,10 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
     public void stop() {
         try {
             socket.close();
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
+        stopped=true;
     }
 
     /**
@@ -351,17 +424,25 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
         this.context = context;
     }
 
-    /**
-     * @return the running
-     */
-    public boolean isRunning() {
-        return running;
-    }
-
-    /**
-     * @param running the running to set
-     */
-    public void setRunning(boolean running) {
-        this.running = running;
+    private void getServiceHook() {
+        WebsocketAdapterHook ah;
+        String ctx;
+        String defaultMethod = null;
+        // for every method of a Kernel instance (our service class extending Kernel)
+        for (Method m : Kernel.getInstance().getClass().getMethods()) {
+            ah = (WebsocketAdapterHook) m.getAnnotation(WebsocketAdapterHook.class);
+            // we search for annotated method
+            if (ah != null) {
+                ctx = ah.context();
+                if (getContext().equalsIgnoreCase(ctx)) {
+                    serviceHookName = m.getName();
+                } else if ("*".equalsIgnoreCase(ctx)) {
+                    defaultMethod = m.getName();
+                }
+            }
+        }
+        if (null == serviceHookName && null != defaultMethod) {
+            serviceHookName = defaultMethod;
+        }
     }
 }

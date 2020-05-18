@@ -41,6 +41,7 @@ import org.cricketmsf.config.HttpHeader;
 import org.cricketmsf.event.EventDecorator;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.DispatcherException;
+import org.cricketmsf.exception.WebsocketException;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
@@ -1052,6 +1053,10 @@ public abstract class Kernel {
      */
     public void setWebsocketPort(int websocketPort) {
         this.websocketPort = websocketPort;
+    }
+    
+    public void sendWebsocketMessage(String context, String message) throws WebsocketException{
+        websocketServer.sendMessage(context, message);
     }
 
 }

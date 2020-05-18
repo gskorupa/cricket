@@ -19,9 +19,14 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.cricketmsf.exception.WebsocketException;
+import org.cricketmsf.in.websocket.ClientList;
 import org.cricketmsf.in.websocket.WebsocketAdapter;
 
 /**
@@ -32,8 +37,7 @@ public class WebsocketServer implements Runnable {
 
     private ServerSocket server = null;
     private boolean running = false;
-    ArrayList<WebsocketAdapter> clients = new ArrayList<>();
-    private ConcurrentHashMap<String, String> registeredContexts = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, ClientList> registeredContexts = new ConcurrentHashMap<>();
 
     public WebsocketServer(Kernel service) {
         String host = service.getHost();
@@ -66,10 +70,12 @@ public class WebsocketServer implements Runnable {
             e.printStackTrace();
         }
         String ctx;
+        WebsocketAdapter adp;
         for (Map.Entry<String, Object> adapterEntry : service.getAdaptersMap().entrySet()) {
             if (adapterEntry.getValue() instanceof org.cricketmsf.in.websocket.WebsocketAdapter) {
-                ctx = ((WebsocketAdapter) adapterEntry.getValue()).getContext();
-                registeredContexts.put(ctx, ctx);
+                adp = (WebsocketAdapter) adapterEntry.getValue();
+                ctx = adp.getContext();
+                registeredContexts.put(ctx, new ClientList(adp.properties));
                 Kernel.getLogger().print("ws context: " + ctx);
             }
         }
@@ -88,8 +94,12 @@ public class WebsocketServer implements Runnable {
                 Socket socket = server.accept();
                 WebsocketAdapter client = new WebsocketAdapter(socket, this);
                 client.start();
-                if (client.isRunning()) {
-                    clients.add(client);
+                String context=client.waitContext();
+                if (null!=context) {
+                    ClientList list=registeredContexts.get(client.getContext());
+                    list.add(client);
+                    registeredContexts.put(client.getContext(), list);
+                    //TODO: remove client from the list after disconnecting
                 }
             } catch (IOException waitException) {
                 throw new IllegalStateException("Could not wait for client connection", waitException);
@@ -100,23 +110,38 @@ public class WebsocketServer implements Runnable {
     public void stop() {
         try {
             running = false;
-            clients.forEach(client -> {
-                client.stop();
-            });
+            Iterator it = registeredContexts.elements().asIterator();
+            ClientList list;
+            while (it.hasNext()) {
+                list = (ClientList) it.next();
+                for (int i = 0; i < list.size(); i++) {
+                    ((WebsocketAdapter) list.get(i)).stop();
+                }
+            }
             server.close();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        clients.forEach(client -> {
-            client.stop();
-        });
     }
 
     /**
      * @return the registeredContexts
      */
-    public ConcurrentHashMap<String, String> getRegisteredContexts() {
+    public ConcurrentHashMap<String, ClientList> getRegisteredContexts() {
         return registeredContexts;
+    }
+
+    public boolean sendMessage(String context, String message) throws WebsocketException {
+        ClientList list = getRegisteredContexts().get(context);
+        if (null == list) {
+            throw new WebsocketException(WebsocketException.CONTEXT_NOT_DEFINED);
+        }
+        int counter = 0;
+        for (int i = 0; i < list.size(); i++) {
+            list.get(i).setOutcomingData(message);
+            counter++;
+        }
+        return counter == list.size();
     }
 
 }
