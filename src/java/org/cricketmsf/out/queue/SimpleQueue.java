@@ -96,15 +96,19 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
             subscribers.put(channel, new ArrayList<>());
         }
         subscribers.get(channel).add(callback);
-        Kernel.getInstance().dispatchEvent(Event.logFinest(this, channel+" subscriber "+callback.getClass().getName()));
+        Kernel.getInstance().dispatchEvent(Event.logFinest(this, channel + " subscriber " + callback.getClass().getName()));
     }
 
     @Override
     public void unsubscribe(String channel, QueueCallbackIface callback) throws QueueException {
-        if (!subscribers.containsKey(channel)) {
+        if (!subscribers.containsKey(channel) || null == callback) {
             return;
         }
-        subscribers.get(channel).remove(subscribers.get(channel).indexOf(callback));
+        try {
+            subscribers.get(channel).remove(subscribers.get(channel).indexOf(callback));
+        } catch (Exception e) {
+            throw new QueueException(QueueException.UNKNOWN, "unsubscribe not possible");
+        }
     }
 
     @Override
@@ -257,14 +261,14 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
 
     @Override
     public long getSize() throws QueueException {
-        long size=0;
-        Iterator it=listChannels.values().iterator();
-        while(it.hasNext()){
-            size+=((List)it.next()).size();
+        long size = 0;
+        Iterator it = listChannels.values().iterator();
+        while (it.hasNext()) {
+            size += ((List) it.next()).size();
         }
-        it=channels.values().iterator();
-        while(it.hasNext()){
-            size+=((Map)it.next()).size();
+        it = channels.values().iterator();
+        while (it.hasNext()) {
+            size += ((Map) it.next()).size();
         }
         return size;
     }

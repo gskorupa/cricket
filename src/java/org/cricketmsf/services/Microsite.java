@@ -35,6 +35,7 @@ import org.cricketmsf.annotation.EventClassHook;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.EventException;
+import org.cricketmsf.exception.InitException;
 import org.cricketmsf.exception.QueueException;
 import org.cricketmsf.in.queue.SubscriberIface;
 import org.cricketmsf.microsite.auth.AuthBusinessLogic;
@@ -106,7 +107,7 @@ public class Microsite extends Kernel {
     }
 
     @Override
-    public void runInitTasks() {
+    public void runInitTasks() throws InitException {
         // we should register event categories used by this service
         try {
             EventMaster.registerEventCategories(new Event().getCategories(), Event.class.getName());

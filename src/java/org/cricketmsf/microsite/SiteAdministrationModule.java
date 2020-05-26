@@ -249,8 +249,11 @@ public class SiteAdministrationModule {
         try {
             String initialAdminEmail = (String) Kernel.getInstance().getProperties().getOrDefault("initial-admin-email", "");
             String initialAdminPassword = (String) Kernel.getInstance().getProperties().getOrDefault("initial-admin-password", "");
-            if (initialAdminEmail.isEmpty() || initialAdminPassword.isEmpty()) {
+            if (initialAdminPassword.isEmpty()) {
                 Kernel.getInstance().dispatchEvent(Event.logSevere(this, "initial-admin-password property not set. Login to the administrator's account will be impossible!"));
+            }
+            if (initialAdminEmail.isEmpty()) {
+                Kernel.getInstance().dispatchEvent(Event.logWarning(this, "initial-admin-email property not set."));
             }
             User newUser;
             //create admin account

@@ -41,6 +41,7 @@ import org.cricketmsf.config.HttpHeader;
 import org.cricketmsf.event.EventDecorator;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.DispatcherException;
+import org.cricketmsf.exception.InitException;
 import org.cricketmsf.exception.WebsocketException;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
@@ -644,7 +645,11 @@ public abstract class Kernel {
             });
 
             getLogger().print("Running initialization tasks");
-            runInitTasks();
+            try {
+                runInitTasks();
+            } catch (InitException ex) {
+                getLogger().print("Initialization exception: "+ex.getMessage());
+            }
             printEventRegister();
 
             getLogger().print("Starting listeners ...");
@@ -658,7 +663,11 @@ public abstract class Kernel {
             }
             if (getWebsocketPort() > 0) {
                 websocketServer = new WebsocketServer(this);
-                websocketServer.start();
+                try{
+                    websocketServer.start();
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
             }
             
             long startedIn = System.currentTimeMillis() - startedAt;
@@ -709,7 +718,7 @@ public abstract class Kernel {
      * the service start. As the last step of the service starting procedure
      * before HTTP service.
      */
-    protected void runInitTasks() {
+    protected void runInitTasks() throws InitException {
         setInitialized(true);
     }
 
