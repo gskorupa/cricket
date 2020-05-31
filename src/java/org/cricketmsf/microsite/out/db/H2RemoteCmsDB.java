@@ -70,7 +70,8 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
                 .append("commentable boolean,")
                 .append("created timestamp,")
                 .append("modified timestamp,")
-                .append("published timestamp)");
+                .append("published timestamp,")
+                .append("extra varchar)");
         docQuery = sb.toString();
         try (Connection conn = getConnection()) {
             PreparedStatement pst;
@@ -111,7 +112,7 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
 
     private void putDocument(String tableName, String key, Document doc) throws KeyValueDBException {
         try (Connection conn = getConnection()) {
-            String query = "merge into ?? (uid,name,author,type,path,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published) key (uid) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            String query = "merge into ?? (uid,name,author,type,path,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra) key (uid) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             query = query.replaceFirst("\\?\\?", tableName);
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, doc.getUid());
@@ -136,6 +137,7 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
             } else {
                 pstmt.setTimestamp(18, Timestamp.from(Instant.from(ISO_INSTANT.parse(doc.getPublished()))));
             }
+            pstmt.setString(19, doc.getExtra());
             int updated = pstmt.executeUpdate();
             //check?
         } catch (SQLException e) {
@@ -278,9 +280,9 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
         if (ci instanceof DocumentPathAndTagComparator) {
             String path = ((Document) o).getPath();
             String tags = ((Document) o).getTags();
-            String queryAll = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from ?? where path = ? and tags like ?";
-            String queryWithPath = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from ?? where path = ?";
-            String queryWithTags = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from ?? where tags like ?";
+            String queryAll = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from ?? where path = ? and tags like ?";
+            String queryWithPath = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from ?? where path = ?";
+            String queryWithTags = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from ?? where tags like ?";
             String query;
             boolean tagsOnly = path.isEmpty();
             boolean pathOnly = tags.isEmpty();
@@ -339,13 +341,14 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
             doc.setPublished(rs.getTimestamp(16).toInstant().toString());
         } catch (NullPointerException e) {
         }
+        doc.setExtra(rs.getString(17));
         return doc;
     }
 
     private Object getDocument(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         Document doc = null;
         try (Connection conn = getConnection()) {
-            String query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from " + tableName + " where uid=?";
+            String query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from " + tableName + " where uid=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
             ResultSet rs = pstmt.executeQuery();

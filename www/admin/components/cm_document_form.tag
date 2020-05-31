@@ -68,6 +68,10 @@
                     <input class="form-control" id="doctags" name="doctags" type="text" value={ doc.tags } >
                 </div>
                 <div class="form-group">
+                    <label for="doctags">{ app.texts.cm_document_form.extra[app.language] }</label>
+                    <input class="form-control" id="extra" name="extra" type="text" value={ doc.extra } >
+                </div>
+                <div class="form-group">
                     <label for="language">{ app.texts.cm_document_form.language[app.language] }</label>
                     <input class="form-control" id="language" name="language" type="text" value={ doc.language } readonly={ true }>
                 </div>
@@ -114,7 +118,8 @@
         'published': '',
         'createdBy': '',
         'commentable': false,
-        'size': 0
+        'size': 0,
+        'extra': ''
     }
 
     init(eventListener, uid, editable, language, status, path){
@@ -202,6 +207,7 @@
         var c=encodeURIComponent(fd.get('content'))
         fd.set('content',c)
         fd.set('tags',fd.get('doctags'))
+        fd.set('extra',fd.get('extra'))
         sendFormData(fd, self.method, app.cmAPI + docPath, app.user.token, self.close, self.listener)
     }
     

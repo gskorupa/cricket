@@ -462,7 +462,7 @@ public abstract class Kernel {
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.log.LoggerAdapterIface) {
                         setFineLevel(((LoggerAdapterIface) adaptersMap.get(adapterName)).isFineLevel());
                     }
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
+                } catch (NullPointerException | ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                     adaptersMap.put(adapterName, null);
                     getLogger().print("ERROR: " + adapterName + " configuration: " + ex.getClass().getSimpleName());
                     ex.printStackTrace();

@@ -299,6 +299,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             doc.setSummary((String) parameters.getOrDefault("summary", ""));
             doc.setTags((String) parameters.getOrDefault("tags", ""));
             doc.setTitle((String) parameters.getOrDefault("title", ""));
+            doc.setExtra((String) parameters.getOrDefault("extra", ""));
             if (getDatabase().containsKey(resolveTableName(doc), doc.getUid())) {
                 throw new CmsException(CmsException.ALREADY_EXISTS, "document already exists");
             }
@@ -403,6 +404,10 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 }
                 doc.setStatus(newStatus);
             }
+            String newExtra = (String) parameters.get("extra");
+            if (newExtra != null) {
+                doc.setExtra(newExtra);
+            }
 
             //if (doc.getType().equals(Document.FILE)) {
             if (Document.FILE.equals(doc.getType())) {
@@ -484,29 +489,6 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         }
     }
 
-    /*
-    @Override
-    public List<Document> findByPath(String path, String language, String status) throws CmsException {
-        Document pattern = new Document();
-        if (!supportedLanguages.contains(language)) {
-            throw new CmsException(CmsException.UNSUPPORTED_LANGUAGE, language + " language is not supported");
-        }
-        if (!supportedStatuses.contains(status)) {
-            throw new CmsException(CmsException.UNSUPPORTED_STATUS, status + " status is not supported");
-        }
-        pattern.setStatus(status);
-        pattern.setPath(path);
-        pattern.setLanguage(language);
-        String tableName = status + "_" + language;
-        ArrayList list = new ArrayList();
-        try {
-            list = (ArrayList) getDatabase().search(tableName, new DocumentPathComparator(), pattern);
-        } catch (KeyValueDBException ex) {
-            throw new CmsException(CmsException.HELPER_EXCEPTION, ex.getMessage());
-        }
-        return list;
-    }
-     */
     @Override
     public List<Document> findByPathAndTag(String path, String tag, String language, String status, List<String> roles) throws CmsException {
         Document pattern = new Document();
@@ -612,35 +594,6 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         return list;
     }
 
-    /*
-    @Override
-    public Result getFile(String uid, String language) throws CmsException {
-        ParameterMapResult result = new ParameterMapResult();
-
-        Document doc = getDocument(uid, language);
-        if (doc == null) {
-            result.setCode(HttpAdapter.SC_NOT_FOUND);
-            return result;
-        }
-        if (!doc.getType().equals(Document.FILE)) {
-            result.setCode(HttpAdapter.SC_BAD_REQUEST);
-            result.setMessage("not a file content");
-            return result;
-        }
-        result.setCode(HttpAdapter.SC_OK);
-        result.setMessage("");
-        result.setPayload(doc.getContent().getBytes());
-        String fileExtension = "";
-        int index = doc.getDbName().lastIndexOf(".");
-        if (index > 0) {
-            fileExtension = doc.getDbName().substring(index);
-        }
-        result.setFileExtension(fileExtension);
-        result.setModificationDate(Date.from(doc.getModified()));
-
-        return result;
-    }
-     */
     @Override
     public void updateCache(RequestObject request, KeyValueDBIface cache, String tableName, String language, String fileContent) {
         FileObject fo;
@@ -937,8 +890,6 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             return "";
         }
         try {
-            //String targetLocation = System.getProperty("user.dir") + targetRoot.substring(1) + uid.substring(1) + getFileExt(sourcePath);
-            //String targetLocation = System.getProperty("user.dir") + targetRoot.substring(1) + Kernel.getEventId() + getFileExt(sourcePath);
             String targetLocation = targetRoot + Kernel.getEventId() + getFileExt(sourcePath);
             Files.move(Paths.get(sourcePath), Paths.get(targetLocation), REPLACE_EXISTING);
             return targetLocation;

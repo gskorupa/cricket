@@ -45,17 +45,13 @@ public class Document {
     private String mimeType;
     private String status;
     private long size;
-    /*
-    private Instant created;
-    private Instant modified;
-    private Instant published;
-     */
     private String created;
     private String modified;
     private String published;
     private String createdBy;
     
     private String rights = READWRITE;
+    private String extra;
 
     public Document() {
 
@@ -75,15 +71,6 @@ public class Document {
         if (uid != null && !uid.isEmpty()) {
             this.uid=uid;
             validateUid();
-            /*
-            if (uid.startsWith("/")) {
-                this.uid = uid;
-            } else {
-                this.uid = "/" + uid;
-            }
-            setPath(this.uid.substring(0, this.uid.lastIndexOf("/") + 1));
-            setName(this.uid.substring(this.uid.lastIndexOf("/") + 1));
-            */
         } else {
             throw new CmsException(CmsException.MALFORMED_UID, "malformed document uid");
         }
@@ -183,30 +170,9 @@ public class Document {
     }
 
     /**
-     * @return the content
-     */
-    /*public String decodeContent() {
-        String decoded = content != null ? content : "";
-        try {
-            decoded = new String(Base64.getDecoder().decode(decoded));
-        } catch (IllegalArgumentException ex) {
-            // not encoded -> nothing to do
-        } catch (NullPointerException ex) {
-            return "";
-        }
-        return decoded;
-    }*/
-    /**
      * @param content the content to set. Must be escaped
      */
     public void setContent(String content) {
-        /*String decoded = content != null ? content : "";
-        try {
-            decoded = new String(Base64.getDecoder().decode(decoded));
-        } catch (IllegalArgumentException e) {
-        }
-        this.content = decoded;
-         */
         this.content = content;
     }
 
@@ -313,65 +279,22 @@ public class Document {
 
     public void setCreated(String created) {
         this.created = created;
-        /*
-        try {
-            Instant.parse((String) get("created"));
-            put("created", created);
-        } catch (DateTimeParseException | ClassCastException e) {
-            e.printStackTrace();
-            put("created", "");
-        }
-         */
     }
 
     public String getModified() {
         return modified;
-        /*
-        try {
-            return Instant.parse((String) get("updated"));
-        } catch (DateTimeParseException | ClassCastException e) {
-            e.printStackTrace();
-        }
-        return null;
-         */
     }
 
     public void setModified(String modified) {
         this.modified = modified;
-        /*
-        try {
-            Instant.parse((String) get("updated"));
-            put("updated", updated);
-        } catch (DateTimeParseException | ClassCastException e) {
-            e.printStackTrace();
-            put("updated", "");
-        }
-         */
     }
 
     public String getPublished() {
         return published;
-        /*
-        try {
-            return Instant.parse((String) get("published"));
-        } catch (DateTimeParseException | ClassCastException e) {
-            e.printStackTrace();
-        }
-        return null;
-         */
     }
 
     public void setPublished(String published) {
         this.published = published;
-        /*
-        try {
-            Instant.parse((String) get("published"));
-            put("published", published);
-        } catch (DateTimeParseException | ClassCastException e) {
-            e.printStackTrace();
-            put("published", "");
-        }
-         */
     }
 
     public String getCreatedBy() {
@@ -395,6 +318,20 @@ public class Document {
     public Document setRights(String rights) {
         this.rights = rights;
         return this;
+    }
+
+    /**
+     * @return the userDefined
+     */
+    public String getExtra() {
+        return extra;
+    }
+
+    /**
+     * @param extra the userDefined to set
+     */
+    public void setExtra(String extra) {
+        this.extra = extra;
     }
 
 }

@@ -216,7 +216,7 @@ public class Microsite extends Kernel {
             rd.put("user", event.getRequest().headers.getFirst("X-user-id"));
             rd.put("environmentName", getName());
             rd.put("javaversion", System.getProperty("java.version"));
-            rd.put("wwwTheme", getProperties().getOrDefault("www-theme", "theme1"));
+            rd.put("wwwTheme", getProperties().getOrDefault("www-theme", "theme0"));
             List<String> roles = event.getRequest().headers.get("X-user-role");
             if (roles != null && roles.size() > 0) {
                 StringBuilder sb = new StringBuilder("[");
