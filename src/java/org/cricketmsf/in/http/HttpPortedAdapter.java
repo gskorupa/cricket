@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.util.Map;
@@ -36,18 +35,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.cricketmsf.Adapter;
 import org.cricketmsf.Stopwatch;
+import org.cricketmsf.event.HttpEvent;
+import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.InboundAdapterIface;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class HttpAdapter
+public class HttpPortedAdapter
         extends InboundAdapter
-        implements HttpAdapterIface, HttpHandler, InboundAdapterIface/*, org.eclipse.jetty.server.Handler*/ {
+        implements Adapter, HttpAdapterIface, HttpHandler, InboundAdapterIface/*, org.eclipse.jetty.server.Handler*/ {
 
     public final static String JSON = "application/json";
     public final static String XML = "text/xml";
@@ -93,7 +93,7 @@ public class HttpAdapter
 
     protected int mode = SERVICE_MODE;
 
-    public HttpAdapter() {
+    public HttpPortedAdapter() {
         super();
         acceptedTypesMap = new HashMap<>();
         for (String acceptedType : acceptedTypes) {
@@ -105,6 +105,7 @@ public class HttpAdapter
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
+        setContext(properties.get("context"));
     }
 
     @Override
@@ -124,18 +125,18 @@ public class HttpAdapter
         }
     }
 
-    @Override 
-    public Object handleInput(Object input){
-        if(input instanceof HttpExchange){
+    @Override
+    public Object handleInput(Object input) {
+        if (input instanceof HttpExchange) {
             try {
-                handle((HttpExchange)input);
+                handle((HttpExchange) input);
             } catch (IOException ex) {
                 Kernel.getInstance().dispatchEvent(Event.logWarning(this, ex.getMessage()));
             }
         }
         return null;
     }
-    
+
     @Override
     public synchronized void handle(HttpExchange exchange) throws IOException {
         long rootEventId = Kernel.getEventId();
@@ -155,7 +156,7 @@ public class HttpAdapter
             if (null != properties.get("dump-request") && "true".equalsIgnoreCase(properties.get("dump-request"))) {
                 Kernel.getInstance().getLogger().print(dumpRequest(requestObject));
             }
-            
+
             Result result = createResponse(requestObject, rootEventId);
 
             acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
@@ -196,7 +197,13 @@ public class HttpAdapter
                             responseData = result.getPayload();
                         }
                     } else {
-                        responseData = result.getPayload();
+                        String rContentType = headers.getFirst("Content-type");
+                        headers.set("Content-type", rContentType.concat("; charset=UTF-8"));
+                        if (acceptedTypesMap.containsKey(rContentType)) {
+                            responseData = formatResponse(rContentType, result);
+                        } else {
+                            responseData = result.getPayload();
+                        }
                     }
                     headers.set("Last-Modified", result.getModificationDateFormatted());
                     //TODO: get max age and no-cache info from the result object
@@ -353,8 +360,12 @@ public class HttpAdapter
         return requestObject;
     }
 
-    protected RequestObject preprocess(RequestObject request) {
-        return request;
+    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+        Event ev = new Event(this.getName(), request);
+        ev.setRootEventId(rootEventId);
+        ev.setPayload(request);
+        HttpEvent event = new HttpEvent(ev);
+        return new ProcedureCall(event, "handle");
     }
 
     private Result createResponse(RequestObject requestObject, long rootEventId) {
@@ -370,43 +381,34 @@ public class HttpAdapter
                 }
             }
         }
-        String hookMethodName = getHookMethodNameForMethod(requestObject.method);
 
-        if (hookMethodName == null) {
-            sendLogEvent(Event.LOG_WARNING, "hook method is not defined for " + requestObject.method);
-            result.setCode(SC_METHOD_NOT_ALLOWED);
-            result.setMessage("method " + requestObject.method + " is not allowed");
-            result.setFileExtension(null);
-            //TODO: set "Allow" header
-            return result;
-        }
         try {
-            sendLogEvent(Event.LOG_FINE, "sending request to hook method " + hookMethodName);
-            Event event = new Event("HttpAdapter", requestObject);
-            event.setRootEventId(rootEventId);
-            event.setPayload(requestObject);
-            Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
-            methodName = m.getName();
-            result = (Result) m.invoke(Kernel.getInstance(), event);
-        } catch (NoSuchMethodException e) {
-            sendLogEvent(Event.LOG_SEVERE, "handler method NoSuchMethodException " + hookMethodName + " " + e.getMessage());
-            result.setCode(SC_INTERNAL_SERVER_ERROR);
-            result.setMessage("handler method error");
-            result.setFileExtension(null);
-        } catch (IllegalAccessException e) {
-            sendLogEvent(Event.LOG_SEVERE, "handler method IllegalAccessException " + hookMethodName + " " + e.getMessage());
-            result.setCode(SC_INTERNAL_SERVER_ERROR);
-            result.setMessage("handler method error");
-            result.setFileExtension(null);
-        } catch (InvocationTargetException e) {
-            sendLogEvent(Event.LOG_SEVERE, "handler method InvocationTargetException " + hookMethodName + " " + e.getMessage());
+            ProcedureCall pCall = preprocess(requestObject, Kernel.getEventId());
+            if (pCall.responseCode == 0) {
+                sendLogEvent(Event.LOG_FINE, "sending request to hook method " + pCall.procedureName + "@" + pCall.event.getClass().getSimpleName());
+                result = (Result) Kernel.getInstance().getEventProcessingResult(
+                        pCall.event,
+                        pCall.procedureName
+                );
+            } else {
+                sendLogEvent(Event.LOG_FINE, "bad request");
+                if (pCall.responseCode < 100 || pCall.responseCode > 1000) {
+                    result.setCode(SC_BAD_REQUEST);
+                } else {
+                    result.setCode(pCall.responseCode);
+                }
+                result.setData(pCall.errorResponse);
+                result.setHeader("Content-type", "application/json");
+            }
+        } catch (ClassCastException e) {
+            sendLogEvent(Event.LOG_SEVERE, "class cast exception");
             result.setCode(SC_INTERNAL_SERVER_ERROR);
             result.setMessage("handler method error");
             result.setFileExtension(null);
         }
         if (null == result) {
             result = new StandardResult("null result returned by the service");
-            result.setCode(HttpAdapter.SC_INTERNAL_SERVER_ERROR);
+            result.setCode(HttpPortedAdapter.SC_INTERNAL_SERVER_ERROR);
         }
         return result;
     }

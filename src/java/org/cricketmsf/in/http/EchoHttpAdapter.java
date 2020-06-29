@@ -24,6 +24,7 @@ import org.cricketmsf.RequestObject;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
+@Deprecated(since="1.4.0", forRemoval=true)
 public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface, Adapter {
 
     private boolean silent = false;

@@ -32,6 +32,7 @@ import java.security.cert.CertificateException;
 import java.util.Map;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import org.cricketmsf.in.http.HttpPortedAdapter;
 
 /**
  *
@@ -111,6 +112,29 @@ public class CricketHttpd implements HttpdIface{
                         context = sserver.createContext(((HttpAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
                     } else {
                         context = server.createContext(((HttpAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
+                    }
+                    context.getFilters().add(new MaintenanceFilter());
+                    context.getFilters().add(new ParameterFilter());
+                    context.getFilters().add(service.getSecurityFilter());
+                }else if (adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpPortedAdapter) {
+                    Kernel.getLogger().print("context: " + ((HttpPortedAdapter) adapterEntry.getValue()).getContext());
+                    if (ssl) {
+                        scontext = SSLContext.getInstance(service.getSslAlgorithm());
+                        // keystore
+                        char[] keystorePassword = password.toCharArray();
+                        KeyStore ks = KeyStore.getInstance("JKS");
+                        ks.load(new FileInputStream(keystore), keystorePassword);
+                        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+                        kmf.init(ks, keystorePassword);
+
+                        scontext.init(kmf.getKeyManagers(), null, null);
+
+                        HttpsConfigurator configurator = new HttpsConfigurator(scontext);
+                        sserver.setHttpsConfigurator(configurator);
+
+                        context = sserver.createContext(((HttpPortedAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
+                    } else {
+                        context = server.createContext(((HttpPortedAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
                     }
                     context.getFilters().add(new MaintenanceFilter());
                     context.getFilters().add(new ParameterFilter());

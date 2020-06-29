@@ -335,12 +335,20 @@
             "ports": [
                 {
                     "name": "Echo",
-                    "interfaceName": "EchoHttpAdapterIface",
-                    "adapterClassName": "org.cricketmsf.in.http.EchoHttpAdapter",
+                    "interfaceName": "XHttpAdapterIface",
+                    "adapterClassName": "org.cricketmsf.in.http.HttpPortedAdapter",
                     "properties": {
                         "context": "/api/echo",
                         "silent-mode": "false",
                         "extended-response":"true"
+                    }
+                },
+                {
+                    "name": "Greeter",
+                    "interfaceName": "",
+                    "adapterClassName": "org.cricketmsf.in.http.GreeterAdapter",
+                    "properties": {
+                        "context": "/api/greeting"
                     }
                 },
                 {

@@ -68,7 +68,7 @@
                     <input class="form-control" id="doctags" name="doctags" type="text" value={ doc.tags } >
                 </div>
                 <div class="form-group">
-                    <label for="doctags">{ app.texts.cm_document_form.extra[app.language] }</label>
+                    <label for="extra">{ app.texts.cm_document_form.extra[app.language] }</label>
                     <input class="form-control" id="extra" name="extra" type="text" value={ doc.extra } >
                 </div>
                 <div class="form-group">

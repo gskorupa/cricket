@@ -21,11 +21,14 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.annotation.HttpAdapterHook;
+import org.cricketmsf.annotation.PortEventClassHook;
 import org.cricketmsf.event.EventMaster;
+import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.exception.EventException;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
+import org.cricketmsf.in.http.Result;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueDBException;
@@ -165,9 +168,17 @@ public class BasicService extends Kernel {
         return result;
     }
 
-    @HttpAdapterHook(adapterName = "Echo", requestMethod = "*")
-    public Object doGetEcho(Event requestEvent) {
-        return sendEcho(requestEvent.getRequest());
+    @PortEventClassHook(className = "HttpEvent", procedureName = "handle")
+    public Object doGetEcho(HttpEvent requestEvent) {
+        return sendEcho(requestEvent.getOriginalEvent().getRequest());
+    }
+    
+    @PortEventClassHook(className = "HttpEvent", procedureName = "greet")
+    public Object doGreet(HttpEvent requestEvent) {
+        String name=(String)requestEvent.getOriginalEvent().getPayload();
+        Result result=new StandardResult("Hello "+name);
+        result.setHeader("Content-type", "text/plain");
+        return result;
     }
 
     @EventHook(eventCategory = Event.CATEGORY_LOG)

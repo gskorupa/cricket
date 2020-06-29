@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.in.http;
+package org.cricketmsf.event;
+
+import org.cricketmsf.Event;
 
 /**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * To be removed
+ * @author greg
  */
-@Deprecated(since="1.4.0", forRemoval=true)
-public interface EchoHttpAdapterIface {
-    
-    public boolean isSilent();
+@org.cricketmsf.livingdoc.design.BoundedContext(name="Content Management")
+@org.cricketmsf.livingdoc.design.Event()
+public class HttpEvent extends EventDecorator implements EventIface {
 
+    public HttpEvent(Event event) {
+        super(event);
+    }
+    
 }

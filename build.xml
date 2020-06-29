@@ -7,7 +7,7 @@
     </target>
     <!-- set global properties for this build -->
     <property name="targetJava10+" value="true"/>
-    <property name="mainVersion" value="1.3.20"/>
+    <property name="mainVersion" value="1.4.0"/>
     <property name="version" value="${mainVersion}"/>
     <!-- default JDK == 1.12 -->
     <!-- alternate JDK compiler will be used if declared (not empty) -->
