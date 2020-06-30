@@ -392,10 +392,16 @@ public class HttpPortedAdapter
                 );
             } else {
                 sendLogEvent(Event.LOG_FINE, "bad request");
-                if (pCall.responseCode < 100 || pCall.responseCode > 1000) {
-                    result.setCode(SC_BAD_REQUEST);
+                if (pCall.responseCode > 0) {
+                    if (pCall.responseCode < 100 || pCall.responseCode > 1000) {
+                        result.setCode(SC_BAD_REQUEST);
+                    } else {
+                        result.setCode(pCall.responseCode);
+                    }
                 } else {
-                    result.setCode(pCall.responseCode);
+                    //negative value of the responseCode means we need to response with 200 
+                    //error description will be attached to the resposnse
+                    result.setCode(SC_OK);
                 }
                 result.setData(pCall.errorResponse);
                 result.setHeader("Content-type", "application/json");

@@ -403,6 +403,8 @@ public class HttpAdapter
             result.setCode(SC_INTERNAL_SERVER_ERROR);
             result.setMessage("handler method error");
             result.setFileExtension(null);
+        }catch(NullPointerException e){
+            e.printStackTrace();
         }
         if (null == result) {
             result = new StandardResult("null result returned by the service");
