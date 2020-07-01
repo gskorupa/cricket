@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -1122,6 +1123,10 @@ public abstract class Kernel {
 
     public void sendWebsocketMessage(String context, String message) throws WebsocketException {
         websocketServer.sendMessage(context, message);
+    }
+    
+    public Locale getServiceLocale(){
+        return Locale.forLanguageTag((String)getProperties().getOrDefault("locale","en-US"));
     }
 
 }
