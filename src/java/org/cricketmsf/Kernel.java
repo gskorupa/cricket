@@ -410,6 +410,7 @@ public abstract class Kernel {
             instance = null;
             LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
             e.printStackTrace();
+            System.exit(1);
         }
         return instance;
     }
@@ -522,7 +523,8 @@ public abstract class Kernel {
                 } catch (NullPointerException | ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                     adaptersMap.put(adapterName, null);
                     getLogger().print("ERROR: " + adapterName + " configuration: " + ex.getClass().getSimpleName());
-                    ex.printStackTrace();
+                    //ex.printStackTrace();
+                    throw new Exception(ex);
                 }
             }
         } catch (Exception e) {
