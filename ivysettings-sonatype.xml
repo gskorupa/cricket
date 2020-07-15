@@ -1,0 +1,31 @@
+<ivysettings>
+    <property name="sonatype.nexus.staging.url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
+    <property name="sonatype.nexus.snapshots.url" value="https://oss.sonatype.org/content/repositories/snapshots/" />
+
+    <include file="ivysettings.xml" />
+
+    <credentials
+        host="oss.sonatype.org"
+        realm="Sonatype Nexus Repository Manager"
+        username="gskorupa"
+        passwd="my.password" />
+
+    <credentials
+        host="${sonatype-nexus-snapshots}"
+        realm="Sonatype Nexus Repository Manager"
+        username="gskorupa"
+        passwd="my.password" />
+
+    <signers>
+        <pgp name="nexus-sig" password="my.gpg.password"/>
+    </signers>
+
+    <resolvers>
+        <ibiblio name="main" m2compatible="true"/>
+        <ibiblio name="sonatype-nexus-snapshots" m2compatible="true" root="${sonatype.nexus.snapshots.url}"/>
+        <url name="sonatype-nexus-staging" m2compatible="true" signer="nexus-sig">
+            <artifact pattern="${sonatype.nexus.staging.url}/[organisation]/[module]/[revision]/[artifact][revision]([classifier]).[ext]"/>
+        </url>
+    </resolvers>
+
+</ivysettings>

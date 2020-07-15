@@ -1,0 +1,89 @@
+plugins {
+    id 'java'
+    id "maven-publish"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_13
+    targetCompatibility = JavaVersion.VERSION_13
+}
+
+version = "1.5.0"
+
+repositories {
+    mavenCentral()
+    maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/gskorupa/test")
+            credentials {
+                username = 'gskorupa'
+                password = '13edaba307f7b164c62fdc008afc5ca360b6796a' 
+            }
+        }
+    flatDir {
+        dirs 'local-lib'
+    }
+}
+
+dependencies {
+    implementation \
+    'com.cedarsoftware:json-io:4.12.0',\
+    'org.checkerframework.annotatedlib:commons-csv:1.8',\
+    'com.h2database:h2:1.4.200',\
+    'com.sun.mail:javax.mail:1.6.2',\
+    'com.sun.activation:javax.activation:1.2.0',\
+    'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0',\
+    'org.wso2.orbit.javax.xml.bind:jaxb-api:2.3.1.wso2v1',\
+    'LivingDocumentation:LivingDocumentation:1.0.0',\
+    'org.cricketmsf:test:0.0.2'
+    testImplementation 'junit:junit:4.13'
+}
+
+task fatJar(type: Jar) {
+    dependsOn 'setVersion'
+    dependsOn 'setBuildVersion'
+    archiveClassifier = ''
+
+    from sourceSets.main.output
+
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) } } {
+        exclude 'META-INF/*'
+    }
+    
+    manifest {
+        attributes 'Main-Class': 'org.cricketmsf.Runner'
+    }
+}
+
+task setVersion(type: WriteProperties) {
+    outputFile = file('src/main/resources/cricket.properties')
+    property('version', version)
+    
+}
+task setBuildVersion(type: WriteProperties) {
+    outputFile = file('build/resources/main/cricket.properties')
+    property('version', version)
+    
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/gskorupa/test")
+            credentials {
+                username = githubUser
+                password = githubPublishingToken
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            groupId = 'org.cricketmsf'
+            artifactId = 'test'
+            from components.java
+        }
+    }
+}

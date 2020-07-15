@@ -34,6 +34,7 @@ hs_err_pid*
 !/templates/standalone/lib/cricket-1.0-B7.jar
 /attic/
 /build/
+/buildj/
 /db/echo.xml
 /db/scheduler.xml
 /db/servicedb.trace.db
@@ -85,3 +86,11 @@ hs_err_pid*
 /docs/documentation/
 /lib/work/data/cms.mv.db
 /.vscode/settings.json
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+/data/
+/gradle.properties
+/.vscode/
