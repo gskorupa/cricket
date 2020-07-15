@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="Cricket" default="all" basedir="."
->
+<project name="Cricket" default="all" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
     <description>Builds, tests, and runs the project Cricket.</description>
     <target name="all" depends="dist">
         <!-- TODO define script. See Help menu or http://ant.apache.org/ -->
     </target>
     <!-- set global properties for this build -->
     <property name="targetJava10+" value="true"/>
-    <property name="mainVersion" value="1.4.3"/>
+    <property name="mainVersion" value="1.4.4"/>
     <property name="version" value="${mainVersion}"/>
     <!-- default JDK == 1.12 -->
     <!-- alternate JDK compiler will be used if declared (not empty) -->
@@ -24,11 +23,14 @@
     <condition property="targetJava8" value="true">
         <equals arg1="${targetJava10+}" arg2="false"/>
     </condition>
+    
+    <ivy:settings refid="ivysettings" file="../ivysettings-sonatype.xml"/>
+   
     <property name="src" location="src/java"/>
     <property name="src-other" location="src/other"/>
     <property name="tests" location="test"/>
-    <property name="build" location="build/classes"/>
-    <property name="build.test" location="build/test"/>
+    <property name="build" location="buildj/classes"/>
+    <property name="build.test" location="buildj/test"/>
     <property name="reports" location="reports"/>
     <property name="dist" location="dist"/>
     <property name="web" location="web"/>
@@ -388,7 +390,7 @@
             <arg value="-r"/>
         </java>
     </target>
-     <target name="run-microsite" depends="dist" if="${targetJava10+}">
+    <target name="run-microsite" depends="dist" if="${targetJava10+}">
         <java jar="${dist}/${jar-name}" dir="${dist}" jvm="">
             <arg value="-c"/>
             <arg value="config/cricket.json"/>
@@ -434,4 +436,18 @@
             <report format="frames" todir="${reports}/html"/>
         </junitreport>
     </target>
+    
+    <target name="deploy">
+        <ivy:resolve />
+        <ivy:publish
+            artifactspattern="${basedir}/dist/[artifact][revision]([classifier]).[ext]"
+            resolver="${resolver}"
+            organisation="org.cricketmsf"
+            module="cricket"
+            overwrite="true"
+            status="${status}"
+            pubrevision="${version}">
+        </ivy:publish>
+    </target>    
+
 </project>
