@@ -134,11 +134,11 @@
                 <br>
                 <ol>
                     <li>Open terminal window in the newly created directory</li>
-                    <li>Download <a href="cricket-latest.jar">the latest Cricket MSF library</a></li>
-                    <li>Create required subfolders and the web page file (index.html)</li>
+                    <li>Download <a href="https://github.com/gskorupa/Cricket/releases/latest/download/cricket.jar">the latest Cricket MSF library</a></li>
+                    <li>Create your web page file in www subfolder(www/index.html)</li>
                     <li>Start the service</li>
-                    <li>Display your page in web browser at http://localhost:8080</li>
-                    <li>Call example echo service API at http://localhost:8080/api/echo?some_param=test</li>
+                    <li>Display your page in web browser at http://localhost:7070</li>
+                    <li>Call example status service API at http://localhost:7070/api/status</li>
                     <li>Stop the service by pressing Ctrl-C in the terminal window</li>
                 </ol>
                 <br>
@@ -146,12 +146,10 @@
                 <pre>
 mkdir myservice
 cd myservice
-wget https://github.com/gskorupa/Cricket/releases/latest/downloads/cricket.jar
-mkdir log
-mkdir data
+wget https://github.com/gskorupa/Cricket/releases/latest/download/cricket.jar
 mkdir www
 echo "Hello World!">www/index.html
-java -jar cricket-latest.jar -r</pre>
+java -jar cricket.jar -r</pre>
             </div>
         </div>
 
