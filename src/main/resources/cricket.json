@@ -68,7 +68,7 @@
                     "properties": {
                         "name": "Microsite",
                         "level": "FINE",
-                        "log-file-name": "./log/cricket%g.log",
+                        "log-file-name": "./logs/cricket%g.log",
                         "max-size": "1000000",
                         "count": "10",
                         "console": "true"
@@ -80,7 +80,7 @@
                     "classFullName": "org.cricketmsf.out.log.FileLogger",
                     "properties": {
                         "name": "Microsite",
-                        "log-file-name": "./log/gdpr.log"
+                        "log-file-name": "./logs/gdpr.log"
                     }
                 },
                 {
@@ -310,6 +310,15 @@
                     "properties": {
                         "mode":"queue"
                     }
+                },
+                {
+                    "name": "Autostart",
+                    "interfaceName": "AutostartIface",
+                    "classFullName": "org.cricketmsf.out.autostart.Autostart",
+                    "description": "",
+                    "properties": {
+                        "subfolders":"./logs:./data:./www"
+                    }
                 }
             ]
         },
@@ -366,7 +375,7 @@
                     "properties": {
                         "name": "BasicService",
                         "level": "FINEST",
-                        "log-file-name": "./log/cricket%g.log",
+                        "log-file-name": "./logs/cricket%g.log",
                         "max-size": "1000000",
                         "count": "10",
                         "console": "true"
@@ -455,6 +464,15 @@
                     "description": "default websocket adapter",
                     "properties": {
                         "context":"/test"
+                    }
+                },
+                {
+                    "name": "Autostart",
+                    "interfaceName": "AutostartIface",
+                    "classFullName": "org.cricketmsf.out.autostart.Autostart",
+                    "description": "",
+                    "properties": {
+                        "subfolders":"./logs:./data:./www"
                     }
                 }
             ]

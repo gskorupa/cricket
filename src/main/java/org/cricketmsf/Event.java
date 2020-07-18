@@ -763,4 +763,9 @@ public class Event implements EventIface {
         return categories;
     }
 
+    public static Event warning(Object source, Object payload) {
+        Event result=logWarning(source.getClass().getSimpleName(), null);
+        result.setPayload(payload);
+        return result;
+    }
 }

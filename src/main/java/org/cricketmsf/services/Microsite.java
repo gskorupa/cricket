@@ -108,11 +108,12 @@ public class Microsite extends Kernel {
 
     @Override
     public void runInitTasks() throws InitException {
-        // we should register event categories used by this service
         try {
+            super.runInitTasks();
+            // we should register event categories used by this service
             EventMaster.registerEventCategories(new Event().getCategories(), Event.class.getName());
             EventMaster.registerEventCategories(new UserEvent().getCategories(), UserEvent.class.getName());
-        } catch (EventException ex) {
+        } catch (InitException|EventException ex) {
             ex.printStackTrace();
             shutdown();
         }

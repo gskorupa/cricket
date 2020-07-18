@@ -139,6 +139,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
+        try{
         if (event.getTimePoint() == null) {
             return false;
         }
@@ -173,7 +174,6 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException ex) {
-
                     }
                 }
 
@@ -221,6 +221,10 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
             final ScheduledFuture<?> workerHandle  = scheduler.schedule(runnable, delay.getDelay(), delay.getUnit());
         }
         return true;
+        }catch(Exception e){
+            System.out.println("EXCEPTION "+e.getMessage());
+            return false;
+        }
     }
 
     private void processDatabase() {

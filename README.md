@@ -99,7 +99,7 @@ Then read the available documentation starting from https://cricketmsf.org
 
 ## Cricket development quick start
 To build Cricket you will need:
-* Java 1.8
+* Java 13
 * Apache Ant
 
 Edit build.xml to modify properties and file paths according to your system. 

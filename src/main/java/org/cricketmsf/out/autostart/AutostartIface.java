@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.in.file;
+package org.cricketmsf.out.autostart;
+
+import org.cricketmsf.exception.InitException;
 
 /**
  *
  * @author greg
  */
-public interface WatchdogIface {
-    
-    public void checkStatus();
-    
+public interface AutostartIface {
+    public void execute() throws InitException;
 }

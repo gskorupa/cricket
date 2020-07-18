@@ -46,6 +46,7 @@ import org.cricketmsf.exception.DispatcherException;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.exception.WebsocketException;
 import org.cricketmsf.in.scheduler.SchedulerIface;
+import org.cricketmsf.out.autostart.AutostartIface;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
 import org.cricketmsf.out.log.LoggerAdapterIface;
 import org.cricketmsf.out.log.StandardLogger;
@@ -82,6 +83,7 @@ public abstract class Kernel {
 
     // adapters
     public HashMap<String, Object> adaptersMap = new HashMap<>();
+    private AutostartIface autostartAdapter;
 
     // user defined properties
     public HashMap<String, Object> properties = new HashMap<>();
@@ -519,6 +521,8 @@ public abstract class Kernel {
                     }
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.log.LoggerAdapterIface) {
                         setFineLevel(((LoggerAdapterIface) adaptersMap.get(adapterName)).isFineLevel());
+                    } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.autostart.AutostartIface) {
+                        setAutostartAdapter(adaptersMap.get(adapterName));
                     }
                 } catch (NullPointerException | ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                     adaptersMap.put(adapterName, null);
@@ -660,7 +664,28 @@ public abstract class Kernel {
         getEventHooks();
         getAdapters();
         setKeystores();
+        getLogger().print("Running initialization tasks");
+        try {
+            runInitTasks();
+        } catch (InitException ex) {
+            getLogger().print("Initialization exception: " + ex.getMessage());
+        }
+        printEventRegister();
+
+        long startedIn = System.currentTimeMillis() - startedAt;
         printHeader(Kernel.getInstance().configSet.getKernelVersion());
+        if (liftMode) {
+            getLogger().print("# Service: " + getClass().getName());
+        } else {
+            getLogger().print("# Service: " + getId());
+        }
+        getLogger().print("# UUID: " + getUuid());
+        getLogger().print("# NAME: " + getName());
+        getLogger().print("# JAVA: " + System.getProperty("java.version"));
+        getLogger().print("#");
+        getLogger().print("# Started in " + startedIn + "ms. Press Ctrl-C to stop");
+        shutdown();
+
     }
 
     private void setKeystores() {
@@ -781,6 +806,7 @@ public abstract class Kernel {
      * before HTTP service.
      */
     protected void runInitTasks() throws InitException {
+        getAutostartAdapter().execute();
         setInitialized(true);
     }
 
@@ -1135,6 +1161,20 @@ public abstract class Kernel {
 
     public Locale getServiceLocale() {
         return Locale.forLanguageTag((String) getProperties().getOrDefault("locale", "en-US"));
+    }
+
+    /**
+     * @return the autostartAdapter
+     */
+    public AutostartIface getAutostartAdapter() {
+        return autostartAdapter;
+    }
+
+    /**
+     * @param autostartAdapter the autostartAdapter to set
+     */
+    public void setAutostartAdapter(Object autostartAdapter) {
+        this.autostartAdapter = (AutostartIface) autostartAdapter;
     }
 
 }

@@ -94,3 +94,4 @@ build
 /data/
 /gradle.properties
 /.vscode/
+/lib/

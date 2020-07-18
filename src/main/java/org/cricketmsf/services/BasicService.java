@@ -25,6 +25,7 @@ import org.cricketmsf.annotation.PortEventClassHook;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.exception.EventException;
+import org.cricketmsf.exception.InitException;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
@@ -77,10 +78,11 @@ public class BasicService extends Kernel {
 
     @Override
     public void runInitTasks() {
-        // we should register event categories used by this service
         try {
+            super.runInitTasks();
+            // we should register event categories used by this service
             EventMaster.registerEventCategories(new Event().getCategories(), Event.class.getName());
-        } catch (EventException ex) {
+        } catch (InitException | EventException ex) {
             ex.printStackTrace();
             shutdown();
         }
@@ -172,11 +174,11 @@ public class BasicService extends Kernel {
     public Object doGetEcho(HttpEvent requestEvent) {
         return sendEcho(requestEvent.getOriginalEvent().getRequest());
     }
-    
+
     @PortEventClassHook(className = "HttpEvent", procedureName = "greet")
     public Object doGreet(HttpEvent requestEvent) {
-        String name=(String)requestEvent.getOriginalEvent().getPayload();
-        Result result=new StandardResult("Hello "+name);
+        String name = (String) requestEvent.getOriginalEvent().getPayload();
+        Result result = new StandardResult("Hello " + name);
         result.setHeader("Content-type", "text/plain");
         return result;
     }
