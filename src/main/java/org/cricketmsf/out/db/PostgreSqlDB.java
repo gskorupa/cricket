@@ -214,7 +214,10 @@ public class PostgreSqlDB extends OutboundAdapter implements SqlDBIface, Adapter
 
     @Override
     public List<String> getTableNames() throws KeyValueDBException {
-        String query = "show tables from public";
+        String query = "SELECT table_name "
+                + "FROM information_schema.tables "
+                + "WHERE table_schema = 'public' "
+                + "ORDER BY table_name;";
         ArrayList list = new ArrayList();
         try (Connection conn = cp.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(query);
