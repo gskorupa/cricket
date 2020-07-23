@@ -15,12 +15,16 @@
  */
 package org.cricketmsf.in.http;
 
+import java.util.Map;
 import org.cricketmsf.in.InboundAdapterIface;
+import org.cricketmsf.out.openapi.Operation;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public interface HttpAdapterIface extends InboundAdapterIface{
-
+    public void defineOperations();
+    public void addOperationConfig(String method, Operation operation);
+    public Map<String,Operation> getOperations();
 }

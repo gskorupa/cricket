@@ -26,6 +26,7 @@ import java.util.HashMap;
 public class Configuration {
 
     private String id;
+    private String description;
     private String service;
     private String host;
     private String port;
@@ -235,6 +236,20 @@ public class Configuration {
                 ports[i].joinProps();
             }
         }
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

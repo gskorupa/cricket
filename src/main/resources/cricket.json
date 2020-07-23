@@ -6,6 +6,7 @@
             "@type": "org.cricketmsf.config.Configuration",
             "id": "Microsite",
             "service": "org.cricketmsf.services.Microsite",
+            "description":"Cricket Microsite service",
             "properties": {
                 "httpd-not-used":"jetty",
                 "host": "0.0.0.0",
@@ -206,15 +207,15 @@
                 {
                     "name": "authDB",
                     "interfaceName": "SqlDBIface",
-                    "classFullName": "org.cricketmsf.microsite.out.db.H2AuthDB",
+                    "classFullName": "org.cricketmsf.microsite.out.db.PostgreSqlAuthDB",
                     "properties": {
-                        "path": "./data",
-                        "file": "auth",
+                        "host": "localhost",
+                        "database": "test",
                         "test-query": "select * from serviceversion",
                         "version": "1",
                         "name": "auth",
-                        "user": "sa",
-                        "password": ""
+                        "user": "test",
+                        "password": "test12345!"
                     }
                 },
                 {
@@ -318,6 +319,15 @@
                     "description": "",
                     "properties": {
                         "subfolders":"./logs:./data:./www"
+                    }
+                },
+                {
+                    "name": "OpenApi",
+                    "interfaceName": "OpenApiIface",
+                    "classFullName": "org.cricketmsf.out.openapi.OpenApi",
+                    "description": "",
+                    "properties": {
+                        "context": "/api"
                     }
                 }
             ]
@@ -472,7 +482,16 @@
                     "classFullName": "org.cricketmsf.out.autostart.Autostart",
                     "description": "",
                     "properties": {
-                        "subfolders":"./logs:./data:./www"
+                        "subfolders":"./logs:./data"
+                    }
+                },
+                {
+                    "name": "OpenApi",
+                    "interfaceName": "OpenApiIface",
+                    "classFullName": "org.cricketmsf.out.openapi.OpenApi",
+                    "description": "",
+                    "properties": {
+                        "context": "/api"
                     }
                 }
             ]

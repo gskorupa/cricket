@@ -46,6 +46,8 @@ import org.cricketmsf.microsite.*;
 import org.cricketmsf.microsite.cms.TranslatorIface;
 import org.cricketmsf.microsite.event.GetContent;
 import org.cricketmsf.microsite.event.StatusRequested;
+import org.cricketmsf.out.openapi.OpenApi;
+import org.cricketmsf.out.openapi.OpenApiIface;
 
 /**
  * Microsite
@@ -75,6 +77,8 @@ public class Microsite extends Kernel {
     //
     EmailSenderIface emailSender = null;
     SubscriberIface queueSubscriber = null;
+    
+    OpenApiIface apiGenerator = null;
 
     public Microsite() {
         super();
@@ -104,6 +108,7 @@ public class Microsite extends Kernel {
         
         queueSubscriber = (SubscriberIface) getRegistered("QueueSubscriber");
         
+        apiGenerator = (OpenApiIface) getRegistered("OpenApi");
     }
 
     @Override
@@ -140,6 +145,7 @@ public class Microsite extends Kernel {
             ex.printStackTrace();
             shutdown();
         }
+        apiGenerator.init(this);
         setInitialized(true);
         dispatchEvent(
                 new Event(this.getName(), "SYSTEM", "message", "+10s", getUuid() + " service started")
@@ -162,6 +168,8 @@ public class Microsite extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
+        apiGenerator.init(this);
+        System.out.println(apiGenerator.toYaml());
         dispatchEvent(Event.logInfo("Microsite.runOnce()", "executed"));
     }
 

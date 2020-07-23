@@ -40,6 +40,7 @@ import org.cricketmsf.Stopwatch;
 import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.InboundAdapterIface;
+import org.cricketmsf.out.openapi.Operation;
 
 /**
  *
@@ -92,6 +93,8 @@ public class HttpPortedAdapter
     SimpleDateFormat dateFormat;
 
     protected int mode = SERVICE_MODE;
+
+    protected HashMap<String, Operation> operations = new HashMap();
 
     public HttpPortedAdapter() {
         super();
@@ -384,27 +387,33 @@ public class HttpPortedAdapter
 
         try {
             ProcedureCall pCall = preprocess(requestObject, Kernel.getEventId());
-            if (pCall.responseCode == 0) {
-                sendLogEvent(Event.LOG_FINE, "sending request to hook method " + pCall.procedureName + "@" + pCall.event.getClass().getSimpleName());
-                result = (Result) Kernel.getInstance().getEventProcessingResult(
-                        pCall.event,
-                        pCall.procedureName
-                );
+            if (pCall.requestHandled) {
+                    result.setCode(pCall.responseCode);
+                    result.setData(pCall.errorResponse);
+                    result.setHeader("Content-type", pCall.contentType);
             } else {
-                sendLogEvent(Event.LOG_FINE, "bad request");
-                if (pCall.responseCode > 0) {
-                    if (pCall.responseCode < 100 || pCall.responseCode > 1000) {
-                        result.setCode(SC_BAD_REQUEST);
-                    } else {
-                        result.setCode(pCall.responseCode);
-                    }
+                if (pCall.responseCode == 0) {
+                    sendLogEvent(Event.LOG_FINE, "sending request to hook method " + pCall.procedureName + "@" + pCall.event.getClass().getSimpleName());
+                    result = (Result) Kernel.getInstance().getEventProcessingResult(
+                            pCall.event,
+                            pCall.procedureName
+                    );
                 } else {
-                    //negative value of the responseCode means we need to response with 200 
-                    //error description will be attached to the resposnse
-                    result.setCode(SC_OK);
+                    sendLogEvent(Event.LOG_FINE, "bad request");
+                    if (pCall.responseCode > 0) {
+                        if (pCall.responseCode < 100 || pCall.responseCode > 1000) {
+                            result.setCode(SC_BAD_REQUEST);
+                        } else {
+                            result.setCode(pCall.responseCode);
+                        }
+                    } else {
+                        //negative value of the responseCode means we need to response with 200 
+                        //error description will be attached to the resposnse
+                        result.setCode(SC_OK);
+                    }
+                    result.setData(pCall.errorResponse);
+                    result.setHeader("Content-type", "application/json");
                 }
-                result.setData(pCall.errorResponse);
-                result.setHeader("Content-type", "application/json");
             }
         } catch (ClassCastException e) {
             sendLogEvent(Event.LOG_SEVERE, "class cast exception");
@@ -550,6 +559,20 @@ public class HttpPortedAdapter
         });
         sb.append("***PARAMETERS.").append("\r\n");
         return sb.toString();
+    }
+
+    @Override
+    public void addOperationConfig(String method, Operation operation) {
+        operations.put(method, operation);
+    }
+
+    @Override
+    public Map<String, Operation> getOperations() {
+        return operations;
+    }
+
+    @Override
+    public void defineOperations() {
     }
 
     /*

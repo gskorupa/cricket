@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa
+ * Copyright 2020 Grzegorz Skorupa
  */
 package org.cricketmsf.microsite.in.http;
 
@@ -8,6 +8,7 @@ import java.util.HashMap;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.HttpAdapterIface;
+import org.cricketmsf.out.openapi.Operation;
 
 /**
  *
@@ -28,7 +29,15 @@ public class SystemApi extends HttpAdapter implements HttpAdapterIface, Adapter 
         super.loadProperties(properties, adapterName);
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
-        Kernel.getInstance().getLogger().print("\tcontext=" + getContext());
+        Kernel.getInstance().getLogger().printIndented("context=" + getContext());
     }
+    
+    @Override
+    public void defineOperations(){
+        Operation op=new Operation();
+        op.setDescription("get sys config");
+        addOperationConfig("get", op);
+    }    
+    
 
 }

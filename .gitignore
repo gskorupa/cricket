@@ -95,3 +95,6 @@ build
 /gradle.properties
 /.vscode/
 /lib/
+/test/
+/tmp/
+/test.yaml

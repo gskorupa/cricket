@@ -79,6 +79,7 @@ public abstract class Kernel {
     private HashMap<String, String> portEventHookMethods = new HashMap<>();
     private String id; //identifying service 
     private String name; // name identifying service deployment (various names will have the same id)
+    private String description;
     public boolean liftMode = false;
 
     // adapters
@@ -403,6 +404,7 @@ public abstract class Kernel {
                     + (defaultCfg != null ? defaultCfg.getAdapters().size() : "unknown") + " adapters");
             ((Kernel) instance).setUuid(UUID.randomUUID());
             ((Kernel) instance).setId(config.getId());
+            ((Kernel) instance).setDescription(config.getDescription());
             ((Kernel) instance).setName((String) cfg.getProperties().getOrDefault("SRVC_NAME_ENV_VARIABLE", "CRICKET_NAME"));
             ((Kernel) instance).setProperties(cfg.getProperties());
             ((Kernel) instance).setSsl((String) cfg.getProperties().getOrDefault("SSL_ENV_VARIABLE", "CRICKET_SSL"));
@@ -514,6 +516,12 @@ public abstract class Kernel {
                     // loading properties
                     java.lang.reflect.Method loadPropsMethod = c.getMethod("loadProperties", HashMap.class, String.class);
                     loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
+                    // defining API description
+                    try {
+                        java.lang.reflect.Method defOperationsMethod = c.getMethod("defineOperations");
+                        defOperationsMethod.invoke(adaptersMap.get(adapterName));
+                    } catch (NoSuchMethodException e) {
+                    }
                     try {
                         setEventDispatcher(((Adapter) adaptersMap.get(adapterName)).getDispatcher());
                     } catch (Exception e) {
@@ -1175,6 +1183,20 @@ public abstract class Kernel {
      */
     public void setAutostartAdapter(Object autostartAdapter) {
         this.autostartAdapter = (AutostartIface) autostartAdapter;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

@@ -36,10 +36,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.cricketmsf.Stopwatch;
 import org.cricketmsf.in.InboundAdapterIface;
+import org.cricketmsf.out.openapi.Operation;
 
 /**
  *
@@ -92,6 +91,8 @@ public class HttpAdapter
     SimpleDateFormat dateFormat;
 
     protected int mode = SERVICE_MODE;
+    
+    protected HashMap<String, Operation> operations = new HashMap();
 
     public HttpAdapter() {
         super();
@@ -688,4 +689,18 @@ public class HttpAdapter
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
      */
+
+    @Override
+    public void addOperationConfig(String method, Operation operation) {
+        operations.put(method, operation);
+    }
+
+    @Override
+    public Map<String, Operation> getOperations() {
+        return operations;
+    }
+    
+    @Override
+    public void defineOperations(){
+    }
 }
