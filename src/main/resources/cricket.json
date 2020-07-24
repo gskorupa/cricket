@@ -207,15 +207,15 @@
                 {
                     "name": "authDB",
                     "interfaceName": "SqlDBIface",
-                    "classFullName": "org.cricketmsf.microsite.out.db.PostgreSqlAuthDB",
+                    "classFullName": "org.cricketmsf.microsite.out.db.H2AuthDB",
                     "properties": {
-                        "host": "localhost",
-                        "database": "test",
+                        "path":"./data",
+                        "file": "auth",
                         "test-query": "select * from serviceversion",
                         "version": "1",
                         "name": "auth",
-                        "user": "test",
-                        "password": "test12345!"
+                        "user": "sa",
+                        "password": ""
                     }
                 },
                 {
