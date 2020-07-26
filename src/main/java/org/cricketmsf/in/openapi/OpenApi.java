@@ -1,6 +1,8 @@
-package org.cricketmsf.out.openapi;
+package org.cricketmsf.in.openapi;
 
 import com.cedarsoftware.util.io.JsonWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,15 +23,17 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
 
     private String openapi = "3.0.3";
     private Info info = null;
-    private Map<String, PathItem> paths = null;
-    
+    private Map<String,Server> servers=null;
+    private ArrayList<PathItem> paths = null;
+
+    @Override
     protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
         // validation and translation 
         String method = request.method;
         if ("GET".equalsIgnoreCase(method)) {
-            return new ProcedureCall(true, 200, "text/plain", toYaml());
+            return ProcedureCall.response(200, "text/plain", toYaml());
         } else {
-            return new ProcedureCall(HttpAdapter.SC_NOT_IMPLEMENTED,"method not implemented");
+            return ProcedureCall.response(HttpAdapter.SC_NOT_IMPLEMENTED, "method not implemented");
         }
     }
 
@@ -64,15 +68,19 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
     /**
      * @return the paths
      */
-    public Map<String, PathItem> getPaths() {
-        return paths;
-    }
+    //public Map<String, PathItem> getPaths() {
+    //    return paths;
+    //}
 
     /**
-     * @param paths the paths to set
+     * @param pathMap the pathMap to set
      */
-    public void setPaths(Map<String, PathItem> paths) {
-        this.paths = paths;
+    public void setPaths(Map<String, PathItem> pathMap) {
+        this.paths = new ArrayList<>();
+        pathMap.values().forEach(item->{
+            this.paths.add(item);
+        });
+        Collections.sort(paths);
     }
 
     @Override
@@ -82,7 +90,14 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
         info.setTitle(service.getName());
         info.setDescription(service.getDescription());
         info.setTermsOfService("");
+        info.setVersion(properties.getOrDefault("version", "1.0.0"));
         setInfo(info);
+        // servers
+        servers=new HashMap<>();
+        Server server=new Server((String)service.getProperties().getOrDefault("serviceurl", ""));
+        if(!server.getUrl().isBlank()){
+            servers.put(server.getUrl(), server);
+        }
         // paths
         HashMap<String, PathItem> paths = new HashMap<>();
         Iterator it = service.getAdaptersMap().values().iterator();
@@ -90,18 +105,20 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
         HttpAdapterIface hta;
         PathItem item;
         Operation operation;
-        while(it.hasNext()){
-            ad=it.next();
-            if(ad instanceof HttpAdapterIface){
-                hta=(HttpAdapterIface)ad;
-                //System.out.println(hta.getProperty("context"));
-                item=new PathItem();
-                operation=hta.getOperations().get("get");
-                if(null!=operation) item.setGet(operation);
-                paths.put(hta.getProperty("context"), item);
+        while (it.hasNext()) {
+            ad = it.next();
+            if (ad instanceof HttpAdapterIface) {
+                hta = (HttpAdapterIface) ad;
+                item = new PathItem(hta.getProperty("context"));
+                if (hta.getOperations().size()>=0) {
+                    operation = hta.getOperations().get("get");
+                    if (null != operation) {
+                        item.setGet(operation);
+                    }
+                    paths.put(item.getPath(), item);
+                }
             }
         }
-        
         setPaths(paths);
     }
 
@@ -111,19 +128,26 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
     }
 
     public String toYaml() {
-        String indent = "";
+        String myIndent = "";
+        String indent = "  ";
         String lf = "\r\n";
         StringBuilder sb = new StringBuilder();
-        sb.append(indent).append("openapi: \"").append(this.getOpenapi()).append("\"").append(lf);
+        sb.append("openapi: '").append(this.getOpenapi()).append("'").append(lf);
         if (null != info) {
             sb.append("info:").append(lf);
-            sb.append(getInfo().toYaml());
+            sb.append(getInfo().toYaml(myIndent + indent));
         }
-        if(null!=paths){
+        if(servers.size()>0){
+            sb.append("servers:").append(lf);
+            servers.keySet().forEach(pathElement -> {
+                sb.append(servers.get(pathElement).toYaml(myIndent + indent));
+            });            
+        }
+        if (null != paths && paths.size()>0) {
             sb.append("paths:").append(lf);
-            paths.keySet().forEach(key->{
-                sb.append("  ").append(key).append(":").append(lf);
-                sb.append(paths.get(key).toYaml());
+            paths.forEach(pathElement -> {
+                sb.append(indent).append(pathElement.getPath()).append(":").append(lf);
+                sb.append(pathElement.toYaml());
             });
         }
         return sb.toString();

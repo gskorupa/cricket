@@ -324,7 +324,7 @@
                 {
                     "name": "OpenApi",
                     "interfaceName": "OpenApiIface",
-                    "classFullName": "org.cricketmsf.out.openapi.OpenApi",
+                    "classFullName": "org.cricketmsf.in.openapi.OpenApi",
                     "description": "",
                     "properties": {
                         "context": "/api"
@@ -488,7 +488,7 @@
                 {
                     "name": "OpenApi",
                     "interfaceName": "OpenApiIface",
-                    "classFullName": "org.cricketmsf.out.openapi.OpenApi",
+                    "classFullName": "org.cricketmsf.in.openapi.OpenApi",
                     "description": "",
                     "properties": {
                         "context": "/api"

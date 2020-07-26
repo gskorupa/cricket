@@ -8,7 +8,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_13
 }
 
-version = "1.5.6"
+version = "1.5.8"
 
 repositories {
     mavenCentral()
@@ -36,7 +36,43 @@ dependencies {
     'org.wso2.orbit.javax.xml.bind:jaxb-api:2.3.1.wso2v1',\
     'org.postgresql:postgresql:42.2.14.jre7',\
     'LivingDocumentation:LivingDocumentation:1.0.0'
+    runtimeOnly \
+    'com.cedarsoftware:json-io:4.12.0',\
+    'org.apache.commons:commons-csv:1.8',\
+    'com.h2database:h2:1.4.200',\
+    'com.sun.mail:javax.mail:1.6.2',\
+    'com.sun.activation:javax.activation:1.2.0',\
+    'org.wso2.orbit.javax.xml.bind:jaxb-api:2.3.1.wso2v1',\
+    'LivingDocumentation:LivingDocumentation:1.0.0'
     testImplementation 'junit:junit:4.13'
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'org.cricketmsf.Runner'
+        )
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+ }
+ 
+task fatJarAll(type: Jar) {
+    dependsOn 'setVersion'
+    dependsOn 'setBuildVersion'
+    archiveClassifier = 'all'
+    from sourceSets.main.output
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) } } {
+        exclude 'META-INF/*', 'META-INF/hk2-locator/**', 'META-INF/licenses/**', \
+        'META-INF/maven/**', 'META-INF/services/**', 'META-INF/versions/**', \
+        'pmd/**', 'checkstyle/**', 'findbugs/**', 'bundle.properties'
+    }
+    
+    manifest {
+        attributes 'Main-Class': 'org.cricketmsf.Runner'
+    }
 }
 
 task fatJar(type: Jar) {
@@ -46,10 +82,11 @@ task fatJar(type: Jar) {
 
     from sourceSets.main.output
 
-    dependsOn configurations.runtimeClasspath
     from {
         configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) } } {
-        exclude 'META-INF/*'
+        exclude 'META-INF/*', 'META-INF/hk2-locator/**', 'META-INF/licenses/**', \
+        'META-INF/maven/**', 'META-INF/services/**', 'META-INF/versions/**', \
+        '**/postgresql/**', '**/eclipse/**', 'pmd/**', 'checkstyle/**', 'findbugs/**', 'bundle.properties'
     }
     
     manifest {

@@ -1,4 +1,4 @@
-package org.cricketmsf.out.openapi;
+package org.cricketmsf.in.openapi;
 
 import org.cricketmsf.Kernel;
 

@@ -35,6 +35,7 @@ public class GreeterAdapter
         super();
     }
 
+    @Override
     protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
         // validation and translation 
         String name = (String) request.parameters.getOrDefault("name", "");
@@ -44,14 +45,14 @@ public class GreeterAdapter
             // http status codes can be used directly:
             // err.put("code", 404);
             err.put("message", "unknown name or name parameter not found (must be 'world')");
-            return new ProcedureCall(PARAM_NOT_FOUND, err);
+            return ProcedureCall.response(PARAM_NOT_FOUND, err);
         }
         // building resulting call
         Event ev = new Event(this.getName(), request);
         ev.setRootEventId(rootEventId);
         ev.setPayload(name);
         HttpEvent event = new HttpEvent(ev);
-        return new ProcedureCall(event, "greet");
+        return ProcedureCall.forward(event, "greet");
     }
 
 }

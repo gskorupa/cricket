@@ -518,8 +518,8 @@ public abstract class Kernel {
                     loadPropsMethod.invoke(adaptersMap.get(adapterName), ac.getProperties(), adapterName);
                     // defining API description
                     try {
-                        java.lang.reflect.Method defOperationsMethod = c.getMethod("defineOperations");
-                        defOperationsMethod.invoke(adaptersMap.get(adapterName));
+                        java.lang.reflect.Method defApiMethod = c.getMethod("defineApi");
+                        defApiMethod.invoke(adaptersMap.get(adapterName));
                     } catch (NoSuchMethodException e) {
                     }
                     try {

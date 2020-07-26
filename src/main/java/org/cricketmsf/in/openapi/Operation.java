@@ -1,4 +1,4 @@
-package org.cricketmsf.out.openapi;
+package org.cricketmsf.in.openapi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,31 @@ public class Operation {
     private String summary;
     private List<Parameter> parameters = new ArrayList<>();
     private List<Response> responses = new ArrayList<>();
+    
+    public Operation(){
+        parameters=new ArrayList<>();
+        responses=new ArrayList<>();
+    }
+    
+    public Operation description(String description){
+        setDescription(description);
+        return this;
+    }
+    
+    public Operation summary(String summary){
+        setSummary(summary);
+        return this;
+    }
+    
+    public Operation response(Response response){
+        responses.add(response);
+        return this;
+    }
+    
+    public Operation parameter(Parameter parameter){
+        parameters.add(parameter);
+        return this;
+    }
 
     public String toYaml() {
         String indent = "      ";
@@ -24,6 +49,10 @@ public class Operation {
         if (null != summary) {
             sb.append(indent).append("summary: \"").append(getSummary()).append("\"").append(lf);
         }
+        sb.append(indent).append("responses:").append(lf);
+        responses.forEach(response->{
+            sb.append(response.toYaml());
+        });
         return sb.toString();
     }
 
@@ -67,5 +96,19 @@ public class Operation {
      */
     public void setParameters(List<Parameter> parameters) {
         this.parameters = parameters;
+    }
+
+    /**
+     * @return the responses
+     */
+    public List<Response> getResponses() {
+        return responses;
+    }
+
+    /**
+     * @param responses the responses to set
+     */
+    public void setResponses(List<Response> responses) {
+        this.responses = responses;
     }
 }

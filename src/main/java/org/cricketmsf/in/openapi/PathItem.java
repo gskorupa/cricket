@@ -1,13 +1,18 @@
-package org.cricketmsf.out.openapi;
+package org.cricketmsf.in.openapi;
 
 /**
  *
  * @author greg
  */
-public class PathItem {
+public class PathItem implements Comparable<PathItem>{
+    private String path;
     private Operation get;
     private Operation put;
     private Operation post;
+    
+    public PathItem(String path){
+        setPath(path);
+    }
     
     public String toYaml() {
         String indent = "    ";
@@ -64,4 +69,24 @@ public class PathItem {
     public void setPost(Operation post) {
         this.post = post;
     }
+
+    /**
+     * @return the path
+     */
+    public String getPath() {
+        return path;
+    }
+
+    /**
+     * @param path the path to set
+     */
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    @Override
+    public int compareTo(PathItem o) {
+        return this.path.compareTo(o.path);
+    }
+
 }

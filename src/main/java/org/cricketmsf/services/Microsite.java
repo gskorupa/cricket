@@ -46,8 +46,8 @@ import org.cricketmsf.microsite.*;
 import org.cricketmsf.microsite.cms.TranslatorIface;
 import org.cricketmsf.microsite.event.GetContent;
 import org.cricketmsf.microsite.event.StatusRequested;
-import org.cricketmsf.out.openapi.OpenApi;
-import org.cricketmsf.out.openapi.OpenApiIface;
+import org.cricketmsf.in.openapi.OpenApi;
+import org.cricketmsf.in.openapi.OpenApiIface;
 
 /**
  * Microsite

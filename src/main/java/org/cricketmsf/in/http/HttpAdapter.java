@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.cricketmsf.Stopwatch;
 import org.cricketmsf.in.InboundAdapterIface;
-import org.cricketmsf.out.openapi.Operation;
+import org.cricketmsf.in.openapi.Operation;
 
 /**
  *
@@ -701,6 +701,6 @@ public class HttpAdapter
     }
     
     @Override
-    public void defineOperations(){
+    public void defineApi(){
     }
 }

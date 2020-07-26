@@ -35,18 +35,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import jdk.jshell.spi.ExecutionControl;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Stopwatch;
 import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.InboundAdapterIface;
-import org.cricketmsf.out.openapi.Operation;
+import org.cricketmsf.in.openapi.Operation;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class HttpPortedAdapter
+public abstract class HttpPortedAdapter
         extends InboundAdapter
         implements Adapter, HttpAdapterIface, HttpHandler, InboundAdapterIface/*, org.eclipse.jetty.server.Handler*/ {
 
@@ -363,13 +364,16 @@ public class HttpPortedAdapter
         return requestObject;
     }
 
-    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+    protected abstract ProcedureCall preprocess(RequestObject request, long rootEventId);
+    /*{
+
         Event ev = new Event(this.getName(), request);
         ev.setRootEventId(rootEventId);
         ev.setPayload(request);
         HttpEvent event = new HttpEvent(ev);
         return new ProcedureCall(event, "handle");
     }
+    */
 
     private Result createResponse(RequestObject requestObject, long rootEventId) {
         String methodName = null;
@@ -572,7 +576,7 @@ public class HttpPortedAdapter
     }
 
     @Override
-    public void defineOperations() {
+    public void defineApi() {
     }
 
     /*

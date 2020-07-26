@@ -98,3 +98,4 @@ build
 /test/
 /tmp/
 /test.yaml
+/logs/

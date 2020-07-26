@@ -1,27 +1,29 @@
-package org.cricketmsf.out.openapi;
+package org.cricketmsf.in.openapi;
 
 /**
  *
  * @author greg
  */
-public class Info {
+public class Info extends Element {
 
     private String title = null;
     private String description = null;
     private String termsOfService = null;
-
-    public String toYaml() {
-        String indent = "  ";
-        String lf = "\r\n";
+    private String version=null;
+    
+    public String toYaml(String indent) {
         StringBuilder sb = new StringBuilder();
+        if(null!=getVersion()){
+            sb.append(indent).append("version: '").append(this.getVersion()).append("'").append(lf);
+        }
         if(null!=getTitle()){
-            sb.append(indent).append("title: \"").append(this.getTitle()).append("\"").append(lf);
+            sb.append(indent).append("title: '").append(this.getTitle()).append("'").append(lf);
         }
         if(null!=getDescription()){
-            sb.append(indent).append("description: \"").append(this.getDescription()).append("\"").append(lf);
+            sb.append(indent).append("description: '").append(this.getDescription()).append("'").append(lf);
         }
         if(null!=getTermsOfService()){
-            sb.append(indent).append("termsOfService: \"").append(this.getTermsOfService()).append("\"").append(lf);
+            sb.append(indent).append("termsOfService: '").append(this.getTermsOfService()).append("'").append(lf);
         }
         return sb.toString();
     }
@@ -66,5 +68,19 @@ public class Info {
      */
     public void setTermsOfService(String termsOfService) {
         this.termsOfService = termsOfService;
+    }
+
+    /**
+     * @return the version
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * @param version the version to set
+     */
+    public void setVersion(String version) {
+        this.version = version;
     }
 }
