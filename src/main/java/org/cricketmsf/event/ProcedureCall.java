@@ -41,21 +41,34 @@ public class ProcedureCall {
         pc.requestHandled = false;
         pc.event = event;
         pc.procedureName = procedureName;
+        pc.responseCode = 0;
         return pc;
     }
 
+    @Deprecated
     public static ProcedureCall response(int responseCode, Object responseObject){
+        return respond(responseCode, responseObject);
+    }
+    
+    public static ProcedureCall respond(int responseCode, Object responseObject){
         ProcedureCall pc=new ProcedureCall();
         pc.requestHandled = true;
         pc.errorResponse=responseObject;
+        pc.responseCode=responseCode;
         return pc;
     }
     
+    @Deprecated
     public static ProcedureCall response(int responseCode, String contentType, Object responseObject){
+        return respond(responseCode, contentType, responseObject);
+    }
+    
+    public static ProcedureCall respond(int responseCode, String contentType, Object responseObject){
         ProcedureCall pc=new ProcedureCall();
         pc.requestHandled = true;
         pc.contentType=contentType;
         pc.errorResponse=responseObject;
+        pc.responseCode=responseCode;
         return pc;
     }
 

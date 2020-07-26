@@ -365,6 +365,7 @@ public abstract class HttpPortedAdapter
     }
 
     protected abstract ProcedureCall preprocess(RequestObject request, long rootEventId);
+
     /*{
 
         Event ev = new Event(this.getName(), request);
@@ -373,7 +374,7 @@ public abstract class HttpPortedAdapter
         HttpEvent event = new HttpEvent(ev);
         return new ProcedureCall(event, "handle");
     }
-    */
+     */
 
     private Result createResponse(RequestObject requestObject, long rootEventId) {
         String methodName = null;
@@ -392,9 +393,13 @@ public abstract class HttpPortedAdapter
         try {
             ProcedureCall pCall = preprocess(requestObject, Kernel.getEventId());
             if (pCall.requestHandled) {
+                if (pCall.responseCode < 100 || pCall.responseCode > 1000) {
+                    result.setCode(SC_BAD_REQUEST);
+                } else {
                     result.setCode(pCall.responseCode);
-                    result.setData(pCall.errorResponse);
-                    result.setHeader("Content-type", pCall.contentType);
+                }
+                result.setData(pCall.errorResponse);
+                result.setHeader("Content-type", pCall.contentType);
             } else {
                 if (pCall.responseCode == 0) {
                     sendLogEvent(Event.LOG_FINE, "sending request to hook method " + pCall.procedureName + "@" + pCall.event.getClass().getSimpleName());
