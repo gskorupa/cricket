@@ -151,7 +151,7 @@ public class StandardResult implements Result {
     
     @Override
     public void setHeader(String name, String value){
-        headers.add(name, value);
+        headers.set(name, value);
     }
     
     @Override

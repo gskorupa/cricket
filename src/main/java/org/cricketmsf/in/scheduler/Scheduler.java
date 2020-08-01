@@ -367,7 +367,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     }
 
     @Override
-    public Map<String, String> getStatus(String name) {
+    public Map<String, Object> getStatus(String name) {
         Map m = super.getStatus(name);
         m.put("threads", "" + getThreadsCount());
         return m;

@@ -29,7 +29,7 @@ public class InboundAdapter implements Runnable, InboundAdapterIface {
 
     protected HashMap<String, String> hookMethodNames;
     public HashMap<String, String> properties = null;
-    protected HashMap<String, String> statusMap = null;
+    protected HashMap<String, Object> statusMap = null;
     protected String name;
 
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -84,11 +84,12 @@ public class InboundAdapter implements Runnable, InboundAdapterIface {
     }
 
     @Override
-    public Map<String, String> getStatus(String name) {
+    public Map<String, Object> getStatus(String name) {
         if (statusMap == null) {
             statusMap = new HashMap();
             statusMap.put("name", name);
             statusMap.put("class", getClass().getName());
+            statusMap.put("properties", properties);
         }
         return statusMap;
     }
@@ -110,7 +111,8 @@ public class InboundAdapter implements Runnable, InboundAdapterIface {
             String[] categories = {category};
             EventMaster.registerEventCategories(categories, eventClassName);
         } catch (EventException ex) {
-            ex.printStackTrace();
+            System.out.println(ex.getMessage());
+            //e.printStackTrace();
         }
     }
 }

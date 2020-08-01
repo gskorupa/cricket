@@ -174,16 +174,6 @@ public class SmtpSender extends OutboundAdapter implements EmailSenderIface, Ada
     }
 
     @Override
-    public Map<String, String> getStatus(String name) {
-        if (statusMap == null) {
-            statusMap = new HashMap();
-            statusMap.put("name", name);
-            statusMap.put("class", getClass().getName());
-        }
-        return statusMap;
-    }
-
-    @Override
     public String send(String to, String cc, String bcc, String subject, String text) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

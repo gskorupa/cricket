@@ -321,7 +321,7 @@ public class HttpAdapter
         try {
             r = formattedResponse.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             Kernel.getInstance().dispatchEvent(Event.logSevere("HttpAdapter.formatResponse()", e.getClass().getSimpleName() + " " + e.getMessage()));
         }
         return r;
@@ -405,7 +405,8 @@ public class HttpAdapter
             result.setMessage("handler method error");
             result.setFileExtension(null);
         }catch(NullPointerException e){
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
         if (null == result) {
             result = new StandardResult("null result returned by the service");

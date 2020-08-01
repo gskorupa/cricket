@@ -89,16 +89,6 @@ public class SmtpSender2 extends OutboundAdapter implements EmailSenderIface, Ad
     }
 
     @Override
-    public Map<String, String> getStatus(String name) {
-        if (statusMap == null) {
-            statusMap = new HashMap();
-            statusMap.put("name", name);
-            statusMap.put("class", getClass().getName());
-        }
-        return statusMap;
-    }
-
-    @Override
     public String send(String to, String cc, String bcc, String subject, String text) {
         if ((null == to || to.isBlank())&&(null == cc || cc.isBlank())&&(null == bcc || bcc.isBlank())) {
             return "";

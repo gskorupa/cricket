@@ -111,7 +111,7 @@ public class MqttSubscriber extends InboundAdapter implements Adapter {
                         System.out.println("loc " + me.getLocalizedMessage());
                         System.out.println("cause " + me.getCause());
                         System.out.println("excep " + me);
-                        me.printStackTrace();
+                        //me.printStackTrace();
                     }
                 } finally {
                     sampleClient = null;

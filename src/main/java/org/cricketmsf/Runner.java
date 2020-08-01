@@ -33,8 +33,8 @@ import java.util.Scanner;
 
 /**
  * Runner class is used when running JAR distribution. The class parses the
- * command line arguments, reads config, then creates and runs
- * the service instance according to the configuration.
+ * command line arguments, reads config, then creates and runs the service
+ * instance according to the configuration.
  *
  * @author greg
  */
@@ -159,7 +159,8 @@ public class Runner {
             try {
                 content = readHelpFile("/help.txt");
             } catch (Exception x) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
+                //e.printStackTrace();
             }
         }
         return content;
@@ -187,8 +188,8 @@ public class Runner {
         types.put("java.utils.HashMap", "adapters");
         types.put("java.utils.HashMap", "properties");
         args.put(JsonReader.TYPE_NAME_MAP, types);
-        InputStream propertyFile=null;
-        if (null!=arguments && arguments.containsKey("config")) {
+        InputStream propertyFile = null;
+        if (null != arguments && arguments.containsKey("config")) {
             //Properties props;
             try {
                 propertyFile = new FileInputStream(new File((String) arguments.get("config")));
@@ -198,12 +199,12 @@ public class Runner {
         } else {
             String propsName = "settings.json";
             propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
-            if(null==propertyFile){
+            if (null == propertyFile) {
                 propsName = "cricket.json";
                 propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
             }
         }
-        if(null==propertyFile){
+        if (null == propertyFile) {
             return null;
         }
         String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
@@ -218,7 +219,7 @@ public class Runner {
         }
         configSet.setKernelVersion(prop.getProperty("version", "unknown"));
         // force property changes based on command line --force param
-        if (null!=arguments && arguments.containsKey("force")) {
+        if (null != arguments && arguments.containsKey("force")) {
             ArrayList<String> forcedProps = (ArrayList) arguments.get("force");
             for (int i = 0; i < forcedProps.size(); i++) {
                 configSet.forceProperty(forcedProps.get(i));

@@ -35,7 +35,7 @@ public interface Adapter {
      */
     public void loadProperties(HashMap<String,String> properties, String adapterName);
     
-    public Map<String,String> getStatus(String name);
+    public Map<String,Object> getStatus(String name);
     public void updateStatusItem(String key, String value);
     public DispatcherIface getDispatcher();
     public String getName();

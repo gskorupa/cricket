@@ -65,7 +65,7 @@
                 {
                     "name": "Logger",
                     "interfaceName": "LoggerAdapterIface",
-                    "classFullName": "org.cricketmsf.out.log.StandardLogger",
+                    "classFullName": "org.cricketmsf.out.log.Slf4jLogger",
                     "properties": {
                         "name": "Microsite",
                         "level": "FINE",
@@ -339,7 +339,7 @@
             "properties": {
                 "host": "0.0.0.0",
                 "port": "7070",
-                "wsport": "7071",
+                "wsport": "",
                 "ssl": "false",
                 "keystore": "./data/cricket_publickeystore.jks",
                 "keystore-password": "cricket15$#17",
@@ -354,7 +354,7 @@
             "ports": [
                 {
                     "name": "Echo",
-                    "interfaceName": "XHttpAdapterIface",
+                    "interfaceName": "",
                     "adapterClassName": "org.cricketmsf.in.http.HttpPortedAdapter",
                     "properties": {
                         "context": "/api/echo",
@@ -381,7 +381,7 @@
                 {
                     "name": "Logger",
                     "interfaceName": "LoggerAdapterIface",
-                    "classFullName": "org.cricketmsf.out.log.StandardLogger",
+                    "classFullName": "org.cricketmsf.out.log.Slf4jLogger",
                     "properties": {
                         "name": "BasicService",
                         "level": "FINEST",

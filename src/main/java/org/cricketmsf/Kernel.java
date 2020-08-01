@@ -23,10 +23,10 @@ import org.cricketmsf.config.ConfigSet;
 import org.cricketmsf.config.Configuration;
 import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.out.OutboundAdapter;
-import java.util.logging.Logger;
 import static java.lang.Thread.MIN_PRIORITY;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
 import org.cricketmsf.annotation.EventClassHook;
 import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.annotation.PortEventClassHook;
@@ -48,8 +47,10 @@ import org.cricketmsf.exception.WebsocketException;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.autostart.AutostartIface;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
+import org.cricketmsf.out.log.Slf4jLogger;
 import org.cricketmsf.out.log.LoggerAdapterIface;
-import org.cricketmsf.out.log.StandardLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Microkernel.
@@ -64,9 +65,11 @@ public abstract class Kernel {
     public final static int SHUTDOWN = 3;
 
     // emergency LOGGER
-    private static final Logger LOGGER = Logger.getLogger(org.cricketmsf.Kernel.class.getName());
+    //private static final Logger LOGGER = Logger.getLogger(org.cricketmsf.Kernel.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(Kernel.class);
+    
     // standard logger
-    protected static LoggerAdapterIface logger = new StandardLogger().getDefault();
+    protected static LoggerAdapterIface logger = null;
     // event dispatcher
     protected DispatcherIface eventDispatcher = null;
 
@@ -224,19 +227,19 @@ public abstract class Kernel {
             }
             o = m.invoke(this, event);
         } catch (IllegalAccessException | NoSuchMethodException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             dispatchEvent(Event.logWarning(
                     "Handler method " + methodName + " not compatible with event class",
                     " " + event.getClass().getName()
             ));
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             dispatchEvent(Event.logWarning(
                     "Handler method " + methodName + " throwed exception",
                     " " + event.getClass().getName()
             ));
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             dispatchEvent(Event.logWarning(
                     "Unable to find handler method " + methodName,
                     " " + event.getClass().getName()
@@ -264,19 +267,19 @@ public abstract class Kernel {
                 ));
             }
         } catch (IllegalAccessException | NoSuchMethodException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             dispatchEvent(Event.logWarning(
                     "Handler method " + methodName + " not compatible with event class",
                     " " + event.getClass().getName()
             ));
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             dispatchEvent(Event.logWarning(
                     "Handler method " + methodName + " throwed exception",
                     " " + event.getClass().getName()
             ));
         } catch (NullPointerException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             dispatchEvent(Event.logWarning(
                     "Unable to find handler method " + methodName,
                     " " + event.getClass().getName()
@@ -412,7 +415,7 @@ public abstract class Kernel {
             ((Kernel) instance).loadAdapters(cfg);
         } catch (Exception e) {
             instance = null;
-            LOGGER.log(Level.SEVERE, "{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
+            LOGGER.info("{0}:{1}", new Object[]{e.getStackTrace()[0].toString(), e.getStackTrace()[1].toString()});
             e.printStackTrace();
             System.exit(1);
         }
@@ -461,36 +464,42 @@ public abstract class Kernel {
         getLogger().print("\tUUID=" + getUuid().toString());
         getLogger().print("\tenv name=" + getName());
         //setHost(config.getHost());
-        getLogger().print("\thttpd=" + config.getProperty("httpd", ""));
+        //getLogger().print("\thttpd=" + config.getProperty("httpd", ""));
         setHost(config.getProperty("host", "0.0.0.0"));
-        getLogger().print("\thost=" + getHost());
+        //getLogger().print("\thost=" + getHost());
         try {
             //setPort(Integer.parseInt(config.getPort()));
             setPort(Integer.parseInt(config.getProperty("port", "8080")));
         } catch (Exception e) {
-            e.printStackTrace();
+            getLogger().print(e.getMessage());
+            //System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
         try {
             setWebsocketPort(Integer.parseInt(config.getProperty("wsport", "0")));
         } catch (Exception e) {
-            e.printStackTrace();
+            getLogger().print(e.getMessage());
+            //System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
-        getLogger().print("\tport=" + getPort());
+        //getLogger().print("\tport=" + getPort());
         try {
             setShutdownDelay(Integer.parseInt(config.getProperty("shutdown-delay", "2")));
         } catch (Exception e) {
-            e.printStackTrace();
+            getLogger().print(e.getMessage());
+            //System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
         getLogger().print("\tshutdown-delay=" + getShutdownDelay());
         setSecurityFilter(config.getProperty("filter"));
         //if ("jetty".equalsIgnoreCase(config.getProperty("httpd", ""))) {
         //    getLogger().print("\tfilter=" + getJettySecurityFilter().getClass().getName());
         //} else {
-        getLogger().print("\tfilter=" + getSecurityFilter().getClass().getName());
+        //getLogger().print("\tfilter=" + getSecurityFilter().getClass().getName());
         //}
         setCorsHeaders(config.getProperty("cors"));
-        getLogger().print("\tCORS=" + getCorsHeaders());
-        getLogger().print("\tExtended properties: " + getProperties().toString());
+        //getLogger().print("\tCORS=" + getCorsHeaders());
+        getLogger().print("\tProperties:\n" + printExtendedProperties(getProperties()));
         getLogger().print("LOADING ADAPTERS");
         String adapterName = null;
         AdapterConfiguration ac = null;
@@ -501,9 +510,12 @@ public abstract class Kernel {
                 ac = adapterEntry.getValue();
                 getLogger().print("ADAPTER: " + adapterName);
                 try {
-                    //Class c = Class.forName(ac.getClassFullName());
                     Class c = Class.forName(ac.getAdapterClassName());
-                    adaptersMap.put(adapterName, c.newInstance());
+                    if(Modifier.isAbstract(c.getModifiers() )){
+                        getLogger().print("ERROR: " + adapterName + " class is abstract");
+                        continue;
+                    }
+                    adaptersMap.put(adapterName, c.getDeclaredConstructor().newInstance());
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.http.HttpAdapter) {
                         setHttpHandlerLoaded(true);
                     } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.http.HttpPortedAdapter) {
@@ -525,23 +537,26 @@ public abstract class Kernel {
                     try {
                         setEventDispatcher(((Adapter) adaptersMap.get(adapterName)).getDispatcher());
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        System.out.println(e.getMessage());
+                        //e.printStackTrace();
                     }
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.log.LoggerAdapterIface) {
                         setFineLevel(((LoggerAdapterIface) adaptersMap.get(adapterName)).isFineLevel());
                     } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.autostart.AutostartIface) {
                         setAutostartAdapter(adaptersMap.get(adapterName));
+                    } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.log.LoggerAdapterIface) {
+                        setLoggerAdapter(adaptersMap.get(adapterName));
                     }
                 } catch (NullPointerException | ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-                    adaptersMap.put(adapterName, null);
+                    //adaptersMap.put(adapterName, null);
                     getLogger().print("ERROR: " + adapterName + " configuration: " + ex.getClass().getSimpleName());
-                    //ex.printStackTrace();
-                    throw new Exception(ex);
+                    ex.printStackTrace();
+                    //throw new Exception(ex);
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Adapters initialization error. Configuration for: {0}", adapterName);
-            throw new Exception(e);
+            LOGGER.info(String.format("Adapters initialization error. Configuration for %1s: %2s", adapterName, e.getMessage()));
+            //throw new Exception(e);
         }
         getLogger().print("event dispatcher: " + (eventDispatcher != null ? eventDispatcher.getName() + "(" + eventDispatcher.getClass().getName() + ")" : " not used"));
         getLogger().print("END LOADING ADAPTERS");
@@ -575,7 +590,8 @@ public abstract class Kernel {
             //securityFilter = (Filter) c.newInstance();
             securityFilter = c.newInstance();
         } catch (ClassCastException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
             securityFilter = new SecurityFilter();
         }
     }
@@ -587,7 +603,8 @@ public abstract class Kernel {
                 securityFilter = (Filter) c.newInstance();
                 securityFilter = c.newInstance();
             } catch (ClassCastException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
+                //e.printStackTrace();
                 securityFilter = new SecurityFilter();
             }
         }
@@ -734,7 +751,8 @@ public abstract class Kernel {
                         shutdown();
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        System.out.println(e.getMessage());
+                        //e.printStackTrace();
                     }
                 }
             });
@@ -761,7 +779,8 @@ public abstract class Kernel {
                 try {
                     websocketServer.start();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.out.println(e.getMessage());
+                    //e.printStackTrace();
                 }
             }
 
@@ -861,7 +880,8 @@ public abstract class Kernel {
                 websocketServer.stop();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
         System.out.println("Kernel stopped\r\n");
     }
@@ -936,7 +956,8 @@ public abstract class Kernel {
                         )
                 );
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
+                //e.printStackTrace();
             }
         }
     }
@@ -996,7 +1017,11 @@ public abstract class Kernel {
      * @return the logger
      */
     public static LoggerAdapterIface getLogger() {
-        return logger;
+        if(null==logger){
+            return new Slf4jLogger();
+        }else{
+            return logger;
+        }
     }
 
     /**
@@ -1042,6 +1067,13 @@ public abstract class Kernel {
         args.put(JsonWriter.DATE_FORMAT, "dd/MMM/yyyy:kk:mm:ss Z");
         args.put(JsonWriter.TYPE, false);
         return JsonWriter.objectToJson(reportStatus(), args);
+    }
+    public String printExtendedProperties(HashMap props) {
+        HashMap args = new HashMap();
+        args.put(JsonWriter.PRETTY_PRINT, true);
+        args.put(JsonWriter.DATE_FORMAT, "dd/MMM/yyyy:kk:mm:ss Z");
+        args.put(JsonWriter.TYPE, false);
+        return JsonWriter.objectToJson(props, args);
     }
 
     private void getThreadsInfo() {
@@ -1183,6 +1215,10 @@ public abstract class Kernel {
      */
     public void setAutostartAdapter(Object autostartAdapter) {
         this.autostartAdapter = (AutostartIface) autostartAdapter;
+    }
+    
+    public void setLoggerAdapter(Object loggerAdapter) {
+        this.logger = (LoggerAdapterIface) loggerAdapter;
     }
 
     /**

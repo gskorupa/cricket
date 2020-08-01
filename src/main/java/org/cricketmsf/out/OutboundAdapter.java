@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class OutboundAdapter implements OutboundAdapterIface {
 
-    protected HashMap<String, String> statusMap = null;
+    protected HashMap<String, Object> statusMap = null;
     public HashMap<String, String> properties;
     protected String name;
 
@@ -42,11 +42,12 @@ public class OutboundAdapter implements OutboundAdapterIface {
     }
 
     @Override
-    public Map<String, String> getStatus(String name) {
+    public Map<String, Object> getStatus(String name) {
         if (statusMap == null) {
             statusMap = new HashMap();
             statusMap.put("name", name);
             statusMap.put("class", getClass().getName());
+            statusMap.put("properties", properties);
         }
         return statusMap;
     }

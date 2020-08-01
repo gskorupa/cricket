@@ -45,12 +45,16 @@ import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
 import org.cricketmsf.out.file.FileObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author greg
  */
 public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIface {
+    
+    private static final Logger logger = LoggerFactory.getLogger(CmsEmbededAdapter.class);
 
     public static int NOT_INITIALIZED = 0;
     public static int FAILED = 1;
@@ -81,7 +85,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         try {
             ruleEngine = (RuleEngineIface) Kernel.getInstance().getAdaptersMap().get(ruleEngineName);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.debug(e.getMessage());
         }
     }
 
@@ -91,7 +95,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 database = (KeyValueDBIface) Kernel.getInstance().getAdaptersMap().get(helperAdapterName);
                 initDB();
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.debug(e.getMessage());
                 status = FAILED;
                 throw new KeyValueDBException(KeyValueDBException.UNKNOWN, "database adapter not available");
             }
@@ -171,7 +175,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                         doc = (Document) getDatabase().get("wip_" + language, uid);
                     }
                 } catch (KeyValueDBException e) {
-                    e.printStackTrace();
+                    logger.debug(e.getMessage());
                     throw new CmsException(CmsException.HELPER_EXCEPTION, e.getMessage());
                 }
             } else {
@@ -182,7 +186,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                             doc = (Document) getDatabase().get("wip_" + supportedLanguages.get(i), uid);
                         }
                     } catch (KeyValueDBException e) {
-                        e.printStackTrace();
+                        logger.debug(e.getMessage());
                         // nothing to do
                     }
                     if (doc != null) {
@@ -206,7 +210,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                     try {
                         doc = (Document) getDatabase().get(docStatus + "_" + supportedLanguages.get(i), uid);
                     } catch (KeyValueDBException e) {
-                        e.printStackTrace();
+                        logger.debug(e.getMessage());
                         // nothing to do
                     }
                     if (doc != null) {
@@ -603,7 +607,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             fo.content = fileContent.getBytes();
             cache.put(tableName, filePath, cache);
         } catch (KeyValueDBException e) {
-            e.printStackTrace();
+            logger.debug(e.getMessage());
         }
     }
 
@@ -647,7 +651,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 try {
                     fo = (FileObject) cache.get(tableName, filePath);
                 } catch (KeyValueDBException e) {
-                    e.printStackTrace();
+                    logger.debug(e.getMessage());
                 }
                 if (fo != null) {
                     fileReady = true;
@@ -669,7 +673,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                     return result;
                 }
             } catch (ClassCastException e) {
-                e.printStackTrace();
+                logger.debug(e.getMessage());
             }
         }
 
@@ -731,7 +735,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             }
         } catch (CmsException ex) {
             // do nothing
-            ex.printStackTrace();
+            logger.debug(ex.getMessage());
         }
 
         // if not found in CMS
@@ -756,7 +760,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 try {
                     cache.put(tableName, filePath, fo);
                 } catch (KeyValueDBException e) {
-                    e.printStackTrace();
+                    logger.debug(e.getMessage());
                     Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
                 }
             }
@@ -827,7 +831,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             }
             //input.close();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            logger.debug(ex.getMessage());
             byte[] emptyContent = {};
             result = emptyContent;
         } finally {
@@ -894,7 +898,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             Files.move(Paths.get(sourcePath), Paths.get(targetLocation), REPLACE_EXISTING);
             return targetLocation;
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.debug(e.getMessage());
             return "";
         }
     }

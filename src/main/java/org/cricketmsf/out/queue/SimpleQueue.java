@@ -127,11 +127,6 @@ public class SimpleQueue extends OutboundAdapter implements QueueIface, Outbound
     }
 
     @Override
-    public Map<String, String> getStatus(String name) {
-        return super.getStatus(name);
-    }
-
-    @Override
     public synchronized void push(String channel, Object value) throws QueueException {
         if (!listChannels.containsKey(channel)) {
             listChannels.put(channel, new ArrayList<>());

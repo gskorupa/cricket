@@ -29,12 +29,14 @@ import java.util.logging.Logger;
 import org.cricketmsf.exception.WebsocketException;
 import org.cricketmsf.in.websocket.ClientList;
 import org.cricketmsf.in.websocket.WebsocketAdapter;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class WebsocketServer implements Runnable {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebsocketServer.class);
 
     private ServerSocket server = null;
     private boolean running = false;
@@ -68,7 +70,8 @@ public class WebsocketServer implements Runnable {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
         String ctx;
         WebsocketAdapter adp;
@@ -103,7 +106,8 @@ public class WebsocketServer implements Runnable {
                     //TODO: remove client from the list after disconnecting
                 }
             } catch (IOException waitException) {
-                throw new IllegalStateException("Could not wait for client connection", waitException);
+                logger.warn("Could not wait for client connection. Websocket closed.");
+                //throw new IllegalStateException("Could not wait for client connection", waitException);
             }
         }
     }
@@ -121,7 +125,8 @@ public class WebsocketServer implements Runnable {
             }
             server.close();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            System.out.println(ex.getMessage());
+            //e.printStackTrace();
         }
     }
 

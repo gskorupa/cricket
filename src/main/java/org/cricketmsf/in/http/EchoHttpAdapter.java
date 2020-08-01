@@ -43,7 +43,7 @@ public class EchoHttpAdapter extends HttpAdapter implements EchoHttpAdapterIface
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         Kernel.getInstance().getLogger().print("\tcontext=" + getContext());
-        setSilent(properties.get("silent-mode"));
+        setSilent(properties.getOrDefault("silent-mode","false"));
         Kernel.getInstance().getLogger().print("\tsilent-mode=" + isSilent());
         setExtendedResponse(properties.getOrDefault("extended-response", "false"));
         Kernel.getInstance().getLogger().print("\textended-response=" + isExtendedResponse());

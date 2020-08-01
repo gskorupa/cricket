@@ -35,10 +35,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import jdk.jshell.spi.ExecutionControl;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Stopwatch;
-import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.InboundAdapterIface;
 import org.cricketmsf.in.openapi.Operation;
@@ -99,11 +97,15 @@ public abstract class HttpPortedAdapter
 
     public HttpPortedAdapter() {
         super();
-        acceptedTypesMap = new HashMap<>();
-        for (String acceptedType : acceptedTypes) {
-            acceptedTypesMap.put(acceptedType, acceptedType);
+        try {
+            acceptedTypesMap = new HashMap<>();
+            for (String acceptedType : acceptedTypes) {
+                acceptedTypesMap.put(acceptedType, acceptedType);
+            }
+            dateFormat = Kernel.getInstance().dateFormat;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        dateFormat = Kernel.getInstance().dateFormat;
     }
 
     @Override
@@ -331,7 +333,7 @@ public abstract class HttpPortedAdapter
         try {
             r = formattedResponse.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             Kernel.getInstance().dispatchEvent(Event.logSevere("HttpAdapter.formatResponse()", e.getClass().getSimpleName() + " " + e.getMessage()));
         }
         return r;
@@ -375,7 +377,6 @@ public abstract class HttpPortedAdapter
         return new ProcedureCall(event, "handle");
     }
      */
-
     private Result createResponse(RequestObject requestObject, long rootEventId) {
         String methodName = null;
         Result result = new StandardResult();

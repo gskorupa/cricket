@@ -8,7 +8,7 @@ java {
     targetCompatibility = JavaVersion.VERSION_13
 }
 
-version = "1.5.10"
+version = "1.5.11"
 
 repositories {
     mavenCentral()
@@ -35,7 +35,10 @@ dependencies {
     'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0',\
     'org.wso2.orbit.javax.xml.bind:jaxb-api:2.3.1.wso2v1',\
     'org.postgresql:postgresql:42.2.14.jre7',\
-    'LivingDocumentation:LivingDocumentation:1.0.0'
+    'LivingDocumentation:LivingDocumentation:1.0.0',\
+    'org.slf4j:slf4j-api:1.7.30', \
+    'ch.qos.logback:logback-classic:1.2.3',\
+    'ch.qos.logback:logback-core:1.1.7'
     runtimeOnly \
     'com.cedarsoftware:json-io:4.12.0',\
     'org.apache.commons:commons-csv:1.8',\
@@ -43,7 +46,10 @@ dependencies {
     'com.sun.mail:javax.mail:1.6.2',\
     'com.sun.activation:javax.activation:1.2.0',\
     'org.wso2.orbit.javax.xml.bind:jaxb-api:2.3.1.wso2v1',\
-    'LivingDocumentation:LivingDocumentation:1.0.0'
+    'LivingDocumentation:LivingDocumentation:1.0.0',
+    'org.slf4j:slf4j-api:1.7.30', \
+    'ch.qos.logback:logback-classic:1.2.3',\
+    'ch.qos.logback:logback-core:1.1.7'
     testImplementation 'junit:junit:4.13'
 }
 
@@ -66,7 +72,7 @@ task fatJarAll(type: Jar) {
     from {
         configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) } } {
         exclude 'META-INF/*', 'META-INF/hk2-locator/**', 'META-INF/licenses/**', \
-        'META-INF/maven/**', 'META-INF/services/**', 'META-INF/versions/**', \
+        'META-INF/maven/**', 'META-INF/services/**', 'META-INF/versions/**', 'META-INF/org/**',\
         'pmd/**', 'checkstyle/**', 'findbugs/**', 'bundle.properties'
     }
     
@@ -85,7 +91,7 @@ task fatJar(type: Jar) {
     from {
         configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) } } {
         exclude 'META-INF/*', 'META-INF/hk2-locator/**', 'META-INF/licenses/**', \
-        'META-INF/maven/**', 'META-INF/services/**', 'META-INF/versions/**', \
+        'META-INF/maven/**', 'META-INF/services/**', 'META-INF/versions/**', 'META-INF/org/**',\
         '**/postgresql/**', '**/eclipse/**', 'pmd/**', 'checkstyle/**', 'findbugs/**', 'bundle.properties'
     }
     
