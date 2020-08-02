@@ -53,11 +53,11 @@ public class Event implements EventIface {
     private String type;
     private String origin;
     private Object payload;
-    private String timePoint; // rename to timeDefinition
+    private String timePoint = null; // rename to timeDefinition
     private long calculatedTimePoint = -1; // rename to timeMillis
     private long createdAt = -1;
-    private String serviceId;
-    private UUID serviceUuid;
+    private String serviceId = null;
+    private UUID serviceUuid = null;
     private long rootEventId = -1;
     private RequestObject request = null;
     private boolean cyclic = false;
@@ -72,11 +72,13 @@ public class Event implements EventIface {
             this.id = Kernel.getEventId();
         }
         createdAt = System.currentTimeMillis();
-        serviceId = Kernel.getInstance().getId();
-        serviceUuid = Kernel.getInstance().getUuid();
+        if (null != Kernel.getInstance()) {
+            serviceId = Kernel.getInstance().getId();
+            serviceUuid = Kernel.getInstance().getUuid();
+        }
         category = Event.CATEGORY_GENERIC;
         type = Event.TYPE_DEFAULT;
-        timePoint="+0s";
+        //timePoint = "+0s";
         calculateTimePoint();
     }
 
@@ -97,8 +99,10 @@ public class Event implements EventIface {
     public Event(String origin, String category, String type, String timePoint, Object payload) {
         this.origin = origin;
         this.id = Kernel.getEventId();
-        this.serviceId = Kernel.getInstance().getId();
-        this.serviceUuid = Kernel.getInstance().getUuid();
+        if (null != Kernel.getInstance()) {
+            this.serviceId = Kernel.getInstance().getId();
+            this.serviceUuid = Kernel.getInstance().getUuid();
+        }
         this.rootEventId = -1;
         this.category = category;
         this.type = type;
@@ -662,21 +666,21 @@ public class Event implements EventIface {
             value = (String) getRequest().parameters.get(name);
         } catch (ClassCastException e) {
             value = (String) ((ArrayList) getRequest().parameters.get(name)).get(0);
-        } catch (NullPointerException e){
-            
+        } catch (NullPointerException e) {
+
         }
         return value;
     }
-    
+
     public ArrayList getRequestParameterValues(String name) {
         ArrayList values = null;
         try {
             values = (ArrayList) getRequest().parameters.get(name);
         } catch (ClassCastException e) {
             values = new ArrayList();
-            values.add((String)getRequest().parameters.get(name));
-        } catch (NullPointerException e){
-            
+            values.add((String) getRequest().parameters.get(name));
+        } catch (NullPointerException e) {
+
         }
         return values;
     }
@@ -747,7 +751,7 @@ public class Event implements EventIface {
     }
 
     public static Event fromJson(String json) {
-        return (Event)JsonReader.jsonToJava(json);
+        return (Event) JsonReader.jsonToJava(json);
     }
 
     @Override
@@ -764,7 +768,7 @@ public class Event implements EventIface {
     }
 
     public static Event warning(Object source, Object payload) {
-        Event result=logWarning(source.getClass().getSimpleName(), null);
+        Event result = logWarning(source.getClass().getSimpleName(), null);
         result.setPayload(payload);
         return result;
     }

@@ -96,7 +96,7 @@ public class BasicService extends Kernel {
          */
         try {
             cacheDB.addTable("webcache", 100, false);
-        } catch (KeyValueDBException e) {
+        } catch (NullPointerException|KeyValueDBException e) {
         }
         /*
         try {

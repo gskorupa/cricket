@@ -226,24 +226,14 @@ public abstract class Kernel {
                 m = getClass().getMethod(methodName, event.getClass());
             }
             o = m.invoke(this, event);
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-            //e.printStackTrace();
-            dispatchEvent(Event.logWarning(
-                    "Handler method " + methodName + " not compatible with event class",
-                    " " + event.getClass().getName()
-            ));
+        } catch (IllegalAccessException e) {
+            LOGGER.debug("Unable to process event [IAE]{}", event.getClass().getName());
+        } catch (NoSuchMethodException e) {
+            LOGGER.debug("Unable to process event [NSME] {}", event.getClass().getName());
         } catch (InvocationTargetException e) {
-            //e.printStackTrace();
-            dispatchEvent(Event.logWarning(
-                    "Handler method " + methodName + " throwed exception",
-                    " " + event.getClass().getName()
-            ));
+            LOGGER.debug("Unable to process event [ITE] {}", event.getClass().getName());
         } catch (NullPointerException e) {
-            //e.printStackTrace();
-            dispatchEvent(Event.logWarning(
-                    "Unable to find handler method " + methodName,
-                    " " + event.getClass().getName()
-            ));
+            LOGGER.debug("Unable to process event [NPE] {}", event.getClass().getName());
         }
         return o;
     }
@@ -262,28 +252,14 @@ public abstract class Kernel {
                 m = getClass().getMethod(methodName, event.getClass());
                 o = m.invoke(this, event);
             } else {
-                dispatchEvent(Event.logWarning(
-                        "Unable to find handler method for procedure " + procedureName, "" + event.getClass().getName()
-                ));
+                LOGGER.warn("Don't know how to handle event {} procedure {}",procedureName,event.getClass().getName());
             }
         } catch (IllegalAccessException | NoSuchMethodException e) {
-            //e.printStackTrace();
-            dispatchEvent(Event.logWarning(
-                    "Handler method " + methodName + " not compatible with event class",
-                    " " + event.getClass().getName()
-            ));
+            LOGGER.warn("Handler method {} not compatible with event class {}",methodName,event.getClass().getName());
         } catch (InvocationTargetException e) {
-            //e.printStackTrace();
-            dispatchEvent(Event.logWarning(
-                    "Handler method " + methodName + " throwed exception",
-                    " " + event.getClass().getName()
-            ));
+            LOGGER.warn("Handler method {} exception {}",methodName,e.getMessage());
         } catch (NullPointerException e) {
-            //e.printStackTrace();
-            dispatchEvent(Event.logWarning(
-                    "Unable to find handler method " + methodName,
-                    " " + event.getClass().getName()
-            ));
+            LOGGER.warn("Unable to find method {} for event class {}",methodName,event.getClass().getName());
         }
         return o;
     }
@@ -338,7 +314,7 @@ public abstract class Kernel {
     }
 
     public Object dispatchEvent(EventDecorator event) {
-        if (null != event.getOriginalEvent().getTimePoint()) {
+        if (null!=event.getOriginalEvent() && null != event.getOriginalEvent().getTimePoint()) {
             try {
                 ((SchedulerIface) getAdaptersMap().get("Scheduler")).handleEvent(event);
                 return null;
@@ -555,7 +531,7 @@ public abstract class Kernel {
                 }
             }
         } catch (Exception e) {
-            LOGGER.info(String.format("Adapters initialization error. Configuration for %1s: %2s", adapterName, e.getMessage()));
+            LOGGER.info(String.format("Adapters initialization error. Configuration for {}: {}", adapterName, e.getMessage()));
             //throw new Exception(e);
         }
         getLogger().print("event dispatcher: " + (eventDispatcher != null ? eventDispatcher.getName() + "(" + eventDispatcher.getClass().getName() + ")" : " not used"));
@@ -822,7 +798,7 @@ public abstract class Kernel {
             }
              */
         } else {
-            getLogger().print("Couldn't find any http request hook method. Exiting ...");
+            LOGGER.error("Inbound ports not configured. Exiting ...");
             System.exit(MIN_PRIORITY);
         }
     }
@@ -833,7 +809,9 @@ public abstract class Kernel {
      * before HTTP service.
      */
     protected void runInitTasks() throws InitException {
-        getAutostartAdapter().execute();
+        if(null!=getAutostartAdapter()){
+            getAutostartAdapter().execute();
+        }
         setInitialized(true);
     }
 
