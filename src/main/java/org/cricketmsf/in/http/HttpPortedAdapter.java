@@ -368,6 +368,10 @@ public abstract class HttpPortedAdapter
 
     protected abstract ProcedureCall preprocess(RequestObject request, long rootEventId);
 
+    protected Result postprocess(Result result){
+        return result;
+    }
+    
     /*{
 
         Event ev = new Event(this.getName(), request);
@@ -393,36 +397,27 @@ public abstract class HttpPortedAdapter
 
         try {
             ProcedureCall pCall = preprocess(requestObject, Kernel.getEventId());
-            if (pCall.requestHandled) {
+            if (pCall.requestHandled) { // request processed by the adapter
                 if (pCall.responseCode < 100 || pCall.responseCode > 1000) {
                     result.setCode(SC_BAD_REQUEST);
                 } else {
                     result.setCode(pCall.responseCode);
                 }
-                result.setData(pCall.errorResponse);
+                result.setData(pCall.response);
                 result.setHeader("Content-type", pCall.contentType);
-            } else {
-                if (pCall.responseCode == 0) {
-                    sendLogEvent(Event.LOG_FINE, "sending request to hook method " + pCall.procedureName + "@" + pCall.event.getClass().getSimpleName());
-                    result = (Result) Kernel.getInstance().getEventProcessingResult(
-                            pCall.event,
-                            pCall.procedureName
-                    );
+            } else { // pCall must be processed by the Kernel
+                sendLogEvent(Event.LOG_FINE, "sending request to hook method " + pCall.procedureName + "@" + pCall.event.getClass().getSimpleName());
+                result = (Result) Kernel.getInstance().getEventProcessingResult(
+                        pCall.event,
+                        pCall.procedureName
+                );
+                if (pCall.responseCode != 0) {
+                    result.setCode(pCall.responseCode);
                 } else {
-                    sendLogEvent(Event.LOG_FINE, "bad request");
-                    if (pCall.responseCode > 0) {
-                        if (pCall.responseCode < 100 || pCall.responseCode > 1000) {
-                            result.setCode(SC_BAD_REQUEST);
-                        } else {
-                            result.setCode(pCall.responseCode);
-                        }
-                    } else {
-                        //negative value of the responseCode means we need to response with 200 
-                        //error description will be attached to the resposnse
-                        result.setCode(SC_OK);
+                    result=postprocess(result);
+                    if(result.getCode() < 100 ||result.getCode() > 1000){
+                        result.setCode(SC_BAD_REQUEST);
                     }
-                    result.setData(pCall.errorResponse);
-                    result.setHeader("Content-type", "application/json");
                 }
             }
         } catch (ClassCastException e) {
@@ -585,146 +580,4 @@ public abstract class HttpPortedAdapter
     public void defineApi() {
     }
 
-    /*
-    @Override
-    public void handle(String string, Request rqst, HttpServletRequest hsr, HttpServletResponse hsr1) throws IOException, ServletException {
-        Stopwatch timer = null;
-        if (Kernel.getInstance().isFineLevel()) {
-            timer = new Stopwatch();
-        }
-        Result result = new StandardResult();
-        boolean problemFound = false;
-        if (mode == WEBSITE_MODE) {
-            if (!rqst.getRequestURI().endsWith("/")) {
-                if (rqst.getRequestURI().lastIndexOf("/") > rqst.getPathInfo().lastIndexOf(".")) {
-                    // redirect to index.file but only if property index.file is not null
-                    hsr1.sendRedirect(rqst.getRequestURI().concat("/"));
-
-                    return;
-                }
-            }
-        }
-
-        String hookMethodName = getHookMethodNameForMethod(rqst.getMethod());
-        if (hookMethodName == null) {
-            sendLogEvent(Event.LOG_WARNING, "hook method is not defined for " + rqst.getMethod());
-            hsr1.sendError(SC_METHOD_NOT_ALLOWED, rqst.getMethod() + " is not allowed");
-            return;
-        }
-
-        String methodName = null;
-        long rootEventID = Kernel.getEventId();
-        try {
-            sendLogEvent(Event.LOG_FINE, "sending request to hook method " + hookMethodName);
-            Event event = new Event("HttpAdapter", new RequestObject(rqst));
-            event.setRootEventId(rootEventID);
-            event.setPayload(rqst);
-            Method m = Kernel.getInstance().getClass().getMethod(hookMethodName, Event.class);
-            methodName = m.getName();
-            result = (Result) m.invoke(Kernel.getInstance(), event);
-        } catch (NoSuchMethodException e) {
-            sendLogEvent(Event.LOG_SEVERE, "handler method NoSuchMethodException " + hookMethodName + " " + e.getMessage());
-            hsr1.sendError(SC_INTERNAL_SERVER_ERROR, "handler method error");
-            return;
-        } catch (IllegalAccessException e) {
-            sendLogEvent(Event.LOG_SEVERE, "handler method IllegalAccessException " + hookMethodName + " " + e.getMessage());
-            hsr1.sendError(SC_INTERNAL_SERVER_ERROR, "handler method error");
-            return;
-        } catch (InvocationTargetException e) {
-            sendLogEvent(Event.LOG_SEVERE, "handler method InvocationTargetException " + hookMethodName + " " + e.getMessage());
-            hsr1.sendError(SC_INTERNAL_SERVER_ERROR, "handler method error");
-            return;
-        }
-        if (null == result) {
-            hsr1.sendError(SC_INTERNAL_SERVER_ERROR, "null result returned by the service");
-            return;
-        }
-        if (result.getCode() == SC_BAD_REQUEST) {
-            hsr1.sendError(SC_BAD_REQUEST, methodName + " " + result.getMessage() + " " + result.getData());
-            return;
-        }
-
-        //create response
-        hsr1.setStatus(result.getCode());
-        String acceptedResponseType = rqst.getHeader("Accept");
-        if (acceptedTypesMap.containsKey(acceptedResponseType)) {
-            hsr1.setContentType(acceptedResponseType.concat("; charset=UTF-8"));
-            hsr1.getWriter().println(new String(formatResponse(acceptedResponseType, result)));
-        } else {
-            hsr1.setContentType(getMimeType(result.getFileExtension()));
-            hsr1.getWriter().println(new String(result.getPayload()));
-        }
-        if (Kernel.getInstance().isFineLevel()) {
-            Kernel.getInstance().dispatchEvent(
-                    Event.logInfo("HttpAdapter", "event " + rootEventID + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
-            );
-        }
-        rqst.setHandled(true);
-    }
-
-    @Override
-    public void setServer(Server server) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Server getServer() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    @Override
-    public void start() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void stop() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isRunning() {
-        return true;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isStarted() {
-        return true;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isStarting() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isStopping() {
-        return false;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isStopped() {
-        return false;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isFailed() {
-        return false;
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void addLifeCycleListener(Listener ll) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void removeLifeCycleListener(Listener ll) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-     */
 }
