@@ -1,11 +1,14 @@
 /*
  * Copyright 2020 Grzegorz Skorupa
  */
-package org.cricketmsf.microsite.in.http;
+package org.cricketmsf.in.http;
 
+import org.cricketmsf.microsite.in.http.*;
 import org.cricketmsf.Adapter;
 import java.util.HashMap;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.RequestObject;
+import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.HttpAdapterIface;
 import org.cricketmsf.in.openapi.Operation;
@@ -20,7 +23,7 @@ import org.cricketmsf.in.openapi.SchemaType;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class SystemApi extends HttpAdapter implements HttpAdapterIface, Adapter {
+public class EchoAdapter extends HttpPortedAdapter implements HttpAdapterIface, Adapter {
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -39,13 +42,14 @@ public class SystemApi extends HttpAdapter implements HttpAdapterIface, Adapter 
     }
 
     /**
-     *
+     * The method provides api documentation for this adapter.
      */
     @Override
     public void defineApi() {
         Operation getOp = new Operation()
-                .description("get system configuration")
-                .summary("get system configuration")
+                .tag("echo")
+                .description("example get method")
+                .summary("example get method")
                 .parameter(
                         new Parameter(
                                 "param1",
@@ -58,16 +62,32 @@ public class SystemApi extends HttpAdapter implements HttpAdapterIface, Adapter 
                 .parameter(
                         new Parameter(
                                 "param2",
-                                ParameterLocation.path,
-                                true,
+                                ParameterLocation.query,
+                                false,
                                 "some description2")
                 )
-                .parameter(
-                        new Parameter("param3", ParameterLocation.query, false, "some description3")
-                )
-                .response(new Response("200").content("application/json").description("system configuration"))
-                .response(new Response("403").description("not authenticated"));
+                .response(new Response("200").content("application/json").description("echo response"))
+                .response(new Response("400").description("Invalid request parameters "));
         addOperationConfig("get", getOp);
+        
+    }
+
+    @Override
+    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+        String method = request.method;
+        if ("GET".equalsIgnoreCase(method)) {
+            return preprocessGet(request);
+        } else {
+            return preprocessPost(request);
+        }
+    }
+    
+    private ProcedureCall preprocessGet(RequestObject request){
+        return ProcedureCall.respond(ResponseCode.OK,"text/plain", "OK");
+    }
+    
+    private ProcedureCall preprocessPost(RequestObject request){
+        return ProcedureCall.respond(ResponseCode.OK, "text/paain","OK");
     }
 
 }

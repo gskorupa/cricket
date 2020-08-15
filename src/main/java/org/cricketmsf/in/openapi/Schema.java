@@ -19,33 +19,46 @@ package org.cricketmsf.in.openapi;
  *
  * @author greg
  */
-public class Server extends Element {
+public class Schema extends Element{
 
-    private String url = null;
-    private String description = null;
+    private String type;
+    private String format;
 
-    public Server(String url) {
-        this.url = url;
+    public Schema(SchemaType type, SchemaFormat format) {
+        this.type = type.name();
+        if (null == format) {
+            this.format = null;
+        } else {
+            this.format = format.toString();
+        }
     }
 
-    Server description (String description) {
-        this.description = description;
-        return this;
+    public Schema() {
+        this.type = SchemaType.string.name();
+        this.format = null;
+    }
+
+    /**
+     * @return the type
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * @return the format
+     */
+    public String getFormat() {
+        return format;
     }
 
     public String toYaml(String indent) {
         StringBuilder sb = new StringBuilder();
-        sb.append(indent).append("- url: \"").append(this.getUrl()).append("\"").append(lf);
-        if (null != description) {
-            sb.append(indent+indentStep).append("description: ").append(this.description).append(lf);
+        sb.append(indent).append("type: \"").append(getType()).append("\"").append(lf);
+        if (null != getFormat()) {
+            sb.append(indent).append("format: \"").append(getFormat()).append("\"").append(lf);
         }
         return sb.toString();
     }
 
-    /**
-     * @return the url
-     */
-    public String getUrl() {
-        return url;
-    }
 }

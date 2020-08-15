@@ -54,7 +54,7 @@ public abstract class HttpPortedAdapter
     public final static String CSV = "text/csv";
     public final static String HTML = "text/html";
     public final static String TEXT = "text/plain";
-
+/*
     public final static int SC_OK = 200;
     public final static int SC_ACCEPTED = 202;
     public final static int SC_CREATED = 201;
@@ -74,7 +74,7 @@ public abstract class HttpPortedAdapter
     public final static int SC_INTERNAL_SERVER_ERROR = 500;
     public final static int SC_NOT_IMPLEMENTED = 501;
     public final static int SC_UNAVAILABLE = 503;
-
+*/
     public final static int SERVICE_MODE = 0;
     public final static int WEBSITE_MODE = 1;
 
@@ -179,8 +179,8 @@ public abstract class HttpPortedAdapter
                 }
             }
             switch (result.getCode()) {
-                case SC_MOVED_PERMANENTLY:
-                case SC_MOVED_TEMPORARY:
+                case ResponseCode.MOVED_PERMANENTLY:
+                case ResponseCode.MOVED_TEMPORARY:
                     if (!headers.containsKey("Location")) {
                         String newLocation = result.getMessage() != null ? result.getMessage() : "/";
                         headers.set("Location", newLocation);
@@ -189,7 +189,7 @@ public abstract class HttpPortedAdapter
                         responseData = "".getBytes();
                     }
                     break;
-                case SC_NOT_FOUND:
+                case ResponseCode.NOT_FOUND:
                     headers.set("Content-type", "text/html");
                     responseData = result.getPayload();
                     break;
@@ -226,7 +226,7 @@ public abstract class HttpPortedAdapter
                         CorsProcessor.getResponseHeaders(headers, exchange.getRequestHeaders(), Kernel.getInstance().getCorsHeaders());
                     }
                     if (result.getCode() == 0) {
-                        result.setCode(SC_OK);
+                        result.setCode(ResponseCode.OK);
                     } else {
                         if (responseData.length == 0) {
                             if (result.getMessage() != null) {
@@ -372,15 +372,6 @@ public abstract class HttpPortedAdapter
         return result;
     }
     
-    /*{
-
-        Event ev = new Event(this.getName(), request);
-        ev.setRootEventId(rootEventId);
-        ev.setPayload(request);
-        HttpEvent event = new HttpEvent(ev);
-        return new ProcedureCall(event, "handle");
-    }
-     */
     private Result createResponse(RequestObject requestObject, long rootEventId) {
         String methodName = null;
         Result result = new StandardResult();
@@ -388,7 +379,7 @@ public abstract class HttpPortedAdapter
             if (!requestObject.uri.endsWith("/")) {
                 if (requestObject.uri.lastIndexOf("/") > requestObject.uri.lastIndexOf(".")) {
                     // redirect to index.file but only if property index.file is not null
-                    result.setCode(SC_MOVED_PERMANENTLY);
+                    result.setCode(ResponseCode.MOVED_PERMANENTLY);
                     result.setMessage(requestObject.uri.concat("/"));
                     return result;
                 }
@@ -399,7 +390,7 @@ public abstract class HttpPortedAdapter
             ProcedureCall pCall = preprocess(requestObject, Kernel.getEventId());
             if (pCall.requestHandled) { // request processed by the adapter
                 if (pCall.responseCode < 100 || pCall.responseCode > 1000) {
-                    result.setCode(SC_BAD_REQUEST);
+                    result.setCode(ResponseCode.BAD_REQUEST);
                 } else {
                     result.setCode(pCall.responseCode);
                 }
@@ -416,19 +407,19 @@ public abstract class HttpPortedAdapter
                 } else {
                     result=postprocess(result);
                     if(result.getCode() < 100 ||result.getCode() > 1000){
-                        result.setCode(SC_BAD_REQUEST);
+                        result.setCode(ResponseCode.BAD_REQUEST);
                     }
                 }
             }
         } catch (ClassCastException e) {
             sendLogEvent(Event.LOG_SEVERE, "class cast exception");
-            result.setCode(SC_INTERNAL_SERVER_ERROR);
+            result.setCode(ResponseCode.INTERNAL_SERVER_ERROR);
             result.setMessage("handler method error");
             result.setFileExtension(null);
         }
         if (null == result) {
             result = new StandardResult("null result returned by the service");
-            result.setCode(HttpPortedAdapter.SC_INTERNAL_SERVER_ERROR);
+            result.setCode(ResponseCode.INTERNAL_SERVER_ERROR);
         }
         return result;
     }
@@ -523,9 +514,6 @@ public abstract class HttpPortedAdapter
         this.extendedResponse = !("false".equalsIgnoreCase(paramValue));
     }
 
-    /*public String getDateFormat() {
-        return dateFormat;
-    }*/
     public void setDateFormat(String dateFormat) {
         if (dateFormat != null) {
             this.dateFormat = new SimpleDateFormat(dateFormat);
@@ -567,15 +555,22 @@ public abstract class HttpPortedAdapter
     }
 
     @Override
-    public void addOperationConfig(String method, Operation operation) {
+    public final void addOperationConfig(String method, Operation operation) {
         operations.put(method, operation);
     }
 
+    /**
+     * This method is called while generating OpenAPI specification for the adapter.
+     * @return map of declared operations
+     */
     @Override
-    public Map<String, Operation> getOperations() {
+    public final Map<String, Operation> getOperations() {
         return operations;
     }
 
+    /**
+     * Can be overriden to provide OpenAPI specification of the adapter class.
+     */
     @Override
     public void defineApi() {
     }

@@ -349,7 +349,9 @@
                 "time-zone": "GMT",
                 "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME",
                 "request-encoding": "UTF-8",
-                "file-upload-maxsize": "1000000"
+                "file-upload-maxsize": "1000000",
+                "serviceurl": "http://localhost:7070",
+                "terms":"https://github.com/gskorups/cricket"
             },
             "ports": [
                 {

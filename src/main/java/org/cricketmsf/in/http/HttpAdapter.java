@@ -44,6 +44,7 @@ import org.cricketmsf.in.openapi.Operation;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
+@Deprecated(since="1.5.17", forRemoval=true)
 public class HttpAdapter
         extends InboundAdapter
         implements HttpAdapterIface, HttpHandler, InboundAdapterIface/*, org.eclipse.jetty.server.Handler*/ {

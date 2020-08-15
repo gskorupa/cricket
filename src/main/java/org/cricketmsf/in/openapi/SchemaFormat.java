@@ -19,36 +19,27 @@ package org.cricketmsf.in.openapi;
  *
  * @author greg
  */
-public class RequestBody {
-    private String description;
-    private boolean required = false;
+public enum SchemaFormat {
+    int32,
+    int64,
+    _float,
+    _double,
+    _byte,
+    binary,
+    _date,
+    _date_time,
+    password,
+    string;
 
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
+    @Override
+    public String toString() {
+        String result = name();
+        if (result.startsWith("_")) {
+            result = result.substring(1);
+        }
+        if(result.indexOf("_")>0){
+            result=result.replaceFirst("_", "-");
+        }
+        return result;
     }
-
-    /**
-     * @param description the description to set
-     */
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * @return the required
-     */
-    public boolean isRequired() {
-        return required;
-    }
-
-    /**
-     * @param required the required to set
-     */
-    public void setRequired(boolean required) {
-        this.required = required;
-    }
-    
 }

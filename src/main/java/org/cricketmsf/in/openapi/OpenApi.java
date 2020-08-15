@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.cricketmsf.in.openapi;
 
 import com.cedarsoftware.util.io.JsonWriter;
@@ -31,9 +46,9 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
         // validation and translation 
         String method = request.method;
         if ("GET".equalsIgnoreCase(method)) {
-            return ProcedureCall.response(200, "text/plain", toYaml());
+            return ProcedureCall.respond(200, "application/vnd.oai.openapi", toYaml());
         } else {
-            return ProcedureCall.response(HttpAdapter.SC_NOT_IMPLEMENTED, "method not implemented");
+            return ProcedureCall.respond(HttpAdapter.SC_NOT_IMPLEMENTED, "method not implemented");
         }
     }
 
@@ -66,13 +81,6 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
     }
 
     /**
-     * @return the paths
-     */
-    //public Map<String, PathItem> getPaths() {
-    //    return paths;
-    //}
-
-    /**
      * @param pathMap the pathMap to set
      */
     public void setPaths(Map<String, PathItem> pathMap) {
@@ -89,7 +97,7 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
         Info info = new Info();
         info.setTitle(service.getName());
         info.setDescription(service.getDescription());
-        info.setTermsOfService("");
+        info.setTermsOfService((String)service.getProperties().getOrDefault("terms", ""));
         info.setVersion(properties.getOrDefault("version", "1.0.0"));
         setInfo(info);
         // servers
@@ -98,28 +106,61 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
         if(!server.getUrl().isBlank()){
             servers.put(server.getUrl(), server);
         }
-        // paths
-        HashMap<String, PathItem> paths = new HashMap<>();
+        // pathsMap
+        HashMap<String, PathItem> pathsMap = new HashMap<>();
         Iterator it = service.getAdaptersMap().values().iterator();
         Object ad;
         HttpAdapterIface hta;
-        PathItem item;
+        PathItem pathItem;
         Operation operation;
         while (it.hasNext()) {
             ad = it.next();
             if (ad instanceof HttpAdapterIface) {
                 hta = (HttpAdapterIface) ad;
-                item = new PathItem(hta.getProperty("context"));
-                if (hta.getOperations().size()>=0) {
+                pathItem = new PathItem(hta.getProperty("context"));
+                if (hta.getOperations().size()>0) {
                     operation = hta.getOperations().get("get");
                     if (null != operation) {
-                        item.setGet(operation);
+                        pathItem.setGet(operation);
                     }
-                    paths.put(item.getPath(), item);
+                    operation = hta.getOperations().get("post");
+                    if (null != operation) {
+                        pathItem.setPost(operation);
+                    }
+                    operation = hta.getOperations().get("put");
+                    if (null != operation) {
+                        pathItem.setPut(operation);
+                    }
+                    operation = hta.getOperations().get("patch");
+                    if (null != operation) {
+                        pathItem.setPatch(operation);
+                    }
+                    operation = hta.getOperations().get("delete");
+                    if (null != operation) {
+                        pathItem.setDelete(operation);
+                    }
+                    operation = hta.getOperations().get("head");
+                    if (null != operation) {
+                        pathItem.setHead(operation);
+                    }
+                    operation = hta.getOperations().get("options");
+                    if (null != operation) {
+                        pathItem.setOptions(operation);
+                    }
+                    operation = hta.getOperations().get("connect");
+                    if (null != operation) {
+                        pathItem.setConnect(operation);
+                    }
+                    operation = hta.getOperations().get("trace");
+                    if (null != operation) {
+                        pathItem.setTrace(operation);
+                    }
+                    pathsMap.put(pathItem.getPath(), pathItem);
+                    //pathItem.setConfigured(true);
                 }
             }
         }
-        setPaths(paths);
+        setPaths(pathsMap);
     }
 
     @Override
@@ -129,27 +170,41 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
 
     public String toYaml() {
         String myIndent = "";
-        String indent = "  ";
+        String indentStep = "  ";
         String lf = "\r\n";
         StringBuilder sb = new StringBuilder();
-        sb.append("openapi: '").append(this.getOpenapi()).append("'").append(lf);
+        sb.append("openapi: \"").append(this.getOpenapi()).append("\"").append(lf);
         if (null != info) {
             sb.append("info:").append(lf);
-            sb.append(getInfo().toYaml(myIndent + indent));
+            sb.append(getInfo().toYaml(myIndent + indentStep));
         }
         if(servers.size()>0){
             sb.append("servers:").append(lf);
             servers.keySet().forEach(pathElement -> {
-                sb.append(servers.get(pathElement).toYaml(myIndent + indent));
+                sb.append(servers.get(pathElement).toYaml(myIndent + indentStep));
             });            
         }
         if (null != paths && paths.size()>0) {
             sb.append("paths:").append(lf);
             paths.forEach(pathElement -> {
-                sb.append(indent).append(pathElement.getPath()).append(":").append(lf);
-                sb.append(pathElement.toYaml());
+                sb.append(indentStep).append(pathElement.getPath()).append(":").append(lf);
+                sb.append(pathElement.toYaml(myIndent+indentStep+indentStep));
             });
         }
         return sb.toString();
+    }
+    
+    
+    /**
+     * Defines API of this addapter
+     */
+    @Override
+    public void defineApi() {
+        Operation getOp = new Operation()
+                .description("get the service API specification as OpenAPI 3.0 YAML")
+                .tag("api")
+                .summary("get the service API specification")
+                .response(new Response("200").content("application/vnd.oai.openapi").description("API specification file"));
+        addOperationConfig("get", getOp);
     }
 }

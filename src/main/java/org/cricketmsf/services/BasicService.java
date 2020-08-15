@@ -31,6 +31,7 @@ import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.http.Result;
 import org.cricketmsf.in.http.StandardResult;
+import org.cricketmsf.in.openapi.OpenApiIface;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
@@ -46,15 +47,11 @@ public class BasicService extends Kernel {
 
     // adapterClasses
     LoggerAdapterIface logAdapter = null;
-    //EchoHttpAdapterIface echoAdapter = null;
     KeyValueDBIface cacheDB = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
     FileReaderAdapterIface wwwFileReader = null;
-    //SubscriberIface queueSubscriber = null;
-    // optional
-    //HttpAdapterIface scriptingService = null;
-    //ScriptingAdapterIface scriptingEngine = null;
+    OpenApiIface apiGenerator = null;
 
     public BasicService() {
         super();
@@ -65,15 +62,11 @@ public class BasicService extends Kernel {
     public void getAdapters() {
         // standard Cricket adapters
         logAdapter = (LoggerAdapterIface) getRegistered("Logger");
-        //echoAdapter = (EchoHttpAdapterIface) getRegistered("Echo");
         cacheDB = (KeyValueDBIface) getRegistered("CacheDB");
         scheduler = (SchedulerIface) getRegistered("Scheduler");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
         wwwFileReader = (FileReaderAdapterIface) getRegistered("WwwFileReader");
-        //queueSubscriber = (SubscriberIface) getRegistered("QueueSubscriber");
-        // optional
-        //scriptingService = (HttpAdapterIface) getRegistered("ScriptingService");
-        //scriptingEngine = (ScriptingAdapterIface) getRegistered("ScriptingEngine");
+        apiGenerator = (OpenApiIface) getRegistered("OpenApi");
     }
 
     @Override
@@ -86,25 +79,12 @@ public class BasicService extends Kernel {
             ex.printStackTrace();
             shutdown();
         }
-        /*
-        try {
-            if(null!=queueSubscriber){
-                queueSubscriber.init();
-            }
-        } catch (QueueException ex) {
-        }
-         */
         try {
             cacheDB.addTable("webcache", 100, false);
         } catch (NullPointerException|KeyValueDBException e) {
         }
-        /*
-        try {
-            cacheDB.addTable("counters", 1, false);
-        } catch (KeyValueDBException e) {
-        }
-         */
-
+        apiGenerator.init(this);
+        setInitialized(true);
     }
 
     @Override
@@ -115,16 +95,10 @@ public class BasicService extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
+        apiGenerator.init(this);
         Kernel.getInstance().dispatchEvent(Event.logInfo("BasicService.runOnce()", "executed"));
     }
 
-    /*
-    @HttpAdapterHook(adapterName = "ScriptingService", requestMethod = "*")
-    public Object doGetScript(Event requestEvent) {
-        StandardResult r = scriptingEngine.processRequest(requestEvent.getRequest());
-        return r;
-    }
-     */
     /**
      * Process requests from simple web server implementation given by
      * HtmlGenAdapter access web web resources
@@ -225,9 +199,6 @@ public class BasicService extends Kernel {
         }
         r.setData(data);
         r.setHeader("x-echo-greeting", "hello");
-        //} else {
-        //    Kernel.getInstance().dispatchEvent(Event.logFine("BasicService", "echo service is silent"));
-        //}
         return r;
     }
 
