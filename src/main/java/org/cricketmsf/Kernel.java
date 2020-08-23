@@ -488,7 +488,7 @@ public abstract class Kernel {
                 try {
                     Class c = Class.forName(ac.getAdapterClassName());
                     if(Modifier.isAbstract(c.getModifiers() )){
-                        getLogger().print("ERROR: " + adapterName + " class is abstract");
+                        getLogger().print("ERROR: " + adapterName + " adapter class is abstract: "+ac.getAdapterClassName());
                         continue;
                     }
                     adaptersMap.put(adapterName, c.getDeclaredConstructor().newInstance());

@@ -54,27 +54,7 @@ public abstract class HttpPortedAdapter
     public final static String CSV = "text/csv";
     public final static String HTML = "text/html";
     public final static String TEXT = "text/plain";
-/*
-    public final static int SC_OK = 200;
-    public final static int SC_ACCEPTED = 202;
-    public final static int SC_CREATED = 201;
 
-    public final static int SC_MOVED_PERMANENTLY = 301;
-    public final static int SC_MOVED_TEMPORARY = 302;
-    public final static int SC_NOT_MODIFIED = 304;
-
-    public final static int SC_BAD_REQUEST = 400;
-    public final static int SC_UNAUTHORIZED = 401;
-    public final static int SC_SESSION_EXPIRED = 401;
-    public final static int SC_FORBIDDEN = 403;
-    public final static int SC_NOT_FOUND = 404;
-    public final static int SC_METHOD_NOT_ALLOWED = 405;
-    public final static int SC_CONFLICT = 409;
-
-    public final static int SC_INTERNAL_SERVER_ERROR = 500;
-    public final static int SC_NOT_IMPLEMENTED = 501;
-    public final static int SC_UNAVAILABLE = 503;
-*/
     public final static int SERVICE_MODE = 0;
     public final static int WEBSITE_MODE = 1;
 
@@ -361,7 +341,7 @@ public abstract class HttpPortedAdapter
         requestObject.acceptedResponseType = acceptedResponseType;
         requestObject.body = (String) exchange.getAttribute("body");
         if (null == requestObject.body) {
-            requestObject.body = (String) parameters.getOrDefault("&&&data", "");
+            requestObject.body="";
         }
         return requestObject;
     }

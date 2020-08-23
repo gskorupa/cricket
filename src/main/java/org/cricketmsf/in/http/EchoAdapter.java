@@ -3,14 +3,11 @@
  */
 package org.cricketmsf.in.http;
 
-import org.cricketmsf.microsite.in.http.*;
 import org.cricketmsf.Adapter;
 import java.util.HashMap;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.event.ProcedureCall;
-import org.cricketmsf.in.http.HttpAdapter;
-import org.cricketmsf.in.http.HttpAdapterIface;
 import org.cricketmsf.in.openapi.Operation;
 import org.cricketmsf.in.openapi.Parameter;
 import org.cricketmsf.in.openapi.ParameterLocation;
@@ -75,7 +72,7 @@ public class EchoAdapter extends HttpPortedAdapter implements HttpAdapterIface, 
     @Override
     protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
         String method = request.method;
-        if ("GET".equalsIgnoreCase(method)) {
+        if ("GET".equals(method)) {
             return preprocessGet(request);
         } else {
             return preprocessPost(request);

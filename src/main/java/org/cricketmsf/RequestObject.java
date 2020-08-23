@@ -16,13 +16,8 @@
 package org.cricketmsf;
 
 import com.sun.net.httpserver.Headers;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-//import org.eclipse.jetty.server.Request;
 
 /**
  *
@@ -38,41 +33,6 @@ public class RequestObject {
     public Map<String, Object> parameters = new HashMap<>();
     public String acceptedResponseType = null;
     public String body = null;
-    //public Request request = null;
-
-    /*
-    public RequestObject(Request request) {
-        this.request = request;
-        clientIp = request.getRemoteInetSocketAddress().getAddress().getHostAddress();
-        method = request.getMethod();
-        uri = request.getRequestURI();
-        pathExt = request.getPathInfo();
-        headers = new Headers();
-        List headerNames = Collections.list(request.getHeaderNames());
-        String hn;
-        for (int i = 0; i < headerNames.size(); i++) {
-            hn = (String) headerNames.get(i);
-            headers.add(hn, request.getHeader(hn));
-        }
-        acceptedResponseType = headers.getFirst("Accept");
-        List pl = Collections.list(request.getParameterNames());
-        parameters = new HashMap<>();
-        for (int i = 0; i < pl.size(); i++) {
-            parameters.put((String) pl.get(i), request.getParameterValues((String) pl.get(i)));
-            System.out.println((String) pl.get(i));
-        }
-        try {
-            StringBuilder buffer = new StringBuilder();
-            BufferedReader reader = request.getReader();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                buffer.append(line);
-            }
-            body = buffer.toString();
-        } catch (IOException e) {
-        }
-    }
-*/
 
     public RequestObject() {
     }

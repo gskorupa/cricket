@@ -56,7 +56,7 @@ public class Runner {
             System.exit(-1);
         }
 
-        defaultConfigSet = runner.readConfig(null);
+        defaultConfigSet = runner.readDefaultConfig();
         configSet = runner.readConfig(arguments);
 
         Class serviceClass = null;
@@ -178,6 +178,33 @@ public class Runner {
             content = out.toString();
         }
         return content;
+    }
+
+    public ConfigSet readDefaultConfig() {
+        ConfigSet configSet = null;
+        Map args = new HashMap();
+        args.put(JsonReader.USE_MAPS, false);
+        Map types = new HashMap();
+        types.put("java.utils.HashMap", "adapters");
+        types.put("java.utils.HashMap", "properties");
+        args.put(JsonReader.TYPE_NAME_MAP, types);
+        InputStream propertyFile = null;
+        String propsName = "cricket.json";
+        propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
+        if (null == propertyFile) {
+            return null;
+        }
+        String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
+        configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
+        Properties prop = new Properties();
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cricket.properties")) {
+            if (inputStream != null) {
+                prop.load(inputStream);
+            }
+        } catch (IOException e) {
+        }
+        configSet.setKernelVersion(prop.getProperty("version", "unknown"));
+        return configSet;
     }
 
     public ConfigSet readConfig(ArgumentParser arguments) {

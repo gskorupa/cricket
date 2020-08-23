@@ -351,13 +351,13 @@
                 "request-encoding": "UTF-8",
                 "file-upload-maxsize": "1000000",
                 "serviceurl": "http://localhost:7070",
-                "terms":"https://github.com/gskorups/cricket"
+                "terms":"https://github.com/gskorupa/cricket"
             },
             "ports": [
                 {
                     "name": "Echo",
                     "interfaceName": "",
-                    "adapterClassName": "org.cricketmsf.in.http.HttpPortedAdapter",
+                    "adapterClassName": "org.cricketmsf.in.http.EchoAdapter",
                     "properties": {
                         "context": "/api/echo",
                         "silent-mode": "false",
@@ -487,6 +487,39 @@
                         "subfolders":"./logs:./data"
                     }
                 },
+                {
+                    "name": "OpenApi",
+                    "interfaceName": "OpenApiIface",
+                    "classFullName": "org.cricketmsf.in.openapi.OpenApi",
+                    "description": "",
+                    "properties": {
+                        "context": "/api"
+                    }
+                }
+            ]
+        },
+        {
+            "@type": "org.cricketmsf.config.Configuration",
+            "id": "BasicService",
+            "service": "org.cricketmsf.services.MinimalService",
+            "properties": {
+                "host": "0.0.0.0",
+                "port": "7070",
+                "wsport": "",
+                "ssl": "false",
+                "keystore": "./data/cricket_publickeystore.jks",
+                "keystore-password": "cricket15$#17",
+                "threads": "0",
+                "filter": "org.cricketmsf.SecurityFilter",
+                "cors": "Access-Control-Allow-Origin:*",
+                "time-zone": "GMT",
+                "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME",
+                "request-encoding": "UTF-8",
+                "file-upload-maxsize": "1000000",
+                "serviceurl": "http://localhost:7070",
+                "terms":"https://github.com/gskorupa/cricket"
+            },
+            "ports": [
                 {
                     "name": "OpenApi",
                     "interfaceName": "OpenApiIface",

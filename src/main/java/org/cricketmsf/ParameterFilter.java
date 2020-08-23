@@ -71,9 +71,9 @@ public class ParameterFilter extends Filter {
         if (null == parameterEncoding) {
             init();
         }
-        String method = exchange.getRequestMethod().toUpperCase();
+        //String method = exchange.getRequestMethod().toUpperCase();
         try {
-            switch (method) {
+            switch (exchange.getRequestMethod()) {
                 case "GET":
                     exchange.setAttribute("parameters", parseGetParameters(exchange));
                     break;
@@ -83,27 +83,13 @@ public class ParameterFilter extends Filter {
                     //try {
                     Map<String, Object> tmp;
                     tmp = parsePostParameters(exchange);
-                    /*
-                    System.out.println("BODY PARMS PARSED:" + tmp.size());
-                    tmp.forEach((k, v) -> {
-                        System.out.println("BODY P:" + k + ":" + v);
-                    });
-                    */
                     if (tmp.containsKey("&&&data")) {
                         exchange.setAttribute("body", tmp.get("&&&data"));
                         //tmp.remove("&&&data");
                     }
                     exchange.setAttribute("parameters", tmp);
-                    //} catch (IOException e) {
-                    //    exchange.sendResponseHeaders(400, e.getMessage().length());
-                    //    exchange.getResponseBody().write(e.getMessage().getBytes());
-                    //    exchange.getResponseBody().close();
-                    //    exchange.close();
-                    //    return;
-                    //}
                     break;
                 default:
-                    //System.out.println("BODY METHOD:" + method);
                     exchange.setAttribute("parameters", parseGetParameters(exchange));
             }
         } catch (Exception e) {
@@ -157,31 +143,13 @@ public class ParameterFilter extends Filter {
             case "text/csv":
             case "application/json":
             case "text/xml":
-                //try {
-                //isr = new InputStreamReader(exchange.getRequestBody(), "utf-8");
-                /*
-                br = new BufferedReader(isr);
-                while ((query = br.readLine()) != null) {
-                    content.append(query);
-                    content.append("\r\n");
-                }
-                 */
                 Scanner sc = new Scanner(exchange.getRequestBody());
                 //Reading line by line from scanner to StringBuffer
                 StringBuilder sb = new StringBuilder();
                 while (sc.hasNext()) {
                     sb.append(sc.nextLine());
                 }
-                //System.out.println("BODY:" + sb.toString());
-                //} catch (IOException e) {
-                //} finally {
-                //    if (null != isr) {
-                //        isr.close();
-                //    }
-                //}
-                //parameters.put("data", content.toString()); //TODO: remove "data" parameter
-                //parameters.put("&&&data", content.toString());
-                parameters.put("data", sb.toString()); //TODO: remove "data" parameter
+                //parameters.put("data", sb.toString()); //TODO: remove "data" parameter
                 parameters.put("&&&data", sb.toString());
                 break;
             case "application/x-www-form-urlencoded":
@@ -212,33 +180,6 @@ public class ParameterFilter extends Filter {
                 isr.close();
                 break;
             default:
-            /*
-                isr = new InputStreamReader(exchange.getRequestBody(), "utf-8");
-                br = new BufferedReader(isr);
-                ArrayList<RequestParameter> list;
-                while ((query = br.readLine()) != null) {
-                    list = parseQuery(query);
-                    for (RequestParameter param : list) {
-                        if (null == param.value) {
-                            parameters.put("&&&data", param.name);
-                        } else if (parameters.containsKey(param.name)) {
-                            Object obj = parameters.get(param.name);
-                            if (obj instanceof List<?>) {
-                                List<String> values = (List<String>) obj;
-                                values.add(param.value);
-                            } else if (obj instanceof String) {
-                                List<String> values = new ArrayList<>();
-                                values.add((String) obj);
-                                values.add(param.value);
-                                parameters.put(param.name, values);
-                            }
-                        } else {
-                            parameters.put(param.name, param.value);
-                        }
-                    }
-                }
-                isr.close();
-             */
         }
         exchange.getRequestBody().close();
         return parameters;
