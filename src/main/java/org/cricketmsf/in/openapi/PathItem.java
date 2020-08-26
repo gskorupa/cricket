@@ -15,6 +15,9 @@
  */
 package org.cricketmsf.in.openapi;
 
+import java.util.HashMap;
+import java.util.List;
+
 /**
  *
  * @author greg
@@ -32,7 +35,7 @@ public class PathItem extends Element implements Comparable<PathItem> {
     private Operation trace;
     private Operation connect;
 
-    public PathItem(String path){
+    public PathItem(String path) {
         setPath(path);
     }
 
@@ -43,58 +46,90 @@ public class PathItem extends Element implements Comparable<PathItem> {
         operation = getGet();
         if (null != operation) {
             sb.append(indent).append("get:").append(lf);
-            sb.append(operation.toYaml(indent+indentStep));
+            sb.append(operation.toYaml(indent + indentStep));
         }
 
         operation = getPost();
         if (null != operation) {
             sb.append(indent).append("post:").append(lf);
-            sb.append(operation.toYaml(indent+indentStep));
+            sb.append(operation.toYaml(indent + indentStep));
         }
 
         operation = getPut();
         if (null != operation) {
             sb.append(indent).append("put:").append(lf);
-            sb.append(operation.toYaml(indent+indentStep));
+            sb.append(operation.toYaml(indent + indentStep));
         }
-        
+
         operation = getPatch();
         if (null != operation) {
             sb.append(indent).append("patch:").append(lf);
-            sb.append(operation.toYaml(indent+indentStep));
+            sb.append(operation.toYaml(indent + indentStep));
         }
 
         operation = getDelete();
         if (null != operation) {
             sb.append(indent).append("delete:").append(lf);
-            sb.append(operation.toYaml(indent+indentStep));
+            sb.append(operation.toYaml(indent + indentStep));
         }
-        
+
         operation = getHead();
         if (null != operation) {
             sb.append(indent).append("head:").append(lf);
-            sb.append(operation.toYaml(indent+indentStep));
+            sb.append(operation.toYaml(indent + indentStep));
         }
-        
+
         operation = getOptions();
         if (null != operation) {
             sb.append(indent).append("options:").append(lf);
-            sb.append(operation.toYaml(indent+indentStep));
+            sb.append(operation.toYaml(indent + indentStep));
         }
-        
+
         operation = getConnect();
         if (null != operation) {
             sb.append(indent).append("connect:").append(lf);
-            sb.append(operation.toYaml(indent+indentStep));
+            sb.append(operation.toYaml(indent + indentStep));
         }
-        
+
         operation = getTrace();
         if (null != operation) {
             sb.append(indent).append("trace:").append(lf);
-            sb.append(operation.toYaml(indent+indentStep));
+            sb.append(operation.toYaml(indent + indentStep));
         }
-        
+
         return sb.toString();
+    }
+    
+    public void setOperation(Operation op){
+        switch(op.getMethod()){
+            case "GET":
+                setGet(op);
+                break;
+            case "POST":
+                setPost(op);
+                break;
+            case "PUT":
+                setPut(op);
+                break;
+            case "PATCH":
+                setPatch(op);
+                break;
+            case "DELETE":
+                setDelete(op);
+                break;
+            case "CONNECT":
+                setConnect(op);
+                break;
+            case "HEAD":
+                setHead(op);
+                break;
+            case "TRACE":
+                setTrace(op);
+                break;
+            case "OPTIONS":
+                setOptions(op);
+                break;
+        }
     }
 
     /**
@@ -108,7 +143,8 @@ public class PathItem extends Element implements Comparable<PathItem> {
      * @param get the get to set
      */
     public void setGet(Operation get) {
-        this.get = get;
+        this.get=get;
+        this.path=this.path+get.getPathModifier();
     }
 
     /**
@@ -143,15 +179,7 @@ public class PathItem extends Element implements Comparable<PathItem> {
      * @return the path
      */
     public String getPath() {
-        StringBuilder sb = new StringBuilder(path);
-        if (null != getGet()) {
-            for (int i = 0; i < getGet().getParameters().size(); i++) {
-                if (getGet().getParameters().get(i).getIn() == ParameterLocation.path) {
-                    sb.append("/{").append(getGet().getParameters().get(i).getName()).append("}");
-                }
-            }
-        }
-        return sb.toString();
+        return path;
     }
 
     /**

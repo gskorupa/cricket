@@ -24,6 +24,8 @@ import java.util.List;
  */
 public class Operation extends Element {
 
+    private String method;
+    private String pathModifier;
     private String description;
     private String summary;
     private List<Parameter> parameters = new ArrayList<>();
@@ -34,6 +36,18 @@ public class Operation extends Element {
         parameters = new ArrayList<>();
         responses = new ArrayList<>();
         tags = new ArrayList<>();
+        pathModifier="";
+        method="";
+    }
+    
+    public Operation(String method){
+        this();
+        this.method=method;
+    }
+    
+    public Operation method(String method){
+        this.method=method.toUpperCase();
+        return this;
     }
 
     public Operation description(String description) {
@@ -60,6 +74,11 @@ public class Operation extends Element {
         if (!tags.contains(tag)) {
             tags.add(tag);
         }
+        return this;
+    }
+    
+    public Operation pathModifier(String pathModifier){
+        this.setPathModifier(pathModifier);
         return this;
     }
 
@@ -127,6 +146,18 @@ public class Operation extends Element {
     public List<Parameter> getParameters() {
         return parameters;
     }
+    
+    public List<Parameter> getParameters(boolean inPath) {
+        ArrayList<Parameter> result= new ArrayList<>();
+        for(int i=0; i<getParameters().size();i++){
+            if(inPath && inPath==getParameters().get(i).getIn().equals(ParameterLocation.path)){
+                result.add(getParameters().get(i));
+            }else if(!inPath && inPath!=getParameters().get(i).getIn().equals(ParameterLocation.path)){
+                result.add(getParameters().get(i));
+            }
+        }
+        return result;
+    }
 
     /**
      * @param parameters the parameters to set
@@ -147,5 +178,36 @@ public class Operation extends Element {
      */
     public void setResponses(List<Response> responses) {
         this.responses = responses;
+    }
+    
+    public boolean hasInPathParameters(){
+        final boolean result;
+        for(int i=0; i<getParameters().size(); i++){
+            if(ParameterLocation.path.equals(getParameters().get(i).getIn())){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return the pathModifier
+     */
+    public String getPathModifier() {
+        return pathModifier;
+    }
+
+    /**
+     * @param pathModifier the pathModifier to set
+     */
+    public void setPathModifier(String pathModifier) {
+        this.pathModifier = pathModifier;
+    }
+
+    /**
+     * @return the method
+     */
+    public String getMethod() {
+        return method;
     }
 }

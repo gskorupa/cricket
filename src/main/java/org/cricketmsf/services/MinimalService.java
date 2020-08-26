@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,13 @@
  */
 package org.cricketmsf.services;
 
-import java.util.HashMap;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.RequestObject;
 import org.cricketmsf.annotation.EventHook;
-import org.cricketmsf.annotation.HttpAdapterHook;
-import org.cricketmsf.annotation.PortEventClassHook;
 import org.cricketmsf.event.EventMaster;
-import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.exception.EventException;
 import org.cricketmsf.exception.InitException;
-import org.cricketmsf.in.http.HtmlGenAdapterIface;
-import org.cricketmsf.in.http.HttpAdapter;
-import org.cricketmsf.in.http.ParameterMapResult;
-import org.cricketmsf.in.http.Result;
-import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.openapi.OpenApiIface;
-import org.cricketmsf.in.scheduler.SchedulerIface;
-import org.cricketmsf.out.db.KeyValueDBException;
-import org.cricketmsf.out.db.KeyValueDBIface;
-import org.cricketmsf.out.file.FileReaderAdapterIface;
-import org.cricketmsf.out.log.LoggerAdapterIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,7 +75,14 @@ public class MinimalService extends Kernel {
 
     @EventHook(eventCategory = "*")
     public void processEvent(Event event) {
-        logger.info(String.format("Don't know how to handle event category %1s with payload: %2s", event.getCategory(), event.getPayload() != null ? event.getPayload().toString() : "null"));
+        switch(event.getCategory()){
+            case "LOG":
+            case "HTTPLOG":
+                logger.info(event.getPayload().toString());
+                break;
+            default:
+                logger.info(String.format("Don't know how to handle event category %1s with payload: %2s", event.getCategory(), event.getPayload() != null ? event.getPayload().toString() : "null"));        
+        }
     }
     
 }

@@ -1,11 +1,21 @@
 /*
- * Copyright 2020 Grzegorz Skorupa
+ * Copyright 2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.cricketmsf.in.http;
 
-import org.cricketmsf.Adapter;
 import java.util.HashMap;
-import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.openapi.Operation;
@@ -20,71 +30,64 @@ import org.cricketmsf.in.openapi.SchemaType;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class EchoAdapter extends HttpPortedAdapter implements HttpAdapterIface, Adapter {
+public class EchoAdapter extends HttpPortedAdapter {
 
-    /**
-     * This method is executed while adapter is instantiated during the service
-     * start. It's used to configure the adapter according to the configuration.
-     *
-     * @param properties map of properties read from the configuration file
-     * @param adapterName name of the adapter set in the configuration file (can
-     * be different from the interface and class name.
-     */
+    public EchoAdapter() {
+        super();
+    }
+
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        super.getServiceHooks(adapterName);
-        setContext(properties.get("context"));
-        Kernel.getInstance().getLogger().printIndented("context=" + getContext());
-    }
-
-    /**
-     * The method provides api documentation for this adapter.
-     */
-    @Override
-    public void defineApi() {
-        Operation getOp = new Operation()
-                .tag("echo")
-                .description("example get method")
-                .summary("example get method")
-                .parameter(
-                        new Parameter(
-                                "param1",
-                                ParameterLocation.path,
-                                true,
-                                "some description1",
-                                new Schema(SchemaType.string, SchemaFormat.string)
-                        )
-                )
-                .parameter(
-                        new Parameter(
-                                "param2",
-                                ParameterLocation.query,
-                                false,
-                                "some description2")
-                )
-                .response(new Response("200").content("application/json").description("echo response"))
-                .response(new Response("400").description("Invalid request parameters "));
-        addOperationConfig("get", getOp);
-        
     }
 
     @Override
     protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
-        String method = request.method;
-        if ("GET".equals(method)) {
-            return preprocessGet(request);
-        } else {
-            return preprocessPost(request);
+        switch (request.method) {
+            case "GET":
+                return preprocessGet(request);
+            default:
+                HashMap<String, Object> err = new HashMap<>();
+                err.put("code", 405); //code<100 || code >1000
+                err.put("message", String.format("method %1s not allowed", request.method));
+                return ProcedureCall.respond(405, err);
         }
     }
-    
-    private ProcedureCall preprocessGet(RequestObject request){
-        return ProcedureCall.respond(ResponseCode.OK,"text/plain", "OK");
+
+    private ProcedureCall preprocessGet(RequestObject request) {
+        String name = (String) request.parameters.getOrDefault("name", "");
+        if(name.isEmpty()){
+            HashMap<String, Object> err = new HashMap<>();
+            err.put("code", 400);
+            err.put("message", "parameter 'name' not found");
+            return ProcedureCall.respond(400, err);
+        }else{
+            return ProcedureCall.respond(200, "text/plain", String.format("Hello %1s!",name));
+        }
     }
-    
-    private ProcedureCall preprocessPost(RequestObject request){
-        return ProcedureCall.respond(ResponseCode.OK, "text/paain","OK");
+
+    /**
+     * The method provides API documentation for this adapter.
+     */
+    @Override
+    public void defineApi() {
+        // GET request definition
+        Operation getOp = new Operation("GET")
+                .tag("echo")
+                .description("get greetings")
+                .summary("example get method")
+                .parameter(
+                        new Parameter(
+                                "name",
+                                ParameterLocation.query,
+                                true,
+                                "User name.",
+                                new Schema(SchemaType.string, SchemaFormat.string)
+                        )
+                )
+                .response(new Response("200").content("text/plain").description("response"))
+                .response(new Response("400").description("Invalid request parameters "));
+        addOperationConfig(getOp);
     }
 
 }

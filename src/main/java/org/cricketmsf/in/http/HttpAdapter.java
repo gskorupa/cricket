@@ -691,10 +691,10 @@ public class HttpAdapter
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
      */
-
+    
     @Override
-    public void addOperationConfig(String method, Operation operation) {
-        operations.put(method, operation);
+    public final void addOperationConfig(Operation operation) {
+        operations.put(operation.getMethod(), operation);
     }
 
     @Override

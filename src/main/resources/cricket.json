@@ -359,9 +359,7 @@
                     "interfaceName": "",
                     "adapterClassName": "org.cricketmsf.in.http.EchoAdapter",
                     "properties": {
-                        "context": "/api/echo",
-                        "silent-mode": "false",
-                        "extended-response":"true"
+                        "context": "/api/echo"
                     }
                 },
                 {
@@ -500,7 +498,7 @@
         },
         {
             "@type": "org.cricketmsf.config.Configuration",
-            "id": "BasicService",
+            "id": "MinimalService",
             "service": "org.cricketmsf.services.MinimalService",
             "properties": {
                 "host": "0.0.0.0",
@@ -527,6 +525,23 @@
                     "description": "",
                     "properties": {
                         "context": "/api"
+                    }
+                },
+                {
+                    "name": "Hello",
+                    "interfaceName": "",
+                    "classFullName": "org.cricketmsf.in.http.EchoAdapter",
+                    "description": "",
+                    "properties": {
+                        "context": "/api/echo"
+                    }
+                },
+                {
+                    "name": "HelloAPI",
+                    "interfaceName": "",
+                    "classFullName": "org.cricketmsf.in.hello.HelloAdapter",
+                    "properties": {
+                        "context": "/api/hello"
                     }
                 }
             ]

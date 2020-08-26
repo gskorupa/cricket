@@ -25,6 +25,6 @@ import org.cricketmsf.in.openapi.Operation;
  */
 public interface HttpAdapterIface extends InboundAdapterIface{
     public void defineApi();
-    public void addOperationConfig(String method, Operation operation);
+    public void addOperationConfig(Operation operation);
     public Map<String,Operation> getOperations();
 }

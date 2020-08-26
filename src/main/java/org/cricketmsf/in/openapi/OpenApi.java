@@ -38,7 +38,7 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
 
     private String openapi = "3.0.3";
     private Info info = null;
-    private Map<String,Server> servers=null;
+    private Map<String, Server> servers = null;
     private ArrayList<PathItem> paths = null;
 
     @Override
@@ -85,7 +85,7 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
      */
     public void setPaths(Map<String, PathItem> pathMap) {
         this.paths = new ArrayList<>();
-        pathMap.values().forEach(item->{
+        pathMap.values().forEach(item -> {
             this.paths.add(item);
         });
         Collections.sort(paths);
@@ -97,20 +97,22 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
         Info info = new Info();
         info.setTitle(service.getName());
         info.setDescription(service.getDescription());
-        info.setTermsOfService((String)service.getProperties().getOrDefault("terms", ""));
+        info.setTermsOfService((String) service.getProperties().getOrDefault("terms", ""));
         info.setVersion(properties.getOrDefault("version", "1.0.0"));
         setInfo(info);
         // servers
-        servers=new HashMap<>();
-        Server server=new Server((String)service.getProperties().getOrDefault("serviceurl", ""));
-        if(!server.getUrl().isBlank()){
+        servers = new HashMap<>();
+        Server server = new Server((String) service.getProperties().getOrDefault("serviceurl", ""));
+        if (!server.getUrl().isBlank()) {
             servers.put(server.getUrl(), server);
         }
         // pathsMap
+        String[] methods = {"GET", "POST", "PUT", "PATCH", "OPTIONS", "HEAD", "CONNECT", "TRACE", "DELETE"};
         HashMap<String, PathItem> pathsMap = new HashMap<>();
         Iterator it = service.getAdaptersMap().values().iterator();
         Object ad;
         HttpAdapterIface hta;
+        //HashMap<String, PathItem> paths = new HashMap<>();
         PathItem pathItem;
         Operation operation;
         while (it.hasNext()) {
@@ -118,45 +120,19 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
             if (ad instanceof HttpAdapterIface) {
                 hta = (HttpAdapterIface) ad;
                 pathItem = new PathItem(hta.getProperty("context"));
-                if (hta.getOperations().size()>0) {
-                    operation = hta.getOperations().get("get");
-                    if (null != operation) {
-                        pathItem.setGet(operation);
-                    }
-                    operation = hta.getOperations().get("post");
-                    if (null != operation) {
-                        pathItem.setPost(operation);
-                    }
-                    operation = hta.getOperations().get("put");
-                    if (null != operation) {
-                        pathItem.setPut(operation);
-                    }
-                    operation = hta.getOperations().get("patch");
-                    if (null != operation) {
-                        pathItem.setPatch(operation);
-                    }
-                    operation = hta.getOperations().get("delete");
-                    if (null != operation) {
-                        pathItem.setDelete(operation);
-                    }
-                    operation = hta.getOperations().get("head");
-                    if (null != operation) {
-                        pathItem.setHead(operation);
-                    }
-                    operation = hta.getOperations().get("options");
-                    if (null != operation) {
-                        pathItem.setOptions(operation);
-                    }
-                    operation = hta.getOperations().get("connect");
-                    if (null != operation) {
-                        pathItem.setConnect(operation);
-                    }
-                    operation = hta.getOperations().get("trace");
-                    if (null != operation) {
-                        pathItem.setTrace(operation);
+                if (hta.getOperations().size() > 0) {
+                    for (String methodName : methods) {
+                        operation = hta.getOperations().get(methodName);
+                        if (null != operation) {
+                            pathItem = pathsMap.get(hta.getProperty("context") + operation.getPathModifier());
+                            if (null == pathItem) {
+                                pathItem = new PathItem(hta.getProperty("context"));
+                            }
+                            pathItem.setOperation(operation);
+                            pathsMap.put(pathItem.getPath(), pathItem);
+                        }
                     }
                     pathsMap.put(pathItem.getPath(), pathItem);
-                    //pathItem.setConfigured(true);
                 }
             }
         }
@@ -178,33 +154,32 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
             sb.append("info:").append(lf);
             sb.append(getInfo().toYaml(myIndent + indentStep));
         }
-        if(servers.size()>0){
+        if (servers.size() > 0) {
             sb.append("servers:").append(lf);
             servers.keySet().forEach(pathElement -> {
                 sb.append(servers.get(pathElement).toYaml(myIndent + indentStep));
-            });            
+            });
         }
-        if (null != paths && paths.size()>0) {
+        if (null != paths && paths.size() > 0) {
             sb.append("paths:").append(lf);
-            paths.forEach(pathElement -> {
-                sb.append(indentStep).append(pathElement.getPath()).append(":").append(lf);
-                sb.append(pathElement.toYaml(myIndent+indentStep+indentStep));
+            paths.forEach(pathItem -> {
+                sb.append(indentStep).append(pathItem.getPath()).append(":").append(lf);
+                sb.append(pathItem.toYaml(myIndent + indentStep + indentStep));
             });
         }
         return sb.toString();
     }
-    
-    
+
     /**
      * Defines API of this addapter
      */
     @Override
     public void defineApi() {
-        Operation getOp = new Operation()
+        Operation getOp = new Operation("GET")
                 .description("get the service API specification as OpenAPI 3.0 YAML")
                 .tag("api")
                 .summary("get the service API specification")
                 .response(new Response("200").content("application/vnd.oai.openapi").description("API specification file"));
-        addOperationConfig("get", getOp);
+        addOperationConfig(getOp);
     }
 }

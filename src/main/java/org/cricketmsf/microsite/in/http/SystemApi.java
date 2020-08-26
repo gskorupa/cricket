@@ -43,7 +43,7 @@ public class SystemApi extends HttpAdapter implements HttpAdapterIface, Adapter 
      */
     @Override
     public void defineApi() {
-        Operation getOp = new Operation()
+        Operation getOp = new Operation("GET")
                 .description("get system configuration")
                 .summary("get system configuration")
                 .parameter(
@@ -67,7 +67,7 @@ public class SystemApi extends HttpAdapter implements HttpAdapterIface, Adapter 
                 )
                 .response(new Response("200").content("application/json").description("system configuration"))
                 .response(new Response("403").description("not authenticated"));
-        addOperationConfig("get", getOp);
+        addOperationConfig(getOp);
     }
 
 }

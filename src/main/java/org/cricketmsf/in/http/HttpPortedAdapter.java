@@ -30,6 +30,7 @@ import java.util.Map;
 import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,6 +41,8 @@ import org.cricketmsf.Stopwatch;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.InboundAdapterIface;
 import org.cricketmsf.in.openapi.Operation;
+import org.cricketmsf.in.openapi.Parameter;
+import org.cricketmsf.in.openapi.ParameterLocation;
 
 /**
  *
@@ -341,17 +344,17 @@ public abstract class HttpPortedAdapter
         requestObject.acceptedResponseType = acceptedResponseType;
         requestObject.body = (String) exchange.getAttribute("body");
         if (null == requestObject.body) {
-            requestObject.body="";
+            requestObject.body = "";
         }
         return requestObject;
     }
 
     protected abstract ProcedureCall preprocess(RequestObject request, long rootEventId);
 
-    protected Result postprocess(Result result){
+    protected Result postprocess(Result result) {
         return result;
     }
-    
+
     private Result createResponse(RequestObject requestObject, long rootEventId) {
         String methodName = null;
         Result result = new StandardResult();
@@ -385,8 +388,8 @@ public abstract class HttpPortedAdapter
                 if (pCall.responseCode != 0) {
                     result.setCode(pCall.responseCode);
                 } else {
-                    result=postprocess(result);
-                    if(result.getCode() < 100 ||result.getCode() > 1000){
+                    result = postprocess(result);
+                    if (result.getCode() < 100 || result.getCode() > 1000) {
                         result.setCode(ResponseCode.BAD_REQUEST);
                     }
                 }
@@ -533,14 +536,38 @@ public abstract class HttpPortedAdapter
         sb.append("***PARAMETERS.").append("\r\n");
         return sb.toString();
     }
-
+    
     @Override
-    public final void addOperationConfig(String method, Operation operation) {
-        operations.put(method, operation);
+    public final void addOperationConfig(Operation operation) {
+        operations.put(operation.getMethod(), operation);
+    }
+
+    protected final ArrayList<Parameter> getParams(String method, boolean required, ParameterLocation location) {
+        ArrayList<Parameter> params = new ArrayList();
+        try {
+            getOperations().get(method).getParameters().forEach(param -> {
+                if (required == param.isRequired() && location.equals(param.getIn())) {
+                    params.add(param);
+                }
+            });
+        } catch (NullPointerException e) {
+        }
+        return params;
+    }
+    
+    protected int getParamIndex(ArrayList<Parameter>params, String name){
+        for(int i=0; i<params.size(); i++){
+            if(params.get(i).getName().equals(name)){
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
-     * This method is called while generating OpenAPI specification for the adapter.
+     * This method is called while generating OpenAPI specification for the
+     * adapter.
+     *
      * @return map of declared operations
      */
     @Override
