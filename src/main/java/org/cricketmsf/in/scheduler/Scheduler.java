@@ -38,6 +38,8 @@ import java.util.concurrent.TimeUnit;
 import org.cricketmsf.event.EventDecorator;
 import org.cricketmsf.exception.DispatcherException;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -45,6 +47,8 @@ import org.cricketmsf.out.dispatcher.DispatcherIface;
  * @author greg
  */
 public class Scheduler extends InboundAdapter implements SchedulerIface, DispatcherIface, Adapter {
+    
+    private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
     private String storagePath;
     private String envVariable;
@@ -141,6 +145,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
         try{
         if (event.getTimePoint() == null) {
+            logger.debug("event.getTimePioint() is null. It should not happen");
             return false;
         }
         if (systemStart) {
@@ -404,20 +409,20 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public void dispatch(Event event) throws DispatcherException {
-        if(event.getTimePoint()==null){
-            Kernel.getInstance().getEventProcessingResult(event);
-        }else{
+        //if(event.getTimePoint()==null){
+        //    Kernel.getInstance().getEventProcessingResult(event);
+        //}else{
             handleEvent(event);
-        }
+        //}
     }
     
     @Override
     public void dispatch(EventDecorator event) throws DispatcherException {
-        if(event.getTimePoint()==null){
-            Kernel.getInstance().getEventProcessingResult(event);
-        }else{
+        //if(event.getTimePoint()==null){
+        //    Kernel.getInstance().getEventProcessingResult(event);
+        //}else{
             handleEvent(event);
-        }
+        //}
     }
     
     @Override

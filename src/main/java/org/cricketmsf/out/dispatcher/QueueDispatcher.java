@@ -97,7 +97,12 @@ public class QueueDispatcher extends OutboundAdapter implements Adapter, Dispatc
         }
         if (handleAll || eventMap.containsKey(event.getClass().getName())) {
             try {
-                ((QueueClientIface) Kernel.getInstance().getAdaptersMap().get(queueClientName)).publish(event.getClass().getName(), event.getOriginalEvent().toJson());
+                String serialized=event.serialize();
+                if(null==serialized){
+                    serialized=event.getOriginalEvent().toJson();
+                }
+                ((QueueClientIface) Kernel.getInstance().getAdaptersMap().get(queueClientName))
+                        .publish(event.getClass().getName(), serialized);
             } catch (QueueException ex) {
                 throw new DispatcherException(DispatcherException.QUEUE_EXCEPTION, ex.getMessage());
             } catch (Exception ex) {

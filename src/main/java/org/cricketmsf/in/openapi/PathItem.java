@@ -159,6 +159,7 @@ public class PathItem extends Element implements Comparable<PathItem> {
      */
     public void setPut(Operation put) {
         this.put = put;
+        this.path=this.path+put.getPathModifier();
     }
 
     /**
@@ -173,6 +174,7 @@ public class PathItem extends Element implements Comparable<PathItem> {
      */
     public void setPost(Operation post) {
         this.post = post;
+        this.path=this.path+post.getPathModifier();
     }
 
     /**
@@ -206,6 +208,7 @@ public class PathItem extends Element implements Comparable<PathItem> {
      */
     public void setDelete(Operation delete) {
         this.delete = delete;
+        this.path=this.path+delete.getPathModifier();
     }
 
     /**
@@ -220,6 +223,7 @@ public class PathItem extends Element implements Comparable<PathItem> {
      */
     public void setPatch(Operation patch) {
         this.patch = patch;
+        this.path=this.path+patch.getPathModifier();
     }
 
     /**
@@ -234,6 +238,7 @@ public class PathItem extends Element implements Comparable<PathItem> {
      */
     public void setHead(Operation head) {
         this.head = head;
+        this.path=this.path+head.getPathModifier();
     }
 
     /**
@@ -248,6 +253,7 @@ public class PathItem extends Element implements Comparable<PathItem> {
      */
     public void setOptions(Operation options) {
         this.options = options;
+        this.path=this.path+options.getPathModifier();
     }
 
     /**
@@ -262,6 +268,7 @@ public class PathItem extends Element implements Comparable<PathItem> {
      */
     public void setTrace(Operation trace) {
         this.trace = trace;
+        this.path=this.path+trace.getPathModifier();
     }
 
     /**
@@ -276,6 +283,7 @@ public class PathItem extends Element implements Comparable<PathItem> {
      */
     public void setConnect(Operation connect) {
         this.connect = connect;
+        this.path=this.path+connect.getPathModifier();
     }
 
 }

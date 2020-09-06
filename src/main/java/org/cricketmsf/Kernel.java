@@ -248,7 +248,7 @@ public abstract class Kernel {
         try {
             Method m;
             methodName = getHookMethodNameForPort(event.getClass().getSimpleName(), procedureName);
-            if (null != methodName) {
+            if (null != methodName && !methodName.isBlank()) {
                 m = getClass().getMethod(methodName, event.getClass());
                 o = m.invoke(this, event);
             } else {
@@ -257,7 +257,8 @@ public abstract class Kernel {
         } catch (IllegalAccessException | NoSuchMethodException e) {
             LOGGER.warn("Handler method {} not compatible with event class {}",methodName,event.getClass().getName());
         } catch (InvocationTargetException e) {
-            LOGGER.warn("Handler method {} exception {}",methodName,e.getMessage());
+            LOGGER.warn("Event class {} handler method {} exception {} {}",event.getClass().getName(),methodName,e.getCause().getClass(), e.getCause().getMessage());
+            e.printStackTrace();
         } catch (NullPointerException e) {
             LOGGER.warn("Unable to find method {} for event class {}",methodName,event.getClass().getName());
         }
@@ -384,8 +385,8 @@ public abstract class Kernel {
             ((Kernel) instance).setUuid(UUID.randomUUID());
             ((Kernel) instance).setId(config.getId());
             ((Kernel) instance).setDescription(config.getDescription());
-            ((Kernel) instance).setName((String) cfg.getProperties().getOrDefault("SRVC_NAME_ENV_VARIABLE", "CRICKET_NAME"));
             ((Kernel) instance).setProperties(cfg.getProperties());
+            ((Kernel) instance).setName((String) cfg.getProperties().getOrDefault("SRVC_NAME_ENV_VARIABLE", "CRICKET_NAME"));
             ((Kernel) instance).setSsl((String) cfg.getProperties().getOrDefault("SSL_ENV_VARIABLE", "CRICKET_SSL"));
             ((Kernel) instance).configureTimeFormat(cfg);
             ((Kernel) instance).loadAdapters(cfg);
@@ -985,9 +986,16 @@ public abstract class Kernel {
             tmp = System.getenv(variableName);
         } catch (Exception e) {
         }
-        this.name = tmp != null ? tmp : "" + getProperties().getOrDefault("servicename", "");
-        if (this.name.isEmpty()) {
+        if(null==tmp||tmp.isBlank()){
+            tmp=(String)getProperties().getOrDefault("servicename", "");
+        }
+        if(null==tmp||tmp.isBlank()){
+            tmp=getId();
+        }
+        if (tmp.isBlank()) {
             this.name = "CricketService";
+        }else{
+            this.name=tmp;
         }
     }
 

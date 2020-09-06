@@ -1,6 +1,8 @@
 package org.cricketmsf.event;
 
+import com.cedarsoftware.util.io.JsonWriter;
 import org.cricketmsf.Event;
+import org.cricketmsf.JsonReader;
 
 /**
  *
@@ -9,9 +11,11 @@ import org.cricketmsf.Event;
 public class EventDecorator extends Event {
 
     protected Event originalEvent;
+    protected Object data;
 
     public EventDecorator() {
         super();
+        data = null;
         originalEvent = this;
     }
 
@@ -24,6 +28,7 @@ public class EventDecorator extends Event {
             setId(event.getId());
             setName(event.getName());
         }
+        data = null;
     }
 
     public Event getOriginalEvent() {
@@ -32,6 +37,44 @@ public class EventDecorator extends Event {
 
     public void setOriginalEvent(Event event) {
         originalEvent = event;
+    }
+
+    /**
+     * Can be used to replace Event.toJson() method.
+     *
+     * Must be implemented when event payload data are not stored in
+     * originalEvent but there are dedicated method fields used for that.
+     *
+     * @return
+     */
+    public String serialize() {
+        return JsonWriter.objectToJson(getData());
+    }
+
+    /**
+     * Must be implemented when event data are not stored in
+     * originalEvent.payload but there are dedicated method fields used for
+     * that.
+     *
+     * @param serialized
+     * @throws Exception
+     */
+    public void deserialize(String jsonString) {
+        setData(JsonReader.jsonToJava(jsonString));
+    }
+
+    /**
+     * @return the data
+     */
+    public Object getData() {
+        return data;
+    }
+
+    /**
+     * @param data the data to set
+     */
+    public void setData(Object data) {
+        this.data = data;
     }
 
 }

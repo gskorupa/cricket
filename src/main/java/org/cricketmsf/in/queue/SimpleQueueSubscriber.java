@@ -67,7 +67,11 @@ public class SimpleQueueSubscriber extends InboundAdapter implements SubscriberI
         Event ev;
         try {
             dev = (EventDecorator)Class.forName(channelName).newInstance();
-            dev.setOriginalEvent(Event.fromJson((String) value));
+            dev.deserialize((String) value);
+            if(dev.getData() instanceof Event){
+                dev.setOriginalEvent((Event)dev.getData());
+                dev.setData(null);
+            }
             Kernel.getInstance().getEventProcessingResult(dev);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             Kernel.getInstance().getEventProcessingResult(Event.fromJson((String) value));

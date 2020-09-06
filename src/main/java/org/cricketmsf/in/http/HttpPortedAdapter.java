@@ -385,12 +385,14 @@ public abstract class HttpPortedAdapter
                         pCall.event,
                         pCall.procedureName
                 );
-                if (pCall.responseCode != 0) {
-                    result.setCode(pCall.responseCode);
-                } else {
-                    result = postprocess(result);
-                    if (result.getCode() < 100 || result.getCode() > 1000) {
-                        result.setCode(ResponseCode.BAD_REQUEST);
+                if (null != result) {
+                    if (pCall.responseCode != 0) {
+                        result.setCode(pCall.responseCode);
+                    } else {
+                        result = postprocess(result);
+                        if (null!=result && (result.getCode() < 100 || result.getCode() > 1000)) {
+                            result.setCode(ResponseCode.BAD_REQUEST);
+                        }
                     }
                 }
             }
@@ -399,6 +401,8 @@ public abstract class HttpPortedAdapter
             result.setCode(ResponseCode.INTERNAL_SERVER_ERROR);
             result.setMessage("handler method error");
             result.setFileExtension(null);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         if (null == result) {
             result = new StandardResult("null result returned by the service");
@@ -536,7 +540,7 @@ public abstract class HttpPortedAdapter
         sb.append("***PARAMETERS.").append("\r\n");
         return sb.toString();
     }
-    
+
     @Override
     public final void addOperationConfig(Operation operation) {
         operations.put(operation.getMethod(), operation);
@@ -554,10 +558,10 @@ public abstract class HttpPortedAdapter
         }
         return params;
     }
-    
-    protected int getParamIndex(ArrayList<Parameter>params, String name){
-        for(int i=0; i<params.size(); i++){
-            if(params.get(i).getName().equals(name)){
+
+    protected int getParamIndex(ArrayList<Parameter> params, String name) {
+        for (int i = 0; i < params.size(); i++) {
+            if (params.get(i).getName().equals(name)) {
                 return i;
             }
         }
