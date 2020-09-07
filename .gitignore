@@ -100,3 +100,4 @@ build
 /test.yaml
 /logs/
 !/gradle/wrapper/gradle-wrapper.jar
+!/local-lib/LivingDocumentation-1.0.0.jar
