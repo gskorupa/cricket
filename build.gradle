@@ -126,23 +126,23 @@ task zipDistro(type: Zip) {
     from fatJar
 }
 
-publishing {
-    repositories {
-        maven {
-            name = "CricketPackages"
-            url = uri("https://maven.pkg.github.com/gskorupa/cricket")
-            credentials {
-                username = githubUser
-                password = githubPublishingToken
-            }
-        }
-    }
-    publications {
-        maven(MavenPublication) {
-            groupId = 'org.cricketmsf'
-            artifactId = 'cricket'
-            artifact fatJar
-        }
-    }
-}
+//publishing {
+//    repositories {
+//        maven {
+//            name = "CricketPackages"
+//            url = uri("https://maven.pkg.github.com/gskorupa/cricket")
+//            credentials {
+//                username = githubUser
+//                password = githubPublishingToken
+//            }
+//        }
+//    }
+//    publications {
+//        maven(MavenPublication) {
+//            groupId = 'org.cricketmsf'
+//            artifactId = 'cricket'
+//            artifact fatJar
+//        }
+//    }
+//}
 
