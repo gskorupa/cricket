@@ -126,6 +126,8 @@ task zipDistro(type: Zip) {
     from fatJar
 }
 
+build.finalizedBy(fatJar)
+
 //publishing {
 //    repositories {
 //        maven {
