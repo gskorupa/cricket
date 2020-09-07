@@ -128,9 +128,13 @@ task zipDistro(type: Zip) {
 
 build.finalizedBy(fatJar)
 
+def cricketFile = file("$buildDir/libs/cricket-"+"$version"+".jar")
+
 artifacts {
-    archives fatJar
+    archives cricketFile
 }
+
+
 
 //publishing {
 //    repositories {
