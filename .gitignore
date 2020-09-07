@@ -99,3 +99,4 @@ build
 /tmp/
 /test.yaml
 /logs/
+!/gradle/wrapper/gradle-wrapper.jar
