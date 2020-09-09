@@ -25,11 +25,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 /**
  * Runner class is used when running JAR distribution. The class parses the
@@ -196,6 +200,7 @@ public class Runner {
         }
         String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
         configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
+        /*
         Properties prop = new Properties();
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cricket.properties")) {
             if (inputStream != null) {
@@ -204,7 +209,30 @@ public class Runner {
         } catch (IOException e) {
         }
         configSet.setKernelVersion(prop.getProperty("version", "unknown"));
+        */
+        configSet.setKernelVersion(getVersion());
         return configSet;
+    }
+
+    private String getVersion() {
+        try {
+            Enumeration<URL> resources = Runner.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+            while (resources.hasMoreElements()) {
+                URL url = resources.nextElement();
+                try {
+                    Manifest manifest = new Manifest(url.openStream());
+                    Attributes attributes = manifest.getMainAttributes();
+                    if ("org.cricketmsf.Runner".equals(attributes.getValue("Main-Class"))) {
+                        return attributes.getValue("Implementation-Version");
+                    }
+                } catch (IOException ex) {
+                    return "";
+                }
+            }
+        } catch (IOException e) {
+            return "";
+        }
+        return "";
     }
 
     public ConfigSet readConfig(ArgumentParser arguments) {
@@ -237,6 +265,8 @@ public class Runner {
         String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
         configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
         // read Kernel version
+        /*
+        getVersion();
         Properties prop = new Properties();
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cricket.properties")) {
             if (inputStream != null) {
@@ -245,6 +275,8 @@ public class Runner {
         } catch (IOException e) {
         }
         configSet.setKernelVersion(prop.getProperty("version", "unknown"));
+        */
+        configSet.setKernelVersion(getVersion());
         // force property changes based on command line --force param
         if (null != arguments && arguments.containsKey("force")) {
             ArrayList<String> forcedProps = (ArrayList) arguments.get("force");
