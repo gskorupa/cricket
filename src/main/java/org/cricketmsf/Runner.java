@@ -200,16 +200,6 @@ public class Runner {
         }
         String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
         configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
-        /*
-        Properties prop = new Properties();
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cricket.properties")) {
-            if (inputStream != null) {
-                prop.load(inputStream);
-            }
-        } catch (IOException e) {
-        }
-        configSet.setKernelVersion(prop.getProperty("version", "unknown"));
-        */
         configSet.setKernelVersion(getVersion());
         return configSet;
     }
@@ -265,17 +255,6 @@ public class Runner {
         String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
         configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
         // read Kernel version
-        /*
-        getVersion();
-        Properties prop = new Properties();
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("cricket.properties")) {
-            if (inputStream != null) {
-                prop.load(inputStream);
-            }
-        } catch (IOException e) {
-        }
-        configSet.setKernelVersion(prop.getProperty("version", "unknown"));
-        */
         configSet.setKernelVersion(getVersion());
         // force property changes based on command line --force param
         if (null != arguments && arguments.containsKey("force")) {

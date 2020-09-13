@@ -76,8 +76,8 @@ public class Parameter extends Element{
         sb.append(indent).append("in: ").append(getIn().name()).append(lf);
         sb.append(indent).append("description: \"").append(getDescription()).append("\"").append(lf);
         sb.append(indent).append("required: ").append(isRequired()).append(lf);
-        sb.append(indent).append("schema:").append(lf);
-        sb.append(schema.toYaml(indent+indentStep));
+        //sb.append(indent).append("schema:").append(lf);
+        sb.append(schema.toYaml(indent));
         return sb.toString();
     }
 

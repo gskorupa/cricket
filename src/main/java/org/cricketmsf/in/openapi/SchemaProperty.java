@@ -15,29 +15,37 @@
  */
 package org.cricketmsf.in.openapi;
 
-import java.util.HashMap;
-
 /**
  *
  * @author greg
  */
-public class RequestBody {
-    private String description;
-    private boolean required = false;
-    private HashMap<String,BodyContent> content;
-    
-    public RequestBody(BodyContent content, boolean required, String description){
-        this.content=new HashMap<>();
-        this.content.put(content.getName(), content);
-        this.description=description;
-        this.required=required;
-    }
-    
-    public RequestBody content(BodyContent content){
-        this.getContent().put(content.getName(), content);
-        return this;
+public class SchemaProperty {
+
+    private final String name;
+    private final SchemaType type;
+    private final String format;
+    private final String description;
+
+    public SchemaProperty(String name, SchemaType type, String format, String description) {
+        this.name = name;
+        this.type = type;
+        this.format = format;
+        this.description = description;
     }
 
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @return the type
+     */
+    public SchemaType getType() {
+        return type;
+    }
 
     /**
      * @return the description
@@ -47,17 +55,10 @@ public class RequestBody {
     }
 
     /**
-     * @return the required
+     * @return the format
      */
-    public boolean isRequired() {
-        return required;
+    public String getFormat() {
+        return format;
     }
 
-    /**
-     * @return the content
-     */
-    public HashMap<String,BodyContent> getContent() {
-        return content;
-    }
-    
 }

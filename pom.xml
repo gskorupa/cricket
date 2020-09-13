@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cricketmsf</groupId>
     <artifactId>cricket</artifactId>
-    <version>1.5.41</version>
+    <version>1.5.42</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -67,11 +67,9 @@
             <version>1.2.3</version>
         </dependency>
         <dependency>
-            <groupId>LivingDocumentation</groupId>
+            <groupId>org.cricketmsf.livingdoc</groupId>
             <artifactId>LivingDocumentation</artifactId>
             <version>1.0.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/local-lib/LivingDocumentation-1.0.0.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -85,6 +83,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -110,6 +109,7 @@
                                     <exclude>org.postgresql:postgresql</exclude>
                                     <exclude>org.eclipse.paho:org.eclipse.paho.client.mqttv3</exclude>
                                     <exclude>junit:junit</exclude>
+                                    <exclude>org.hamcrest:hamcrest-core</exclude>
                                 </excludes>
                             </artifactSet>
                             <transformers>

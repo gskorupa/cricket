@@ -543,6 +543,7 @@ public abstract class HttpPortedAdapter
 
     @Override
     public final void addOperationConfig(Operation operation) {
+        System.out.println(">>> "+getName()+" adding operation "+operation.getMethod()+" "+operation.getParameters().size());
         operations.put(operation.getMethod(), operation);
     }
 
@@ -550,11 +551,12 @@ public abstract class HttpPortedAdapter
         ArrayList<Parameter> params = new ArrayList();
         try {
             getOperations().get(method).getParameters().forEach(param -> {
-                if (required == param.isRequired() && location.equals(param.getIn())) {
+                if (required == param.isRequired() && location==param.getIn()) {
                     params.add(param);
                 }
             });
         } catch (NullPointerException e) {
+            e.printStackTrace();
         }
         return params;
     }

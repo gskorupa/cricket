@@ -16,6 +16,7 @@
 package org.cricketmsf.in.openapi;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -28,25 +29,32 @@ public class Operation extends Element {
     private String pathModifier;
     private String description;
     private String summary;
+    private RequestBody body;
     private List<Parameter> parameters = new ArrayList<>();
     private List<Response> responses = new ArrayList<>();
     private List<String> tags = new ArrayList<>();
 
     public Operation() {
+        body = null;
         parameters = new ArrayList<>();
         responses = new ArrayList<>();
         tags = new ArrayList<>();
-        pathModifier="";
-        method="";
+        pathModifier = "";
+        method = "";
     }
-    
-    public Operation(String method){
+
+    public Operation(String method) {
         this();
-        this.method=method;
+        this.method = method;
     }
-    
-    public Operation method(String method){
-        this.method=method.toUpperCase();
+
+    public Operation body(RequestBody body) {
+        this.body = body;
+        return this;
+    }
+
+    public Operation method(String method) {
+        this.method = method.toUpperCase();
         return this;
     }
 
@@ -76,8 +84,8 @@ public class Operation extends Element {
         }
         return this;
     }
-    
-    public Operation pathModifier(String pathModifier){
+
+    public Operation pathModifier(String pathModifier) {
         this.setPathModifier(pathModifier);
         return this;
     }
@@ -96,13 +104,31 @@ public class Operation extends Element {
         if (null != summary) {
             sb.append(indent).append("summary: \"").append(getSummary()).append("\"").append(lf);
         }
-        if (parameters.size() > 0) {
+
+        // print body definition or parameters
+        if (null != body) {
+            sb.append(indent).append("requestBody:").append(lf);
+            String indent2 = indent + indentStep;
+            if (null != body.getDescription() && !body.getDescription().isEmpty()) {
+                sb.append(indent2).append("description: \"").append(body.getDescription()).append("\"").append(lf);
+            }
+            sb.append(indent2).append("required: ").append(body.isRequired()).append(lf);
+            sb.append(indent2).append("content:").append(lf);
+            HashMap<String,BodyContent> bc=body.getContent();
+            bc.forEach((name,item)->{
+                sb.append(indent2).append(indentStep).append(name).append(":").append(lf);
+                sb.append(item.getSchema().toYaml(indent2+indentStep+indentStep));
+            });
+            
+        } else if (parameters.size() > 0) {
             sb.append(indent).append("parameters:").append(lf);
             parameters.forEach(parameter -> {
                 sb.append(indent).append("- name: \"").append(parameter.getName()).append("\"").append(lf);
                 sb.append(parameter.toYaml(indent + indentStep));
             });
         }
+
+        // print responses definition
         if (responses.size() > 0) {
             sb.append(indent).append("responses:").append(lf);
             responses.forEach(response -> {
@@ -146,13 +172,13 @@ public class Operation extends Element {
     public List<Parameter> getParameters() {
         return parameters;
     }
-    
+
     public List<Parameter> getParameters(boolean inPath) {
-        ArrayList<Parameter> result= new ArrayList<>();
-        for(int i=0; i<getParameters().size();i++){
-            if(inPath && inPath==getParameters().get(i).getIn().equals(ParameterLocation.path)){
+        ArrayList<Parameter> result = new ArrayList<>();
+        for (int i = 0; i < getParameters().size(); i++) {
+            if (inPath && inPath == getParameters().get(i).getIn().equals(ParameterLocation.path)) {
                 result.add(getParameters().get(i));
-            }else if(!inPath && inPath!=getParameters().get(i).getIn().equals(ParameterLocation.path)){
+            } else if (!inPath && inPath != getParameters().get(i).getIn().equals(ParameterLocation.path)) {
                 result.add(getParameters().get(i));
             }
         }
@@ -179,11 +205,11 @@ public class Operation extends Element {
     public void setResponses(List<Response> responses) {
         this.responses = responses;
     }
-    
-    public boolean hasInPathParameters(){
+
+    public boolean hasInPathParameters() {
         final boolean result;
-        for(int i=0; i<getParameters().size(); i++){
-            if(ParameterLocation.path.equals(getParameters().get(i).getIn())){
+        for (int i = 0; i < getParameters().size(); i++) {
+            if (ParameterLocation.path.equals(getParameters().get(i).getIn())) {
                 return true;
             }
         }

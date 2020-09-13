@@ -20,19 +20,25 @@ import java.util.HashMap;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.http.HttpPortedAdapter;
+import org.cricketmsf.in.openapi.BodyContent;
 import org.cricketmsf.in.openapi.Operation;
 import org.cricketmsf.in.openapi.Parameter;
 import org.cricketmsf.in.openapi.ParameterLocation;
+import org.cricketmsf.in.openapi.RequestBody;
 import org.cricketmsf.in.openapi.Response;
 import org.cricketmsf.in.openapi.Schema;
-import org.cricketmsf.in.openapi.SchemaFormat;
+import org.cricketmsf.in.openapi.SchemaProperty;
 import org.cricketmsf.in.openapi.SchemaType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class HelloAdapter extends HttpPortedAdapter{
+public class HelloAdapter extends HttpPortedAdapter {
+
+    private static final Logger logger = LoggerFactory.getLogger(HelloAdapter.class);
 
     public static int PARAM_NOT_FOUND = 1;
 
@@ -43,6 +49,7 @@ public class HelloAdapter extends HttpPortedAdapter{
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
+        // "context" parameter is read by HttpPortedAdapter class
     }
 
     @Override
@@ -52,6 +59,8 @@ public class HelloAdapter extends HttpPortedAdapter{
                 return preprocessGet(request);
             case "POST":
                 return preprocessPost(request);
+            case "OPTIONS":
+                return ProcedureCall.respond(200, null);
             default:
                 HashMap<String, Object> err = new HashMap<>();
                 err.put("code", 405); //code<100 || code >1000
@@ -61,6 +70,38 @@ public class HelloAdapter extends HttpPortedAdapter{
     }
 
     private ProcedureCall preprocessGet(RequestObject request) {
+
+        /*
+        Validating request
+         */
+        ProcedureCall validationResult = validateGet(request);
+        if (null != validationResult) {
+            return validationResult;
+        }
+
+        /*
+        Getting request parameters
+         */
+        String[] pathParams = pathParams = request.pathExt.split("/");
+        String name = pathParams.length > 0 ? pathParams[0] : "";
+        String friend = (String) request.parameters.getOrDefault("friend", "");
+
+        /*
+        Forwarding dedicated event type to the service
+         */
+        return ProcedureCall.forward(new HelloEvent(name, friend), "sayHello");
+    }
+
+    private ProcedureCall preprocessPost(RequestObject request) {
+        // validation and translation 
+
+        // the name parameter is required
+        String name = (String) request.parameters.getOrDefault("name", "");
+        // forwarding dedicated event type to the service
+        return ProcedureCall.forward(new HelloEvent(name, ""), "addUser");
+    }
+
+    private ProcedureCall validateGet(RequestObject request) {
         HashMap<String, Object> err = new HashMap<>();
         
         /*
@@ -70,59 +111,47 @@ public class HelloAdapter extends HttpPortedAdapter{
         if (!request.pathExt.isBlank()) {
             pathParams = request.pathExt.split("/");
         }
+        int pathParamsCount = pathParams.length;
+        if (pathParamsCount > 0 && pathParams[0].isBlank()) {
+            pathParamsCount = 0;
+        }
         // checking required path parameters
         ArrayList<Parameter> requiredPathParams = getParams("GET", true, ParameterLocation.path);
-        if (requiredPathParams.size() > pathParams.length) {
-            err.put("code", PARAM_NOT_FOUND); //code<100 || code >1000
+        System.out.println("REQUIRED PATH PARAMS " + requiredPathParams.size());
+        System.out.println("PATH PARAMS " + pathParamsCount);
+        if (requiredPathParams.size() > pathParamsCount) {
+            err.put("code", 400); //code<100 || code >1000
             for (int i = 0; i < requiredPathParams.size(); i++) {
-                if (i >= pathParams.length) {
+                if (i >= pathParamsCount) {
                     err.put("message" + i, String.format("path parameter '%1s' not found", requiredPathParams.get(i).getName()));
                 }
             }
+            return ProcedureCall.respond(400, err);
         }
-        if(err.size()>0){
-            return ProcedureCall.respond(PARAM_NOT_FOUND, err);
+
+        //query parameters
+        String name = (String) request.parameters.getOrDefault("name", "");
+        if (name.isEmpty()) {
+            err.put("code", 400); //code<100 || code >1000
+            // http status codes can be used directly:
+            // err.put("code", 404);
+            err.put("message", "unknown name");
+            return ProcedureCall.respond(400, err);
         }
         /* End of API validation */
 
-        /*
-        * Getting request parameters
-        */
-        String name = pathParams[0];
-        String friend = (String) request.parameters.getOrDefault("friend", "");
-        
         /*
         * Custom validation
         * The second parameter should be in query and it's optional
         * but we decide that value "world" is not allowed
         */
-        if("world".equalsIgnoreCase(friend)){
-            err.put("code", 400);
-            err.put("message", String.format("friend value '%1s' is not allowed", "world"));
-            return ProcedureCall.respond(400, err);
-        }
+        //if ("world".equalsIgnoreCase(friend)) {
+        //    err.put("code", 400);
+        //    err.put("message", String.format("friend value '%1s' is not allowed", "world"));
+        //    return ProcedureCall.respond(400, err);
+        //}
         
-        
-        /*
-        * Forwarding dedicated event type to the service
-        */
-        return ProcedureCall.forward(new HelloEvent(name, friend), "sayHello");
-    }
-
-    private ProcedureCall preprocessPost(RequestObject request) {
-        // validation and translation 
-        // the name parameter is required
-        String name = (String) request.parameters.getOrDefault("name", "");
-        if (name.isEmpty()) {
-            HashMap<String, Object> err = new HashMap<>();
-            err.put("code", PARAM_NOT_FOUND); //code<100 || code >1000
-            // http status codes can be used directly:
-            // err.put("code", 404);
-            err.put("message", "unknown name");
-            return ProcedureCall.respond(PARAM_NOT_FOUND, err);
-        }
-        // forwarding dedicated event type to the service
-        return ProcedureCall.forward(new HelloEvent(name, ""), "addUser");
+        return null;
     }
 
     /**
@@ -142,7 +171,7 @@ public class HelloAdapter extends HttpPortedAdapter{
                                 ParameterLocation.path,
                                 true,
                                 "User name.",
-                                new Schema(SchemaType.string, SchemaFormat.string)
+                                new Schema(SchemaType.string)
                         )
                 )
                 .parameter(
@@ -162,15 +191,21 @@ public class HelloAdapter extends HttpPortedAdapter{
                 .tag("hello")
                 .description("registering user name")
                 .summary("example post method")
-                .parameter(
-                        new Parameter(
-                                "name",
-                                ParameterLocation.query,
-                                true,
-                                "new user name")
-                )
                 .response(new Response("200").content("text/plain").description("user name registered"))
                 .response(new Response("400").description("Invalid request parameters"));
+
+        SchemaProperty schemaProperty1 = new SchemaProperty("name", SchemaType.string, null, "");
+        Schema schema = new Schema(SchemaType.object).property(schemaProperty1);
+        //SchemaProperty schemaProperty2=new SchemaProperty("friend", SchemaType.string, null, "");
+        //schema=schema.property(schemaProperty2);
+
+        BodyContent bodyContent = new BodyContent("application/x-www-form-urlencoded", schema);
+        //BodyContent bodyContent=new BodyContent("application/json", schema2);
+
+        RequestBody body = new RequestBody(bodyContent, true, "description");
+        //body.content(bc2);
+
+        postOp.body(body);
         addOperationConfig(postOp);
     }
 

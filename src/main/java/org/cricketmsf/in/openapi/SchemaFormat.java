@@ -28,8 +28,7 @@ public enum SchemaFormat {
     binary,
     _date,
     _date_time,
-    password,
-    string;
+    password;
 
     @Override
     public String toString() {

@@ -82,7 +82,7 @@ public class EchoAdapter extends HttpPortedAdapter {
                                 ParameterLocation.query,
                                 true,
                                 "User name.",
-                                new Schema(SchemaType.string, SchemaFormat.string)
+                                new Schema(SchemaType.string)
                         )
                 )
                 .response(new Response("200").content("text/plain").description("response"))
