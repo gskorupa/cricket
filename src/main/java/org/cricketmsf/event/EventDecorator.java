@@ -30,6 +30,11 @@ public class EventDecorator extends Event {
         }
         data = null;
     }
+    
+    public EventDecorator timePoint(String timePointDefinition){
+        setTimePoint(timePointDefinition);
+        return this;
+    }
 
     public Event getOriginalEvent() {
         return originalEvent;

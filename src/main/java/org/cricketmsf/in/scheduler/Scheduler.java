@@ -80,7 +80,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         Kernel.getInstance().getLogger().print("\tpath: " + getStoragePath());
         setEnvVariable(properties.get("envVariable"));
         Kernel.getInstance().getLogger().print("\tenvVAriable name: " + getEnvVariable());
-        if (System.getenv(getEnvVariable()) != null) {
+        if (null!=getEnvVariable() && System.getenv(getEnvVariable()) != null) {
             setStoragePath(System.getenv(getEnvVariable()));
         }
         // fix to handle '.'
@@ -145,7 +145,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
         try{
         if (event.getTimePoint() == null) {
-            logger.debug("event.getTimePioint() is null. It should not happen");
+            logger.debug("event.getTimePoint() is null. It should not happen");
             return false;
         }
         if (systemStart) {
@@ -409,20 +409,20 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public void dispatch(Event event) throws DispatcherException {
-        //if(event.getTimePoint()==null){
-        //    Kernel.getInstance().getEventProcessingResult(event);
-        //}else{
+        if(event.getTimePoint()==null){
+            Kernel.getInstance().getEventProcessingResult(event);
+        }else{
             handleEvent(event);
-        //}
+        }
     }
     
     @Override
     public void dispatch(EventDecorator event) throws DispatcherException {
-        //if(event.getTimePoint()==null){
-        //    Kernel.getInstance().getEventProcessingResult(event);
-        //}else{
+        if(event.getTimePoint()==null){
+            Kernel.getInstance().getEventProcessingResult(event);
+        }else{
             handleEvent(event);
-        //}
+        }
     }
     
     @Override

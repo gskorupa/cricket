@@ -72,9 +72,9 @@ public class Configuration {
                     found = i;
                 }
             }
-            if (found<0) {
+            if (found < 0) {
                 al.add(ports[j]);
-            }else{
+            } else {
                 al.set(found, ports[j]);
             }
         }
@@ -115,11 +115,25 @@ public class Configuration {
     }
 
     public String getProperty(String name) {
-        return (String) properties.get(name);
+        String value = (String) properties.get(name);
+        if (null != value && value.startsWith("$")) {
+            String tmp = System.getenv(value.substring(1));
+            if (null != tmp) {
+                value = tmp;
+            }
+        }
+        return value;
     }
 
     public String getProperty(String name, String defaultValue) {
-        return (String) properties.getOrDefault(name, defaultValue);
+        String value = (String) properties.getOrDefault(name, defaultValue);
+        if (null != value && value.startsWith("$")) {
+            String tmp = System.getenv(value.substring(1));
+            if (null != tmp) {
+                value = tmp;
+            }
+        }
+        return value;
     }
 
     public void putProperty(String name, Object value) {
