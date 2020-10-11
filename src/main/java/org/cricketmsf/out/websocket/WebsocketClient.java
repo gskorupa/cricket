@@ -13,16 +13,20 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.OutboundAdapterIface;
+import org.cricketmsf.services.BasicService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author greg
  */
 public class WebsocketClient extends OutboundAdapter implements OutboundAdapterIface, Adapter, WebsocketClientIface {
+    private static final Logger logger = LoggerFactory.getLogger(WebsocketClient.class);
 
     public static int NOT_INITIALIZED = 0;
     public static int CONNECTED = 1;
@@ -87,14 +91,14 @@ public class WebsocketClient extends OutboundAdapter implements OutboundAdapterI
                 }
             }).join();
         } catch (Exception e) {
-            Kernel.getInstance().dispatchEvent(Event.logWarning(this, "error connecting to "+endpoint+" : "+e.getMessage()));
+            logger.warn("error connecting to {} : {}",endpoint,e.getMessage());
         }
     }
 
     @Override
     public void sendMessage(String message) {
         if (null == webSocket) {
-            Kernel.getInstance().dispatchEvent(Event.logWarning(name, "not connected"));
+            logger.warn("not connected");
             return;
         }
         webSocket.sendText(message, true);
@@ -106,16 +110,16 @@ public class WebsocketClient extends OutboundAdapter implements OutboundAdapterI
         getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
         endpoint = properties.get("url");
         properties.put("url", endpoint);
-        Kernel.getInstance().getLogger().print("\turl: " + endpoint);
+        logger.info("\turl: " + endpoint);
         timeout = Long.parseLong(properties.getOrDefault("timeout","0"));
         properties.put("timeout", ""+timeout);
-        Kernel.getInstance().getLogger().print("\ttimeout: " + timeout);
+        logger.info("\ttimeout: " + timeout);
         user = properties.getOrDefault("user","");
         properties.put("user", user);
-        Kernel.getInstance().getLogger().print("\tuser: " + user);
+        logger.info("\tuser: " + user);
         password = properties.getOrDefault("password","");
         properties.put("password", "***");
-        Kernel.getInstance().getLogger().print("\tpassword: " + "***");
+        logger.info("\tpassword: " + "***");
         if(!(user.isBlank()||password.isBlank())){
             credentials=Base64.getUrlEncoder().encodeToString((user + ":" + password).getBytes());
         }

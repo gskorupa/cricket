@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
 import org.h2.jdbcx.JdbcConnectionPool;

@@ -15,7 +15,7 @@
  */
 package org.cricketmsf.services;
 
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import java.util.HashMap;
 import org.cricketmsf.annotation.HttpAdapterHook;

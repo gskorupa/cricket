@@ -27,6 +27,4 @@ public interface EventIface {
         EventMaster.registerEventCategories(categories,className);
     }
     
-    public abstract String[] getCategories() throws EventException;
-    
 }

@@ -15,7 +15,7 @@
  */
 package org.cricketmsf.in.scheduler;
 
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 
 /**
  *

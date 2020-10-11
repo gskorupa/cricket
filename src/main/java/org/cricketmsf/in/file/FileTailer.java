@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.EventException;

@@ -24,30 +24,17 @@ import org.cricketmsf.event.ProcedureCall;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class GreeterAdapter
+public class StatusAdapter
         extends HttpPortedAdapter /*implements Adapter, HttpAdapterIface, HttpHandler, InboundAdapterIface/*, org.eclipse.jetty.server.Handler*/ {
 
-    public static int PARAM_NOT_FOUND = 1;
-
-    public GreeterAdapter() {
+    public StatusAdapter() {
         super();
     }
 
     @Override
     protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
-        // validation and translation 
-        String name = (String) request.parameters.getOrDefault("name", "");
-        if (name.isEmpty() || !"world".equalsIgnoreCase(name)) {
-            HashMap<String, Object> err = new HashMap<>();
-            err.put("code", PARAM_NOT_FOUND); //code<100 || code >1000
-            // http status codes can be used directly:
-            // err.put("code", 404);
-            err.put("message", "unknown name or name parameter not found (must be 'world')");
-            return ProcedureCall.respond(PARAM_NOT_FOUND, err);
-        }
-        // building resulting call
         HttpEvent event = new HttpEvent(request);
-        return ProcedureCall.forward(event, "greet");
+        return ProcedureCall.forward(event, "getStatus");
     }
 
 }

@@ -20,7 +20,7 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.microsite.out.auth.AuthAdapterIface;
 import org.cricketmsf.microsite.out.auth.AuthException;

@@ -16,19 +16,15 @@
 package org.cricketmsf.services;
 
 import java.util.HashMap;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
-import org.cricketmsf.annotation.EventHook;
-import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.annotation.PortEventClassHook;
-import org.cricketmsf.event.EventMaster;
-import org.cricketmsf.event.HttpEvent;
-import org.cricketmsf.exception.EventException;
+import org.cricketmsf.event.GreeterEvent;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
-import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
+import org.cricketmsf.in.http.ResponseCode;
 import org.cricketmsf.in.http.Result;
 import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.in.openapi.OpenApiIface;
@@ -36,7 +32,8 @@ import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
 import org.cricketmsf.out.file.FileReaderAdapterIface;
-import org.cricketmsf.out.log.LoggerAdapterIface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * EchoService
@@ -44,9 +41,9 @@ import org.cricketmsf.out.log.LoggerAdapterIface;
  * @author greg
  */
 public class BasicService extends Kernel {
+    private static final Logger logger = LoggerFactory.getLogger(BasicService.class);
 
     // adapterClasses
-    LoggerAdapterIface logAdapter = null;
     KeyValueDBIface cacheDB = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
@@ -61,7 +58,6 @@ public class BasicService extends Kernel {
     @Override
     public void getAdapters() {
         // standard Cricket adapters
-        logAdapter = (LoggerAdapterIface) getRegistered("Logger");
         cacheDB = (KeyValueDBIface) getRegistered("CacheDB");
         scheduler = (SchedulerIface) getRegistered("Scheduler");
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
@@ -74,8 +70,8 @@ public class BasicService extends Kernel {
         try {
             super.runInitTasks();
             // we should register event categories used by this service
-            EventMaster.registerEventCategories(new Event().getCategories(), Event.class.getName());
-        } catch (InitException | EventException ex) {
+            //EventMaster.registerEventCategories(new Event().getCategories(), Event.class.getName());
+        } catch (InitException ex) {
             ex.printStackTrace();
             shutdown();
         }
@@ -96,7 +92,7 @@ public class BasicService extends Kernel {
     public void runOnce() {
         super.runOnce();
         apiGenerator.init(this);
-        Kernel.getInstance().dispatchEvent(Event.logInfo("BasicService.runOnce()", "executed"));
+        logger.info("BasicService.runOnce() executed");
     }
 
     /**
@@ -122,64 +118,25 @@ public class BasicService extends Kernel {
         return null;
     }
 
-    @HttpAdapterHook(adapterName = "Test", requestMethod = "*")
-    public Object doTest(Event event) {
-        try {
-            RequestObject request = event.getRequest();
-            StandardResult result = new StandardResult();
-            result.setData("");
-            Kernel.getInstance().dispatchEvent(new Event(this.getName(), "TEST", "", null, ""));
-            return result;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @HttpAdapterHook(adapterName = "StatusService", requestMethod = "GET")
+    @PortEventClassHook(className = "HttpEvent", procedureName = "getStatus")
     public Object handleStatusRequest(Event requestEvent) {
         StandardResult result = new StandardResult();
-        result.setCode(HttpAdapter.SC_OK);
+        result.setCode(ResponseCode.OK);
         result.setData(reportStatus());
         return result;
     }
 
-    @PortEventClassHook(className = "HttpEvent", procedureName = "handle")
-    public Object doGetEcho(HttpEvent requestEvent) {
-        return sendEcho(requestEvent.getOriginalEvent().getRequest());
-    }
-
     @PortEventClassHook(className = "HttpEvent", procedureName = "greet")
-    public Object doGreet(HttpEvent requestEvent) {
-        String name = (String) requestEvent.getOriginalEvent().getPayload();
+    public Object doGreet(GreeterEvent event) {
+        String name =  ((HashMap<String,String>)event.getData()).get("name");
         Result result = new StandardResult("Hello " + name);
         result.setHeader("Content-type", "text/plain");
         return result;
     }
 
-    @EventHook(eventCategory = Event.CATEGORY_LOG)
-    @EventHook(eventCategory = "Category-Test")
-    public void logEvent(Event event) {
-        logAdapter.log(event);
-    }
-
-    @EventHook(eventCategory = Event.CATEGORY_HTTP_LOG)
-    public void logHttpEvent(Event event) {
-        logAdapter.log(event);
-    }
-
-    @EventHook(eventCategory = "*")
-    public void processEvent(Event event) {
-        if (event.getTimePoint() != null) {
-            scheduler.handleEvent(event);
-        } else {
-            Kernel.getInstance().dispatchEvent(Event.logWarning("Event category " + event.getCategory() + " is not handled by BasicService", event.getPayload() != null ? event.getPayload().toString() : ""));
-        }
-    }
-
     public Object sendEcho(RequestObject request) {
         StandardResult r = new StandardResult();
-        r.setCode(HttpAdapter.SC_OK);
+        r.setCode(ResponseCode.OK);
         //if (!echoAdapter.isSilent()) {
         HashMap<String, Object> data = new HashMap<>(request.parameters);
         data.put("&_service.id", getId());
@@ -189,7 +146,7 @@ public class BasicService extends Kernel {
         data.put("&_request.pathExt", request.pathExt);
         data.put("&_request.body", request.body);
         if (data.containsKey("error")) {
-            int errCode = HttpAdapter.SC_INTERNAL_SERVER_ERROR;
+            int errCode = ResponseCode.INTERNAL_SERVER_ERROR;
             try {
                 errCode = Integer.parseInt((String) data.get("error"));
             } catch (Exception e) {

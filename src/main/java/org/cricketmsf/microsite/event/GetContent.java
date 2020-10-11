@@ -15,7 +15,7 @@
  */
 package org.cricketmsf.microsite.event;
 
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.event.EventDecorator;
 import org.cricketmsf.event.EventIface;
 

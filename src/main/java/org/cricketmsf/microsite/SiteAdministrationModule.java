@@ -16,7 +16,7 @@
 package org.cricketmsf.microsite;
 
 import java.sql.SQLException;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.StandardResult;
 import java.text.SimpleDateFormat;

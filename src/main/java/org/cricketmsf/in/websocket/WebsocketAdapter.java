@@ -17,31 +17,26 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.bind.DatatypeConverter;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.RequestObject;
 import org.cricketmsf.WebsocketServer;
-import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.annotation.WebsocketAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.in.InboundAdapterIface;
-import org.cricketmsf.in.http.HttpAdapter;
-import static org.cricketmsf.in.http.HttpAdapter.SC_INTERNAL_SERVER_ERROR;
-import static org.cricketmsf.in.http.HttpAdapter.SC_METHOD_NOT_ALLOWED;
-import org.cricketmsf.in.http.Result;
-import org.cricketmsf.in.http.StandardResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author greg
  */
 public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIface, Adapter, Runnable {
+
+    private static final Logger logger = LoggerFactory.getLogger(WebsocketAdapter.class);
 
     public static final int DIALOG = 0;
     public static final int INPUT = 1;
@@ -50,7 +45,7 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
     public int serviceType = DIALOG;
     public boolean sendHello = false;
     public boolean echo = false;
-    public String context=null;
+    public String context = null;
     public boolean stopped = false;
 
     //private Adapter handler = null;
@@ -93,10 +88,10 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
         if (!onStart) {
             getServiceHook();
         } else {
-            Kernel.getLogger().printIndented("context=" + getContext());
-            Kernel.getLogger().printIndented("echo=" + echo);
-            Kernel.getLogger().printIndented("send-hello=" + sendHello);
-            Kernel.getLogger().printIndented("mode=" + tmpMode);
+            logger.info("context=" + getContext());
+            logger.info("echo=" + echo);
+            logger.info("send-hello=" + sendHello);
+            logger.info("mode=" + tmpMode);
         }
     }
 
@@ -328,25 +323,25 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
         } catch (Exception e) {
 
         }
-        Kernel.getInstance().dispatchEvent(Event.logInfo(this, "WS client disconnected from " + getContext()));
+        logger.info("WS client disconnected from " + getContext());
         stop();
     }
 
     private void setReceivedData(String message) {
         String result = null;
         if (serviceHookName == null) {
-            Kernel.getInstance().dispatchEvent(Event.logWarning(this, "hook method is not defined for context " + getContext()));
+            logger.warn("hook method is not defined for context {}", getContext());
             return;
         }
         try {
             Method m = Kernel.getInstance().getClass().getMethod(serviceHookName, String.class);
             result = (String) m.invoke(Kernel.getInstance(), message);
         } catch (NoSuchMethodException e) {
-            Kernel.getInstance().dispatchEvent(Event.logWarning(this, "handler method NoSuchMethodException " + serviceHookName + " " + e.getMessage()));
+            logger.warn("handler method NoSuchMethodException {} {}", serviceHookName, e.getMessage());
         } catch (IllegalAccessException e) {
-            Kernel.getInstance().dispatchEvent(Event.logWarning(this, "handler method IllegalAccessException " + serviceHookName + " " + e.getMessage()));
+            logger.warn("handler method IllegalAccessException {} {}", serviceHookName, e.getMessage());
         } catch (InvocationTargetException e) {
-            Kernel.getInstance().dispatchEvent(Event.logWarning(this, "handler method InvocationTargetException " + serviceHookName + " " + e.getMessage()));
+            logger.warn("handler method InvocationTargetException {} {}", serviceHookName, e.getMessage());
         }
         if (null != result) {
             setOutcomingData(result);
@@ -354,14 +349,15 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
     }
 
     public void setOutcomingData(String message) {
-        if(!stopped)
+        if (!stopped) {
             dataToSend = message;
+        }
     }
 
     private synchronized String getData() {
         boolean interrupted = false;
-        String result=null;
-        while (!interrupted && null == dataToSend && !this.socket.isClosed() && this.socket.isConnected() ) {
+        String result = null;
+        while (!interrupted && null == dataToSend && !this.socket.isClosed() && this.socket.isConnected()) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException ex) {
@@ -394,7 +390,7 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
         }
         return result;
     }
-    
+
     public void start() {
         //System.out.println("Starting WS adapter");
         Thread t = new Thread(this);
@@ -407,7 +403,7 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        stopped=true;
+        stopped = true;
     }
 
     /**

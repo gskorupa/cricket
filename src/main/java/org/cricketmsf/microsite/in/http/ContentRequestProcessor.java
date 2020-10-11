@@ -17,7 +17,7 @@ package org.cricketmsf.microsite.in.http;
 
 import com.cedarsoftware.util.io.JsonReader;
 import java.util.List;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;

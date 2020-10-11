@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.annotation;
+package org.cricketmsf.event;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.HashMap;
 
 /**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * To be removed
+ * @author greg
  */
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface HttpAdapterHook {
-    public String adapterName();
-    public String requestMethod();
+@org.cricketmsf.livingdoc.design.BoundedContext(name="Content Management")
+@org.cricketmsf.livingdoc.design.Event()
+public class GreeterEvent extends Event {
+
+    public GreeterEvent(HashMap<String,String> parameters) {
+        super();
+        setData(parameters);
+    }
+    
 }

@@ -19,7 +19,7 @@ import org.cricketmsf.exception.DispatcherException;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.event.EventDecorator;
 import org.cricketmsf.exception.QueueException;

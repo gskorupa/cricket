@@ -8,14 +8,12 @@
             "service": "org.cricketmsf.services.Microsite",
             "description":"Cricket Microsite service",
             "properties": {
-                "httpd-not-used":"jetty",
                 "host": "0.0.0.0",
                 "port": "7070",
                 "wsport": "",
                 "ssl": "false",
                 "threads": "0",
                 "shutdown-delay":"2",
-                "filter-not-used": "org.cricketmsf.microsite.auth.SecurityJettyFilter",
                 "filter": "org.cricketmsf.microsite.auth.SecurityFilter",
                 "cors": "Access-Control-Allow-Origin:*|Access-Control-Allow-Credentials:true|Access-Control-Allow-Methods: POST, PATCH, GET, OPTIONS, DELETE, PUT|Access-Control-Allow-Headers:Authentication|Access-Control-Max-Age: 1728000",
                 "time-zone": "GMT",
@@ -32,9 +30,6 @@
                 "servicename": "",
                 "maintenance-paths": "/api/system /api/cm /api/auth /api/user /admin",
                 "default-language": "en",
-                "SRVC_NAME_ENV_VARIABLE": "CRICKET_SERVICE_NAME",
-                "SRVC_URL_ENV_VARIABLE": "CRICKET_URL",
-                "SSL_ENV_VARIABLE": "CRICKET_SSL",
                 "www-theme": "theme0"
             },
             "ports": [
@@ -338,21 +333,12 @@
                 "filter": "org.cricketmsf.SecurityFilter",
                 "cors": "Access-Control-Allow-Origin:*",
                 "time-zone": "GMT",
-                "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME",
                 "request-encoding": "UTF-8",
                 "file-upload-maxsize": "1000000",
                 "serviceurl": "http://localhost:7070",
                 "terms":"https://github.com/gskorupa/cricket"
             },
             "ports": [
-                {
-                    "name": "Echo",
-                    "interfaceName": "",
-                    "adapterClassName": "org.cricketmsf.in.http.EchoAdapter",
-                    "properties": {
-                        "context": "/api/echo"
-                    }
-                },
                 {
                     "name": "Greeter",
                     "interfaceName": "",
@@ -364,22 +350,9 @@
                 {
                     "name": "StatusService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.StandardHttpAdapter",
+                    "classFullName": "org.cricketmsf.in.http.StatusAdapter",
                     "properties": {
                         "context": "/api/status"
-                    }
-                },
-                {
-                    "name": "Logger",
-                    "interfaceName": "LoggerAdapterIface",
-                    "classFullName": "org.cricketmsf.out.log.Slf4jLogger",
-                    "properties": {
-                        "name": "BasicService",
-                        "level": "FINEST",
-                        "log-file-name": "./logs/cricket%g.log",
-                        "max-size": "1000000",
-                        "count": "10",
-                        "console": "true"
                     }
                 },
                 {
@@ -499,7 +472,6 @@
                 "filter": "org.cricketmsf.SecurityFilter",
                 "cors": "Access-Control-Allow-Origin:*",
                 "time-zone": "GMT",
-                "SRVC_NAME_ENV_VARIABLE": "CRICKET_NAME",
                 "request-encoding": "UTF-8",
                 "file-upload-maxsize": "1000000",
                 "serviceurl": "http://localhost:7070",
@@ -513,23 +485,6 @@
                     "description": "",
                     "properties": {
                         "context": "/api"
-                    }
-                },
-                {
-                    "name": "Hello",
-                    "interfaceName": "",
-                    "classFullName": "org.cricketmsf.in.http.EchoAdapter",
-                    "description": "",
-                    "properties": {
-                        "context": "/api/echo"
-                    }
-                },
-                {
-                    "name": "HelloAPI",
-                    "interfaceName": "",
-                    "classFullName": "org.cricketmsf.in.hello.HelloAdapter",
-                    "properties": {
-                        "context": "/api/hello"
                     }
                 }
             ]

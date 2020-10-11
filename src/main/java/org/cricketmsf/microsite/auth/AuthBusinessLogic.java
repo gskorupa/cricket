@@ -16,7 +16,7 @@
 package org.cricketmsf.microsite.auth;
 
 import java.util.Base64;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;

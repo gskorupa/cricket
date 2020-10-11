@@ -15,7 +15,7 @@
  */
 package org.cricketmsf;
 
-import org.cricketmsf.in.http.HttpAdapter;
+import org.cricketmsf.in.http.HttpPortedAdapter;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
@@ -33,12 +33,16 @@ import java.util.Map;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import org.cricketmsf.in.http.HttpPortedAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class CricketHttpd implements HttpdIface{
+public class CricketHttpd implements HttpdIface {
+
+    private static final Logger logger = LoggerFactory.getLogger(CricketHttpd.class);
 
     public HttpServer server = null;
     public HttpsServer sserver = null;
@@ -57,12 +61,12 @@ public class CricketHttpd implements HttpdIface{
         keystore = (String) service.getProperties().getOrDefault("keystore", "");
         password = (String) service.getProperties().getOrDefault("keystore-password", "");
         //ssl = "true".equalsIgnoreCase("" + service.getProperties().getOrDefault("ssl", "false"));
-        if("false".equalsIgnoreCase(service.getSslAlgorithm()) || "no".equalsIgnoreCase(service.getSslAlgorithm())){
-            ssl=false;
-        }else{
-            ssl=true;
+        if ("false".equalsIgnoreCase(service.getSslAlgorithm()) || "no".equalsIgnoreCase(service.getSslAlgorithm())) {
+            ssl = false;
+        } else {
+            ssl = true;
         }
-        
+
         if (ssl && (keystore.isEmpty() || password.isEmpty())) {
             System.out.println("SSL not configured properly");
             System.exit(100);
@@ -93,31 +97,8 @@ public class CricketHttpd implements HttpdIface{
         SSLContext scontext;
         try {
             for (Map.Entry<String, Object> adapterEntry : service.getAdaptersMap().entrySet()) {
-                if (adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpAdapter) {
-                    Kernel.getLogger().print("context: " + ((HttpAdapter) adapterEntry.getValue()).getContext());
-                    if (ssl) {
-                        scontext = SSLContext.getInstance(service.getSslAlgorithm());
-                        // keystore
-                        char[] keystorePassword = password.toCharArray();
-                        KeyStore ks = KeyStore.getInstance("JKS");
-                        ks.load(new FileInputStream(keystore), keystorePassword);
-                        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-                        kmf.init(ks, keystorePassword);
-
-                        scontext.init(kmf.getKeyManagers(), null, null);
-
-                        HttpsConfigurator configurator = new HttpsConfigurator(scontext);
-                        sserver.setHttpsConfigurator(configurator);
-
-                        context = sserver.createContext(((HttpAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
-                    } else {
-                        context = server.createContext(((HttpAdapter) adapterEntry.getValue()).getContext(), (com.sun.net.httpserver.HttpHandler) adapterEntry.getValue());
-                    }
-                    context.getFilters().add(new MaintenanceFilter());
-                    context.getFilters().add(new ParameterFilter());
-                    context.getFilters().add(service.getSecurityFilter());
-                }else if (adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpPortedAdapter) {
-                    Kernel.getLogger().print("context: " + ((HttpPortedAdapter) adapterEntry.getValue()).getContext());
+                if (adapterEntry.getValue() instanceof org.cricketmsf.in.http.HttpPortedAdapter) {
+                    logger.info("context: " + ((HttpPortedAdapter) adapterEntry.getValue()).getContext());
                     if (ssl) {
                         scontext = SSLContext.getInstance(service.getSslAlgorithm());
                         // keystore

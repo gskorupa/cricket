@@ -17,7 +17,7 @@ package org.cricketmsf.out.log;
 
 import java.io.IOException;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.out.OutboundAdapter;
 import java.util.HashMap;
 import java.util.logging.ConsoleHandler;

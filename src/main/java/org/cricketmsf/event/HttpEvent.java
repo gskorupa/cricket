@@ -15,18 +15,17 @@
  */
 package org.cricketmsf.event;
 
-import org.cricketmsf.Event;
-
 /**
  * To be removed
  * @author greg
  */
 @org.cricketmsf.livingdoc.design.BoundedContext(name="Content Management")
 @org.cricketmsf.livingdoc.design.Event()
-public class HttpEvent extends EventDecorator implements EventIface {
+public class HttpEvent extends Event {
 
-    public HttpEvent(Event event) {
-        super(event);
+    public HttpEvent(Object request) {
+        super();
+        setData(request);
     }
     
 }

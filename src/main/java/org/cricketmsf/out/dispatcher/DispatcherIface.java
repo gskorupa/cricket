@@ -16,7 +16,7 @@
 package org.cricketmsf.out.dispatcher;
 
 import org.cricketmsf.exception.DispatcherException;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.event.EventDecorator;
 
 /**

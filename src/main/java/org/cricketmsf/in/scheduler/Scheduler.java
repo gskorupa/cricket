@@ -16,7 +16,7 @@
 package org.cricketmsf.in.scheduler;
 
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.db.KeyValueStore;
 import org.cricketmsf.in.InboundAdapter;
@@ -35,7 +35,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import org.cricketmsf.event.EventDecorator;
 import org.cricketmsf.exception.DispatcherException;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
 import org.slf4j.Logger;

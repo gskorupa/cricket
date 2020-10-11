@@ -45,14 +45,14 @@ public class StandardResult implements Result {
     private long responseTime = 0;
 
     public StandardResult() {
-        setCode(HttpAdapter.SC_OK);
+        setCode(ResponseCode.OK);
         setModificationDate(new Date());
         maxAge = 0;
         headers = new Headers();
     }
 
     public StandardResult(Object data) {
-        setCode(HttpAdapter.SC_OK);
+        setCode(ResponseCode.OK);
         setData(data);
         setModificationDate(new Date());
         maxAge = 0;

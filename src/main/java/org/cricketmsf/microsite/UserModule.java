@@ -18,7 +18,7 @@ package org.cricketmsf.microsite;
 import java.util.List;
 import org.cricketmsf.microsite.user.*;
 import java.util.Map;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;

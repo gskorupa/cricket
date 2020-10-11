@@ -15,11 +15,7 @@
  */
 package org.cricketmsf.services;
 
-import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.annotation.EventHook;
-import org.cricketmsf.event.EventMaster;
-import org.cricketmsf.exception.EventException;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.in.openapi.OpenApiIface;
 import org.slf4j.Logger;
@@ -52,8 +48,8 @@ public class MinimalService extends Kernel {
         try {
             super.runInitTasks();
             // we should register event categories used by this service
-            EventMaster.registerEventCategories(new Event().getCategories(), Event.class.getName());
-        } catch (InitException | EventException ex) {
+            //EventMaster.registerEventCategories(new Event().getCategories(), Event.class.getName());
+        } catch (InitException ex) {
             ex.printStackTrace();
             shutdown();
         }
@@ -63,26 +59,14 @@ public class MinimalService extends Kernel {
 
     @Override
     public void runFinalTasks() {
-        //System.out.println(printStatus());
+        
     }
 
     @Override
     public void runOnce() {
         super.runOnce();
         apiGenerator.init(this);
-        Kernel.getInstance().dispatchEvent(Event.logInfo("MinimalService.runOnce()", "executed"));
-    }
-
-    @EventHook(eventCategory = "*")
-    public void processEvent(Event event) {
-        switch(event.getCategory()){
-            case "LOG":
-            case "HTTPLOG":
-                logger.info(event.getPayload().toString());
-                break;
-            default:
-                logger.info(String.format("Don't know how to handle event category %1s with payload: %2s", event.getCategory(), event.getPayload() != null ? event.getPayload().toString() : "null"));        
-        }
+        logger.info("MinimalService.runOnce() executed");
     }
     
 }

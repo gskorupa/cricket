@@ -17,14 +17,18 @@ package org.cricketmsf.in.http;
 
 import java.util.List;
 import java.util.Map;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.services.BasicService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class TxtFormatter {
+    private static final Logger logger = LoggerFactory.getLogger(TxtFormatter.class);
 
     private static TxtFormatter instance = null;
 
@@ -73,7 +77,7 @@ public class TxtFormatter {
             }
         } catch (Exception e) {
             //e.printStackTrace();
-            Kernel.getInstance().dispatchEvent(Event.logSevere("TxtFormatter", e.getMessage()));
+            logger.warn(e.getMessage());
             sb.append(e.getMessage());
         }
         return sb.toString();

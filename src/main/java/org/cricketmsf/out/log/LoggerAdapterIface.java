@@ -15,7 +15,7 @@
  */
 package org.cricketmsf.out.log;
 
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 
 /**
  *

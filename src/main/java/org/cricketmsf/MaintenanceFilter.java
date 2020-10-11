@@ -19,7 +19,7 @@ import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.io.OutputStream;
-import org.cricketmsf.in.http.HttpAdapter;
+import org.cricketmsf.in.http.ResponseCode;
 
 /**
  * This is default filter used to check required request conditions. It does
@@ -44,7 +44,7 @@ public class MaintenanceFilter extends Filter {
         switch (Kernel.getInstance().getStatus()) {
             case Kernel.STARTING:
                     message = "System is starting. Try again later.";
-                    exchange.sendResponseHeaders(HttpAdapter.SC_UNAVAILABLE, message.getBytes().length);
+                    exchange.sendResponseHeaders(ResponseCode.UNAVAILABLE, message.getBytes().length);
                     try (OutputStream os = exchange.getResponseBody()) {
                         os.write(message.getBytes());
                     }
@@ -53,7 +53,7 @@ public class MaintenanceFilter extends Filter {
                     break;
             case Kernel.SHUTDOWN:
                     message = "System shutdown in progress.";
-                    exchange.sendResponseHeaders(HttpAdapter.SC_UNAVAILABLE, message.getBytes().length);
+                    exchange.sendResponseHeaders(ResponseCode.UNAVAILABLE, message.getBytes().length);
                     try (OutputStream os = exchange.getResponseBody()) {
                         os.write(message.getBytes());
                     }
@@ -73,7 +73,7 @@ public class MaintenanceFilter extends Filter {
                     chain.doFilter(exchange);
                 } else {
                     message = "System in maintenance mode. Try again later.";
-                    exchange.sendResponseHeaders(HttpAdapter.SC_UNAVAILABLE, message.getBytes().length);
+                    exchange.sendResponseHeaders(ResponseCode.UNAVAILABLE, message.getBytes().length);
                     try (OutputStream os = exchange.getResponseBody()) {
                         os.write(message.getBytes());
                     }

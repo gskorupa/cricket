@@ -17,7 +17,7 @@ package org.cricketmsf.microsite;
 
 import org.cricketmsf.microsite.out.notification.EmailSenderIface;
 import org.cricketmsf.microsite.user.*;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HttpAdapter;

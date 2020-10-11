@@ -21,7 +21,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.out.OutboundAdapter;
 import java.util.HashMap;
 import org.cricketmsf.Kernel;

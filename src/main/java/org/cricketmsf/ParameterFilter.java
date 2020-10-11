@@ -15,6 +15,7 @@
  */
 package org.cricketmsf;
 
+import org.cricketmsf.event.Event;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.Filter.Chain;
 import com.sun.net.httpserver.HttpExchange;
@@ -33,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This filter is used to recognize, parse and transform request parameters into
@@ -43,6 +46,8 @@ import java.util.Scanner;
  * Many thanks for Leonardo Marcelino https://leonardom.wordpress.com
  */
 public class ParameterFilter extends Filter {
+    
+    private static final Logger logger = LoggerFactory.getLogger(Kernel.class);
 
     public final static char CR = (char) 0x0D;
     public final static char LF = (char) 0x0A;
@@ -341,7 +346,7 @@ public class ParameterFilter extends Filter {
             try {
                 Files.delete(filePath);
             } catch (IOException e) {
-                Kernel.getInstance().dispatchEvent(Event.logWarning(this, e.getMessage()));
+                logger.warn(e.getMessage());
             }
         } else {
             fileParameter.fileSize = totalSize;

@@ -19,13 +19,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.cricketmsf.exception.WebsocketException;
 import org.cricketmsf.in.websocket.ClientList;
 import org.cricketmsf.in.websocket.WebsocketAdapter;
@@ -80,7 +76,7 @@ public class WebsocketServer implements Runnable {
                 adp = (WebsocketAdapter) adapterEntry.getValue();
                 ctx = adp.getContext();
                 registeredContexts.put(ctx, new ClientList(adp.properties));
-                Kernel.getLogger().print("ws context: " + ctx);
+                logger.info("ws context: " + ctx);
             }
         }
     }

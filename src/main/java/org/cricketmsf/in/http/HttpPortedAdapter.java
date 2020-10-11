@@ -15,7 +15,6 @@
  */
 package org.cricketmsf.in.http;
 
-import org.cricketmsf.Event;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.Kernel;
 import com.sun.net.httpserver.Headers;
@@ -27,11 +26,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.text.DateFormat;
 import java.util.Map;
-import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +40,8 @@ import org.cricketmsf.in.InboundAdapterIface;
 import org.cricketmsf.in.openapi.Operation;
 import org.cricketmsf.in.openapi.Parameter;
 import org.cricketmsf.in.openapi.ParameterLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -51,6 +50,8 @@ import org.cricketmsf.in.openapi.ParameterLocation;
 public abstract class HttpPortedAdapter
         extends InboundAdapter
         implements Adapter, HttpAdapterIface, HttpHandler, InboundAdapterIface/*, org.eclipse.jetty.server.Handler*/ {
+    
+    private static final Logger logger = LoggerFactory.getLogger(HttpPortedAdapter.class);
 
     public final static String JSON = "application/json";
     public final static String XML = "text/xml";
@@ -98,29 +99,12 @@ public abstract class HttpPortedAdapter
     }
 
     @Override
-    protected void getServiceHooks(String adapterName) {
-        HttpAdapterHook ah;
-        String requestMethod;
-        // for every method of a Kernel instance (our service class extending Kernel)
-        for (Method m : Kernel.getInstance().getClass().getMethods()) {
-            ah = (HttpAdapterHook) m.getAnnotation(HttpAdapterHook.class);
-            // we search for annotated method
-            if (ah != null) {
-                requestMethod = ah.requestMethod();
-                if (ah.adapterName().equals(adapterName)) {
-                    addHookMethodNameForMethod(requestMethod, m.getName());
-                }
-            }
-        }
-    }
-
-    @Override
     public Object handleInput(Object input) {
         if (input instanceof HttpExchange) {
             try {
                 handle((HttpExchange) input);
             } catch (IOException ex) {
-                Kernel.getInstance().dispatchEvent(Event.logWarning(this, ex.getMessage()));
+                logger.warn(ex.getMessage());
             }
         }
         return null;
@@ -143,7 +127,7 @@ public abstract class HttpPortedAdapter
             // cerating Result object
             RequestObject requestObject = buildRequestObject(exchange, acceptedResponseType);
             if (null != properties.get("dump-request") && "true".equalsIgnoreCase(properties.get("dump-request"))) {
-                Kernel.getInstance().getLogger().print(dumpRequest(requestObject));
+                logger.info(dumpRequest(requestObject));
             }
 
             Result result = createResponse(requestObject, rootEventId);
@@ -220,11 +204,8 @@ public abstract class HttpPortedAdapter
                     break;
             }
 
-            //TODO: format logs to have clear info about root event id
             if (Kernel.getInstance().isFineLevel()) {
-                Kernel.getInstance().dispatchEvent(
-                        Event.logFinest("HttpAdapter", "event " + rootEventId + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms")
-                );
+                logger.debug("event " + rootEventId + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms");
             }
 
             if (responseData.length > 0) {
@@ -235,11 +216,10 @@ public abstract class HttpPortedAdapter
             } else {
                 exchange.sendResponseHeaders(result.getCode(), -1);
             }
-            sendLogEvent(exchange, responseData.length);
+            //sendLogEvent(exchange, responseData.length);
             result = null;
         } catch (IOException e) {
-            //e.printStackTrace();
-            Kernel.getInstance().dispatchEvent(Event.logWarning(this, exchange.getRequestURI().getPath() + " " + e.getMessage()));
+            logger.warn(exchange.getRequestURI().getPath() + " " + e.getMessage());
         }
         exchange.close();
     }
@@ -316,8 +296,7 @@ public abstract class HttpPortedAdapter
         try {
             r = formattedResponse.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
-            //e.printStackTrace();
-            Kernel.getInstance().dispatchEvent(Event.logSevere("HttpAdapter.formatResponse()", e.getClass().getSimpleName() + " " + e.getMessage()));
+            logger.error(e.getMessage());
         }
         return r;
     }
@@ -380,7 +359,7 @@ public abstract class HttpPortedAdapter
                 result.setData(pCall.response);
                 result.setHeader("Content-type", pCall.contentType);
             } else { // pCall must be processed by the Kernel
-                sendLogEvent(Event.LOG_FINE, "sending request to hook method " + pCall.procedureName + "@" + pCall.event.getClass().getSimpleName());
+                logger.debug("sending request to hook method " + pCall.procedureName + "@" + pCall.event.getClass().getSimpleName());
                 result = (Result) Kernel.getInstance().getEventProcessingResult(
                         pCall.event,
                         pCall.procedureName
@@ -397,7 +376,7 @@ public abstract class HttpPortedAdapter
                 }
             }
         } catch (ClassCastException e) {
-            sendLogEvent(Event.LOG_SEVERE, "class cast exception");
+            logger.warn(e.getMessage());
             result.setCode(ResponseCode.INTERNAL_SERVER_ERROR);
             result.setMessage("handler method error");
             result.setFileExtension(null);
@@ -439,52 +418,6 @@ public abstract class HttpPortedAdapter
             result = hookMethodNames.get("*");
         }
         return result;
-    }
-
-    protected void sendLogEvent(HttpExchange exchange, int length) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append(exchange.getRemoteAddress().getAddress().getHostAddress());
-        sb.append(" - ");
-        try {
-            sb.append(exchange.getPrincipal().getUsername());
-        } catch (Exception e) {
-            sb.append("-");
-        }
-        sb.append(" ");
-        sb.append(dateFormat.format(new Date()));
-        sb.append(" ");
-        sb.append(exchange.getRequestMethod());
-        sb.append(" ");
-        sb.append(exchange.getProtocol());
-        sb.append(" ");
-        sb.append(exchange.getRequestURI());
-        sb.append(" ");
-        sb.append(exchange.getResponseCode());
-        sb.append(" ");
-        sb.append(length);
-
-        Event event = new Event(
-                "HttpAdapter",
-                Event.CATEGORY_HTTP_LOG,
-                Event.LOG_INFO,
-                null,
-                sb.toString());
-        Kernel.getInstance().dispatchEvent(event);
-    }
-
-    protected void sendLogEvent(String type, String message) {
-        Event event = new Event(
-                "HttpAdapter",
-                Event.CATEGORY_LOG,
-                type,
-                null,
-                message);
-        Kernel.getInstance().dispatchEvent(event);
-    }
-
-    protected void sendLogEvent(String message) {
-        sendLogEvent(Event.LOG_INFO, message);
     }
 
     /**

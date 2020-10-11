@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Event;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.http.Result;
 import org.cricketmsf.in.http.StandardResult;

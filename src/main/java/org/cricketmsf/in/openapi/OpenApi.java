@@ -26,9 +26,9 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.InboundAdapterIface;
-import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.HttpAdapterIface;
 import org.cricketmsf.in.http.HttpPortedAdapter;
+import org.cricketmsf.in.http.ResponseCode;
 
 /**
  *
@@ -48,7 +48,7 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
         if ("GET".equalsIgnoreCase(method)) {
             return ProcedureCall.respond(200, "application/vnd.oai.openapi", toYaml());
         } else {
-            return ProcedureCall.respond(HttpAdapter.SC_NOT_IMPLEMENTED, "method not implemented");
+            return ProcedureCall.respond(ResponseCode.NOT_IMPLEMENTED, "method not implemented");
         }
     }
 
