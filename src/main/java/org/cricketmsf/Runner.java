@@ -201,6 +201,7 @@ public class Runner {
         String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
         configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
         configSet.setKernelVersion(getVersion());
+        configSet.setServiceVersion(getServiceVersion());
         return configSet;
     }
 
@@ -213,7 +214,27 @@ public class Runner {
                     Manifest manifest = new Manifest(url.openStream());
                     Attributes attributes = manifest.getMainAttributes();
                     if ("org.cricketmsf.Runner".equals(attributes.getValue("Main-Class"))) {
-                        return attributes.getValue("Implementation-Version");
+                        return attributes.getValue("Cricket-Version");
+                    }
+                } catch (IOException ex) {
+                    return "";
+                }
+            }
+        } catch (IOException e) {
+            return "";
+        }
+        return "";
+    }
+    private String getServiceVersion() {
+        try {
+            Enumeration<URL> resources = Runner.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+            while (resources.hasMoreElements()) {
+                URL url = resources.nextElement();
+                try {
+                    Manifest manifest = new Manifest(url.openStream());
+                    Attributes attributes = manifest.getMainAttributes();
+                    if ("org.cricketmsf.Runner".equals(attributes.getValue("Main-Class"))) {
+                        return attributes.getValue("Service-Version");
                     }
                 } catch (IOException ex) {
                     return "";
@@ -256,6 +277,7 @@ public class Runner {
         configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
         // read Kernel version
         configSet.setKernelVersion(getVersion());
+        configSet.setServiceVersion(getServiceVersion());
         // force property changes based on command line --force param
         if (null != arguments && arguments.containsKey("force")) {
             ArrayList<String> forcedProps = (ArrayList) arguments.get("force");

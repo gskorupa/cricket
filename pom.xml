@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cricketmsf</groupId>
     <artifactId>cricket</artifactId>
-    <version>1.5.45</version>
+    <version>1.5.46</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -117,7 +117,8 @@
                                     implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Main-Class>org.cricketmsf.Runner</Main-Class>
-                                        <Implementation-Version>${project.version}</Implementation-Version>
+                                        <Cricket-Version>${project.version}</Cricket-Version>
+                                        <Service-Version>${project.version}</Service-Version>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>

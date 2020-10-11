@@ -27,6 +27,7 @@ public class ConfigSet {
     String description = "This is sample configuration";
     ArrayList<Configuration> services;
     private String kernelVersion;
+    private String serviceVersion;
 
     public ConfigSet() {
         services = new ArrayList<>();
@@ -87,12 +88,20 @@ public class ConfigSet {
     public String getKernelVersion() {
         return kernelVersion;
     }
+    
+    public String getServiceVersion() {
+        return serviceVersion;
+    }
 
     /**
      * @param kernelVersion the kernelVersion to set
      */
     public void setKernelVersion(String kernelVersion) {
         this.kernelVersion = kernelVersion;
+    }
+    
+    public void setServiceVersion(String serviceVersion) {
+        this.serviceVersion = serviceVersion;
     }
 
     public void forceProperty(String definition) {

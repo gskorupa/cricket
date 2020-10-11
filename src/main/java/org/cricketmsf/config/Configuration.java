@@ -18,6 +18,7 @@ package org.cricketmsf.config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  *
@@ -115,25 +116,11 @@ public class Configuration {
     }
 
     public String getProperty(String name) {
-        String value = (String) properties.get(name);
-        if (null != value && value.startsWith("$")) {
-            String tmp = System.getenv(value.substring(1));
-            if (null != tmp) {
-                value = tmp;
-            }
-        }
-        return value;
+        return (String) properties.get(name);
     }
 
     public String getProperty(String name, String defaultValue) {
-        String value = (String) properties.getOrDefault(name, defaultValue);
-        if (null != value && value.startsWith("$")) {
-            String tmp = System.getenv(value.substring(1));
-            if (null != tmp) {
-                value = tmp;
-            }
-        }
-        return value;
+        return (String) properties.getOrDefault(name, defaultValue);
     }
 
     public void putProperty(String name, Object value) {
@@ -232,6 +219,18 @@ public class Configuration {
      * @return the properties
      */
     public HashMap<String, Object> getProperties() {
+        Iterator it=properties.keySet().iterator();
+        String key,value;
+        while(it.hasNext()){
+            key=(String)it.next();
+            value=""+properties.get(key);
+            if (value.startsWith("$")) {
+                String tmp = System.getenv(value.substring(1));
+                if (null != tmp) {
+                    properties.put(key, tmp);
+                }
+            }
+        }
         return properties;
     }
 

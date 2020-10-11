@@ -386,8 +386,8 @@ public abstract class Kernel {
             ((Kernel) instance).setId(config.getId());
             ((Kernel) instance).setDescription(config.getDescription());
             ((Kernel) instance).setProperties(cfg.getProperties());
-            ((Kernel) instance).setName((String) cfg.getProperties().getOrDefault("SRVC_NAME_ENV_VARIABLE", "CRICKET_NAME"));
-            ((Kernel) instance).setSsl((String) cfg.getProperties().getOrDefault("SSL_ENV_VARIABLE", "CRICKET_SSL"));
+            ((Kernel) instance).setName((String) cfg.getProperties().get("servicename"));
+            ((Kernel) instance).setSsl((String) cfg.getProperties().getOrDefault("ssl", "false"));
             ((Kernel) instance).configureTimeFormat(cfg);
             ((Kernel) instance).loadAdapters(cfg);
         } catch (Exception e) {
@@ -768,9 +768,10 @@ public abstract class Kernel {
             } else {
                 getLogger().print("# Service: " + getId());
             }
-            getLogger().print("# UUID: " + getUuid());
-            getLogger().print("# NAME: " + getName());
-            getLogger().print("# JAVA: " + System.getProperty("java.version"));
+            getLogger().print("# UUID   : " + getUuid());
+            getLogger().print("# VERSION: " + Kernel.getInstance().configSet.getServiceVersion());
+            getLogger().print("# NAME   : " + getName());
+            getLogger().print("# JAVA   : " + System.getProperty("java.version"));
             getLogger().print("#");
             if (!"jetty".equalsIgnoreCase((String) getProperties().getOrDefault("httpd", ""))) {
                 if (getHttpd().isSsl()) {
@@ -974,6 +975,10 @@ public abstract class Kernel {
      */
     public String getName() {
         return name;
+    }
+    
+    public String getServiceVersion(){
+        return getConfigSet().getServiceVersion();
     }
 
     /**
