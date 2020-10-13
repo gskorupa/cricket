@@ -321,4 +321,12 @@ public class Event implements EventIface {
         this.data = data;
     }
     
+    public String serialize() {
+        return JsonWriter.objectToJson(getData());
+    }
+
+    public void deserialize(String jsonString) {
+        setData(JsonReader.jsonToJava(jsonString));
+    }
+    
 }

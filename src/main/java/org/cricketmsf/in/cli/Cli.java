@@ -18,21 +18,23 @@ package org.cricketmsf.in.cli;
 import java.io.Console;
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.InboundAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author greg
  */
 public class Cli extends InboundAdapter implements Adapter, CliIface {
+    private static final Logger logger = LoggerFactory.getLogger(Cli.class);
 
     private int samplingInterval = 1000;
     Console c = System.console();
     private boolean started = false;
     private String command;
-    private String categoryName;
+    private String procedureName;
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -46,9 +48,9 @@ public class Cli extends InboundAdapter implements Adapter, CliIface {
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         //super.getServiceHooks(adapterName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "200"));
-        categoryName = properties.getOrDefault("event-category", "CLI_COMMAND");
-        Kernel.getInstance().getLogger().print("\tevent-category =" + categoryName);
-        super.registerEventCategory(categoryName, Event.class.getName());
+        procedureName = properties.getOrDefault("procedure", "CLI_COMMAND");
+        logger.info("\tevent-category =" + procedureName);
+        //super.registerEventCategory(categoryName, Event.class.getName());
     }
 
     @Override
@@ -58,10 +60,7 @@ public class Cli extends InboundAdapter implements Adapter, CliIface {
 
     public void readCommand() {
         command = c.readLine("Enter command: ");
-        c.format("Command is %s.%n", command);
-        Event ev = new Event();
-        ev.setCategory(categoryName);
-        ev.setPayload(command);
+        CliEvent ev = new CliEvent(command);
         Kernel.getInstance().dispatchEvent(ev);
     }
 
@@ -72,7 +71,7 @@ public class Cli extends InboundAdapter implements Adapter, CliIface {
                 Thread.sleep(samplingInterval);
             }
         } catch (InterruptedException e) {
-            Kernel.getInstance().getLogger().print("CLI interrupted");
+            logger.info("CLI interrupted");
         }
         if (started) {
             try {
@@ -81,7 +80,7 @@ public class Cli extends InboundAdapter implements Adapter, CliIface {
                     Thread.sleep(samplingInterval);
                 }
             } catch (InterruptedException e) {
-                Kernel.getInstance().getLogger().print("CLI interrupted");
+                logger.info("CLI interrupted");
             }
         }
     }
@@ -93,7 +92,7 @@ public class Cli extends InboundAdapter implements Adapter, CliIface {
         try {
             this.samplingInterval = Integer.parseInt(samplingInterval);
         } catch (NumberFormatException e) {
-            Kernel.getInstance().getLogger().print(e.getMessage());
+            logger.info(e.getMessage());
         }
     }
 

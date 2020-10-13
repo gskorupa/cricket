@@ -20,12 +20,18 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.RequestObject;
+import org.cricketmsf.event.HttpEvent;
+import org.cricketmsf.event.ProcedureCall;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, Adapter {
+public class HtmlGenAdapter extends HttpPortedAdapter implements HtmlGenAdapterIface, Adapter {
+    private static final Logger logger = LoggerFactory.getLogger(HtmlGenAdapter.class);
 
     private boolean useCache = false;
     private boolean processingVariables = false;
@@ -48,11 +54,11 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
         super.loadProperties(properties, adapterName);
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
-        Kernel.getInstance().getLogger().print("\tcontext=" + getContext());
+        logger.info("\tcontext=" + getContext());
         useCache = properties.getOrDefault("use-cache", "false").equalsIgnoreCase("true");
-        Kernel.getInstance().getLogger().print("\tuse-cache=" + useCache());
+        logger.info("\tuse-cache=" + useCache());
         processingVariables= (properties.getOrDefault("page-processor", "false").equalsIgnoreCase("true"));
-        Kernel.getInstance().getLogger().print("\tpage-processor=" + processingVariables);
+        logger.info("\tpage-processor=" + processingVariables);
     }
 
     @Override
@@ -114,6 +120,12 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
             }
         }
         return result.getPayload();
+    }
+
+    @Override
+    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+        HttpEvent event = new HttpEvent(request);
+        return ProcedureCall.forward(event, "www");
     }
 
 }

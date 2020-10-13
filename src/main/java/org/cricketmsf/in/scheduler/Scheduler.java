@@ -76,9 +76,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
         setStoragePath(properties.get("path"));
-        Kernel.getInstance().getLogger().print("\tpath: " + getStoragePath());
+        logger.info("\tpath: " + getStoragePath());
         setEnvVariable(properties.get("envVariable"));
-        Kernel.getInstance().getLogger().print("\tenvVAriable name: " + getEnvVariable());
+        logger.info("\tenvVAriable name: " + getEnvVariable());
         if (null!=getEnvVariable() && System.getenv(getEnvVariable()) != null) {
             setStoragePath(System.getenv(getEnvVariable()));
         }
@@ -87,17 +87,17 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
             setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
         }
         setFileName(properties.get("file"));
-        Kernel.getInstance().getLogger().print("\tfile: " + getFileName());
+        logger.info("\tfile: " + getFileName());
         String pathSeparator = System.getProperty("file.separator");
         setStoragePath(
                 getStoragePath().endsWith(pathSeparator)
                 ? getStoragePath() + getFileName()
                 : getStoragePath() + pathSeparator + getFileName()
         );
-        Kernel.getInstance().getLogger().print("\tscheduler database file location: " + getStoragePath());
+        logger.info("\tscheduler database file location: " + getStoragePath());
 
         initialTasks = properties.getOrDefault("init", "");
-        Kernel.getInstance().getLogger().print("\tinit: " + initialTasks);
+        logger.info("\tinit: " + initialTasks);
 
         properties.put("init", initialTasks);
 
@@ -199,7 +199,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                         handleEvent(ev);
                     }
                 } catch (Exception e) {
-                    Kernel.getLogger().log(Event.logWarning(this, "malformed event time definition - unable to reschedule"));
+                    logger.warn("malformed event time definition - unable to reschedule");
                 }
             }
 
@@ -287,7 +287,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
             d.setDelay(getDelay(dateDefinition));
         }
         if (wrongFormat) {
-            Kernel.getLogger().print("WARNING unsuported delay format: " + dateDefinition);
+            logger.info("WARNING unsuported delay format: " + dateDefinition);
             return null;
         }
         return d;
@@ -317,7 +317,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                     result = result + 24 * 60 * 60 * 1000;
                 }
             } catch (ParseException ex) {
-                Kernel.getLogger().log(Event.logWarning(this, ex.getMessage()));
+                logger.warn(ex.getMessage());
                 return -1;
             }
         }
@@ -326,10 +326,10 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public void destroy() {
-        Kernel.getInstance().getLogger().print("Stopping scheduler ... ");
+        logger.info("Stopping scheduler ... ");
         List<Runnable> activeEvents = scheduler.shutdownNow();
         database.write();
-        Kernel.getInstance().getLogger().print("done");
+        logger.info("done");
     }
 
     /**

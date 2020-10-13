@@ -25,6 +25,9 @@ import org.cricketmsf.Adapter;
 import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.InboundAdapter;
+import org.cricketmsf.in.http.HttpPortedAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -32,7 +35,8 @@ import org.cricketmsf.in.InboundAdapter;
  */
 public class FileReader extends InboundAdapter implements Adapter, WatchdogIface {
 
-    private String categoryName = "DATA_READY";
+    private static final Logger logger = LoggerFactory.getLogger(FileReader.class);
+    private String procedureName = "DATA_READY";
 
     private String fileName;
     File file;
@@ -50,27 +54,22 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         //super.getServiceHooks(adapterName);
         setFile(properties.getOrDefault("path", ""));
-        Kernel.getInstance().getLogger().print("\tpath=" + fileName);
+        logger.info("\tpath=" + fileName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
-        Kernel.getInstance().getLogger().print("\tsampling-interval=" + samplingInterval);
-        categoryName = properties.getOrDefault("event-category", "DATA_READY");
-        Kernel.getInstance().getLogger().print("\tevent-category =" + categoryName);
-        super.registerEventCategory(categoryName, Event.class.getName());
+        logger.info("\tsampling-interval=" + samplingInterval);
+        procedureName = properties.getOrDefault("procedure-name", "DATA_READY");
+        logger.info("\tprocedure-name =" + procedureName);
+        super.registerEventCategory(procedureName, Event.class.getName());
     }
 
     @Override
     public void checkStatus() {
         if (file != null) {
             byte[] content = readFile();
-            Kernel.getInstance().
-                    dispatchEvent(
-                            Event.logFine(this.getClass().getSimpleName(), "reading " + fileName)
-                    );
+            logger.debug("reading " + fileName);
             if (content.length > 0) {
                 //handle(categoryName, new String(content));
-                Event ev = new Event();
-                ev.setCategory(categoryName);
-                ev.setPayload(new String(content));
+                FileEvent ev = new FileEvent(content);
                 Kernel.getInstance().dispatchEvent(ev);
             }
         }
@@ -85,7 +84,7 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
                 //Thread.yield();
             }
         } catch (InterruptedException e) {
-            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), "interrupted"));
+            logger.info("interrupted");
         }
     }
 
@@ -96,7 +95,7 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
         try {
             this.samplingInterval = Integer.parseInt(samplingInterval);
         } catch (NumberFormatException e) {
-            Kernel.getInstance().getLogger().print(e.getMessage());
+            logger.info(e.getMessage());
         }
     }
 
@@ -109,13 +108,13 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
         try {
             if (!file.exists()) {
                 file = null;
-                Kernel.getInstance().getLogger().print("file not found");
+                logger.info("file not found");
             } else if (file.isDirectory()) {
-                Kernel.getInstance().getLogger().print("directory found");
+                logger.info("directory found");
                 file = null;
             }
         } catch (SecurityException e) {
-            Kernel.getInstance().getLogger().print(e.getMessage());
+            logger.info(e.getMessage());
         }
     }
 

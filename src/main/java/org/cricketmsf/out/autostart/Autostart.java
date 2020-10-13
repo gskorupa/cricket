@@ -24,10 +24,14 @@ import java.util.HashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.exception.InitException;
+import org.cricketmsf.in.http.HttpPortedAdapter;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.OutboundAdapterIface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Autostart extends OutboundAdapter implements OutboundAdapterIface, Adapter, AutostartIface {
+    private static final Logger logger = LoggerFactory.getLogger(Autostart.class);
     
     HashMap<String, String> properties;
     String[] paths;
@@ -40,7 +44,7 @@ public class Autostart extends OutboundAdapter implements OutboundAdapterIface, 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         String pathNames = properties.getOrDefault("subfolders", "");
-        Kernel.getInstance().getLogger().printIndented("subfolders=" + pathNames);
+        logger.info("subfolders=" + pathNames);
         paths = pathNames.split(":");
     }
     

@@ -30,18 +30,21 @@ import java.util.HashMap;
 import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
-import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.ParameterMapResult;
+import org.cricketmsf.in.http.ResponseCode;
 import org.cricketmsf.in.http.Result;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author greg
  */
 public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileReaderAdapterIface {
+    private static final Logger logger = LoggerFactory.getLogger(FileReaderAdapter.class);
 
     private String rootPath;
     private String indexFileName;
@@ -57,9 +60,9 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setRootPath(properties.get("root"));
-        Kernel.getInstance().getLogger().print("\troot: " + getRootPath());
+        logger.info("\troot: " + getRootPath());
         indexFileName = properties.getOrDefault("index-file", "index.html");
-        Kernel.getInstance().getLogger().print("\tindex-file: " + indexFileName);
+        logger.info("\tindex-file: " + indexFileName);
     }
 
     /**
@@ -151,7 +154,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             byte[] b = readFile(file);
             return b;
         } catch (Exception e) {
-            Kernel.getInstance().dispatchEvent(Event.logWarning("FileReaderAdapter(1)", filePath + " not readable or not found"));
+            logger.warn(filePath + " not readable or not found");
             byte[] emptyContent = {};
             return emptyContent;
         }
@@ -183,7 +186,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                 fo = (FileObject) cache.get(filePath);
                 if (fo != null) {
                     fileReady = true;
-                    result.setCode(HttpAdapter.SC_OK);
+                    result.setCode(ResponseCode.OK);
                     result.setMessage("");
                     result.setPayload(fo.content);
                     result.setFileExtension(fo.fileExtension);
@@ -191,9 +194,9 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                     if (!isModifiedSince(fo.modified, modificationPoint)) {
                         //System.out.println("NOT MODIFIED");
                         result.setPayload("".getBytes());
-                        result.setCode(HttpAdapter.SC_NOT_MODIFIED);
+                        result.setCode(ResponseCode.NOT_MODIFIED);
                     }
-                    Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
+                    logger.debug("read from cache");
                     return result;
                 }
             } catch (ClassCastException e) {
@@ -205,7 +208,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             content = getFileBytes(file, filePath);
             if (content.length == 0) {
                 // file not found or empty file
-                result.setCode(HttpAdapter.SC_NOT_FOUND);
+                result.setCode(ResponseCode.NOT_FOUND);
                 result.setMessage("file not found");
                 result.setHeader("Content-type", "text/html");
                 result.setPayload("file not found".getBytes());
@@ -220,7 +223,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                 cache.put(filePath, fo);
             }
         }
-        result.setCode(HttpAdapter.SC_OK);
+        result.setCode(ResponseCode.OK);
         result.setMessage("");
         result.setPayload(fo.content);
         result.setFileExtension(fo.fileExtension);
@@ -228,9 +231,9 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         if (!isModifiedSince(fo.modified, modificationPoint)) {
             //System.out.println("NOT MODIFIED");
             result.setPayload("".getBytes());
-            result.setCode(HttpAdapter.SC_NOT_MODIFIED);
+            result.setCode(ResponseCode.NOT_MODIFIED);
         } else {
-            result.setCode(HttpAdapter.SC_OK);
+            result.setCode(ResponseCode.OK);
             result.setPayload(fo.content);
         }
         return result;
@@ -285,7 +288,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                 }
                 if (fo != null) {
                     fileReady = true;
-                    result.setCode(HttpAdapter.SC_OK);
+                    result.setCode(ResponseCode.OK);
                     result.setMessage("");
                     result.setPayload(fo.content);
                     result.setFileExtension(fo.fileExtension);
@@ -293,9 +296,9 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
                     if (!isModifiedSince(fo.modified, modificationPoint)) {
                         //System.out.println("NOT MODIFIED");
                         result.setPayload("".getBytes());
-                        result.setCode(HttpAdapter.SC_NOT_MODIFIED);
+                        result.setCode(ResponseCode.NOT_MODIFIED);
                     }
-                    Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "read from cache"));
+                    logger.debug("read from cache");
                     return result;
                 }
             } catch (ClassCastException e) {
@@ -307,7 +310,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             content = getFileBytes(file, filePath);
             if (content.length == 0) {
                 // file not found or empty file
-                result.setCode(HttpAdapter.SC_NOT_FOUND);
+                result.setCode(ResponseCode.NOT_FOUND);
                 result.setMessage("file not found");
                 result.setPayload("file not found".getBytes());
                 result.setHeader("Content-type", "text/html");
@@ -331,9 +334,9 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         if (!isModifiedSince(fo.modified, modificationPoint)) {
             //System.out.println("NOT MODIFIED");
             result.setPayload("".getBytes());
-            result.setCode(HttpAdapter.SC_NOT_MODIFIED);
+            result.setCode(ResponseCode.NOT_MODIFIED);
         } else {
-            result.setCode(HttpAdapter.SC_OK);
+            result.setCode(ResponseCode.OK);
             result.setPayload(fo.content);
         }
         return result;

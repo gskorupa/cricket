@@ -102,7 +102,7 @@ public class BasicService extends Kernel {
      * @param event
      * @return ParameterMapResult with the file content as a byte array
      */
-    @HttpAdapterHook(adapterName = "WwwService", requestMethod = "GET")
+    @PortEventClassHook(className = "HttpEvent", procedureName = "www")
     public Object doGet(Event event) {
         try {
             RequestObject request = event.getRequest();

@@ -26,13 +26,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.in.http.HttpPortedAdapter;
 import org.cricketmsf.out.OutboundAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author greg
  */
 public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adapter {
+    
+    private static final Logger logger = LoggerFactory.getLogger(KeyValueDB.class);
 
     private String storagePath = "./";
     private String dbName = null;
@@ -54,9 +59,9 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
             storagePath = System.getProperty("user.dir") + storagePath.substring(1);
         }
         filePath = storagePath + ".db";
-        Kernel.getInstance().getLogger().print("\tpath: " + storagePath);
-        Kernel.getInstance().getLogger().print("\tdatabase name: " + dbName);
-        Kernel.getInstance().getLogger().print("\tdatabase file: " + filePath);
+        logger.info("\tpath: " + storagePath);
+        logger.info("\tdatabase name: " + dbName);
+        logger.info("\tdatabase file: " + filePath);
         try {
             start();
         } catch (KeyValueDBException e) {

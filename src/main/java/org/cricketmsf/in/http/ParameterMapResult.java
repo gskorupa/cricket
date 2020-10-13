@@ -49,7 +49,7 @@ public class ParameterMapResult implements Result {
     private long responseTime = 0;
 
     public ParameterMapResult() {
-        setCode(HttpAdapter.SC_OK);
+        setCode(ResponseCode.OK);
         setModificationDate(new Date());
         maxAge = 0;
         headers = new Headers();

@@ -21,13 +21,17 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.in.http.HttpPortedAdapter;
 import org.cricketmsf.out.OutboundAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author greg
  */
 public class CommandRunner extends OutboundAdapter implements Adapter, CommandRunnerIface {
+    private static final Logger logger = LoggerFactory.getLogger(CommandRunner.class);
 
     private String command;
 
@@ -43,7 +47,7 @@ public class CommandRunner extends OutboundAdapter implements Adapter, CommandRu
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
         command = properties.getOrDefault("command", "");
-        Kernel.getInstance().getLogger().print("\tcommand=" + command);
+        logger.info("\tcommand=" + command);
 
     }
 

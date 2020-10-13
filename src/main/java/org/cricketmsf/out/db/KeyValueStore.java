@@ -30,12 +30,16 @@ import java.util.Map;
 import java.util.Set;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.in.http.HttpPortedAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author greg
  */
 public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapterIface, Adapter {
+    private static final Logger logger = LoggerFactory.getLogger(KeyValueStore.class);
 
     private LimitedMap cache = null;
     private String storagePath;
@@ -67,9 +71,9 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         setStoragePath(properties.get("path"));
-        Kernel.getInstance().getLogger().print("\tpath: " + getStoragePath());
+        logger.info("\tpath: " + getStoragePath());
         setEnvVariable(properties.get("envVariable"));
-        Kernel.getInstance().getLogger().print("\tenvVAriable name: " + getEnvVariable());
+        logger.info("\tenvVAriable name: " + getEnvVariable());
         if (System.getenv(getEnvVariable()) != null) {
             setStoragePath(System.getenv(getEnvVariable()));
         }
@@ -78,22 +82,22 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
             setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
         }
         setFileName(properties.get("file"));
-        Kernel.getInstance().getLogger().print("\tfile: " + getFileName());
+        logger.info("\tfile: " + getFileName());
         String pathSeparator = System.getProperty("file.separator");
         setStoragePath(
                 getStoragePath().endsWith(pathSeparator)
                 ? getStoragePath() + getFileName()
                 : getStoragePath() + pathSeparator + getFileName()
         );
-        Kernel.getInstance().getLogger().print("\tcache file location: " + getStoragePath());
+        logger.info("\tcache file location: " + getStoragePath());
         try {
             setCapacity(Integer.parseInt(properties.get("max-records")));
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
-        Kernel.getInstance().getLogger().print("\tmax-records: " + getCapacity());
+        logger.info("\tmax-records: " + getCapacity());
         setPersistent(Boolean.parseBoolean(properties.get("persistent")));
-        Kernel.getInstance().getLogger().print("\tpersistent: " + isPersistent());
+        logger.info("\tpersistent: " + isPersistent());
         start();
     }
 

@@ -17,7 +17,6 @@ package org.cricketmsf.out.dispatcher;
 
 import org.cricketmsf.exception.DispatcherException;
 import org.cricketmsf.event.Event;
-import org.cricketmsf.event.EventDecorator;
 
 /**
  *
@@ -25,7 +24,6 @@ import org.cricketmsf.event.EventDecorator;
  */
 public interface DispatcherIface {
     public void dispatch(Event event) throws DispatcherException;
-    public void dispatch(EventDecorator event) throws DispatcherException;
     public void registerEventTypes(String categories) throws DispatcherException;
     public String getName();
 }

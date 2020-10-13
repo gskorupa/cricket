@@ -104,3 +104,4 @@ build
 /target/
 /dependency-reduced-pom.xml
 /gradlefiles/
+/backup2x/
