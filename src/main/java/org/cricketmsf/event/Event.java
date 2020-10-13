@@ -36,11 +36,13 @@ public class Event implements EventIface {
     private String timePoint = null; // rename to timeDefinition
     private long calculatedTimePoint = -1; // rename to timeMillis
     private long createdAt = -1;
-    private String serviceId = null;
-    private UUID serviceUuid = null;
-    private RequestObject request = null;
+    //private String serviceId = null;
+    //private UUID serviceUuid = null;
     private boolean cyclic = false;
     private Object data;
+    private String name;
+    private String procedureName;
+    
 
     /**
      * Creates new Event instance. Sets new id and createdAt parameters.
@@ -50,11 +52,14 @@ public class Event implements EventIface {
             this.id = Kernel.getEventId();
         }
         createdAt = System.currentTimeMillis();
-        if (null != Kernel.getInstance()) {
-            serviceId = Kernel.getInstance().getId();
-            serviceUuid = Kernel.getInstance().getUuid();
-        }
+        //if (null != Kernel.getInstance()) {
+        //    serviceId = Kernel.getInstance().getId();
+        //    serviceUuid = Kernel.getInstance().getUuid();
+        //}
         calculateTimePoint();
+        name=null;
+        procedureName=null;
+        data=null;
     }
 
     /**
@@ -66,14 +71,18 @@ public class Event implements EventIface {
      * (see: SimpleDateFormat)
      *)
      * @param timePoint defines when this event should happen.
-     * @param payload holds additional data
+     * @param data holds additional data
      */
-    public Event(String timePoint, Object payload) {
+    public Event(String name, String procedureName, String timePoint, Object data) {
         this.id = Kernel.getEventId();
+        this.name=name;
+        this.procedureName=procedureName;
+        /*
         if (null != Kernel.getInstance()) {
             this.serviceId = Kernel.getInstance().getId();
             this.serviceUuid = Kernel.getInstance().getUuid();
         }
+        */
         if (timePoint != null && timePoint.isEmpty()) {
             this.timePoint = null;
         } else {
@@ -81,9 +90,13 @@ public class Event implements EventIface {
         }
         createdAt = System.currentTimeMillis();
         calculateTimePoint();
-        setData(payload);
+        setData(data);
     }
-
+    
+    public Event(String timePoint, Object data) {
+        this(null, null, timePoint, data);
+    }
+    
     /**
      * @return the id
      */
@@ -225,30 +238,20 @@ public class Event implements EventIface {
         this.createdAt = createdAt;
     }
 
-    /**
-     * @return the serviceId
-     */
+/*    
     public String getServiceId() {
         return serviceId;
     }
 
-    /**
-     * @param serviceId the serviceId to set
-     */
     public void setServiceId(String serviceId) {
         this.serviceId = serviceId;
     }
 
-    /**
-     * @return the serviceUuid
-     */
     public UUID getServiceUuid() {
         return serviceUuid;
     }
 
     /**
-     * @param serviceUuid the serviceUuid to set
-     */
     public void setServiceUuid(UUID serviceUuid) {
         this.serviceUuid = serviceUuid;
     }
@@ -278,13 +281,11 @@ public class Event implements EventIface {
         return values;
     }
 
-    /**
-     * @return the request
-     */
     public RequestObject getRequest() {
         return request;
     }
-
+*/
+    
     /**
      * @return the cyclic
      */
@@ -327,6 +328,20 @@ public class Event implements EventIface {
 
     public void deserialize(String jsonString) {
         setData(JsonReader.jsonToJava(jsonString));
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
     }
     
 }

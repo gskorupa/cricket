@@ -153,6 +153,10 @@ public abstract class Kernel {
     private String getHookMethodNameForPort(String className, String procedureName) {
         return portEventHookMethods.get(procedureName + "@" + className);
     }
+    
+    public Object getEventProcessingResult(Event event) {
+        return getEventProcessingResult(event, event.getName());
+    }
 
     public Object getEventProcessingResult(Event event, String procedureName) {
         Object o = null;

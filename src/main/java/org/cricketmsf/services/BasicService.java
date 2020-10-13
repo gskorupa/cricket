@@ -105,7 +105,7 @@ public class BasicService extends Kernel {
     @PortEventClassHook(className = "HttpEvent", procedureName = "www")
     public Object doGet(Event event) {
         try {
-            RequestObject request = event.getRequest();
+            RequestObject request = (RequestObject)event.getData();
             ParameterMapResult result
                     = (ParameterMapResult) wwwFileReader
                             .getFile(request, htmlAdapter.useCache() ? cacheDB : null, "webcache");
