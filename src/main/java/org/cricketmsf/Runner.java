@@ -44,10 +44,11 @@ import org.slf4j.LoggerFactory;
  * @author greg
  */
 public class Runner {
+
     private static final Logger logger = LoggerFactory.getLogger(Runner.class);
 
     public static Kernel getService(String[] args) {
-        
+
         long runAt = System.currentTimeMillis();
         final Kernel service;
         final ConfigSet defaultConfigSet;
@@ -229,6 +230,7 @@ public class Runner {
         }
         return "";
     }
+
     private String getServiceVersion() {
         try {
             Enumeration<URL> resources = Runner.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
@@ -268,10 +270,19 @@ public class Runner {
             }
         } else {
             String propsName = "settings.json";
-            propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
-            if (null == propertyFile) {
-                propsName = "cricket.json";
+            File file = getFile(propsName);
+            if (null != file) {
+                try {
+                    propertyFile = new FileInputStream(file);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
                 propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
+                if (null == propertyFile) {
+                    propsName = "cricket.json";
+                    propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
+                }
             }
         }
         if (null == propertyFile) {
@@ -291,6 +302,16 @@ public class Runner {
         }
         configSet.joinProps();
         return configSet;
+    }
+
+    private File getFile(String fileName) {
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL resource = classLoader.getResource(fileName);
+        if (resource == null) {
+            return null;
+        } else {
+            return new File(resource.getFile());
+        }
     }
 
     public String getConfigAsString(ConfigSet c) {

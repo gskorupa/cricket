@@ -151,7 +151,7 @@ public abstract class Kernel {
     }
 
     private String getHookMethodNameForPort(String className, String procedureName) {
-        return portEventHookMethods.get(procedureName + "@" + className);
+        return portEventHookMethods.get((null==procedureName?"*":procedureName) + "@" + className);
     }
     
     public Object getEventProcessingResult(Event event) {
@@ -159,16 +159,16 @@ public abstract class Kernel {
     }
 
     public Object getEventProcessingResult(Event event, String procedureName) {
-        Object o = null;
-        String methodName = "unknown";
+        String methodName="unknown";
+        String procedure=(null==procedureName?"*":procedureName);
         try {
             Method m;
-            methodName = getHookMethodNameForPort(event.getClass().getSimpleName(), procedureName);
+            methodName = getHookMethodNameForPort(event.getClass().getSimpleName(), procedure);
             if (null != methodName && !methodName.isBlank()) {
                 m = getClass().getMethod(methodName, event.getClass());
-                o = m.invoke(this, event);
+                return m.invoke(this, event);
             } else {
-                LOGGER.warn("Don't know how to handle event {} procedure {}",procedureName,event.getClass().getName());
+                LOGGER.warn("Don't know how to handle {} procedure {} fired by {}",event.getClass().getName(), procedureName, event.getOrigin().getName());
             }
         } catch (IllegalAccessException | NoSuchMethodException e) {
             LOGGER.warn("Handler method {} not compatible with event class {}",methodName,event.getClass().getName());
@@ -178,7 +178,7 @@ public abstract class Kernel {
         } catch (NullPointerException e) {
             LOGGER.warn("Unable to find method {} for event class {}",methodName,event.getClass().getName());
         }
-        return o;
+        return null;
     }
 
     /**
@@ -188,7 +188,7 @@ public abstract class Kernel {
      * @return result of event processing
      */
     public static Object handle(Event event) {
-        return Kernel.getInstance().getEventProcessingResult(event, null);
+        return Kernel.getInstance().getEventProcessingResult(event);
     }
 
     public Object dispatchEvent(Event event) {
@@ -196,7 +196,7 @@ public abstract class Kernel {
             eventDispatcher.dispatch(event);
             return null;
         } catch (NullPointerException | DispatcherException ex) {
-            return getEventProcessingResult(event, null);
+            return getEventProcessingResult(event);
         } catch (Exception ex) {
             ex.printStackTrace();
             return null;

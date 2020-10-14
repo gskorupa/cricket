@@ -376,7 +376,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                                     params[0], //name
                                     params[1], //timePoint
                                     params[2], //data
-                                    true
+                                    true,
+                                    this.getClass()
                             ));
                 }
             }

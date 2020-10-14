@@ -30,7 +30,7 @@ import org.cricketmsf.RequestObject;
  *
  * @author Grzegorz Skorupa
  */
-public class Event implements EventIface {
+public class Event {
 
     private Long id = null;
     private String timePoint = null; // rename to timeDefinition
@@ -41,6 +41,7 @@ public class Event implements EventIface {
     private String procedureName;
     private String initialTimePoint;
     private boolean fromInit = false;
+    private Class origin;
 
     /**
      * Creates new Event instance. Sets new id and createdAt parameters.
@@ -58,6 +59,7 @@ public class Event implements EventIface {
         procedureName = null;
         data = null;
         fromInit = false;
+        origin = null;
     }
 
     /**
@@ -71,9 +73,9 @@ public class Event implements EventIface {
      * @param timePoint defines when this event should happen.
      * @param data holds additional data
      */
-    public Event(String name, String timePoint, Object data, boolean fromInit) {
+    public Event(String procedureName, String timePoint, Object data, boolean fromInit, Class origin) {
         this.id = Kernel.getEventId();
-        this.procedureName = name;
+        this.procedureName = procedureName;
         /*
         if (null != Kernel.getInstance()) {
             this.serviceId = Kernel.getInstance().getId();
@@ -89,14 +91,18 @@ public class Event implements EventIface {
         calculateTimePoint();
         setData(data);
         this.fromInit = fromInit;
+        this.origin = origin;
     }
 
-    public Event(String name, String timePoint, Object data) {
-        this(null, timePoint, data, false);
+    public Event(Class origin, String name, String timePoint, Object data) {
+        this(name, timePoint, data, false, origin);
     }
 
-    public Event(String timePoint, Object data) {
-        this(null, timePoint, data, false);
+    //public Event(String name, String timePoint, Object data) {
+    //    this(name, timePoint, data, false, null);
+    //}
+    public Event(Object origin, String timePoint, Object data) {
+        this(null, timePoint, data, false, null);
     }
 
     /**
@@ -324,6 +330,20 @@ public class Event implements EventIface {
      */
     public void setFromInit(boolean fromInit) {
         this.fromInit = fromInit;
+    }
+
+    /**
+     * @return the origin
+     */
+    public Class getOrigin() {
+        return origin;
+    }
+
+    /**
+     * @param origin the origin to set
+     */
+    public void setOrigin(Class origin) {
+        this.origin = origin;
     }
 
 }

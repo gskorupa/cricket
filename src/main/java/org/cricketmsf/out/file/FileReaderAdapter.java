@@ -48,6 +48,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
 
     private String rootPath;
     private String indexFileName;
+    private int maxAge=60;
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -63,6 +64,12 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         logger.info("\troot: " + getRootPath());
         indexFileName = properties.getOrDefault("index-file", "index.html");
         logger.info("\tindex-file: " + indexFileName);
+        try{
+            maxAge=Integer.parseInt(properties.getOrDefault("max-age", "120"));
+        }catch(Exception e){
+            logger.warn("max-age param config error: {}", e.getMessage());
+        }
+        logger.info("\tmax-age: " + maxAge);
     }
 
     /**
@@ -336,6 +343,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             result.setPayload("".getBytes());
             result.setCode(ResponseCode.NOT_MODIFIED);
         } else {
+            result.setMaxAge(maxAge);
             result.setCode(ResponseCode.OK);
             result.setPayload(fo.content);
         }

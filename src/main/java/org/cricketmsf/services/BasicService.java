@@ -105,7 +105,12 @@ public class BasicService extends Kernel {
      */
     @PortEventClassHook(className = "HttpEvent", procedureName = "www")
     public Object doGet(HttpEvent event) {
-        try {
+        return wwwFileReader.getFile(
+                (RequestObject)event.getData(), 
+                htmlAdapter.useCache() ? cacheDB : null, 
+                "webcache"
+        );
+        /*try {
             RequestObject request = (RequestObject)event.getData();
             ParameterMapResult result
                     = (ParameterMapResult) wwwFileReader
@@ -117,6 +122,7 @@ public class BasicService extends Kernel {
             e.printStackTrace();
         }
         return null;
+        */
     }
 
     @PortEventClassHook(className = "HttpEvent", procedureName = "getStatus")
