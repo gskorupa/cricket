@@ -16,12 +16,16 @@ public class ProcedureCall {
     public ProcedureCall(){
         this.responseCode = 500;
     }
+    
+    public static ProcedureCall forward(Event event) {
+        return forward(event, event.getProcedureName(), 0);
+    }
 
     public ProcedureCall(Event event, String procedureName) {
         this.event = event;
         this.procedureName = procedureName;
     }
-    
+        
     public static ProcedureCall forward(Event event, String procedureName) {
         return forward(event, procedureName, 0);
     }

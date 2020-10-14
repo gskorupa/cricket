@@ -49,6 +49,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
     private String rootPath;
     private String indexFileName;
     private int maxAge=60;
+    private boolean useCache = false;
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -70,6 +71,12 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             logger.warn("max-age param config error: {}", e.getMessage());
         }
         logger.info("\tmax-age: " + maxAge);
+        try{
+            useCache=Boolean.parseBoolean(properties.getOrDefault("cache", "false"));
+        }catch(Exception e){
+            logger.warn("cache param config error: {}", e.getMessage());
+        }
+        logger.info("\tcache: " + useCache);
     }
 
     /**
@@ -167,96 +174,11 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         }
     }
 
-    @Deprecated
-    @Override
-    public Result getFile(RequestObject request, KeyValueCacheAdapterIface cache) {
-        String filePath = getFilePath(request);
-        byte[] content;
-        ParameterMapResult result = new ParameterMapResult();
-        result.setData(request.parameters);
-        String modificationString = request.headers.getFirst("If-Modified-Since");
-        Date modificationPoint = null;
-        if (modificationString != null) {
-            SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
-            try {
-                modificationPoint = dt1.parse(modificationString);
-            }catch(ParseException e){
-                e.printStackTrace();
-            }
-        }
-        
-        // we can use cache if available
-        FileObject fo = null;
-        boolean fileReady = false;
-        if (cache != null) {
-            try {
-                fo = (FileObject) cache.get(filePath);
-                if (fo != null) {
-                    fileReady = true;
-                    result.setCode(ResponseCode.OK);
-                    result.setMessage("");
-                    result.setPayload(fo.content);
-                    result.setFileExtension(fo.fileExtension);
-                    result.setModificationDate(fo.modified);
-                    if (!isModifiedSince(fo.modified, modificationPoint)) {
-                        //System.out.println("NOT MODIFIED");
-                        result.setPayload("".getBytes());
-                        result.setCode(ResponseCode.NOT_MODIFIED);
-                    }
-                    logger.debug("read from cache");
-                    return result;
-                }
-            } catch (ClassCastException e) {
-            }
-        }
-        // if not in cache
-        if (!fileReady) {
-            File file = new File(filePath);
-            content = getFileBytes(file, filePath);
-            if (content.length == 0) {
-                // file not found or empty file
-                result.setCode(ResponseCode.NOT_FOUND);
-                result.setMessage("file not found");
-                result.setHeader("Content-type", "text/html");
-                result.setPayload("file not found".getBytes());
-                return result;
-            }
-            fo = new FileObject();
-            fo.content = content;
-            fo.modified = new Date(file.lastModified());
-            fo.filePath = filePath;
-            fo.fileExtension = getFileExt(filePath);
-            if (cache != null && content.length > 0) {
-                cache.put(filePath, fo);
-            }
-        }
-        result.setCode(ResponseCode.OK);
-        result.setMessage("");
-        result.setPayload(fo.content);
-        result.setFileExtension(fo.fileExtension);
-        result.setModificationDate(fo.modified);
-        if (!isModifiedSince(fo.modified, modificationPoint)) {
-            //System.out.println("NOT MODIFIED");
-            result.setPayload("".getBytes());
-            result.setCode(ResponseCode.NOT_MODIFIED);
-        } else {
-            result.setCode(ResponseCode.OK);
-            result.setPayload(fo.content);
-        }
-        return result;
-    }
-
     private boolean isModifiedSince(Date modified, Date since) {
         if(since == null){
-            //System.out.println("IF-MODIFIED-SINCE NULL");
             return true;
         }
-        //System.out.println("CHECKING MODIFICATION");
-        
         boolean modif = modified.after(since);
-        //System.out.println("MODIFIED "+modif);
-        //System.out.println("MOD "+modified);
-        //System.out.println("SINCE "+since);
         return modif;
     }
 
@@ -287,7 +209,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
         // we can use cache if available
         FileObject fo = null;
         boolean fileReady = false;
-        if (cache != null) {
+        if (useCache && cache != null) {
             try {
                 try {
                     fo = (FileObject) cache.get(tableName, filePath);

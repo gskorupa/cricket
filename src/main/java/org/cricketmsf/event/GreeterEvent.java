@@ -21,7 +21,7 @@ import java.util.HashMap;
  * To be removed
  * @author greg
  */
-@org.cricketmsf.livingdoc.design.BoundedContext(name="Content Management")
+@org.cricketmsf.livingdoc.design.BoundedContext(name="Base")
 @org.cricketmsf.livingdoc.design.Event()
 public class GreeterEvent extends Event {
 

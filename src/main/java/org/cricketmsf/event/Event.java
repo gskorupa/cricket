@@ -18,12 +18,9 @@ package org.cricketmsf.event;
 import com.cedarsoftware.util.io.JsonWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.UUID;
-import org.cricketmsf.JsonReader;
+import org.cricketmsf.util.JsonReader;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.RequestObject;
 
 /**
  * Event

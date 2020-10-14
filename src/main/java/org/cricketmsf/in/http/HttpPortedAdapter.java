@@ -34,7 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Stopwatch;
+import org.cricketmsf.util.Stopwatch;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.InboundAdapterIface;
 import org.cricketmsf.in.openapi.Operation;

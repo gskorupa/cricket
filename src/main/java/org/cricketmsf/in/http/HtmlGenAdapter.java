@@ -124,8 +124,8 @@ public class HtmlGenAdapter extends HttpPortedAdapter implements HtmlGenAdapterI
 
     @Override
     protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
-        HttpEvent event = new HttpEvent(request);
-        return ProcedureCall.forward(event, "www");
+        HttpEvent event = new HttpEvent("www",request);
+        return ProcedureCall.forward(event);
     }
 
 }

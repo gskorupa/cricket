@@ -1,4 +1,4 @@
-package org.cricketmsf;
+package org.cricketmsf.util;
 
 public class JsonReader {
 

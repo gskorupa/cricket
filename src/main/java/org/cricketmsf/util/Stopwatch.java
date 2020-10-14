@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.annotation;
+package org.cricketmsf.util;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.concurrent.TimeUnit;
 
-@Documented
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface RestApiErrorCodes {
-    RestApiErrorCode[] value();
+/**
+ *
+ * @author greg
+ */
+public class Stopwatch {
+
+    public long start = System.nanoTime();
+
+    public long time() {
+        return System.nanoTime() - start;
+    }
+
+    public long time(TimeUnit unit) {
+        return unit.convert(time(), TimeUnit.NANOSECONDS);
+    }
+
 }

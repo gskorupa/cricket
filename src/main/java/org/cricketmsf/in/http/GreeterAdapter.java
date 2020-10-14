@@ -46,8 +46,8 @@ public class GreeterAdapter
             return ProcedureCall.respond(PARAM_NOT_FOUND, err);
         }
         // building resulting call
-        HttpEvent event = new HttpEvent(request);
-        return ProcedureCall.forward(event, "greet");
+        HttpEvent event = new HttpEvent("greet", request);
+        return ProcedureCall.forward(event);
     }
 
 }

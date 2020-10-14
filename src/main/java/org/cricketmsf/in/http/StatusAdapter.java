@@ -33,8 +33,8 @@ public class StatusAdapter
 
     @Override
     protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
-        HttpEvent event = new HttpEvent(request);
-        return ProcedureCall.forward(event, "getStatus");
+        HttpEvent event = new HttpEvent("getStatus", request);
+        return ProcedureCall.forward(event);
     }
 
 }

@@ -19,13 +19,14 @@ package org.cricketmsf.event;
  * To be removed
  * @author greg
  */
-@org.cricketmsf.livingdoc.design.BoundedContext(name="Content Management")
+@org.cricketmsf.livingdoc.design.BoundedContext(name="Base")
 @org.cricketmsf.livingdoc.design.Event()
 public class HttpEvent extends Event {
 
-    public HttpEvent(Object request) {
+    public HttpEvent(String procedureName, Object request) {
         super();
         setData(request);
+        setProcedureName(procedureName);
     }
     
 }

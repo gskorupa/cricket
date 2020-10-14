@@ -15,16 +15,13 @@
  */
 package org.cricketmsf.out.autostart;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.Kernel;
 import org.cricketmsf.exception.InitException;
-import org.cricketmsf.in.http.HttpPortedAdapter;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.OutboundAdapterIface;
 import org.slf4j.Logger;

@@ -44,11 +44,10 @@ import org.slf4j.LoggerFactory;
 public class BasicService extends Kernel {
     private static final Logger logger = LoggerFactory.getLogger(BasicService.class);
 
-    // adapterClasses
+    // outbound adapters
     KeyValueDBIface cacheDB = null;
-    SchedulerIface scheduler = null;
-    HtmlGenAdapterIface htmlAdapter = null;
     FileReaderAdapterIface wwwFileReader = null;
+    // other adapters whose methods must be available
     OpenApiIface apiGenerator = null;
 
     public BasicService() {
@@ -58,10 +57,7 @@ public class BasicService extends Kernel {
 
     @Override
     public void getAdapters() {
-        // standard Cricket adapters
         cacheDB = (KeyValueDBIface) getRegistered("CacheDB");
-        scheduler = (SchedulerIface) getRegistered("Scheduler");
-        htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
         wwwFileReader = (FileReaderAdapterIface) getRegistered("WwwFileReader");
         apiGenerator = (OpenApiIface) getRegistered("OpenApi");
     }
@@ -70,8 +66,6 @@ public class BasicService extends Kernel {
     public void runInitTasks() {
         try {
             super.runInitTasks();
-            // we should register event categories used by this service
-            //EventMaster.registerEventCategories(new Event().getCategories(), Event.class.getName());
         } catch (InitException ex) {
             ex.printStackTrace();
             shutdown();
@@ -97,8 +91,6 @@ public class BasicService extends Kernel {
     }
 
     /**
-     * Process requests from simple web server implementation given by
-     * HtmlGenAdapter access web web resources
      *
      * @param event
      * @return ParameterMapResult with the file content as a byte array
@@ -107,30 +99,14 @@ public class BasicService extends Kernel {
     public Object doGet(HttpEvent event) {
         return wwwFileReader.getFile(
                 (RequestObject)event.getData(), 
-                htmlAdapter.useCache() ? cacheDB : null, 
+                cacheDB, 
                 "webcache"
         );
-        /*try {
-            RequestObject request = (RequestObject)event.getData();
-            ParameterMapResult result
-                    = (ParameterMapResult) wwwFileReader
-                            .getFile(request, htmlAdapter.useCache() ? cacheDB : null, "webcache");
-            // caching policy 
-            result.setMaxAge(120);
-            return result;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-        */
     }
 
     @PortEventClassHook(className = "HttpEvent", procedureName = "getStatus")
     public Object handleStatusRequest(Event requestEvent) {
-        StandardResult result = new StandardResult();
-        result.setCode(ResponseCode.OK);
-        result.setData(reportStatus());
-        return result;
+        return new StandardResult(reportStatus());
     }
 
     @PortEventClassHook(className = "HttpEvent", procedureName = "greet")

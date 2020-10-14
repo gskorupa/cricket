@@ -427,6 +427,7 @@
                     "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
                         "root": "./www/",
+                        "use-cache": "true",
                         "index-file": "index.html"
                     }
                 },
