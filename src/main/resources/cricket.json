@@ -88,7 +88,6 @@
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
                         "path": "./data",
-                        "envVariable": "SCHEDULER_DB_PATH",
                         "file": "scheduler.xml",
                         "init.0":"Data1,MICROSITE,EVENT,CLEAR_DATA,05:00:00 GMT|*24h,_|_;",
                         "init.1":"Data2,MICROSITE,EVENT,BACKUP,06:00:00 GMT|*24h,_"
@@ -370,8 +369,8 @@
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
                         "path": "./data",
-                        "envVariable": "SCHEDULER_DB_PATH",
-                        "file": "scheduler.xml"
+                        "file": "scheduler.xml",
+                        "init": "printInfo,+10s,asdfgh"
                     }
                 },
                 {

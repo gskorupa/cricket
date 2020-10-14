@@ -88,10 +88,10 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
         if (!onStart) {
             getServiceHook();
         } else {
-            logger.info("context=" + getContext());
-            logger.info("echo=" + echo);
-            logger.info("send-hello=" + sendHello);
-            logger.info("mode=" + tmpMode);
+            logger.info("\tcontext=" + getContext());
+            logger.info("\techo=" + echo);
+            logger.info("\tsend-hello=" + sendHello);
+            logger.info("\tmode=" + tmpMode);
         }
     }
 

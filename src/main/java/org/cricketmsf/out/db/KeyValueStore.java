@@ -165,17 +165,17 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
     }
 
     @Override
-    public void put(String key, Object value) {
+    public void put(Object key, Object value) {
         getCache().put(key, value);
     }
 
     @Override
-    public Object get(String key) {
+    public Object get(Object key) {
         return getCache().get(key);
     }
 
     @Override
-    public Object get(String key, Object defaultValue) {
+    public Object get(Object key, Object defaultValue) {
         return getCache().containsKey(key) ? getCache().get(key) : defaultValue;
     }
 
@@ -200,12 +200,12 @@ public class KeyValueStore extends OutboundAdapter implements KeyValueCacheAdapt
     }
 
     @Override
-    public boolean containsKey(String key) {
+    public boolean containsKey(Object key) {
         return getCache().containsKey(key);
     }
 
     @Override
-    public boolean remove(String key) {
+    public boolean remove(Object key) {
         return getCache().remove(key) != null;
     }
 

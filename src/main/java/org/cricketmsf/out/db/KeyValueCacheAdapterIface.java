@@ -26,13 +26,13 @@ import org.cricketmsf.out.db.ComparatorIface;
 public interface KeyValueCacheAdapterIface {
     
     public void start();
-    public void put(String key, Object value);
-    public Object get(String key);
-    public Object get(String key, Object defaultValue);
+    public void put(Object key, Object value);
+    public Object get(Object key);
+    public Object get(Object key, Object defaultValue);
     public Map getAll();
     public List search(ComparatorIface comparator, Object pattern);
-    public boolean containsKey(String key);
-    public boolean remove(String key);
+    public boolean containsKey(Object key);
+    public boolean remove(Object key);
     public void clear();
     public long getSize();
 }

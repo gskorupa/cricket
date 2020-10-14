@@ -21,6 +21,7 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.annotation.PortEventClassHook;
 import org.cricketmsf.event.GreeterEvent;
+import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.http.ParameterMapResult;
@@ -103,7 +104,7 @@ public class BasicService extends Kernel {
      * @return ParameterMapResult with the file content as a byte array
      */
     @PortEventClassHook(className = "HttpEvent", procedureName = "www")
-    public Object doGet(Event event) {
+    public Object doGet(HttpEvent event) {
         try {
             RequestObject request = (RequestObject)event.getData();
             ParameterMapResult result
@@ -132,6 +133,12 @@ public class BasicService extends Kernel {
         Result result = new StandardResult("Hello " + name);
         result.setHeader("Content-type", "text/plain");
         return result;
+    }
+    
+    @PortEventClassHook(className = "Event", procedureName = "printInfo")
+    public Object printInfo(Event event) {
+        logger.info("INFO {} {} {}",event.getProcedureName(), event.getInitialTimePoint(), event.getData());
+        return null;
     }
 
     public Object sendEcho(RequestObject request) {

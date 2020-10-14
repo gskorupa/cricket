@@ -30,10 +30,11 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Runner class is used when running JAR distribution. The class parses the
@@ -43,8 +44,10 @@ import java.util.jar.Manifest;
  * @author greg
  */
 public class Runner {
+    private static final Logger logger = LoggerFactory.getLogger(Runner.class);
 
     public static Kernel getService(String[] args) {
+        
         long runAt = System.currentTimeMillis();
         final Kernel service;
         final ConfigSet defaultConfigSet;
@@ -79,11 +82,11 @@ public class Runner {
 
         // if serviceName isn't configured print error and exit
         if (configuration == null) {
-            System.out.println("Configuration not found for id=" + serviceId);
+            logger.info("Configuration not found for id=" + serviceId);
             System.exit(-1);
         } else if (arguments.containsKey("lift")) {
             serviceName = (String) arguments.get("lift");
-            System.out.println("LIFT service " + serviceName);
+            logger.info("LIFT service " + serviceName);
         } else {
             serviceName = configuration.getService();
         }
@@ -104,7 +107,7 @@ public class Runner {
             e.printStackTrace();
             System.exit(-1);
         }
-        System.out.println("CRICKET RUNNER");
+        logger.info("CRICKET RUNNER");
         try {
             service = Kernel.getInstanceWithProperties(serviceClass, configuration, defaultConfigSet);
             service.configSet = configSet;
@@ -116,6 +119,7 @@ public class Runner {
             } else {
                 //service.setScheduler(new Scheduler());
                 //System.out.println("Executing runOnce method");
+                service.setStartedAt(runAt);
                 service.runOnce();
                 service.shutdown();
                 return null;

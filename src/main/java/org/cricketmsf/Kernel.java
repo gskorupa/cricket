@@ -155,7 +155,7 @@ public abstract class Kernel {
     }
     
     public Object getEventProcessingResult(Event event) {
-        return getEventProcessingResult(event, event.getName());
+        return getEventProcessingResult(event, event.getProcedureName());
     }
 
     public Object getEventProcessingResult(Event event, String procedureName) {
@@ -308,7 +308,7 @@ public abstract class Kernel {
         setInboundAdaptersLoaded(false);
         LOGGER.info("LOADING SERVICE PROPERTIES FOR " + config.getService());
         LOGGER.info("\tUUID=" + getUuid().toString());
-        LOGGER.info("\tenv name=" + getName());
+        LOGGER.info("\tname=" + getName());
         setHost(config.getProperty("host", "0.0.0.0"));
         try {
             setPort(Integer.parseInt(config.getProperty("port", "8080")));

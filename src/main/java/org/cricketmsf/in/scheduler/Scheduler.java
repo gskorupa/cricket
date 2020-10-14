@@ -49,7 +49,6 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
     private String storagePath;
-    private String envVariable;
     private String fileName;
     private KeyValueStore database;
     protected boolean restored = false;
@@ -76,12 +75,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         super.loadProperties(properties, adapterName);
         setStoragePath(properties.get("path"));
         logger.info("\tpath: " + getStoragePath());
-        setEnvVariable(properties.get("envVariable"));
-        logger.info("\tenvVAriable name: " + getEnvVariable());
-        if (null != getEnvVariable() && System.getenv(getEnvVariable()) != null) {
-            setStoragePath(System.getenv(getEnvVariable()));
-        }
         // fix to handle '.'
+        //TODO: ?
         if (getStoragePath().startsWith(".")) {
             setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
         }
@@ -122,14 +117,6 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         return storagePath;
     }
 
-    private void setEnvVariable(String envVariable) {
-        this.envVariable = envVariable;
-    }
-
-    private String getEnvVariable() {
-        return envVariable;
-    }
-
     @Override
     public boolean handleEvent(Event event) {
         return handleEvent(event, false, false);
@@ -143,20 +130,18 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
         try {
             if (event.getTimePoint() == null) {
-                logger.debug("event.getTimePoint() is null. It should not happen");
+                logger.debug("event.getTimePoint() is null. It should not happen. {} {} {} {}",
+                        event.getClass().getSimpleName(),
+                        event.getProcedureName(),
+                        event.getTimePoint(),
+                        event.getInitialTimePoint());
                 return false;
             }
             if (systemStart) {
                 String oldCopy = "";
                 //when events initialized on the service start, we need to create new instances of these events
-                if (event.getName() != null && !event.getName().isEmpty()) {
-                    if (database.containsKey(event.getName())) {
-                        oldCopy = ((Event) database.get(event.getName())).getId() + "";
-                    }
-                } else {
-                    if (database.containsKey("" + event.getId())) {
-                        oldCopy = ((Event) database.get("" + event.getId())).getId() + "";
-                    }
+                if (database.containsKey(event.getId())) {
+                    oldCopy = "" + ((Event) database.get(event.getId())).getId();
                 }
                 if (!oldCopy.isEmpty()) {
                     killList.put(oldCopy, oldCopy);
@@ -172,6 +157,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                     // we should reset timepoint to prevent sending this event back from the service
                     String remembered = ev.getTimePoint();
                     ev.setTimePoint(null);
+                    ev.setInitialTimePoint(remembered);
                     // we should wait until Kernel finishes initialization process
                     while (!Kernel.getInstance().isStarted()) {
                         try {
@@ -185,7 +171,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                     }
 
                     threadsCounter--;
-                    database.remove("" + ev.getId());
+                    database.remove(ev.getId());
                     try {
                         if (ev.isCyclic()) {
                             //if timePoint has form dateformatted|*cyclicdelay
@@ -211,14 +197,10 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
             Delay delay = getDelayForEvent(event, restored);
             if (delay.getDelay() >= 0) {
                 if (systemStart) {
-                    logger.info("event " + event.getName() + " will start in " + (delay.getDelay() / 1000) + " seconds");
+                    logger.info("event " + event.getProcedureName() + " will start in " + (delay.getDelay() / 1000) + " seconds");
                 }
-                if (!restored) {
-                    if (event.getName() != null && !event.getName().isEmpty()) {
-                        database.put(event.getName(), event);
-                    } else {
-                        database.put("" + event.getId(), event);
-                    }
+                if (!(restored || event.isFromInit())) {
+                    database.put(event.getId(), event);
                 }
                 threadsCounter++;
                 final ScheduledFuture<?> workerHandle = scheduler.schedule(runnable, delay.getDelay(), delay.getUnit());
@@ -232,14 +214,13 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     private void processDatabase() {
         Iterator it = database.getKeySet().iterator();
-        String key;
+        Long key;
         while (it.hasNext()) {
-            key = (String) it.next();
+            key = (Long) it.next();
+            //TODO: check this
             //restore only events without name == not these created using 
             //scheduler properties
-            if (((Event) database.get(key)).getName() == null) {
-                handleEvent((Event) database.get(key), true);
-            }
+            handleEvent((Event) database.get(key), true);
         }
     }
 
@@ -381,6 +362,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         return database.containsKey(eventID);
     }
 
+    @Override
     public void initScheduledTasks() {
         String[] params;
         String[] tasks;
@@ -388,13 +370,13 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
             tasks = initialTasks.split(";");
             for (String task : tasks) {
                 params = task.split(",");
-                if (params.length == 6) {
+                if (params.length == 3) {
                     handleEvent(
                             new Event(
-                                    params[0],
-                                    params[1], //procedure
-                                    params[2], //timePoint
-                                    params[3] //data
+                                    params[0], //name
+                                    params[1], //timePoint
+                                    params[2], //data
+                                    true
                             ));
                 }
             }
