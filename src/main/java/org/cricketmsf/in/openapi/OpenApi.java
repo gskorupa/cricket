@@ -46,9 +46,9 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
         // validation and translation 
         String method = request.method;
         if ("GET".equalsIgnoreCase(method)) {
-            return ProcedureCall.respond(200, "application/vnd.oai.openapi", toYaml());
+            return ProcedureCall.toRespond(200, "application/vnd.oai.openapi", toYaml());
         } else {
-            return ProcedureCall.respond(ResponseCode.NOT_IMPLEMENTED, "method not implemented");
+            return ProcedureCall.toRespond(ResponseCode.NOT_IMPLEMENTED, "method not implemented");
         }
     }
 

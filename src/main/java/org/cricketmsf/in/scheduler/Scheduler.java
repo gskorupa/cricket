@@ -48,7 +48,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
-    private String storagePath;
+    //private String storagePath;
     private String fileName;
     private KeyValueStore database;
     protected boolean restored = false;
@@ -73,22 +73,23 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        setStoragePath(properties.get("path"));
-        logger.info("\tpath: " + getStoragePath());
+        //setStoragePath(properties.get("path"));
+        //logger.info("\tpath: " + getStoragePath());
         // fix to handle '.'
         //TODO: ?
-        if (getStoragePath().startsWith(".")) {
-            setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
-        }
+        //if (getStoragePath().startsWith(".")) {
+        //    setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
+        //}
         setFileName(properties.get("file"));
         logger.info("\tfile: " + getFileName());
-        String pathSeparator = System.getProperty("file.separator");
+        /*String pathSeparator = System.getProperty("file.separator");
         setStoragePath(
                 getStoragePath().endsWith(pathSeparator)
                 ? getStoragePath() + getFileName()
                 : getStoragePath() + pathSeparator + getFileName()
         );
-        logger.info("\tscheduler database file location: " + getStoragePath());
+        */
+        logger.info("\tscheduler database file location: " + getFileName());
 
         initialTasks = properties.getOrDefault("init", "");
         logger.info("\tinit: " + initialTasks);
@@ -96,7 +97,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         properties.put("init", initialTasks);
 
         database = new KeyValueStore();
-        database.setStoragePath(getStoragePath());
+        database.setStoragePath(getFileName());
         database.read();
         setRestored(database.getSize() > 0);
         processDatabase();
@@ -109,13 +110,15 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         initScheduledTasks();
     }
 
-    private void setStoragePath(String storagePath) {
+    /*private void setStoragePath(String storagePath) {
         this.storagePath = storagePath;
     }
+    
 
     private String getStoragePath() {
         return storagePath;
     }
+    */
 
     @Override
     public boolean handleEvent(Event event) {

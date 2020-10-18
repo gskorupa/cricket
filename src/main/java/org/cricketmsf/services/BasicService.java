@@ -19,7 +19,6 @@ import java.util.HashMap;
 import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
-import org.cricketmsf.annotation.PortEventClassHook;
 import org.cricketmsf.event.GreeterEvent;
 import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.exception.InitException;
@@ -35,9 +34,10 @@ import org.cricketmsf.out.db.KeyValueDBIface;
 import org.cricketmsf.out.file.FileReaderAdapterIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.cricketmsf.annotation.EventHook;
 
 /**
- * EchoService
+ * This is example service.
  *
  * @author greg
  */
@@ -95,7 +95,7 @@ public class BasicService extends Kernel {
      * @param event
      * @return ParameterMapResult with the file content as a byte array
      */
-    @PortEventClassHook(className = "HttpEvent", procedureName = "www")
+    @EventHook(className = "HttpEvent", procedureName = "www")
     public Object doGet(HttpEvent event) {
         return wwwFileReader.getFile(
                 (RequestObject)event.getData(), 
@@ -104,12 +104,12 @@ public class BasicService extends Kernel {
         );
     }
 
-    @PortEventClassHook(className = "HttpEvent", procedureName = "getStatus")
+    @EventHook(className = "HttpEvent", procedureName = "getStatus")
     public Object handleStatusRequest(Event requestEvent) {
         return new StandardResult(reportStatus());
     }
 
-    @PortEventClassHook(className = "HttpEvent", procedureName = "greet")
+    @EventHook(className = "HttpEvent", procedureName = "greet")
     public Object doGreet(GreeterEvent event) {
         String name =  ((HashMap<String,String>)event.getData()).get("name");
         Result result = new StandardResult("Hello " + name);
@@ -117,7 +117,7 @@ public class BasicService extends Kernel {
         return result;
     }
     
-    @PortEventClassHook(className = "Event", procedureName = "printInfo")
+    @EventHook(className = "Event", procedureName = "printInfo")
     public Object printInfo(Event event) {
         logger.info("INFO {} {} {}",event.getProcedureName(), event.getInitialTimePoint(), event.getData());
         return null;

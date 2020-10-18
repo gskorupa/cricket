@@ -275,9 +275,10 @@ public class Runner {
                 try {
                     propertyFile = new FileInputStream(file);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
-            } else {
+            }
+            if(null==propertyFile){
                 propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
                 if (null == propertyFile) {
                     propsName = "cricket.json";

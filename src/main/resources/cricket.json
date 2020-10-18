@@ -4,6 +4,174 @@
     "services": [
         {
             "@type": "org.cricketmsf.config.Configuration",
+            "id": "MinimalService",
+            "service": "org.cricketmsf.services.MinimalService",
+            "properties": {
+                "host": "0.0.0.0",
+                "port": "7070",
+                "wsport": "",
+                "threads": "0",
+                "filter": "org.cricketmsf.SecurityFilter",
+                "cors": "Access-Control-Allow-Origin:*",
+                "time-zone": "GMT",
+                "request-encoding": "UTF-8",
+                "file-upload-maxsize": "1000000",
+                "serviceurl": "http://localhost:7070",
+                "terms":"https://github.com/gskorupa/cricket"
+            },
+            "ports": [
+                {
+                    "name": "OpenApi",
+                    "interfaceName": "OpenApiIface",
+                    "classFullName": "org.cricketmsf.in.openapi.OpenApi",
+                    "description": "",
+                    "properties": {
+                        "context": "/api"
+                    }
+                }
+            ]
+        },
+        {
+            "@type": "org.cricketmsf.config.Configuration",
+            "id": "BasicService",
+            "service": "org.cricketmsf.services.BasicService",
+            "properties": {
+                "host": "0.0.0.0",
+                "port": "7070",
+                "wsport": "",
+                "threads": "0",
+                "filter": "org.cricketmsf.SecurityFilter",
+                "cors": "Access-Control-Allow-Origin:*",
+                "time-zone": "GMT",
+                "request-encoding": "UTF-8",
+                "file-upload-maxsize": "1000000",
+                "serviceurl": "http://localhost:7070",
+                "terms":"https://github.com/gskorupa/cricket"
+            },
+            "ports": [
+                {
+                    "name": "Greeter",
+                    "interfaceName": "",
+                    "adapterClassName": "org.cricketmsf.in.http.GreeterAdapter",
+                    "properties": {
+                        "context": "/api/greeting"
+                    }
+                },
+                {
+                    "name": "StatusService",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.StatusAdapter",
+                    "properties": {
+                        "context": "/api/status"
+                    }
+                },
+                {
+                    "name": "CacheDB",
+                    "interfaceName": "KeyValueDBIface",
+                    "classFullName": "org.cricketmsf.out.db.KeyValueDB",
+                    "properties": {
+                        "path": "./data",
+                        "name": "local"
+                    }
+                },
+                {
+                    "name": "Scheduler",
+                    "interfaceName": "SchedulerIface",
+                    "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
+                    "properties": {
+                        "file": "./scheduler.xml",
+                        "init": "printInfo,+10s,asdfgh"
+                    }
+                },
+                {
+                    "name": "Dispatcher",
+                    "interfaceName": "DispatcherIface",
+                    "classFullName": "org.cricketmsf.out.dispatcher.QueueDispatcher",
+                    "description": "event dispatcher using internal Queue",
+                    "properties": {
+                        "event-classes": "org.cricketmsf.event.GreeterEvent",
+                        "queue-client-name": "QueueClient"
+                    }
+                },
+                {
+                    "name": "QueueClient",
+                    "interfaceName": "QueueClientIface",
+                    "classFullName": "org.cricketmsf.out.queue.SimpleQueueClient",
+                    "description": "internal Queue client",
+                    "properties": {
+                        "queue-adapter-name": "Queue"
+                    }
+                },
+                {
+                    "name": "QueueSubscriber",
+                    "interfaceName": "QueueClientIface",
+                    "classFullName": "org.cricketmsf.in.queue.SimpleQueueSubscriber",
+                    "description": "internal Queue subscriber",
+                    "properties": {
+                        "queue-adapter-name": "Queue",
+                        "channels": "org.cricketmsf.event.GreeterEvent"
+                    }
+                },
+                {
+                    "name": "Queue",
+                    "interfaceName": "QueueIface",
+                    "classFullName": "org.cricketmsf.out.queue.SimpleQueue",
+                    "description": "embeded queue inplementation",
+                    "properties": {
+                    }
+                },
+                {
+                    "name": "WwwService",
+                    "interfaceName": "HtmlGenAdapterIface",
+                    "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
+                    "properties": {
+                        "context": "/",
+                        "use-cache": "true",
+                        "page-processor": "false",
+                        "dump-request": "false"
+                    }
+                },
+                {
+                    "name": "WwwFileReader",
+                    "interfaceName": "FileReaderAdapterIface",
+                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
+                    "properties": {
+                        "root": "./www/",
+                        "use-cache": "true",
+                        "index-file": "index.html"
+                    }
+                },
+                {
+                    "name": "WsAdapter",
+                    "interfaceName": "InboundAdapterIface",
+                    "classFullName": "org.cricketmsf.in.websocket.WebsocketAdapter",
+                    "description": "default websocket adapter",
+                    "properties": {
+                        "context":"/test"
+                    }
+                },
+                {
+                    "name": "Autostart",
+                    "interfaceName": "AutostartIface",
+                    "classFullName": "org.cricketmsf.out.autostart.Autostart",
+                    "description": "",
+                    "properties": {
+                        "subfolders":"./logs:./data"
+                    }
+                },
+                {
+                    "name": "OpenApi",
+                    "interfaceName": "OpenApiIface",
+                    "classFullName": "org.cricketmsf.in.openapi.OpenApi",
+                    "description": "",
+                    "properties": {
+                        "context": "/api"
+                    }
+                }
+            ]
+        },
+        {
+            "@type": "org.cricketmsf.config.Configuration",
             "id": "Microsite",
             "service": "org.cricketmsf.services.Microsite",
             "description":"Cricket Microsite service",
@@ -309,175 +477,6 @@
                         "subfolders":"./logs:./data:./www"
                     }
                 },
-                {
-                    "name": "OpenApi",
-                    "interfaceName": "OpenApiIface",
-                    "classFullName": "org.cricketmsf.in.openapi.OpenApi",
-                    "description": "",
-                    "properties": {
-                        "context": "/api"
-                    }
-                }
-            ]
-        },
-        {
-            "@type": "org.cricketmsf.config.Configuration",
-            "id": "BasicService",
-            "service": "org.cricketmsf.services.BasicService",
-            "properties": {
-                "host": "0.0.0.0",
-                "port": "7070",
-                "wsport": "",
-                "threads": "0",
-                "filter": "org.cricketmsf.SecurityFilter",
-                "cors": "Access-Control-Allow-Origin:*",
-                "time-zone": "GMT",
-                "request-encoding": "UTF-8",
-                "file-upload-maxsize": "1000000",
-                "serviceurl": "http://localhost:7070",
-                "terms":"https://github.com/gskorupa/cricket"
-            },
-            "ports": [
-                {
-                    "name": "Greeter",
-                    "interfaceName": "",
-                    "adapterClassName": "org.cricketmsf.in.http.GreeterAdapter",
-                    "properties": {
-                        "context": "/api/greeting"
-                    }
-                },
-                {
-                    "name": "StatusService",
-                    "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.StatusAdapter",
-                    "properties": {
-                        "context": "/api/status"
-                    }
-                },
-                {
-                    "name": "CacheDB",
-                    "interfaceName": "KeyValueDBIface",
-                    "classFullName": "org.cricketmsf.out.db.KeyValueDB",
-                    "properties": {
-                        "path": "./data",
-                        "name": "local"
-                    }
-                },
-                {
-                    "name": "Scheduler",
-                    "interfaceName": "SchedulerIface",
-                    "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
-                    "properties": {
-                        "path": "./data",
-                        "file": "scheduler.xml",
-                        "init": "printInfo,+10s,asdfgh"
-                    }
-                },
-                {
-                    "name": "Dispatcher",
-                    "interfaceName": "DispatcherIface",
-                    "classFullName": "org.cricketmsf.out.dispatcher.QueueDispatcher",
-                    "description": "using internal Queue",
-                    "properties": {
-                        "event-types": "TEST",
-                        "queue-client-name": "QueueClient"
-                    }
-                },
-                {
-                    "name": "QueueClient",
-                    "interfaceName": "QueueClientIface",
-                    "classFullName": "org.cricketmsf.out.queue.SimpleQueueClient",
-                    "description": "using internal Queue",
-                    "properties": {
-                        "queue-adapter-name": "Queue"
-                    }
-                },
-                {
-                    "name": "QueueSubscriber",
-                    "interfaceName": "QueueClientIface",
-                    "classFullName": "org.cricketmsf.in.queue.SimpleQueueSubscriber",
-                    "description": "using internal Queue",
-                    "properties": {
-                        "queue-adapter-name": "Queue",
-                        "channels": "TEST"
-                    }
-                },
-                {
-                    "name": "Queue",
-                    "interfaceName": "QueueIface",
-                    "classFullName": "org.cricketmsf.out.queue.SimpleQueue",
-                    "description": "=",
-                    "properties": {
-                    }
-                },
-                {
-                    "name": "WwwService",
-                    "interfaceName": "HtmlGenAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
-                    "properties": {
-                        "context": "/",
-                        "use-cache": "true",
-                        "page-processor": "false",
-                        "dump-request": "false"
-                    }
-                },
-                {
-                    "name": "WwwFileReader",
-                    "interfaceName": "FileReaderAdapterIface",
-                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
-                    "properties": {
-                        "root": "./www/",
-                        "use-cache": "true",
-                        "index-file": "index.html"
-                    }
-                },
-                {
-                    "name": "WsAdapter",
-                    "interfaceName": "InboundAdapterIface",
-                    "classFullName": "org.cricketmsf.in.websocket.WebsocketAdapter",
-                    "description": "default websocket adapter",
-                    "properties": {
-                        "context":"/test"
-                    }
-                },
-                {
-                    "name": "Autostart",
-                    "interfaceName": "AutostartIface",
-                    "classFullName": "org.cricketmsf.out.autostart.Autostart",
-                    "description": "",
-                    "properties": {
-                        "subfolders":"./logs:./data"
-                    }
-                },
-                {
-                    "name": "OpenApi",
-                    "interfaceName": "OpenApiIface",
-                    "classFullName": "org.cricketmsf.in.openapi.OpenApi",
-                    "description": "",
-                    "properties": {
-                        "context": "/api"
-                    }
-                }
-            ]
-        },
-        {
-            "@type": "org.cricketmsf.config.Configuration",
-            "id": "MinimalService",
-            "service": "org.cricketmsf.services.MinimalService",
-            "properties": {
-                "host": "0.0.0.0",
-                "port": "7070",
-                "wsport": "",
-                "threads": "0",
-                "filter": "org.cricketmsf.SecurityFilter",
-                "cors": "Access-Control-Allow-Origin:*",
-                "time-zone": "GMT",
-                "request-encoding": "UTF-8",
-                "file-upload-maxsize": "1000000",
-                "serviceurl": "http://localhost:7070",
-                "terms":"https://github.com/gskorupa/cricket"
-            },
-            "ports": [
                 {
                     "name": "OpenApi",
                     "interfaceName": "OpenApiIface",

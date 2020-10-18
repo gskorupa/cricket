@@ -43,11 +43,11 @@ public class GreeterAdapter
             // http status codes can be used directly:
             // err.put("code", 404);
             err.put("message", "unknown name or name parameter not found (must be 'world')");
-            return ProcedureCall.respond(PARAM_NOT_FOUND, err);
+            return ProcedureCall.toRespond(PARAM_NOT_FOUND, err);
         }
         // building resulting call
         HttpEvent event = new HttpEvent("greet", request);
-        return ProcedureCall.forward(event);
+        return ProcedureCall.toForward(event);
     }
 
 }

@@ -35,16 +35,17 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
-import org.cricketmsf.annotation.PortEventClassHook;
 import org.cricketmsf.config.HttpHeader;
 import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.DispatcherException;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.exception.WebsocketException;
+import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.autostart.AutostartIface;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.cricketmsf.annotation.EventHook;
 
 /**
  * Microkernel.
@@ -60,7 +61,7 @@ public abstract class Kernel {
 
     // emergency LOGGER
     private static final Logger LOGGER = LoggerFactory.getLogger(Kernel.class);
-    
+
     // event dispatcher
     protected DispatcherIface eventDispatcher = null;
 
@@ -76,7 +77,8 @@ public abstract class Kernel {
 
     // adapters
     public HashMap<String, Object> adaptersMap = new HashMap<>();
-    private AutostartIface autostartAdapter;
+    private AutostartIface autostartAdapter = null;
+    private SchedulerIface schedulerAdapter = null;
 
     // user defined properties
     public HashMap<String, Object> properties = new HashMap<>();
@@ -131,50 +133,50 @@ public abstract class Kernel {
     }
 
     private void getEventHooks() {
-        String eventCategory;
         String eventClass;
         String procedureName;
         LOGGER.info("REGISTERING EVENT HOOKS");
         // for every method of a Kernel instance (our service class extending Kernel)
         for (Method m : this.getClass().getMethods()) {
-            PortEventClassHook[] portArray = m.getAnnotationsByType(PortEventClassHook.class);
-            for (PortEventClassHook hook : portArray) {
+            EventHook[] portArray = m.getAnnotationsByType(EventHook.class);
+            for (EventHook hook : portArray) {
                 eventClass = hook.className();
                 procedureName = hook.procedureName();
                 addHookMethodNameForPort(procedureName + "@" + eventClass, m.getName());
-                LOGGER.info(procedureName + "@" + eventClass + " : " + m.getName());
+                LOGGER.info("{}::{} => {}", eventClass, procedureName, m.getName());
             }
         }
         LOGGER.info("END REGISTERING EVENT HOOKS");
+        LOGGER.info("");
     }
 
     private String getHookMethodNameForPort(String className, String procedureName) {
-        return portEventHookMethods.get((null==procedureName?"*":procedureName) + "@" + className);
+        return portEventHookMethods.get((null == procedureName ? "*" : procedureName) + "@" + className);
     }
-    
+
     public Object getEventProcessingResult(Event event) {
         return getEventProcessingResult(event, event.getProcedureName());
     }
 
     public Object getEventProcessingResult(Event event, String procedureName) {
-        String methodName="unknown";
-        String procedure=(null==procedureName?"*":procedureName);
+        String methodName = "unknown";
+        String procedure = (null == procedureName ? "*" : procedureName);
         try {
             Method m;
-            methodName = getHookMethodNameForPort(event.getClass().getSimpleName(), procedure);
+            methodName = getHookMethodNameForPort(event.getClass().getName(), procedure);
             if (null != methodName && !methodName.isBlank()) {
                 m = getClass().getMethod(methodName, event.getClass());
                 return m.invoke(this, event);
             } else {
-                LOGGER.warn("Don't know how to handle {} procedure {} fired by {}",event.getClass().getName(), procedureName, event.getOrigin().getName());
+                LOGGER.warn("Don't know how to handle {} procedure {} fired by {}", event.getClass().getName(), procedureName, event.getOrigin().getName());
             }
         } catch (IllegalAccessException | NoSuchMethodException e) {
-            LOGGER.warn("Handler method {} not compatible with event class {}",methodName,event.getClass().getName());
+            LOGGER.warn("Handler method {} not compatible with event class {}", methodName, event.getClass().getName());
         } catch (InvocationTargetException e) {
-            LOGGER.warn("Event class {} handler method {} exception {} {}",event.getClass().getName(),methodName,e.getCause().getClass(), e.getCause().getMessage());
+            LOGGER.warn("Event class {} handler method {} exception {} {}", event.getClass().getName(), methodName, e.getCause().getClass(), e.getCause().getMessage());
             e.printStackTrace();
         } catch (NullPointerException e) {
-            LOGGER.warn("Unable to find method {} for event class {}",methodName,event.getClass().getName());
+            LOGGER.warn("Unable to find method {} for event class {}", methodName, event.getClass().getName());
         }
         return null;
     }
@@ -191,7 +193,11 @@ public abstract class Kernel {
 
     public Object dispatchEvent(Event event) {
         try {
-            eventDispatcher.dispatch(event);
+            if (null != event.getTimePoint() && !event.getTimePoint().isEmpty() && null != schedulerAdapter) {
+                schedulerAdapter.handleEvent(event);
+            } else {
+                eventDispatcher.dispatch(event);
+            }
             return null;
         } catch (NullPointerException | DispatcherException ex) {
             return getEventProcessingResult(event);
@@ -338,8 +344,8 @@ public abstract class Kernel {
                 LOGGER.info("ADAPTER: " + adapterName);
                 try {
                     Class c = Class.forName(ac.getAdapterClassName());
-                    if(Modifier.isAbstract(c.getModifiers() )){
-                        LOGGER.error(adapterName + " adapter class is abstract: "+ac.getAdapterClassName());
+                    if (Modifier.isAbstract(c.getModifiers())) {
+                        LOGGER.error(adapterName + " adapter class is abstract: " + ac.getAdapterClassName());
                         continue;
                     }
                     adaptersMap.put(adapterName, c.getDeclaredConstructor().newInstance());
@@ -368,6 +374,9 @@ public abstract class Kernel {
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.autostart.AutostartIface) {
                         setAutostartAdapter(adaptersMap.get(adapterName));
                     }
+                    if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.scheduler.SchedulerIface) {
+                        setSchedulerAdapter(adaptersMap.get(adapterName));
+                    }
                 } catch (NullPointerException | ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                     LOGGER.error(adapterName + " configuration: " + ex.getClass().getSimpleName());
                     ex.printStackTrace();
@@ -388,11 +397,12 @@ public abstract class Kernel {
      * @param adapter
      */
     private void setEventDispatcher(Object adapter) {
-        if (adapter != null) {
-            // Scheduler can be used only if there is no other dispatcher configured
-            if (null == eventDispatcher || eventDispatcher.getName().equals("Scheduler")) {
-                eventDispatcher = (DispatcherIface) adapter;
-            }
+        if (null == adapter) {
+            return;
+        }
+        // Scheduler can be used only if there is no other dispatcher configured
+        if (null == eventDispatcher || eventDispatcher.getName().equals("Scheduler")) {
+            eventDispatcher = (DispatcherIface) adapter;
         }
     }
 
@@ -628,7 +638,7 @@ public abstract class Kernel {
      * before HTTP service.
      */
     protected void runInitTasks() throws InitException {
-        if(null!=getAutostartAdapter()){
+        if (null != getAutostartAdapter()) {
             getAutostartAdapter().execute();
         }
         setInitialized(true);
@@ -789,8 +799,8 @@ public abstract class Kernel {
     public String getName() {
         return name;
     }
-    
-    public String getServiceVersion(){
+
+    public String getServiceVersion() {
         return getConfigSet().getServiceVersion();
     }
 
@@ -804,16 +814,16 @@ public abstract class Kernel {
             tmp = System.getenv(variableName);
         } catch (Exception e) {
         }
-        if(null==tmp||tmp.isBlank()){
-            tmp=(String)getProperties().getOrDefault("servicename", "");
+        if (null == tmp || tmp.isBlank()) {
+            tmp = (String) getProperties().getOrDefault("servicename", "");
         }
-        if(null==tmp||tmp.isBlank()){
-            tmp=getId();
+        if (null == tmp || tmp.isBlank()) {
+            tmp = getId();
         }
         if (tmp.isBlank()) {
             this.name = "CricketService";
-        }else{
-            this.name=tmp;
+        } else {
+            this.name = tmp;
         }
     }
 
@@ -861,6 +871,7 @@ public abstract class Kernel {
         args.put(JsonWriter.TYPE, false);
         return JsonWriter.objectToJson(reportStatus(), args);
     }
+
     public String printExtendedProperties(HashMap props) {
         HashMap args = new HashMap();
         args.put(JsonWriter.PRETTY_PRINT, true);
@@ -1008,6 +1019,14 @@ public abstract class Kernel {
      */
     public void setAutostartAdapter(Object autostartAdapter) {
         this.autostartAdapter = (AutostartIface) autostartAdapter;
+    }
+
+    /**
+     *
+     * @param schedulerAdapter
+     */
+    public void setSchedulerAdapter(Object schedulerAdapter) {
+        this.schedulerAdapter = (SchedulerIface) schedulerAdapter;
     }
 
     /**

@@ -27,10 +27,10 @@ import java.lang.annotation.Target;
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 @Documented
-@Repeatable(PortEventClassHook.List.class)
+@Repeatable(EventHook.List.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface PortEventClassHook {
+public @interface EventHook {
     public String className();
     public String procedureName();
     
@@ -38,6 +38,6 @@ public @interface PortEventClassHook {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
     @interface List {
-        PortEventClassHook[] value();
+        EventHook[] value();
     }
 }

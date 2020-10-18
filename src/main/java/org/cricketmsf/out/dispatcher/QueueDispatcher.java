@@ -45,7 +45,7 @@ public class QueueDispatcher extends OutboundAdapter implements Adapter, Dispatc
         }
         if (handleAll || eventMap.containsKey(event.getClass().getSimpleName())) {
             try {
-                ((QueueClientIface) Kernel.getInstance().getAdaptersMap().get(queueClientName)).publish(event.getClass().getSimpleName(), event.toJson());
+                ((QueueClientIface) Kernel.getInstance().getAdaptersMap().get(queueClientName)).publish(event.getClass().getName(), event.toJson());
             } catch (QueueException ex) {
                 ex.printStackTrace();
                 throw new DispatcherException(DispatcherException.QUEUE_EXCEPTION, ex.getMessage());
@@ -61,27 +61,27 @@ public class QueueDispatcher extends OutboundAdapter implements Adapter, Dispatc
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        String eventTypes = properties.getOrDefault("event-types", "");
-        registerEventTypes(eventTypes);
-        logger.info("\tevent-types: " + eventTypes);
+        String eventClasses = properties.getOrDefault("event-classes", "");
+        registerEventTypes(eventClasses);
+        logger.info("\tevent-classes: " + eventClasses);
         queueClientName = properties.get("queue-client-name");
         if (null == queueClientName || queueClientName.isEmpty()) {
-            logger.info("\tWARNING! queue-client-name parameter is not set.");
+            logger.warn("\tqueue-client-name parameter is not set.");
         } else {
             logger.info("\tqueue-client-name: " + queueClientName);
         }
     }
 
     @Override
-    public void registerEventTypes(String categoriesConfig) {
-        String[] categories = categoriesConfig.split(";");
-        for (String category : categories) {
-            if (!category.isEmpty()) {
-                if ("*".equals(category)) {
+    public void registerEventTypes(String eventClasses) {
+        String[] classes = eventClasses.split(";");
+        for (String clazz : classes) {
+            if (!clazz.isEmpty()) {
+                if ("*".equals(clazz)) {
                     handleAll = true;
                     continue;
                 }
-                eventMap.put(category, category);
+                eventMap.put(clazz, clazz);
             }
         }
     }

@@ -19,17 +19,18 @@ import java.util.HashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.event.EventDecorator;
 import org.cricketmsf.exception.QueueException;
 import org.cricketmsf.in.InboundAdapter;
-import org.cricketmsf.out.queue.QueueIface;
+import org.cricketmsf.queue.QueueIface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author greg
  */
 public class SimpleQueueSubscriber extends InboundAdapter implements SubscriberIface, QueueCallbackIface, Adapter {
-
+    private static final Logger logger = LoggerFactory.getLogger(SimpleQueueSubscriber.class);
     private QueueIface queue = null;
     String queueAdapterName = null;
     String channelNames = null;
@@ -63,18 +64,13 @@ public class SimpleQueueSubscriber extends InboundAdapter implements SubscriberI
 
     @Override
     public void call(String channelName, Object value) {
-        EventDecorator dev;
         Event ev;
         try {
-            dev = (EventDecorator)Class.forName(channelName).newInstance();
-            dev.deserialize((String) value);
-            if(dev.getData() instanceof Event){
-                dev.setOriginalEvent((Event)dev.getData());
-                dev.setData(null);
-            }
-            Kernel.getInstance().getEventProcessingResult(dev);
+            ev = (Event)Class.forName(channelName).newInstance();
+            ev.deserialize((String) value);
+            Kernel.getInstance().getEventProcessingResult(ev);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            Kernel.getInstance().getEventProcessingResult(Event.fromJson((String) value));
+            Kernel.getInstance().dispatchEvent(Event.fromJson((String) value));
         }
     }
 
@@ -83,15 +79,15 @@ public class SimpleQueueSubscriber extends InboundAdapter implements SubscriberI
         super.loadProperties(properties, adapterName);
         queueAdapterName = properties.get("queue-adapter-name");
         if (null == queueAdapterName || queueAdapterName.isEmpty()) {
-            Kernel.getInstance().getLogger().print("\tWARNING! queue-adapter-name parameter is not set.");
+            logger.warn("\tqueue-adapter-name parameter is not set.");
         } else {
-            Kernel.getInstance().getLogger().print("\tqueue-adapter-name: " + queueAdapterName);
+            logger.info("\tqueue-adapter-name: " + queueAdapterName);
         }
         channelNames = properties.get("channels");
         if (null == channelNames || channelNames.isEmpty()) {
-            Kernel.getInstance().getLogger().print("\tWARNING! channels parameter is not set.");
+            logger.warn("\tchannels parameter is not set.");
         } else {
-            Kernel.getInstance().getLogger().print("\tchannels: " + channelNames);
+            logger.info("\tchannels: " + channelNames);
         }
     }
 
