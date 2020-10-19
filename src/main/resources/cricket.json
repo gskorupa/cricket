@@ -79,7 +79,7 @@
                     "interfaceName": "SchedulerIface",
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
-                        "file": "./scheduler.xml",
+                        "file": "./scheduler",
                         "init": "printInfo,+10s,asdfgh"
                     }
                 },
@@ -256,7 +256,7 @@
                     "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
                         "path": "./data",
-                        "file": "scheduler.xml",
+                        "file": "scheduler",
                         "init.0":"Data1,MICROSITE,EVENT,CLEAR_DATA,05:00:00 GMT|*24h,_|_;",
                         "init.1":"Data2,MICROSITE,EVENT,BACKUP,06:00:00 GMT|*24h,_"
                     }

@@ -206,6 +206,10 @@ public abstract class Kernel {
             return null;
         }
     }
+    
+    public void reschedule(String procedureName, String timepoint){
+        schedulerAdapter.reschedule(procedureName, timepoint);
+    }
 
     public HashMap<String, Object> getAdaptersMap() {
         return adaptersMap;

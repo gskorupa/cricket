@@ -50,7 +50,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     //private String storagePath;
     private String fileName;
+    private String reshedulingFile;
     private KeyValueStore database;
+    private KeyValueStore databaseRs;
     protected boolean restored = false;
     long threadsCounter = 0;
     private String initialTasks;
@@ -80,7 +82,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         //if (getStoragePath().startsWith(".")) {
         //    setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
         //}
-        setFileName(properties.get("file"));
+        setFileName(properties.get("file")+".xml");
+        reshedulingFile=properties.get("file")+"-reshedule.xml";
         logger.info("\tfile: " + getFileName());
         /*String pathSeparator = System.getProperty("file.separator");
         setStoragePath(
@@ -100,6 +103,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         database.setStoragePath(getFileName());
         database.read();
         setRestored(database.getSize() > 0);
+        databaseRs = new KeyValueStore();
+        databaseRs.setStoragePath(reshedulingFile);
+        databaseRs.read();
         processDatabase();
         killList = new ConcurrentHashMap<>();
 
@@ -182,7 +188,11 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                             if (pos > 0) {
                                 remembered = remembered.substring(pos + 1);
                             }
-                            ev.setTimePoint(remembered);
+                            if(databaseRs.containsKey(ev.getProcedureName())){
+                                ev.setTimePoint((String)databaseRs.get(ev.getProcedureName()));
+                            }else{
+                                ev.setTimePoint(remembered);
+                            }
                             ev.reschedule();
                             handleEvent(ev);
                         }
@@ -312,6 +322,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         logger.info("Stopping scheduler ... ");
         List<Runnable> activeEvents = scheduler.shutdownNow();
         database.write();
+        databaseRs.write();
         logger.info("done");
     }
 
@@ -403,5 +414,10 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public void registerEventTypes(String categories) throws DispatcherException {
+    }
+    
+    @Override
+    public void reschedule(String processName, String newTimepoint){
+        databaseRs.put(processName, newTimepoint);
     }
 }

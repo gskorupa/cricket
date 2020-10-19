@@ -31,4 +31,5 @@ public interface SchedulerIface {
     public boolean isScheduled(String eventID);
     public String getProperty(String name);
     public void initScheduledTasks();
+    public void reschedule(String processName, String newTimepoint);
 }
