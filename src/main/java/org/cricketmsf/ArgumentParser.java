@@ -94,6 +94,10 @@ public class ArgumentParser {
                     case "-p":
                         map.put("print", "");
                         break;
+                    case "--export":
+                    case "-x":
+                        map.put("export", "");
+                        break;
                     case "--run":
                     case "-r":
                         map.put("run", "*");

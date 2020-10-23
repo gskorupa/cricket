@@ -22,6 +22,7 @@ import org.cricketmsf.config.Configuration;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -99,6 +100,10 @@ public class Runner {
 
         if (arguments.containsKey("print")) {
             System.out.println(runner.getConfigAsString(configSet));
+            System.exit(0);
+        }
+        if (arguments.containsKey("export")) {
+            runner.exportConfigs(configSet);
             System.exit(0);
         }
 
@@ -278,7 +283,7 @@ public class Runner {
                     //e.printStackTrace();
                 }
             }
-            if(null==propertyFile){
+            if (null == propertyFile) {
                 propertyFile = getClass().getClassLoader().getResourceAsStream(propsName);
                 if (null == propertyFile) {
                     propsName = "cricket.json";
@@ -328,5 +333,61 @@ public class Runner {
         args.put(JsonWriter.PRETTY_PRINT, true);
         //args.put(JsonWriter., args)
         return JsonWriter.objectToJson(c, args);
+    }
+
+    public void exportConfigs(ConfigSet configSet) {
+        String settings = getConfigAsString(configSet);
+        InputStream loggingConfig;
+        loggingConfig = getClass().getClassLoader().getResourceAsStream("logback.xml");
+
+        Scanner scanner = new Scanner(loggingConfig, "UTF-8");
+        StringBuilder sb = new StringBuilder();
+        while (scanner.hasNext()) {
+            sb.append(scanner.nextLine()).append("\r\n");
+        }
+        String result=writeToFile("settings", ".json", settings);
+        if(result.isEmpty()){
+            System.out.println("Unable to save service settings.");
+        }else{
+            System.out.println("Service settings saved to "+result);
+        }
+        result=writeToFile("logback", ".xml", sb.toString());
+        if(result.isEmpty()){
+            System.out.println("Unable to save logging config.");
+        }else{
+            System.out.println("Logging config saved to "+result);
+        }
+    }
+
+    private String writeToFile(String name, String ext, String content) {
+        String fileName = name + ext;
+        int pass = 0;
+        boolean created = false;
+        while (!created && pass<=10) {
+            if (pass > 0) {
+                fileName = name + "_" + pass + ext;
+            }
+            try {
+                File myObj = new File(fileName);
+                if (myObj.createNewFile()) {
+                    created = true;
+                }
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+            pass++;
+        }
+        if(!created){
+            return "";
+        }
+        try {
+            FileWriter myWriter = new FileWriter(fileName);
+            myWriter.write(content);
+            myWriter.close();
+            return fileName;
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            return "";
+        }
     }
 }

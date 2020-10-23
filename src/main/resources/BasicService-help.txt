@@ -11,7 +11,8 @@ Options:
 --config | -c PATH         Use external configuration file at PATH
 --force | -f PARAMS        Overwrite selected configuration 
 --service | -s SERVICE_ID  Run selected service from the configuration file 
---print | -p               Print configuration and exit
+--print | -p               Print settings and exit
+--export | -e              Export settings and logging config to files
 --lift | -l class          Run specified class (on classpath) as a service
 
 PARAMS format: 
