@@ -176,7 +176,7 @@ public abstract class Kernel {
             LOGGER.warn("Event class {} handler method {} exception {} {}", event.getClass().getName(), methodName, e.getCause().getClass(), e.getCause().getMessage());
             e.printStackTrace();
         } catch (NullPointerException e) {
-            LOGGER.warn("Unable to find method {} for event class {}", methodName, event.getClass().getName());
+            LOGGER.warn("Unable to find method {} for event class {} ", methodName, event.getClass().getName());
         }
         return null;
     }
@@ -206,8 +206,8 @@ public abstract class Kernel {
             return null;
         }
     }
-    
-    public void reschedule(String procedureName, String timepoint){
+
+    public void reschedule(String procedureName, String timepoint) {
         schedulerAdapter.reschedule(procedureName, timepoint);
     }
 
@@ -522,7 +522,7 @@ public abstract class Kernel {
         LOGGER.info("# NAME: " + getName());
         LOGGER.info("# JAVA: " + System.getProperty("java.version"));
         LOGGER.info("#");
-        LOGGER.info("# Started in " + startedIn + "ms. Press Ctrl-C to stop");
+        LOGGER.info("# Started in {}ms using {} settings. Press Ctrl-C to stop", startedIn, configSet.isBuiltIn() ? "built in" : "external");
         shutdown();
 
     }
@@ -624,7 +624,7 @@ public abstract class Kernel {
             }
 
             LOGGER.info("#");
-            LOGGER.info("# Started in " + startedIn + "ms. Press Ctrl-C to stop");
+            LOGGER.info("# Started in {}ms using {} settings. Press Ctrl-C to stop", startedIn, configSet.isBuiltIn() ? "built in" : "external");
             LOGGER.info("");
             runFinalTasks();
             Thread.currentThread().setPriority(Thread.MAX_PRIORITY);

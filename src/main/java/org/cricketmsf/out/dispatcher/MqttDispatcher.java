@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.in.mqtt.Callback;
+import org.cricketmsf.in.mqtt.EventSubscriberCallback;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.mqtt.MqttPublisher;
 import org.cricketmsf.out.mqtt.MqttPublisherException;

@@ -28,16 +28,17 @@ public class ConfigSet {
     ArrayList<Configuration> services;
     private String kernelVersion;
     private String serviceVersion;
+    private boolean builtIn  = true;
 
     public ConfigSet() {
         services = new ArrayList<>();
     }
 
     public void addConfiguration(Configuration c) {
-        int index=getIndexOf(c.getId());
-        if(index>-1){
+        int index = getIndexOf(c.getId());
+        if (index > -1) {
             services.set(index, c);
-        }else{
+        } else {
             services.add(c);
         }
     }
@@ -45,12 +46,12 @@ public class ConfigSet {
     public Configuration getDefault() {
         return services.get(0);
     }
-    
-    private int getIndexOf(String serviceId){
+
+    private int getIndexOf(String serviceId) {
         Configuration c;
-        for(int i=0; i<services.size(); i++){
-            c=services.get(i);
-            if(c.getId().equalsIgnoreCase(serviceId)){
+        for (int i = 0; i < services.size(); i++) {
+            c = services.get(i);
+            if (c.getId().equalsIgnoreCase(serviceId)) {
                 return i;
             }
         }
@@ -69,7 +70,7 @@ public class ConfigSet {
     }
 
     public Configuration getConfigurationById(String id) {
-        if(null==id){
+        if (null == id) {
             return null;
         }
         Configuration c;
@@ -88,7 +89,7 @@ public class ConfigSet {
     public String getKernelVersion() {
         return kernelVersion;
     }
-    
+
     public String getServiceVersion() {
         return serviceVersion;
     }
@@ -99,7 +100,7 @@ public class ConfigSet {
     public void setKernelVersion(String kernelVersion) {
         this.kernelVersion = kernelVersion;
     }
-    
+
     public void setServiceVersion(String serviceVersion) {
         this.serviceVersion = serviceVersion;
     }
@@ -122,7 +123,7 @@ public class ConfigSet {
         } catch (NullPointerException e) {
             return;
         }
-        
+
         String[] elements = definition.split("\\^");
         serviceId = elements[0];
         if (elements.length > 1) {
@@ -138,27 +139,41 @@ public class ConfigSet {
             adapterProperty = tmp[0];
             adapterPropertyValue = tmp.length > 1 ? tmp[1] : null;
         }
-               
+
         Configuration config = getConfigurationById(serviceId);
-        if(servicePropertyValue != null){
+        if (servicePropertyValue != null) {
             config.putProperty(serviceProperty, servicePropertyValue);
         }
-        if(adapterPropertyValue != null){
-            AdapterConfiguration ac= config.getAdapterConfiguration(adapter);
+        if (adapterPropertyValue != null) {
+            AdapterConfiguration ac = config.getAdapterConfiguration(adapter);
             ac.putProperty(adapterProperty, adapterPropertyValue);
             config.putAdapterConfiguration(ac);
         }
         addConfiguration(config);
     }
 
-    public void joinProps(){
-        for(int i=0; i<services.size();i++){
+    public void joinProps() {
+        for (int i = 0; i < services.size(); i++) {
             services.get(i).joinProps();
         }
-        
+
     }
-    
-    public ArrayList<Configuration> getServices(){
+
+    public ArrayList<Configuration> getServices() {
         return services;
+    }
+
+    /**
+     * @return the builtIn
+     */
+    public boolean isBuiltIn() {
+        return builtIn;
+    }
+
+    /**
+     * @param builtIn the builtIn to set
+     */
+    public void setBuiltIn(boolean builtIn) {
+        this.builtIn = builtIn;
     }
 }

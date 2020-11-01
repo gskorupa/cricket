@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.in.scheduler;
 
+import java.lang.reflect.InvocationTargetException;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
@@ -82,8 +83,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         //if (getStoragePath().startsWith(".")) {
         //    setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
         //}
-        setFileName(properties.get("file")+".xml");
-        reshedulingFile=properties.get("file")+"-reshedule.xml";
+        setFileName(properties.get("file") + ".xml");
+        reshedulingFile = properties.get("file") + "-reshedule.xml";
         logger.info("\tfile: " + getFileName());
         /*String pathSeparator = System.getProperty("file.separator");
         setStoragePath(
@@ -91,7 +92,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                 ? getStoragePath() + getFileName()
                 : getStoragePath() + pathSeparator + getFileName()
         );
-        */
+         */
         logger.info("\tscheduler database file location: " + getFileName());
 
         initialTasks = properties.getOrDefault("init", "");
@@ -124,8 +125,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     private String getStoragePath() {
         return storagePath;
     }
-    */
-
+     */
     @Override
     public boolean handleEvent(Event event) {
         return handleEvent(event, false, false);
@@ -188,9 +188,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                             if (pos > 0) {
                                 remembered = remembered.substring(pos + 1);
                             }
-                            if(databaseRs.containsKey(ev.getProcedureName())){
-                                ev.setTimePoint((String)databaseRs.get(ev.getProcedureName()));
-                            }else{
+                            if (databaseRs.containsKey(ev.getProcedureName())) {
+                                ev.setTimePoint((String) databaseRs.get(ev.getProcedureName()));
+                            } else {
                                 ev.setTimePoint(remembered);
                             }
                             ev.reschedule();
@@ -380,16 +380,33 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     public void initScheduledTasks() {
         String[] params;
         String[] tasks;
+        String firstParam;
         if (initialTasks != null && !initialTasks.isEmpty()) {
             tasks = initialTasks.split(";");
             for (String task : tasks) {
                 params = task.split(",");
-                if (params.length == 3) {
+                firstParam = params[0];
+                if (firstParam.contains(".")) {
+                    Class cls;
+                    try {
+                        cls = Class.forName(firstParam);
+                        Event event = (Event) cls.getConstructor().newInstance();
+                        event.setProcedureName(params[1]);
+                        event.setTimePoint(params[2]);
+                        if (params.length > 3) {
+                            event.setData(params[3]);
+                        }
+                        event.setFromInit(true);
+                        event.setOrigin(this.getClass());
+                    } catch (NoSuchMethodException | InvocationTargetException | ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                        logger.warn(ex.getMessage());
+                    }
+                } else {
                     handleEvent(
                             new Event(
-                                    params[0], //name
+                                    firstParam, //name
                                     params[1], //timePoint
-                                    params[2], //data
+                                    params.length > 2 ? params[2] : null, //data
                                     true,
                                     this.getClass()
                             ));
@@ -415,9 +432,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     @Override
     public void registerEventTypes(String categories) throws DispatcherException {
     }
-    
+
     @Override
-    public void reschedule(String processName, String newTimepoint){
+    public void reschedule(String processName, String newTimepoint) {
         databaseRs.put(processName, newTimepoint);
     }
 }

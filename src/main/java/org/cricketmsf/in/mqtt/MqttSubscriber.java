@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,8 @@ package org.cricketmsf.in.mqtt;
 
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.InboundAdapter;
-import org.cricketmsf.out.dispatcher.QueueDispatcher;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -34,15 +32,19 @@ import org.slf4j.LoggerFactory;
 public class MqttSubscriber extends InboundAdapter implements Adapter {
     
     private static final Logger logger = LoggerFactory.getLogger(MqttSubscriber.class);
-    private String rootTopic = "org.cricketmsf/events/";
     private String filters = "";
     private String[] topicFilters = {};
     private int qos = 0;
     private int[] qosArray = {};
     private String brokerURL = "tcp://test.mosquitto.org:1883";
     private String clientID = "CricketService";
-    private boolean debug = false;
-    private String typeSuffix = "";
+    private MqttClient mqttClient;
+
+    //TODO: pola poniżej
+    private boolean cleanSession = false;
+    private String user;
+    private String password;
+    private boolean acceptAllCertificates = true;
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -57,13 +59,11 @@ public class MqttSubscriber extends InboundAdapter implements Adapter {
         super.loadProperties(properties, adapterName);
         clientID = properties.getOrDefault("client-id", "");
         if (clientID.isEmpty()) {
-            clientID = Kernel.getInstance().getUuid().toString()+".sub";
+            clientID = Kernel.getInstance().getUuid().toString() + ".sub";
         }
         this.properties.put("client-id", clientID);
-        logger.info("\tclient-id: " + clientID);
         brokerURL = properties.get("url");
         this.properties.put("url", brokerURL);
-        logger.info("\turl: " + brokerURL);
         try {
             this.properties.put("qos", properties.getOrDefault("qos", "0"));
             qos = Integer.parseInt(this.properties.getOrDefault("qos", "0"));
@@ -71,71 +71,48 @@ public class MqttSubscriber extends InboundAdapter implements Adapter {
                 qos = 2;
             }
         } catch (NumberFormatException e) {
+            logger.warn(e.getMessage());
         }
-        logger.info("\tqos: " + qos);
-        try {
-            this.properties.put("debug", properties.getOrDefault("debug", "false"));
-            debug = Boolean.parseBoolean(this.properties.getOrDefault("debug", "false"));
-        } catch (NumberFormatException e) {
-        }
-        logger.info("\tdebug: " + debug);
-        rootTopic = properties.getOrDefault("root-topic", "");
-        this.properties.put("root-topic", rootTopic);
-        logger.info("\troot-topic: " + rootTopic);
-        filters = properties.getOrDefault("topic-filter", "#");
-        this.properties.put("topic-filter", filters);
-        topicFilters = parse(filters, rootTopic);
+        filters = properties.getOrDefault("topics", "#");
+        this.properties.put("topics", filters);
+        topicFilters = parse(filters);
         qosArray = getQos(qos, topicFilters.length);
-        logger.info("\ttopicFilter: " + filters);
-        typeSuffix = properties.getOrDefault("type-suffix", "");
-        this.properties.put("type-suffix", typeSuffix);
-        logger.info("\ttype-suffix: " + typeSuffix);
+        
+        logger.info("\turl: " + brokerURL);
+        logger.info("\tclient-id: " + clientID);
+        logger.info("\tqos: " + qos);
+        logger.info("\ttopics: " + filters);
     }
-
-    @Override
-    public void run() {
-        Callback listener;
-        MqttClient sampleClient;
+    
+    public void start() {
         try {
-            while (true) {
-                try {
-                    listener = new Callback(rootTopic, typeSuffix);
-                    sampleClient = new MqttClient(brokerURL, clientID);
-                    sampleClient.setCallback(listener);
-                    MqttConnectOptions options = new MqttConnectOptions();
-                    options.setCleanSession(true);
-                    sampleClient.connect(options);
-                    sampleClient.subscribe(topicFilters, qosArray);
-                    Thread.sleep(10000);
-                    sampleClient.disconnect();
-                } catch (MqttException me) {
-                    if (debug) {
-                        System.out.println("reason " + me.getReasonCode());
-                        System.out.println("msg " + me.getMessage());
-                        System.out.println("loc " + me.getLocalizedMessage());
-                        System.out.println("cause " + me.getCause());
-                        System.out.println("excep " + me);
-                        //me.printStackTrace();
-                    }
-                } finally {
-                    sampleClient = null;
-                }
-                //Thread.yield();
-            }
-        } catch (InterruptedException e) {
-            logger.warn("interrupted");
+            mqttClient = new MqttClient(brokerURL, clientID);
+            Callback callback = new Callback();
+            callback.setClient(mqttClient);
+            mqttClient.setCallback(callback);
+            MqttConnectOptions options = new MqttConnectOptions();
+            options.setCleanSession(cleanSession);
+            mqttClient.connect(options);
+            mqttClient.subscribe(topicFilters, qosArray);
+        } catch (MqttException me) {
+            logger.warn("{} {} {}", me.getReasonCode(), me.getMessage(), me.getCause());
+        } finally {
+            mqttClient = null;
         }
     }
-
-    private String[] parse(String definition, String prefix) {
-        String[] result = definition.split(";");
-        for (int i = 0; i < result.length; i++) {
-            result[i] = prefix + result[i];
-
+    
+    public void stop() {
+        try {
+            mqttClient.disconnect();
+        } catch (MqttException ex) {
+            logger.warn(ex.getMessage());
         }
-        return result;
     }
-
+    
+    private String[] parse(String definition) {
+        return definition.split(";");
+    }
+    
     private int[] getQos(int size, int value) {
         int[] result = new int[size];
         for (int i = 0; i < size; i++) {
@@ -143,5 +120,5 @@ public class MqttSubscriber extends InboundAdapter implements Adapter {
         }
         return result;
     }
-
+    
 }

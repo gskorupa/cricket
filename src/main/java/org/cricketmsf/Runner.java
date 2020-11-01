@@ -266,10 +266,12 @@ public class Runner {
         types.put("java.utils.HashMap", "properties");
         args.put(JsonReader.TYPE_NAME_MAP, types);
         InputStream propertyFile = null;
+        boolean builtInConfig = true;
         if (null != arguments && arguments.containsKey("config")) {
             //Properties props;
             try {
                 propertyFile = new FileInputStream(new File((String) arguments.get("config")));
+                builtInConfig = false;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -279,6 +281,7 @@ public class Runner {
             if (null != file) {
                 try {
                     propertyFile = new FileInputStream(file);
+                    builtInConfig = false;
                 } catch (Exception e) {
                     //e.printStackTrace();
                 }
@@ -296,6 +299,7 @@ public class Runner {
         }
         String inputStreamString = new Scanner(propertyFile, "UTF-8").useDelimiter("\\A").next();
         configSet = (ConfigSet) JsonReader.jsonToJava(inputStreamString, args);
+        configSet.setBuiltIn(builtInConfig);
         // read Kernel version
         configSet.setKernelVersion(getVersion());
         configSet.setServiceVersion(getServiceVersion());
@@ -345,17 +349,17 @@ public class Runner {
         while (scanner.hasNext()) {
             sb.append(scanner.nextLine()).append("\r\n");
         }
-        String result=writeToFile("settings", ".json", settings);
-        if(result.isEmpty()){
+        String result = writeToFile("settings", ".json", settings);
+        if (result.isEmpty()) {
             System.out.println("Unable to save service settings.");
-        }else{
-            System.out.println("Service settings saved to "+result);
+        } else {
+            System.out.println("Service settings saved to " + result);
         }
-        result=writeToFile("logback", ".xml", sb.toString());
-        if(result.isEmpty()){
+        result = writeToFile("logback", ".xml", sb.toString());
+        if (result.isEmpty()) {
             System.out.println("Unable to save logging config.");
-        }else{
-            System.out.println("Logging config saved to "+result);
+        } else {
+            System.out.println("Logging config saved to " + result);
         }
     }
 
@@ -363,7 +367,7 @@ public class Runner {
         String fileName = name + ext;
         int pass = 0;
         boolean created = false;
-        while (!created && pass<=10) {
+        while (!created && pass <= 10) {
             if (pass > 0) {
                 fileName = name + "_" + pass + ext;
             }
@@ -377,7 +381,7 @@ public class Runner {
             }
             pass++;
         }
-        if(!created){
+        if (!created) {
             return "";
         }
         try {

@@ -15,11 +15,11 @@
  */
 package org.cricketmsf.in.mqtt;
 
-import org.cricketmsf.event.Event;
-import org.cricketmsf.Kernel;
-import org.cricketmsf.out.dispatcher.QueueDispatcher;
+import java.util.logging.Level;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,41 +28,32 @@ import org.slf4j.LoggerFactory;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class Callback implements MqttCallback {
-    
-    private static final Logger logger = LoggerFactory.getLogger(Callback.class);
-    private String rootTopic;
-    private String typeSuffix;
-    private int prefixLength = 0;
+public class Callback implements MqttCallback, MqttSubscriberCallback {
 
-    public Callback(String rootTopic, String typeSuffix) {
-        this.rootTopic = rootTopic;
-        if (!this.rootTopic.endsWith("/")) {
-            this.rootTopic = this.rootTopic.concat("/");
-        }
-        prefixLength = this.rootTopic.length();
-        this.typeSuffix = typeSuffix;
+    private static final Logger logger = LoggerFactory.getLogger(Callback.class);
+
+    private MqttClient client;
+
+    public Callback() {
+    }
+    
+    @Override
+    public void setClient(MqttClient client){
+        this.client=client;
     }
 
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
-        String detailedTopic = topic.substring(prefixLength);
-        if (detailedTopic.indexOf("/") < 1) {
-            logger.warn("Unable to deserialize event " + detailedTopic);
-            return;
-        }
-        String className = detailedTopic.substring(0, detailedTopic.indexOf("/"));
-        String procedurename = detailedTopic.substring(detailedTopic.indexOf("/") + 1);
-        Event event = (Event)Class.forName(className).newInstance();
-        event.setProcedureName(procedurename);
-        //event.setType(type + typeSuffix);
-        event.setData(message.toString());
-        Kernel.getInstance().dispatchEvent(event);
+        
     }
 
     @Override
     public void connectionLost(Throwable cause) {
-        cause.printStackTrace();
+        try {
+            client.reconnect();
+        } catch (MqttException ex) {
+            logger.warn(ex.getMessage());
+        }
     }
 
     @Override

@@ -58,6 +58,10 @@ public class Event {
         fromInit = false;
         origin = null;
     }
+    
+    public Event(String procedureName){
+        this(procedureName, null, null, false, null);
+    }
 
     /**
      * Used to create new Event instance. Values of id and createdAt parameters
