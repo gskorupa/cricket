@@ -244,7 +244,7 @@ public class HttpAdapter
             sendLogEvent(exchange, responseData.length);
             result = null;
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             Kernel.getInstance().dispatchEvent(Event.logWarning(this, exchange.getRequestURI().getPath() + " " + e.getMessage()));
         }
         exchange.close();

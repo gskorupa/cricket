@@ -15,6 +15,9 @@
  */
 package org.cricketmsf.microsite.user;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  *
  * @author greg
@@ -151,6 +154,14 @@ public class User {
      */
     public String getRole() {
         return role;
+    }
+    
+    public List getRoles(){
+        return Arrays.asList(getRole().split(","));
+    }
+    
+    public boolean hasRole(String role){
+        return getRoles().contains(role);
     }
 
     /**

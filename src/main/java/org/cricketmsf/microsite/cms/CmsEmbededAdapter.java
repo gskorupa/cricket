@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * @author greg
  */
 public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIface {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(CmsEmbededAdapter.class);
 
     public static int NOT_INITIALIZED = 0;
@@ -74,7 +74,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     private String fileRoot = null; //cms document files root path in the filesystem
     private String publishedFilesRoot = null;
     String indexFileName = "index.html";
-    
+    String pwaApplicationPrefix = "";
+
     private String defaultLanguage = null; // if not null we will be able to get document in the default language when requested language version is not found
 
     private void initRuleEngine() {
@@ -224,7 +225,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         } else {
             throw new CmsException(CmsException.UNSUPPORTED_STATUS, "unsupported status");
         }
-        if(null==ruleEngine){
+        if (null == ruleEngine) {
             initRuleEngine();
         }
         doc = ruleEngine.processDocument(doc, roles);
@@ -559,6 +560,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         Kernel.getInstance().getLogger().print("\tfile-path-published: " + getPublishedFilesRoot());
         setDefaultLanguage(properties.get("default-language"));
         Kernel.getInstance().getLogger().print("\tdefault-language: " + getDefaultLanguage());
+        pwaApplicationPrefix = (String) properties.getOrDefault("pwa-prefix", "");
+        Kernel.getInstance().getLogger().print("\tpwa-prefix: " + pwaApplicationPrefix);
 
         supportedLanguages = new ArrayList<>();
         supportedLanguages.add("pl");
@@ -622,7 +625,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         byte[] content;
         byte[] emptyContent = {};
         ParameterMapResult result = new ParameterMapResult();
-        result.setData(null!=request.parameters?request.parameters:new HashMap());
+        result.setData(null != request.parameters ? request.parameters : new HashMap());
         String modificationString = request.headers.getFirst("If-Modified-Since");
         Date modificationPoint = null;
         if (modificationString != null) {
@@ -741,7 +744,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         // if not found in CMS
         // read from disk
         if (!fileReady) {
-            System.out.println("READING FILE:"+getWwwRoot() + filePath);
+            System.out.println("READING FILE:" + getWwwRoot() + filePath);
             File file = new File(getWwwRoot() + filePath);
             content = readFile(file);
             if (content.length == 0) {
@@ -801,6 +804,13 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
 
     public String getFilePath(RequestObject request) {
         String filePath = request.pathExt;
+        if (!pwaApplicationPrefix.isBlank()
+                && filePath.startsWith(pwaApplicationPrefix)) {
+            int separatorIndex = filePath.indexOf("/", pwaApplicationPrefix.length());
+            if (separatorIndex > 0) {
+                filePath = pwaApplicationPrefix + filePath.substring(separatorIndex+1);
+            }
+        }
         if (filePath.isEmpty() || filePath.endsWith("/")) {
             filePath = filePath.concat(indexFileName);
         }

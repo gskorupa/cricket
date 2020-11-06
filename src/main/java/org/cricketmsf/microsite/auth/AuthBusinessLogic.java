@@ -30,7 +30,7 @@ import org.cricketmsf.microsite.out.auth.Token;
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class AuthBusinessLogic {
-    
+
     private static AuthBusinessLogic self;
 
     public static AuthBusinessLogic getInstance() {
@@ -39,8 +39,8 @@ public class AuthBusinessLogic {
         }
         return self;
     }
-    
-    public Object check(Event event, AuthAdapterIface authAdapter){
+
+    public Object check(Event event, AuthAdapterIface authAdapter) {
         RequestObject request = event.getRequest();
         String tokenValue = request.pathExt;
         StandardResult result = new StandardResult();
@@ -55,15 +55,19 @@ public class AuthBusinessLogic {
                 result.setCode(401);
             }
         }
-        return result;        
+        return result;
     }
-    
-    public Object login(Event event, AuthAdapterIface authAdapter){
+
+    public Object login(Event event, AuthAdapterIface authAdapter) {
         StandardResult result = new StandardResult();
         result.setCode(HttpAdapter.SC_FORBIDDEN);
         result.setData("authorization required");
 
         String authData = event.getRequest().headers.getFirst("Authentication");
+        String authData2 = event.getRequest().headers.getFirst("Authorization");
+        if(authData2.startsWith("Basic ")){
+            authData=authData2;
+        }
         //handle(Event.logFinest("apiLogin", "authData=" + authData));
         if (authData != null) {
             try {
@@ -87,10 +91,10 @@ public class AuthBusinessLogic {
                 Kernel.getInstance().dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), e.getMessage()));
             }
         }
-        return result;        
+        return result;
     }
-    
-    public Object logout(Event event, AuthAdapterIface authAdapter){
+
+    public Object logout(Event event, AuthAdapterIface authAdapter) {
         RequestObject request = event.getRequest();
         String tokenValue = request.pathExt;
         StandardResult result = new StandardResult();
@@ -102,10 +106,10 @@ public class AuthBusinessLogic {
         } catch (AuthException ex) {
             Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), ex.getMessage()));
         }
-        return result;    
+        return result;
     }
-    
-    public Object refreshToken(Event event, AuthAdapterIface authAdapter){
+
+    public Object refreshToken(Event event, AuthAdapterIface authAdapter) {
         RequestObject request = event.getRequest();
         String token = request.headers.getFirst("Authentication");
         StandardResult result = new StandardResult();
@@ -116,9 +120,9 @@ public class AuthBusinessLogic {
         } catch (AuthException ex) {
             ex.printStackTrace();
             Kernel.getInstance().dispatchEvent(Event.logFine(this, ex.getMessage()));
-        } catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return result;    
+        return result;
     }
 }
