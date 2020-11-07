@@ -219,6 +219,7 @@ public abstract class HttpPortedAdapter
             //sendLogEvent(exchange, responseData.length);
             result = null;
         } catch (IOException e) {
+            e.printStackTrace();
             logger.warn(exchange.getRequestURI().getPath() + " " + e.getMessage());
         }
         exchange.close();
