@@ -159,6 +159,9 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     private void putTags(String tags) throws KeyValueDBException {
         try (Connection conn = getConnection()) {
+            if(null==tags){
+                tags="";
+            }
             String[] tagArray = tags.split(",");
             String query = "merge into tags values (?)";
             PreparedStatement pstmt = conn.prepareStatement(query);

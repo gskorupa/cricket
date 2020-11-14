@@ -65,7 +65,7 @@ public class AuthBusinessLogic {
 
         String authData = event.getRequest().headers.getFirst("Authentication");
         String authData2 = event.getRequest().headers.getFirst("Authorization");
-        if(authData2.startsWith("Basic ")){
+        if(null!=authData2 && authData2.startsWith("Basic ")){
             authData=authData2;
         }
         //handle(Event.logFinest("apiLogin", "authData=" + authData));
