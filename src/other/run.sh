@@ -1,2 +1,7 @@
 #!/bin/sh
-java -jar {{distribution}} -c config/cricket.json -s Microsite -r
+
+## uncomment example environment variables
+# export CRICKET_VAR1 = varA
+# export CRICKET_VAR2 = varB
+
+java -jar cricket.jar -s BasicService -r

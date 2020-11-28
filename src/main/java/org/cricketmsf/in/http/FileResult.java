@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.in.http;
 
+import org.cricketmsf.api.ResultIface;
 import com.sun.net.httpserver.Headers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,7 +26,7 @@ import java.util.Locale;
  *
  * @author greg
  */
-public class FileResult implements Result {
+public class FileResult implements ResultIface {
 
     private Object data;
     private String message;
@@ -159,5 +160,15 @@ public class FileResult implements Result {
     @Override
     public long getResponseTime() {
         return responseTime;
+    }
+
+    @Override
+    public String getProcedureName() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setProcedureName(String procedureName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -15,6 +15,8 @@
  */
 package org.cricketmsf.in.http;
 
+import org.cricketmsf.api.ResponseCode;
+import org.cricketmsf.api.ResultIface;
 import com.sun.net.httpserver.Headers;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,7 +35,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "result")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class ParameterMapResult implements Result {
+public class ParameterMapResult implements ResultIface {
 
     @XmlElement(name = "data")
     private HashMap<String, String> data;
@@ -186,5 +188,15 @@ public class ParameterMapResult implements Result {
     @Override
     public long getResponseTime() {
         return responseTime;
+    }
+
+    @Override
+    public String getProcedureName() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setProcedureName(String procedureName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -31,13 +31,13 @@ import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.ParameterMapResult;
-import org.cricketmsf.in.http.ResponseCode;
-import org.cricketmsf.in.http.Result;
+import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.cricketmsf.api.ResultIface;
 
 /**
  *
@@ -77,6 +77,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
             logger.warn("cache param config error: {}", e.getMessage());
         }
         logger.info("\tcache: " + useCache);
+                logger.info("\ttest: " + properties.getOrDefault("test", ""));
     }
 
     /**
@@ -190,7 +191,7 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
      * @return
      */
     @Override
-    public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName) {
+    public ResultIface getFile(RequestObject request, KeyValueDBIface cache, String tableName) {
         String filePath = getFilePath(request);
         byte[] content;
         ParameterMapResult result = new ParameterMapResult();

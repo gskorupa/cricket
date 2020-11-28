@@ -84,7 +84,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         //    setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
         //}
         setFileName(properties.get("file") + ".xml");
-        reshedulingFile = properties.get("file") + "-reshedule.xml";
+        reshedulingFile = properties.get("file") + "-reschedule.xml";
         logger.info("\tfile: " + getFileName());
         /*String pathSeparator = System.getProperty("file.separator");
         setStoragePath(

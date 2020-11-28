@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.in.http;
 
+import org.cricketmsf.api.ResultIface;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.event.Event;
@@ -41,7 +42,7 @@ public class TxtFormatter {
         }
     }
 
-    public String format(Result r) {
+    public String format(ResultIface r) {
         StringBuilder sb = new StringBuilder();
         if (r.getData() == null) {
             return "";

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.in.http;
+package org.cricketmsf.api;
 
 import com.sun.net.httpserver.Headers;
 import java.util.Date;
@@ -23,58 +23,27 @@ import java.util.List;
  *
  * @author greg
  */
-public interface Result {
+public interface ResultIface {
     
-    /**
-     * @return the status code
-     */
+    public String getProcedureName();
+    public void setProcedureName(String procedureName);
     public int getCode();
-    
-    /**
-     * @param code the status code to set
-     */
     public void setCode(int code);
-    
-    /**
-     * @return the status message
-     */
     public String getMessage();
-    
-    /**
-     * @param message the message to set
-     */
     public void setMessage(String message);
-    
-    /**
-     * @return the data
-     */
     public Object getData();
-    
-    /**
-     * @param data the data to set
-     */
     public void setData(Object data);
-    
     public byte[] getPayload();
-    
     public void setPayload(byte[] payload);
-    
     public String getFileExtension();
-    
     public void setFileExtension(String fileExt);
-    
     public void setModificationDate(Date date);
-    
     public Date getModificationDate();
-    
     public String getModificationDateFormatted();
-    
     public int getMaxAge();
     public void setMaxAge(int maxAge);
-    
     public void setHeader(String name, String value);
     public void setHeader(String name, List values);
-    
     public Headers getHeaders();
     public void setResponseTime(long time);
     public long getResponseTime();   

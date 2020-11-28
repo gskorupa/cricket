@@ -140,7 +140,11 @@ public class Runner {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        getService(args);
+        try {
+            getService(args);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     /**

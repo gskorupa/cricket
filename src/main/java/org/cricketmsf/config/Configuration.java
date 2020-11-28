@@ -29,17 +29,17 @@ public class Configuration {
     private String id;
     private String description;
     private String service;
-    private String host;
-    private String port;
-    private int threads;
-    private String filter;
-    //private ArrayList<HttpHeader> cors;
+    //private String host;
+    //private String port;
+    //private int threads;
+    //private String filter;
     private HashMap<String, Object> properties;
     private HashMap<String, AdapterConfiguration> adapters;
     private AdapterConfiguration[] ports;
 
     public Configuration() {
-        adapters = new HashMap<>();
+        //adapters = new HashMap<>();
+        adapters = null;
         properties = new HashMap<>();
         ports = null;
     }
@@ -55,28 +55,32 @@ public class Configuration {
             overwritten.properties.put(k, v);
         });
         //overwrite adapters
+        /*
         adapters.forEach((k, v) -> {
             overwritten.adapters.put(k, v);
         });
-
+         */
         //overwrite ports
-        AdapterConfiguration ac;
         int found;
         ArrayList<AdapterConfiguration> al = new ArrayList<>();
-        for (int i = 0; i < overwritten.ports.length; i++) {
-            al.add(overwritten.ports[i]);
-        }
-        for (int j = 0; j < ports.length; j++) {
+        al.addAll(Arrays.asList(overwritten.ports));
+        String active;
+        for (AdapterConfiguration adapterConfig : ports) {
+            active = adapterConfig.getActive();
+            if (null != active && (active.equalsIgnoreCase("false") || active.equalsIgnoreCase("no"))) {
+                //System.out.println("NOT ACTIVE " + adapterConfig.getName());
+                continue;
+            }
             found = -1;
             for (int i = 0; i < al.size(); i++) {
-                if (ports[j].getName().equals(al.get(i).getName())) {
+                if (adapterConfig.getName().equals(al.get(i).getName())) {
                     found = i;
                 }
             }
             if (found < 0) {
-                al.add(ports[j]);
+                al.add(adapterConfig);
             } else {
-                al.set(found, ports[j]);
+                al.set(found, adapterConfig);
             }
         }
         overwritten.ports = al.toArray(new AdapterConfiguration[al.size()]);
@@ -84,34 +88,26 @@ public class Configuration {
     }
 
     public AdapterConfiguration getAdapterConfiguration(String name) {
-        if (null == ports || ports.length == 0) {
-            return adapters.get(name);
-        } else {
-            for (int i = 0; i < ports.length; i++) {
-                if (name.equals(ports[i].getName())) {
-                    return ports[i];
-                }
+        for (int i = 0; i < ports.length; i++) {
+            if (name.equals(ports[i].getName())) {
+                return ports[i];
             }
-            return null;
         }
+        return null;
     }
 
     public void putAdapterConfiguration(AdapterConfiguration config) {
-        if (null == ports || ports.length == 0) {
-            adapters.put(config.getName(), config);
-        } else {
-            boolean found = false;
-            for (int i = 0; i < ports.length; i++) {
-                if (config.getName().equals(ports[i].getName())) {
-                    ports[i] = config;
-                    found = true;
-                    break;
-                }
+        boolean found = false;
+        for (int i = 0; i < ports.length; i++) {
+            if (config.getName().equals(ports[i].getName())) {
+                ports[i] = config;
+                found = true;
+                break;
             }
-            if (!found) {
-                ports = Arrays.copyOf(ports, ports.length + 1);
-                ports[ports.length - 1] = config;
-            }
+        }
+        if (!found) {
+            ports = Arrays.copyOf(ports, ports.length + 1);
+            ports[ports.length - 1] = config;
         }
     }
 
@@ -127,53 +123,12 @@ public class Configuration {
         properties.put(name, value);
     }
 
-    /**
-     * @return the host
-     */
-    public String getHost() {
-        return host;
-    }
-
-    /**
-     * @param host the host to set
-     */
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    /**
-     * @return the port
-     */
-    public String getPort() {
-        return port;
-    }
-
-    /**
-     * @param port the port to set
-     */
-    public void setPort(String port) {
-        this.port = port;
-    }
-
-    /**
-     * @return the threads
-     */
-    public int getThreads() {
-        return threads;
-    }
-
-    /**
-     * @param threads the threads to set
-     */
-    public void setThreads(int threads) {
-        this.threads = threads;
-    }
-
     public HashMap getAdapters() {
-        if (null != ports && ports.length > 0) {
+        if (null == adapters) {
             adapters = new HashMap<>();
-            for (int i = 0; i < ports.length; i++) {
-                adapters.put(ports[i].getName(), ports[i]);
+            String active;
+            for (AdapterConfiguration adapterConfig : ports) {
+                adapters.put(adapterConfig.getName(), adapterConfig);
             }
         }
         return adapters;
@@ -185,20 +140,6 @@ public class Configuration {
 
     public void setService(String service) {
         this.service = service;
-    }
-
-    /**
-     * @return the securityFilter
-     */
-    public String getFilter() {
-        return filter;
-    }
-
-    /**
-     * @param filterName the securityFilter to set
-     */
-    public void setFilter(String filterName) {
-        this.filter = filterName;
     }
 
     /**
@@ -219,11 +160,11 @@ public class Configuration {
      * @return the properties
      */
     public HashMap<String, Object> getProperties() {
-        Iterator it=properties.keySet().iterator();
-        String key,value;
-        while(it.hasNext()){
-            key=(String)it.next();
-            value=""+properties.get(key);
+        Iterator it = properties.keySet().iterator();
+        String key, value;
+        while (it.hasNext()) {
+            key = (String) it.next();
+            value = "" + properties.get(key);
             if (value.startsWith("$")) {
                 String tmp = System.getenv(value.substring(1));
                 if (null != tmp) {
@@ -242,12 +183,8 @@ public class Configuration {
     }
 
     public void joinProps() {
-        if (null == ports || ports.length == 0) {
-            adapters.forEach((k, v) -> v.joinProps());
-        } else {
-            for (int i = 0; i < ports.length; i++) {
-                ports[i].joinProps();
-            }
+        for (AdapterConfiguration port1 : ports) {
+            port1.joinPropsAndResolveEnvVar();
         }
     }
 

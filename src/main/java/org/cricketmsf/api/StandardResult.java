@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.in.http;
+package org.cricketmsf.api;
 
 import com.sun.net.httpserver.Headers;
 import java.text.SimpleDateFormat;
@@ -30,7 +30,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "result")
 @XmlAccessorType (XmlAccessType.FIELD)
-public class StandardResult implements Result {
+public class StandardResult implements ResultIface {
 
     private Object data = null;
     
@@ -43,12 +43,14 @@ public class StandardResult implements Result {
     private int maxAge;
     private Headers headers;
     private long responseTime = 0;
+    private String procedureName;
 
     public StandardResult() {
         setCode(ResponseCode.OK);
         setModificationDate(new Date());
         maxAge = 0;
         headers = new Headers();
+        procedureName=null;
     }
 
     public StandardResult(Object data) {
@@ -57,6 +59,7 @@ public class StandardResult implements Result {
         setModificationDate(new Date());
         maxAge = 0;
         headers = new Headers();
+        procedureName=null;
     }
 
     /**
@@ -172,5 +175,15 @@ public class StandardResult implements Result {
     @Override
     public long getResponseTime() {
         return responseTime;
+    }
+
+    @Override
+    public String getProcedureName() {
+        return procedureName;
+    }
+
+    @Override
+    public void setProcedureName(String procedureName) {
+        this.procedureName=procedureName;
     }
 }

@@ -15,6 +15,9 @@
  */
 package org.cricketmsf.in.http;
 
+import org.cricketmsf.api.ResponseCode;
+import org.cricketmsf.api.StandardResult;
+import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.Kernel;
 import com.sun.net.httpserver.Headers;
@@ -130,7 +133,7 @@ public abstract class HttpPortedAdapter
                 logger.info(dumpRequest(requestObject));
             }
 
-            Result result = createResponse(requestObject, rootEventId);
+            ResultIface result = createResponse(requestObject, rootEventId);
 
             acceptedResponseType = setResponseType(acceptedResponseType, result.getFileExtension());
             //set content type and print response to string format as JSON if needed
@@ -270,7 +273,7 @@ public abstract class HttpPortedAdapter
         return acceptedResponseType;
     }
 
-    public byte[] formatResponse(String type, Result result) {
+    public byte[] formatResponse(String type, ResultIface result) {
         byte[] r = {};
         String formattedResponse;
         switch (type) {
@@ -331,13 +334,13 @@ public abstract class HttpPortedAdapter
 
     protected abstract ProcedureCall preprocess(RequestObject request, long rootEventId);
 
-    protected Result postprocess(Result result) {
+    protected ResultIface postprocess(ResultIface result) {
         return result;
     }
 
-    private Result createResponse(RequestObject requestObject, long rootEventId) {
+    private ResultIface createResponse(RequestObject requestObject, long rootEventId) {
         String methodName = null;
-        Result result = new StandardResult();
+        ResultIface result = new StandardResult();
         if (mode == WEBSITE_MODE) {
             if (!requestObject.uri.endsWith("/")) {
                 if (requestObject.uri.lastIndexOf("/") > requestObject.uri.lastIndexOf(".")) {
@@ -361,7 +364,7 @@ public abstract class HttpPortedAdapter
                 result.setHeader("Content-type", pCall.contentType);
             } else { // pCall must be processed by the Kernel
                 logger.debug("sending request to hook method " + pCall.procedureName + "@" + pCall.event.getClass().getSimpleName());
-                result = (Result) Kernel.getInstance().getEventProcessingResult(
+                result = (ResultIface) Kernel.getInstance().getEventProcessingResult(
                         pCall.event,
                         pCall.procedureName
                 );

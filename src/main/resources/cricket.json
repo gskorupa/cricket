@@ -9,13 +9,8 @@
             "properties": {
                 "host": "0.0.0.0",
                 "port": "7070",
-                "wsport": "",
-                "threads": "0",
-                "filter": "org.cricketmsf.SecurityFilter",
-                "cors": "Access-Control-Allow-Origin:*",
                 "time-zone": "GMT",
                 "request-encoding": "UTF-8",
-                "file-upload-maxsize": "1000000",
                 "serviceurl": "http://localhost:7070",
                 "terms":"https://github.com/gskorupa/cricket"
             },
@@ -23,7 +18,7 @@
                 {
                     "name": "OpenApi",
                     "interfaceName": "OpenApiIface",
-                    "classFullName": "org.cricketmsf.in.openapi.OpenApi",
+                    "className": "org.cricketmsf.in.openapi.OpenApi",
                     "description": "",
                     "properties": {
                         "context": "/api"
@@ -52,7 +47,7 @@
                 {
                     "name": "Greeter",
                     "interfaceName": "",
-                    "adapterClassName": "org.cricketmsf.in.http.GreeterAdapter",
+                    "className": "org.cricketmsf.in.http.GreeterAdapter",
                     "properties": {
                         "context": "/api/greeting"
                     }
@@ -60,7 +55,7 @@
                 {
                     "name": "StatusService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.StatusAdapter",
+                    "className": "org.cricketmsf.in.http.StatusAdapter",
                     "properties": {
                         "context": "/api/status"
                     }
@@ -68,7 +63,7 @@
                 {
                     "name": "CacheDB",
                     "interfaceName": "KeyValueDBIface",
-                    "classFullName": "org.cricketmsf.out.db.KeyValueDB",
+                    "className": "org.cricketmsf.out.db.KeyValueDB",
                     "properties": {
                         "path": "./data",
                         "name": "local"
@@ -77,16 +72,16 @@
                 {
                     "name": "Scheduler",
                     "interfaceName": "SchedulerIface",
-                    "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
+                    "className": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
                         "file": "./scheduler",
-                        "init": "printInfo,+10s,asdfgh"
+                        "init": "printInfo,+10s,event fired by the Scheduler adapter - see: cricket.json"
                     }
                 },
                 {
                     "name": "Dispatcher",
                     "interfaceName": "DispatcherIface",
-                    "classFullName": "org.cricketmsf.out.dispatcher.QueueDispatcher",
+                    "className": "org.cricketmsf.out.dispatcher.QueueDispatcher",
                     "description": "event dispatcher using internal Queue",
                     "properties": {
                         "event-classes": "org.cricketmsf.event.GreeterEvent",
@@ -96,7 +91,7 @@
                 {
                     "name": "QueueClient",
                     "interfaceName": "QueueClientIface",
-                    "classFullName": "org.cricketmsf.out.queue.SimpleQueueClient",
+                    "className": "org.cricketmsf.out.queue.SimpleQueueClient",
                     "description": "internal Queue client",
                     "properties": {
                         "queue-adapter-name": "Queue"
@@ -105,7 +100,7 @@
                 {
                     "name": "QueueSubscriber",
                     "interfaceName": "QueueClientIface",
-                    "classFullName": "org.cricketmsf.in.queue.SimpleQueueSubscriber",
+                    "className": "org.cricketmsf.in.queue.SimpleQueueSubscriber",
                     "description": "internal Queue subscriber",
                     "properties": {
                         "queue-adapter-name": "Queue",
@@ -115,7 +110,7 @@
                 {
                     "name": "Queue",
                     "interfaceName": "QueueIface",
-                    "classFullName": "org.cricketmsf.out.queue.SimpleQueue",
+                    "className": "org.cricketmsf.out.queue.SimpleQueue",
                     "description": "embeded queue inplementation",
                     "properties": {
                     }
@@ -123,7 +118,7 @@
                 {
                     "name": "WwwService",
                     "interfaceName": "HtmlGenAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
+                    "className": "org.cricketmsf.in.http.HtmlGenAdapter",
                     "properties": {
                         "context": "/",
                         "use-cache": "true",
@@ -134,7 +129,7 @@
                 {
                     "name": "WwwFileReader",
                     "interfaceName": "FileReaderAdapterIface",
-                    "classFullName": "org.cricketmsf.out.file.FileReaderAdapter",
+                    "className": "org.cricketmsf.out.file.FileReaderAdapter",
                     "properties": {
                         "root": "./www/",
                         "use-cache": "true",
@@ -144,7 +139,7 @@
                 {
                     "name": "WsAdapter",
                     "interfaceName": "InboundAdapterIface",
-                    "classFullName": "org.cricketmsf.in.websocket.WebsocketAdapter",
+                    "className": "org.cricketmsf.in.websocket.WebsocketAdapter",
                     "description": "default websocket adapter",
                     "properties": {
                         "context":"/test"
@@ -153,7 +148,7 @@
                 {
                     "name": "Autostart",
                     "interfaceName": "AutostartIface",
-                    "classFullName": "org.cricketmsf.out.autostart.Autostart",
+                    "className": "org.cricketmsf.out.autostart.Autostart",
                     "description": "",
                     "properties": {
                         "subfolders":"./logs:./data"
@@ -162,7 +157,7 @@
                 {
                     "name": "OpenApi",
                     "interfaceName": "OpenApiIface",
-                    "classFullName": "org.cricketmsf.in.openapi.OpenApi",
+                    "className": "org.cricketmsf.in.openapi.OpenApi",
                     "description": "",
                     "properties": {
                         "context": "/api"
@@ -173,6 +168,140 @@
         {
             "@type": "org.cricketmsf.config.Configuration",
             "id": "Microsite",
+            "active": "true",
+            "service": "org.cricketmsf.services.Microsite",
+            "description":"Cricket Microsite service",
+            "properties": {
+                "host": "0.0.0.0",
+                "port": "7070",
+                "wsport": "",
+                "ssl": "false",
+                "threads": "0",
+                "shutdown-delay":"2",
+                "filter": "org.cricketmsf.microsite.auth.SecurityFilter",
+                "cors": "Access-Control-Allow-Origin:*|Access-Control-Allow-Credentials:true|Access-Control-Allow-Methods: POST, PATCH, GET, OPTIONS, DELETE, PUT|Access-Control-Allow-Headers:Authentication|Access-Control-Max-Age: 1728000",
+                "time-zone": "GMT",
+                "user-confirm": "true",
+                "initial-admin-email": "user@domain",
+                "initial-admin-password": "cricket",
+                "admin-notification-email": "",
+                "restricted-resources": "DELETE@/api/auth GET@/api/user PUT@/api/user DELETE@/api/user *@/api/cm *@/api/alert *@/api/system",
+                "file.upload.maxsize": "1000000",
+                "backup-folder": "./backup",
+                "backup-strategy": "week",
+                "request-encoding": "UTF-8",
+                "serviceurl": "http://localhost:7070",
+                "servicename": "",
+                "maintenance-paths": "/api/system /api/cm /api/auth /api/user /admin",
+                "default-language": "en",
+                "www-theme": "theme0"
+            },
+            "ports": [
+                {
+                    "name": "Database",
+                    "interfaceName": "KeyValueDBIface",
+                    "className": "org.cricketmsf.out.db.KeyValueDB",
+                    "properties": {
+                        "path": "./data",
+                        "name": "local"
+                    }
+                },
+                {
+                    "name": "SiteAdministrationModule",
+                    "interfaceName": "SiteAdministrationIface",
+                    "className": "org.cricketmsf.microsite.out.siteadmin.SiteAdministrationModule",
+                    "properties": {
+                    }
+                },
+                {
+                    "name": "AuthService",
+                    "interfaceName": "HttpAdapterIface",
+                    "className": "org.cricketmsf.microsite.in.auth.AuthApi",
+                    "properties": {
+                        "context": "/api/auth"
+                    }
+                },
+                {
+                    "name": "UserAdapter",
+                    "interfaceName": "UserAdapterIface",
+                    "className": "org.cricketmsf.microsite.out.user.UserEmbededAdapter",
+                    "properties": {
+                        "helper-name": "UserDB"
+                    }
+                },
+                {
+                    "name": "UserDB",
+                    "interfaceName": "SqlDBIface",
+                    "className": "org.cricketmsf.microsite.out.db.H2UserDB",
+                    "properties": {
+                        "path": "./data",
+                        "file": "user",
+                        "test-query": "select * from serviceversion",
+                        "version": "2",
+                        "name": "user",
+                        "user": "sa",
+                        "password": "",
+                        "encrypted": "true",
+                        "filePassword":"cr1Ck37#@"
+                    }
+                },
+                {
+                    "name": "AuthAdapter",
+                    "interfaceName": "AuthAdapterIface",
+                    "className": "org.cricketmsf.microsite.out.auth.AuthEmbededAdapter",
+                    "properties": {
+                        "helper-name": "AuthDB",
+                        "helper-name-2": "UserAdapter",
+                        "token-timeout": "1800"
+                    }
+                },
+                {
+                    "name": "AuthDB",
+                    "interfaceName": "SqlDBIface",
+                    "className": "org.cricketmsf.microsite.out.db.H2AuthDB",
+                    "properties": {
+                        "path":"./data",
+                        "file": "auth",
+                        "test-query": "select * from serviceversion",
+                        "version": "1",
+                        "name": "auth",
+                        "user": "sa",
+                        "password": ""
+                    }
+                },
+                {
+                    "name": "Autostart",
+                    "interfaceName": "AutostartIface",
+                    "className": "org.cricketmsf.out.autostart.Autostart",
+                    "description": "",
+                    "properties": {
+                        "subfolders":"./logs:./data:./www"
+                    }
+                },
+                {
+                    "name": "OpenApi",
+                    "interfaceName": "OpenApiIface",
+                    "className": "org.cricketmsf.in.openapi.OpenApi",
+                    "description": "",
+                    "properties": {
+                        "context": "/api"
+                    }
+                },
+                {
+                    "name": "Scheduler",
+                    "interfaceName": "SchedulerIface",
+                    "className": "org.cricketmsf.in.scheduler.Scheduler",
+                    "properties": {
+                        "path": "./data",
+                        "file": "scheduler"
+                    }
+                }
+            ]
+        },
+        {
+            "@type": "org.cricketmsf.config.Configuration",
+            "id": "Microsite",
+            "active": "false",
             "service": "org.cricketmsf.services.Microsite",
             "description":"Cricket Microsite service",
             "properties": {
@@ -204,7 +333,7 @@
                 {
                     "name": "StatusService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.StandardHttpAdapter",
+                    "className": "org.cricketmsf.in.http.StandardHttpAdapter",
                     "properties": {
                         "context": "/api/status"
                     }
@@ -212,7 +341,7 @@
                 {
                     "name": "WwwService",
                     "interfaceName": "HtmlGenAdapterIface",
-                    "classFullName": "org.cricketmsf.in.http.HtmlGenAdapter",
+                    "className": "org.cricketmsf.in.http.HtmlGenAdapter",
                     "properties": {
                         "context": "/",
                         "use-cache": "true",
@@ -222,7 +351,7 @@
                 {
                     "name": "Logger",
                     "interfaceName": "LoggerAdapterIface",
-                    "classFullName": "org.cricketmsf.out.log.Slf4jLogger",
+                    "className": "org.cricketmsf.out.log.Slf4jLogger",
                     "properties": {
                         "name": "Microsite",
                         "level": "FINE",
@@ -235,7 +364,7 @@
                 {
                     "name": "GdprLogger",
                     "interfaceName": "LoggerAdapterIface",
-                    "classFullName": "org.cricketmsf.out.log.FileLogger",
+                    "className": "org.cricketmsf.out.log.FileLogger",
                     "properties": {
                         "name": "Microsite",
                         "log-file-name": "./logs/gdpr.log"
@@ -244,7 +373,7 @@
                 {
                     "name": "Database",
                     "interfaceName": "KeyValueDBIface",
-                    "classFullName": "org.cricketmsf.out.db.KeyValueDB",
+                    "className": "org.cricketmsf.out.db.KeyValueDB",
                     "properties": {
                         "path": "./data",
                         "name": "local"
@@ -253,7 +382,7 @@
                 {
                     "name": "Scheduler",
                     "interfaceName": "SchedulerIface",
-                    "classFullName": "org.cricketmsf.in.scheduler.Scheduler",
+                    "className": "org.cricketmsf.in.scheduler.Scheduler",
                     "properties": {
                         "path": "./data",
                         "file": "scheduler",
@@ -264,7 +393,7 @@
                 {
                     "name": "UserService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.in.http.UserApi",
+                    "className": "org.cricketmsf.microsite.in.http.UserApi",
                     "properties": {
                         "context": "/api/user"
                     }
@@ -272,7 +401,7 @@
                 {
                     "name": "RecoveryService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.in.http.UserApi",
+                    "className": "org.cricketmsf.microsite.in.http.UserApi",
                     "properties": {
                         "context": "/api/recover"
                     }
@@ -280,7 +409,7 @@
                 {
                     "name": "AuthService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.in.http.AuthApi",
+                    "className": "org.cricketmsf.microsite.in.http.AuthApi",
                     "properties": {
                         "context": "/api/auth"
                     }
@@ -288,7 +417,7 @@
                 {
                     "name": "ConfirmationService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.in.http.ConfirmationApi",
+                    "className": "org.cricketmsf.microsite.in.http.ConfirmationApi",
                     "properties": {
                         "context": "/api/confirm"
                     }
@@ -296,7 +425,7 @@
                 {
                     "name": "ContentManager",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.in.http.ContentApi",
+                    "className": "org.cricketmsf.microsite.in.http.ContentApi",
                     "properties": {
                         "context": "/api/cm"
                     }
@@ -304,7 +433,7 @@
                 {
                     "name": "ContentService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.in.http.ContentApi",
+                    "className": "org.cricketmsf.microsite.in.http.ContentApi",
                     "properties": {
                         "context": "/api/cs"
                     }
@@ -312,7 +441,7 @@
                 {
                     "name": "AlertService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.in.http.AlertApi",
+                    "className": "org.cricketmsf.microsite.in.http.AlertApi",
                     "properties": {
                         "context": "/api/alert"
                     }
@@ -320,7 +449,7 @@
                 {
                     "name": "SystemService",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.in.http.SystemApi",
+                    "className": "org.cricketmsf.microsite.in.http.SystemApi",
                     "properties": {
                         "context": "/api/system",
                         "dump-request": "false"
@@ -329,7 +458,7 @@
                 {
                     "name": "userAdapter",
                     "interfaceName": "UserAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.out.user.UserEmbededAdapter",
+                    "className": "org.cricketmsf.microsite.out.user.UserEmbededAdapter",
                     "properties": {
                         "helper-name": "userDB"
                     }
@@ -337,7 +466,7 @@
                 {
                     "name": "userDB",
                     "interfaceName": "SqlDBIface",
-                    "classFullName": "org.cricketmsf.microsite.out.db.H2UserDB",
+                    "className": "org.cricketmsf.microsite.out.db.H2UserDB",
                     "properties": {
                         "path": "./data",
                         "file": "user",
@@ -353,7 +482,7 @@
                 {
                     "name": "authAdapter",
                     "interfaceName": "AuthAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.out.auth.AuthEmbededAdapter",
+                    "className": "org.cricketmsf.microsite.out.auth.AuthEmbededAdapter",
                     "properties": {
                         "helper-name": "authDB",
                         "helper-name-2": "userAdapter",
@@ -363,7 +492,7 @@
                 {
                     "name": "authDB",
                     "interfaceName": "SqlDBIface",
-                    "classFullName": "org.cricketmsf.microsite.out.db.H2AuthDB",
+                    "className": "org.cricketmsf.microsite.out.db.H2AuthDB",
                     "properties": {
                         "path":"./data",
                         "file": "auth",
@@ -377,7 +506,7 @@
                 {
                     "name": "cmsDB",
                     "interfaceName": "SqlDBIface",
-                    "classFullName": "org.cricketmsf.microsite.out.db.H2CmsDB",
+                    "className": "org.cricketmsf.microsite.out.db.H2CmsDB",
                     "properties": {
                         "path":"./data",
                         "file": "cms",
@@ -391,14 +520,14 @@
                 {
                     "name": "cmsRuleEngine",
                     "interfaceName": "RuleEngineIface",
-                    "classFullName": "org.cricketmsf.microsite.cms.DefaultRuleEngine",
+                    "className": "org.cricketmsf.microsite.cms.DefaultRuleEngine",
                     "properties": {
                     }
                 },
                 {
                     "name": "cmsAdapter",
                     "interfaceName": "CmsIface",
-                    "classFullName": "org.cricketmsf.microsite.cms.CmsEmbededAdapter",
+                    "className": "org.cricketmsf.microsite.cms.CmsEmbededAdapter",
                     "properties": {
                         "helper-name": "cmsDB",
                         "rule-engine": "cmsRuleEngine",
@@ -411,7 +540,7 @@
                 {
                     "name": "emailSender",
                     "interfaceName": "EmailSenderIface",
-                    "classFullName": "org.cricketmsf.microsite.out.notification.SmtpSender",
+                    "className": "org.cricketmsf.microsite.out.notification.SmtpSender",
                     "properties": {
                         "from": "",
                         "mailhost": "",
@@ -423,7 +552,7 @@
                 {
                     "name": "watchdog",
                     "interfaceName": "WatchdogIface",
-                    "classFullName": "org.cricketmsf.in.file.FileTailer",
+                    "className": "org.cricketmsf.in.file.FileTailer",
                     "properties": {
                         "path": "./tmp/test.txt",
                         "sampling-interval": "1000",
@@ -433,7 +562,7 @@
                 {
                     "name": "Dispatcher",
                     "interfaceName": "DispatcherIface",
-                    "classFullName": "org.cricketmsf.out.dispatcher.QueueDispatcher",
+                    "className": "org.cricketmsf.out.dispatcher.QueueDispatcher",
                     "description": "using internal Queue",
                     "properties": {
                         "event-types": "*",
@@ -443,7 +572,7 @@
                 {
                     "name": "QueueClient",
                     "interfaceName": "QueueClientIface",
-                    "classFullName": "org.cricketmsf.out.queue.SimpleQueueClient",
+                    "className": "org.cricketmsf.out.queue.SimpleQueueClient",
                     "description": "using internal Queue",
                     "properties": {
                         "queue-adapter-name": "Queue"
@@ -452,7 +581,7 @@
                 {
                     "name": "QueueSubscriber",
                     "interfaceName": "QueueClientIface",
-                    "classFullName": "org.cricketmsf.in.queue.SimpleQueueSubscriber",
+                    "className": "org.cricketmsf.in.queue.SimpleQueueSubscriber",
                     "description": "using internal Queue",
                     "properties": {
                         "queue-adapter-name": "Queue",
@@ -462,7 +591,7 @@
                 {
                     "name": "Queue",
                     "interfaceName": "QueueIface",
-                    "classFullName": "org.cricketmsf.out.queue.SimpleQueue",
+                    "className": "org.cricketmsf.out.queue.SimpleQueue",
                     "description": "=",
                     "properties": {
                         "mode":"queue"
@@ -471,7 +600,7 @@
                 {
                     "name": "Autostart",
                     "interfaceName": "AutostartIface",
-                    "classFullName": "org.cricketmsf.out.autostart.Autostart",
+                    "className": "org.cricketmsf.out.autostart.Autostart",
                     "description": "",
                     "properties": {
                         "subfolders":"./logs:./data:./www"
@@ -480,7 +609,7 @@
                 {
                     "name": "OpenApi",
                     "interfaceName": "OpenApiIface",
-                    "classFullName": "org.cricketmsf.in.openapi.OpenApi",
+                    "className": "org.cricketmsf.in.openapi.OpenApi",
                     "description": "",
                     "properties": {
                         "context": "/api"

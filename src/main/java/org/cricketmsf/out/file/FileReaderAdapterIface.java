@@ -19,9 +19,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.cricketmsf.RequestObject;
-import org.cricketmsf.in.http.Result;
 import org.cricketmsf.out.db.KeyValueCacheAdapterIface;
 import org.cricketmsf.out.db.KeyValueDBIface;
+import org.cricketmsf.api.ResultIface;
 
 /**
  *
@@ -34,6 +34,6 @@ public interface FileReaderAdapterIface {
     public String getFilePath(RequestObject request);
     public String getFileExt(String filePath);
     public byte[] getFileBytes(File file, String filePath);
-    public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName);
+    public ResultIface getFile(RequestObject request, KeyValueDBIface cache, String tableName);
     public String getRootPath();
 }

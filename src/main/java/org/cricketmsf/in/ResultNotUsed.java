@@ -21,7 +21,8 @@ import com.sun.net.httpserver.Headers;
  *
  * @author greg
  */
-public interface Result {
+@Deprecated
+public interface ResultNotUsed {
     
     /**
      * @return the status code

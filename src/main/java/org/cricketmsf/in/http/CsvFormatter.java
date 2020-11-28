@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.in.http;
 
+import org.cricketmsf.api.ResultIface;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +67,7 @@ public class CsvFormatter {
         return sb.append("\r\n").toString();
     }
 
-    public String format(Result r) {
+    public String format(ResultIface r) {
         if (r.getData() instanceof List) {
             return format((List) r.getData());
         } else if (r.getData() instanceof Map) {

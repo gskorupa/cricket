@@ -22,5 +22,6 @@ package org.cricketmsf.in.file;
 public interface WatchdogIface {
     
     public void checkStatus();
+    public void shutdown();
     
 }

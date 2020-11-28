@@ -22,19 +22,17 @@ import org.cricketmsf.RequestObject;
 import org.cricketmsf.event.GreeterEvent;
 import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.exception.InitException;
-import org.cricketmsf.in.http.HtmlGenAdapterIface;
-import org.cricketmsf.in.http.ParameterMapResult;
-import org.cricketmsf.in.http.ResponseCode;
-import org.cricketmsf.in.http.Result;
-import org.cricketmsf.in.http.StandardResult;
+import org.cricketmsf.api.ResponseCode;
+import org.cricketmsf.api.StandardResult;
 import org.cricketmsf.in.openapi.OpenApiIface;
-import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
 import org.cricketmsf.out.file.FileReaderAdapterIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.cricketmsf.annotation.EventHook;
+import org.cricketmsf.api.Result;
+import org.cricketmsf.api.ResultIface;
 
 /**
  * This is example service.
@@ -83,20 +81,13 @@ public class BasicService extends Kernel {
         //System.out.println(printStatus());
     }
 
-    @Override
-    public void runOnce() {
-        super.runOnce();
-        apiGenerator.init(this);
-        logger.info("BasicService.runOnce() executed");
-    }
-
     /**
      *
      * @param event
      * @return ParameterMapResult with the file content as a byte array
      */
-    @EventHook(className = "HttpEvent", procedureName = "www")
-    public Object doGet(HttpEvent event) {
+    @EventHook(className = "org.cricketmsf.event.HttpEvent", procedureName = "www")
+    public ResultIface doGet(HttpEvent event) {
         return wwwFileReader.getFile(
                 (RequestObject)event.getData(), 
                 cacheDB, 
@@ -104,21 +95,21 @@ public class BasicService extends Kernel {
         );
     }
 
-    @EventHook(className = "HttpEvent", procedureName = "getStatus")
-    public Object handleStatusRequest(Event requestEvent) {
-        return new StandardResult(reportStatus());
+    @EventHook(className = "org.cricketmsf.event.HttpEvent", procedureName = "getStatus")
+    public ResultIface handleStatusRequest(HttpEvent requestEvent) {
+        return new Result(reportStatus());
     }
 
-    @EventHook(className = "HttpEvent", procedureName = "greet")
-    public Object doGreet(GreeterEvent event) {
+    @EventHook(className = "org.cricketmsf.event.GreeterEvent", procedureName = "greet")
+    public ResultIface doGreet(GreeterEvent event) {
         String name =  ((HashMap<String,String>)event.getData()).get("name");
-        Result result = new StandardResult("Hello " + name);
-        result.setHeader("Content-type", "text/plain");
+        ResultIface result = new Result("Hello " + name);
+        result.setProcedureName("greet");
         return result;
     }
     
-    @EventHook(className = "Event", procedureName = "printInfo")
-    public Object printInfo(Event event) {
+    @EventHook(className = "org.cricketmsf.event.Event", procedureName = "printInfo")
+    public Result printInfo(Event event) {
         logger.info("INFO {} {} {}",event.getProcedureName(), event.getInitialTimePoint(), event.getData());
         return null;
     }

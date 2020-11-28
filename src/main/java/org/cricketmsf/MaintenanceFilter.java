@@ -19,7 +19,7 @@ import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.io.OutputStream;
-import org.cricketmsf.in.http.ResponseCode;
+import org.cricketmsf.api.ResponseCode;
 
 /**
  * This is default filter used to check required request conditions. It does

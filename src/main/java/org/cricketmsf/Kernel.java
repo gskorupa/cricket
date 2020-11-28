@@ -46,6 +46,8 @@ import org.cricketmsf.out.dispatcher.DispatcherIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.cricketmsf.annotation.EventHook;
+import org.cricketmsf.api.ResultIface;
+import org.cricketmsf.out.auth.AuthAdapterIface;
 
 /**
  * Microkernel.
@@ -154,21 +156,28 @@ public abstract class Kernel {
         return portEventHookMethods.get((null == procedureName ? "*" : procedureName) + "@" + className);
     }
 
-    public Object getEventProcessingResult(Event event) {
+    public ResultIface getEventProcessingResult(Event event) {
         return getEventProcessingResult(event, event.getProcedureName());
     }
 
-    public Object getEventProcessingResult(Event event, String procedureName) {
+    //public Object getEventProcessingResult(Event event, String procedureName) {
+    public ResultIface getEventProcessingResult(Event event, String procedureName) {
         String methodName = "unknown";
-        String procedure = (null == procedureName ? "*" : procedureName);
+        //String procedure = (null == procedureName ? "*" : procedureName);
         try {
             Method m;
-            methodName = getHookMethodNameForPort(event.getClass().getName(), procedure);
-            if (null != methodName && !methodName.isBlank()) {
+            methodName = getHookMethodNameForPort(event.getClass().getName(), procedureName);
+            if (null != methodName) {
                 m = getClass().getMethod(methodName, event.getClass());
-                return m.invoke(this, event);
+                return (ResultIface) m.invoke(this, event);
             } else {
-                LOGGER.warn("Don't know how to handle {} procedure {} fired by {}", event.getClass().getName(), procedureName, event.getOrigin().getName());
+                methodName = getHookMethodNameForPort(event.getClass().getName(), "*");
+                if (null != methodName) {
+                    m = getClass().getMethod(methodName, event.getClass());
+                    return (ResultIface) m.invoke(this, event);
+                } else {
+                    LOGGER.warn("Don't know how to handle {} procedure {} fired by {}", event.getClass().getName(), procedureName, event.getOrigin().getName());
+                }
             }
         } catch (IllegalAccessException | NoSuchMethodException e) {
             LOGGER.warn("Handler method {} not compatible with event class {}", methodName, event.getClass().getName());
@@ -187,11 +196,11 @@ public abstract class Kernel {
      * @param event event object that should be processed
      * @return result of event processing
      */
-    public static Object handle(Event event) {
+    public static ResultIface handle(Event event) {
         return Kernel.getInstance().getEventProcessingResult(event);
     }
 
-    public Object dispatchEvent(Event event) {
+    public ResultIface dispatchEvent(Event event) {
         try {
             if (null != event.getTimePoint() && !event.getTimePoint().isEmpty() && null != schedulerAdapter) {
                 schedulerAdapter.handleEvent(event);
@@ -213,6 +222,10 @@ public abstract class Kernel {
 
     public HashMap<String, Object> getAdaptersMap() {
         return adaptersMap;
+    }
+    
+    public AuthAdapterIface getAuthAdapter(){
+        return null;
     }
 
     protected Object getRegistered(String adapterName) {
@@ -315,8 +328,6 @@ public abstract class Kernel {
         setHttpHandlerLoaded(false);
         setInboundAdaptersLoaded(false);
         LOGGER.info("LOADING SERVICE PROPERTIES FOR " + config.getService());
-        LOGGER.info("\tUUID=" + getUuid().toString());
-        LOGGER.info("\tname=" + getName());
         setHost(config.getProperty("host", "0.0.0.0"));
         try {
             setPort(Integer.parseInt(config.getProperty("port", "8080")));
@@ -325,21 +336,21 @@ public abstract class Kernel {
         }
         try {
             setWebsocketPort(Integer.parseInt(config.getProperty("wsport", "0")));
-        } catch (Exception e) {
-            LOGGER.debug(e.getMessage());
+        } catch (NumberFormatException e) {
+            LOGGER.debug("wrong wsport value {}", e.getMessage());
         }
         try {
             setShutdownDelay(Integer.parseInt(config.getProperty("shutdown-delay", "2")));
         } catch (Exception e) {
             LOGGER.debug(e.getMessage());
         }
-        LOGGER.info("\tshutdown-delay=" + getShutdownDelay());
         setSecurityFilter(config.getProperty("filter"));
         setCorsHeaders(config.getProperty("cors"));;
-        LOGGER.info("\tProperties:\n" + printExtendedProperties(getProperties()));
+        LOGGER.info(printExtendedProperties(getProperties()));
         LOGGER.info("LOADING ADAPTERS");
         String adapterName = null;
         AdapterConfiguration ac = null;
+        String active;
         try {
             HashMap<String, AdapterConfiguration> adcm = config.getAdapters();
             for (Map.Entry<String, AdapterConfiguration> adapterEntry : adcm.entrySet()) {
@@ -584,7 +595,10 @@ public abstract class Kernel {
             runListeners();
 
             LOGGER.info("Starting http listener ...");
-            if (!"jetty".equalsIgnoreCase((String) getProperties().getOrDefault("httpd", ""))) {
+            String httpdName = (String) getProperties().getOrDefault("httpd", "");
+            if ("none".equalsIgnoreCase(httpdName) || "false".equalsIgnoreCase(httpdName) || "adapter".equalsIgnoreCase(httpdName)) {
+                // do not start httpd
+            } else {
                 setHttpd(new CricketHttpd(this));
                 getHttpd().run();
             }
@@ -610,7 +624,7 @@ public abstract class Kernel {
             LOGGER.info("# NAME   : " + getName());
             LOGGER.info("# JAVA   : " + System.getProperty("java.version"));
             LOGGER.info("#");
-            if (!"jetty".equalsIgnoreCase((String) getProperties().getOrDefault("httpd", ""))) {
+            if (null!=getHttpd()) {
                 if (getHttpd().isSsl()) {
                     LOGGER.info("# HTTPS server listening on port " + getPort());
                 } else {

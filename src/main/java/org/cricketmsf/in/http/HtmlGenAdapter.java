@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.in.http;
 
+import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.Adapter;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -74,7 +75,7 @@ public class HtmlGenAdapter extends HttpPortedAdapter implements HtmlGenAdapterI
      * @return the payload field of the result modified with parameters
      */
     @Override
-    public byte[] formatResponse(String type, Result result) {
+    public byte[] formatResponse(String type, ResultIface result) {
         if (HTML.equalsIgnoreCase(type) && processingVariables) {
             // && !Boolean.parseBoolean(result.getHeaders().getFirst("X-from-cache"))
             return updateHtml((ParameterMapResult) result);

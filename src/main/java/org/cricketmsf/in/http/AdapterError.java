@@ -4,6 +4,7 @@ package org.cricketmsf.in.http;
  *
  * @author greg
  */
+@Deprecated
 public class AdapterError {
 
     public int code;

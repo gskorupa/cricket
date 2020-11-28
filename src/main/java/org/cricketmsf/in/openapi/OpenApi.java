@@ -28,7 +28,7 @@ import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.InboundAdapterIface;
 import org.cricketmsf.in.http.HttpAdapterIface;
 import org.cricketmsf.in.http.HttpPortedAdapter;
-import org.cricketmsf.in.http.ResponseCode;
+import org.cricketmsf.api.ResponseCode;
 
 /**
  *

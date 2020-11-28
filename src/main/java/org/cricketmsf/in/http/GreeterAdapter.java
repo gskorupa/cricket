@@ -17,7 +17,9 @@ package org.cricketmsf.in.http;
 
 import java.util.HashMap;
 import org.cricketmsf.RequestObject;
-import org.cricketmsf.event.HttpEvent;
+import org.cricketmsf.api.ResultIface;
+import org.cricketmsf.api.StandardResult;
+import org.cricketmsf.event.GreeterEvent;
 import org.cricketmsf.event.ProcedureCall;
 
 /**
@@ -46,8 +48,18 @@ public class GreeterAdapter
             return ProcedureCall.toRespond(PARAM_NOT_FOUND, err);
         }
         // building resulting call
-        HttpEvent event = new HttpEvent("greet", request);
+        HashMap<String,String>data=new HashMap<>();
+        data.put("name", name);
+        GreeterEvent event = new GreeterEvent(data);
+        event.setProcedureName("greet");
         return ProcedureCall.toForward(event);
+    }
+    
+    @Override
+    protected ResultIface postprocess(ResultIface fromService){
+        StandardResult result=new StandardResult(fromService.getData());
+        result.setHeader("Content-type", "text/plain");
+        return result;
     }
 
 }

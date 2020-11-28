@@ -30,8 +30,9 @@ public class AdapterConfiguration {
 
     private String name;
     private String interfaceName;
-    private String classFullName;
-    private String adapterClassName;
+    private String className;
+    private String active;
+    //private String adapterClassName;
     private HashMap<String, String> properties;
 
     public AdapterConfiguration() {
@@ -42,12 +43,12 @@ public class AdapterConfiguration {
         this.properties = properties;
         this.name = name;
         this.interfaceName = interfaceName;
-        this.classFullName = className;
+        this.className = className;
     }
 
     public AdapterConfiguration(Adapter adapter) {
         name = adapter.getName();
-        classFullName = adapter.getClass().getName();
+        className = adapter.getClass().getName();
         if (adapter instanceof InboundAdapter) {
             setProperties(((InboundAdapter) adapter).properties);
         } else if (adapter instanceof OutboundAdapter) {
@@ -63,27 +64,18 @@ public class AdapterConfiguration {
         properties.put(name, value);
     }
 
-    /*
-    public String getInterfaceName() {
-        return interfaceName;
-    }
-
-    public void setInterfaceName(String interfaceName) {
-        this.interfaceName = interfaceName;
-    }
-     */
     /**
      * @return the classFullName
      */
-    public String getClassFullName() {
-        return classFullName;
+    public String getClassName() {
+        return className;
     }
 
     /**
-     * @param classFullName the classFullName to set
+     * @param className the classFullName to set
      */
-    public void setClassFullName(String classFullName) {
-        this.classFullName = classFullName;
+    public void setClassName(String className) {
+        this.className = className;
     }
 
     /**
@@ -105,7 +97,6 @@ public class AdapterConfiguration {
      */
     public String getName() {
         if (name == null || name.isEmpty()) {
-            //return getInterfaceName();
             return "";
         } else {
             return name;
@@ -119,7 +110,7 @@ public class AdapterConfiguration {
         this.name = name;
     }
 
-    public void joinProps() {
+    public void joinPropsAndResolveEnvVar() {
         HashMap<String, String> newProperties = new HashMap<>();
         Iterator<Map.Entry<String, String>> it = properties.entrySet().iterator();
         String key;
@@ -149,7 +140,27 @@ public class AdapterConfiguration {
                 newProperties.put(tmpKey, properties.get(tmpKey));
             }
         }
-        properties = newProperties;
+
+        // resolve environment variables
+        HashMap<String, String> newProperties2 = new HashMap<>();
+        it = newProperties.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, String> pair = it.next();
+            key = pair.getKey();
+            value = pair.getValue();
+            if (null != value && value.startsWith("$")) {
+                tmpValue = System.getenv(value.substring(1));
+                if (null != tmpValue) {
+                    newProperties2.put(key, tmpValue);
+                } else {
+                    newProperties2.put(key, "");
+                }
+            } else {
+                newProperties2.put(key, value);
+            }
+        }
+
+        properties = newProperties2;
     }
 
     /**
@@ -170,17 +181,21 @@ public class AdapterConfiguration {
      * @return the adapterClassName
      */
     public String getAdapterClassName() {
-        if(null==adapterClassName){
-            return getClassFullName();
-        }
-        return adapterClassName;
+        return getClassName();
     }
 
     /**
-     * @param adapterClassName the adapterClassName to set
+     * @return the active
      */
-    public void setAdapterClassName(String adapterClassName) {
-        this.adapterClassName = adapterClassName;
+    public String getActive() {
+        return active;
+    }
+
+    /**
+     * @param active the active to set
+     */
+    public void setActive(String active) {
+        this.active = active;
     }
 
 }
