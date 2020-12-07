@@ -38,6 +38,7 @@ public class FileResult implements ResultIface {
     private int maxAge = 0;
     private Headers headers;
     private long responseTime = 0;
+    private String procedureName=null;
 
     public FileResult() {
         headers = new Headers();
@@ -115,7 +116,7 @@ public class FileResult implements ResultIface {
 
     public void setModificationDate(Date date) {
         modificationDate = date;
-        SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z",Locale.ENGLISH);
+        SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.ENGLISH);
         modificationDateFormatted = dt1.format(modificationDate);
 
     }
@@ -170,5 +171,11 @@ public class FileResult implements ResultIface {
     @Override
     public void setProcedureName(String procedureName) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ResultIface procedureName(String procedureName) {
+        this.procedureName = procedureName;
+        return this;
     }
 }

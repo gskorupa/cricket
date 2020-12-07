@@ -15,13 +15,21 @@
  */
 package org.cricketmsf.microsite.out.user;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.cricketmsf.api.Result;
 
 /**
  * 
  * @author greg
  */
 public interface UserAdapterIface {
+    public Result handleGet(HashMap params);
+    public Result handleRegisterUser(User newUser);
+    public Result handleUpdateRequest(HashMap params);
+    public Result handleDeleteUser(HashMap params);
+    
     public User get(String uid) throws UserException;
     public User getByNumber(long number) throws UserException;
     public Map getAll() throws UserException;

@@ -22,10 +22,8 @@ import java.util.Map;
 import java.util.Random;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.RequestObject;
-import org.cricketmsf.event.Event;
 import org.cricketmsf.api.ResponseCode;
-import org.cricketmsf.api.StandardResult;
+import org.cricketmsf.api.Result;
 import org.cricketmsf.microsite.event.UserEvent;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.db.KeyValueDBException;
@@ -43,6 +41,7 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
     private KeyValueDBIface database = null;
     private String helperAdapterName = null;
     private boolean initialized = false;
+    private boolean withConfirmation = false;
 
     private KeyValueDBIface getDatabase() {
         if (database == null) {
@@ -58,7 +57,9 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
         helperAdapterName = properties.get("helper-name");
+        withConfirmation = Boolean.parseBoolean(properties.get("confirm-registration"));
         logger.info("\thelper-name: " + helperAdapterName);
+        logger.info("\tconfirm-registration: " + withConfirmation);
     }
 
     @Override
@@ -97,16 +98,16 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
 
     @Override
     public User register(User user) throws UserException {
-        User newUser = user;
+        //User newUser;
         Random r = new Random(System.currentTimeMillis());
-        newUser.setUid(newUser.getUid());
-        newUser.setConfirmString(Base64.getEncoder().withoutPadding().encodeToString(("" + r.nextLong()).getBytes()));
+        //newUser.setUid(newUser.getUid());
+        user.setConfirmString(Base64.getEncoder().withoutPadding().encodeToString(("" + r.nextLong()).getBytes()));
         try {
-            if (getDatabase().containsKey("users", newUser.getUid())) {
+            if (getDatabase().containsKey("users", user.getUid())) {
                 throw new UserException(UserException.USER_ALREADY_EXISTS, "cannot register");
             }
-            getDatabase().put("users", newUser.getUid(), newUser);
-            return get(newUser.getUid());
+            getDatabase().put("users", user.getUid(), user);
+            return get(user.getUid());
         } catch (KeyValueDBException e) {
             throw new UserException(UserException.HELPER_EXCEPTION, e.getMessage());
         }
@@ -162,7 +163,7 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
         }
     }
 
-    private boolean isAdmin(List<String> requesterRoles) {
+    /*private boolean isAdmin(List<String> requesterRoles) {
         boolean admin = false;
         for (int i = 0; i < requesterRoles.size(); i++) {
             if ("admin".equals(requesterRoles.get(i))) {
@@ -172,16 +173,36 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
         }
         return admin;
     }
+     */
+    private boolean isAdmin(String[] requesterRoles) {
+        boolean admin = false;
+        for (int i = 0; i < requesterRoles.length; i++) {
+            if ("admin".equals(requesterRoles[i])) {
+                admin = true;
+                break;
+            }
+        }
+        return admin;
+    }
 
-    // business logic
-    public Object handleGetUser(String uid, String requesterID, Long userNumber, List<String> requesterRoles) {
+    // API methods
+    public Result handleGet(HashMap params) {
+        String userId = (String) params.get("uid");
+        String requesterId = (String) params.get("requester");
+        Long userNumber = (Long) params.get("userNumber");
+        String[] roles = ((String) params.getOrDefault("roles", "")).split(",");
+        if (null != userId && !userId.isEmpty()) {
+            return handleGetUser(userId, requesterId, userNumber, roles);
+        } else {
+            return handleGetAll(requesterId, userNumber, roles);
+        }
+    }
+
+    public Result handleGetUser(String uid, String requesterID, Long userNumber, String[] requesterRoles) {
+        Result result = new Result();
         boolean admin = isAdmin(requesterRoles);
-        StandardResult result = new StandardResult();
         try {
-            if (uid.isEmpty() && admin) {
-                Map m = getAll();
-                result.setData(m);
-            } else if (uid.equals(requesterID) || admin) {
+            if (uid.equals(requesterID) || admin) {
                 User u = (User) get(uid);
                 result.setData(u);
             } else if (uid.isEmpty() && null != userNumber) {
@@ -189,74 +210,93 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
                 if (requesterID.equals(u.getUid())) {
                     result.setData(u);
                 }
-            } else {
-                result.setCode(ResponseCode.FORBIDDEN);
             }
         } catch (UserException e) {
-            result.setCode(ResponseCode.NOT_FOUND);
+            logger.warn(e.getMessage());
         }
         return result;
     }
 
-    public Object handleRegisterUser(User newUser, boolean withConfirmation) {
-        StandardResult result = new StandardResult();
+    public Result handleGetAll(String requesterID, Long userNumber, String[] requesterRoles) {
+        Result result = new Result();
         try {
+            if (isAdmin(requesterRoles)) {
+                result.setData(getAll());
+            } else {
+                return null;
+            }
+        } catch (UserException e) {
+            logger.warn(e.getMessage());
+        }
+        return result;
+    }
+
+    public Result handleRegisterUser(User newUser) {
+        Result result = new Result();
+        try {
+            User user = register(newUser);
             if (withConfirmation) {
-                result.setCode(ResponseCode.ACCEPTED);
-                //fire event to send "need confirmation" email
-                UserEvent ev = new UserEvent(newUser.getUid());
-                ev.setProcedureName("registration");
+                UserEvent ev = new UserEvent(user.getUid());
+                ev.setProcedureName("confirmRegistration");
                 Kernel.getInstance().dispatchEvent(ev);
             } else {
-                confirmRegistration(newUser.getUid());
-                result.setCode(ResponseCode.CREATED);
-                //fire event to send "welcome" email
+                confirmRegistration(user.getUid());
                 UserEvent ev = new UserEvent(newUser.getNumber());
                 ev.setProcedureName("registrationConfirmed");
                 Kernel.getInstance().dispatchEvent(ev);
             }
-            result.setData(newUser.getUid());
+            result.setData(get(user.getUid()));
         } catch (UserException e) {
+            logger.warn(e.getMessage()); //conflict
             if (e.getCode() == UserException.USER_ALREADY_EXISTS) {
                 result.setCode(ResponseCode.CONFLICT);
             } else {
                 result.setCode(ResponseCode.BAD_REQUEST);
             }
-            result.setMessage(e.getMessage());
+            result.setData(e.getMessage());
         } catch (NullPointerException e) {
             e.printStackTrace();
             result.setCode(ResponseCode.BAD_REQUEST);
-            result.setMessage(e.getMessage());
+            result.setData(e.getMessage());
         }
         return result;
     }
 
-    public Object handleDeleteUser(String uid, List<String> requesterRoles, boolean withConfirmation) {
-        //TODO: check requester rights
-        //only admin can do this and user status must be IS_UNREGISTERING
-        boolean admin = isAdmin(requesterRoles);
-        StandardResult result = new StandardResult();
+    //TODO: request removal (fired by the user, remove after confirmation by th user)
+    
+    
+    public Result handleDeleteUser(HashMap params) {
+        String uid = (String) params.get("uid");
+        String[] requesterRoles = ((String) params.get("roles")).split(",");
+        Result result = new Result();
         if (uid == null || !isAdmin(requesterRoles)) {
-            result.setCode(ResponseCode.BAD_REQUEST);
+            result.setCode(ResponseCode.FORBIDDEN);
             return result;
         }
         try {
             User tmpUser = get(uid);
-            remove(uid);
-            UserEvent event = new UserEvent(tmpUser.getUid(), tmpUser.getNumber());
-            event.setProcedureName("afterRemove");
-            Kernel.getInstance().dispatchEvent(event);
-            result.setCode(ResponseCode.OK);
-            result.setData(uid);
+            if (null != tmpUser) {
+                remove(uid);
+                UserEvent event = new UserEvent(tmpUser.getUid(), tmpUser.getNumber());
+                event.setProcedureName("afterUserRemoval");
+                Kernel.getInstance().dispatchEvent(event);
+                result.setCode(ResponseCode.OK);
+                result.setData(uid);
+            }else{
+                result.setCode(ResponseCode.NOT_FOUND);
+            }
         } catch (UserException e) {
             result.setCode(ResponseCode.BAD_REQUEST);
         }
         return result;
     }
 
-    public Object handleUpdateRequest(User updatedUser, List<String> requesterRoles) {
-        StandardResult result = new StandardResult();
-        boolean admin = isAdmin(requesterRoles);
+    public Result handleUpdateRequest(HashMap params) {
+        User updatedUser = (User) params.get("user");
+        String requesterId = (String) params.get("requester");
+        String[] roles = ((String) params.getOrDefault("roles", "")).split(",");
+        Result result = new Result();
+        boolean admin = isAdmin(roles);
         try {
             User user = get(updatedUser.getUid());
             if (user == null) {

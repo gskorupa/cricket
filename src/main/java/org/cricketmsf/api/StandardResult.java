@@ -186,4 +186,10 @@ public class StandardResult implements ResultIface {
     public void setProcedureName(String procedureName) {
         this.procedureName=procedureName;
     }
+
+    @Override
+    public ResultIface procedureName(String procedureName) {
+        this.procedureName=procedureName;
+        return this;
+    }
 }

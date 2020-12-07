@@ -47,7 +47,7 @@ public class UserEvent extends Event {
         this.data=user;
     }
     
-    public UserEvent(String uid, String requesterID, Long userNumber, List<String> requesterRoles){
+    public UserEvent(String uid, String requesterID, Long userNumber, String requesterRoles){
         super();
         HashMap map=new HashMap();
         map.put("uid", uid);
@@ -57,14 +57,20 @@ public class UserEvent extends Event {
         data=map;
     }
     
-    public UserEvent(String uid, List<String> requesterRoles){
+    public UserEvent(User user, String requesterRoles){
+        super();
+        HashMap map=new HashMap();
+        map.put("user", user);
+        map.put("roles", requesterRoles);
+        data=map;
+    }
+    public UserEvent(String uid, String requesterRoles){
         super();
         HashMap map=new HashMap();
         map.put("uid", uid);
         map.put("roles", requesterRoles);
         data=map;
     }
-    
     public UserEvent(String uid, Long userNumber){
         super();
         HashMap map=new HashMap();

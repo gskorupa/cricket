@@ -15,20 +15,18 @@
  */
 package org.cricketmsf.microsite.in.user;
 
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.http.HttpPortedAdapter;
 import org.cricketmsf.api.ResponseCode;
+import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.api.StandardResult;
-import org.cricketmsf.microsite.event.AuthEvent;
 import org.cricketmsf.microsite.event.UserEvent;
+import static org.cricketmsf.microsite.in.auth.AuthApi.LOGIN_PROCEDURE;
 import org.cricketmsf.microsite.out.user.HashMaker;
 import org.cricketmsf.microsite.out.user.User;
-import org.cricketmsf.microsite.out.user.UserException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +37,7 @@ import org.slf4j.LoggerFactory;
 public class UserApi extends HttpPortedAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(UserApi.class);
+    private boolean withConfirmation = false;
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -53,6 +52,8 @@ public class UserApi extends HttpPortedAdapter {
         super.loadProperties(properties, adapterName);
         super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
+        withConfirmation = Boolean.parseBoolean(properties.get("confirm-registration"));
+        logger.info("\tconfirm-registration: " + withConfirmation);
         logger.info("\tcontext=" + getContext());
     }
 
@@ -77,7 +78,7 @@ public class UserApi extends HttpPortedAdapter {
         String uid = request.pathExt;
         String requesterID = request.headers.getFirst("X-user-id");
         String userNumber = (String) request.parameters.getOrDefault("n", "");
-        List<String> requesterRoles = request.headers.get("X-user-role");
+        String requesterRoles = request.headers.getFirst("X-user-role");
         long number = -1;
         try {
             number = Long.parseLong(userNumber);
@@ -88,23 +89,36 @@ public class UserApi extends HttpPortedAdapter {
 
     private ProcedureCall preprocessDelete(RequestObject request) {
         String uid = request.pathExt;
-        List<String> requesterRoles = request.headers.get("X-user-role");
+        String requesterRoles = request.headers.getFirst("X-user-role");
         return ProcedureCall.toForward(new UserEvent(uid, requesterRoles), "delete");
     }
 
     private ProcedureCall preprocessPost(RequestObject request) {
-        String uid = request.pathExt;
-        if (uid != null && !uid.isEmpty()) {
-            return ProcedureCall.toRespond(ResponseCode.BAD_REQUEST, "bad request");
-        }
         try {
+            String uid = (String) request.parameters.get("uid");
+            String email = (String) request.parameters.get("email");
+            String password = (String) request.parameters.get("password");
+            // validate
+            boolean valid = true;
+            if (uid == null || uid.isEmpty()) {
+                valid = false;
+            }
+            if (withConfirmation && (null == email || email.isEmpty())) {
+                valid = false;
+            }
+            if (password == null || password.isEmpty()) {
+                valid = false;
+            }
+            if (!valid) {
+                return ProcedureCall.toRespond(ResponseCode.BAD_REQUEST, "lack of required parameters");
+            }
             User newUser = new User();
-            newUser.setUid((String) request.parameters.get("uid"));
-            newUser.setEmail((String) request.parameters.get("email"));
+            newUser.setUid(uid);
+            newUser.setEmail(email);
             newUser.setName((String) request.parameters.get("name"));
             newUser.setSurname((String) request.parameters.get("surname"));
             newUser.setRole("");
-            newUser.setPassword(HashMaker.md5Java((String) request.parameters.get("password")));
+            newUser.setPassword(HashMaker.md5Java(password));
             String type = (String) request.parameters.get("type");
             if (null != type) {
                 switch (type.toUpperCase()) {
@@ -121,23 +135,9 @@ public class UserApi extends HttpPortedAdapter {
             } else {
                 newUser.setType(User.USER);
             }
-            // validate
-            boolean valid = true;
-            if (!(newUser.getUid() != null && !newUser.getUid().isEmpty())) {
-                valid = false;
-            }
-            if (!(newUser.getEmail() != null && !newUser.getEmail().isEmpty())) {
-                valid = false;
-            }
-            if (!(newUser.getPassword() != null && !newUser.getPassword().isEmpty())) {
-                valid = false;
-            }
-            if (!valid) {
-                return ProcedureCall.toRespond(ResponseCode.BAD_REQUEST, "lack of required parameters");
-            }
             return ProcedureCall.toForward(new UserEvent(newUser), "register");
         } catch (Exception ex) {
-
+            ex.printStackTrace();
         }
         return ProcedureCall.toRespond(ResponseCode.BAD_REQUEST, "bad request");
     }
@@ -186,12 +186,36 @@ public class UserApi extends HttpPortedAdapter {
             if (unregisterRequested != null) {
                 user.setUnregisterRequested("true".equalsIgnoreCase(unregisterRequested));
             }
-            List<String> requesterRoles = request.headers.get("X-user-role");
-            return ProcedureCall.toForward(new UserEvent(uid, requesterRoles), "update");
+            String requesterRoles = request.headers.getFirst("X-user-role");
+            return ProcedureCall.toForward(new UserEvent(user, requesterRoles), "update");
         } catch (NullPointerException e) {
             e.printStackTrace();
             return ProcedureCall.toRespond(ResponseCode.BAD_REQUEST, "");
         }
     }
 
+    @Override
+    protected ResultIface postprocess(ResultIface fromService) {
+
+        StandardResult result = new StandardResult();
+        result.setCode(fromService.getCode());
+        result.setData(fromService.getData());
+        switch (fromService.getProcedureName()) {
+            case "get":
+                if (null == fromService.getData()) {
+                    result.setCode(ResponseCode.UNAUTHORIZED);
+                    result.setData("unauthorized (3)");
+                }
+                break;
+            case "register":
+                break;
+            case "update":
+                break;
+            case "delete":
+                break;
+            default:
+                result.setCode(ResponseCode.BAD_REQUEST);
+        }
+        return result;
+    }
 }

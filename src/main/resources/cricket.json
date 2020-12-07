@@ -181,7 +181,6 @@
                 "filter": "org.cricketmsf.microsite.auth.SecurityFilter",
                 "cors": "Access-Control-Allow-Origin:*|Access-Control-Allow-Credentials:true|Access-Control-Allow-Methods: POST, PATCH, GET, OPTIONS, DELETE, PUT|Access-Control-Allow-Headers:Authentication|Access-Control-Max-Age: 1728000",
                 "time-zone": "GMT",
-                "user-confirm": "true",
                 "initial-admin-email": "user@domain",
                 "initial-admin-password": "cricket",
                 "admin-notification-email": "",
@@ -198,6 +197,31 @@
             },
             "ports": [
                 {
+                    "name": "OpenApi",
+                    "interfaceName": "OpenApiIface",
+                    "className": "org.cricketmsf.in.openapi.OpenApi",
+                    "description": "",
+                    "properties": {
+                        "context": "/api"
+                    }
+                },
+                {
+                    "name": "AuthApiHttp",
+                    "interfaceName": "HttpAdapterIface",
+                    "className": "org.cricketmsf.microsite.in.auth.AuthApi",
+                    "properties": {
+                        "context": "/api/auth"
+                    }
+                },
+                {
+                    "name": "UserApiHttp",
+                    "interfaceName": "HttpAdapterIface",
+                    "className": "org.cricketmsf.microsite.in.user.UserApi",
+                    "properties": {
+                        "context": "/api/user"
+                    }
+                },
+                {
                     "name": "Database",
                     "interfaceName": "KeyValueDBIface",
                     "className": "org.cricketmsf.out.db.KeyValueDB",
@@ -213,20 +237,14 @@
                     "properties": {
                     }
                 },
-                {
-                    "name": "AuthService",
-                    "interfaceName": "HttpAdapterIface",
-                    "className": "org.cricketmsf.microsite.in.auth.AuthApi",
-                    "properties": {
-                        "context": "/api/auth"
-                    }
-                },
+                
                 {
                     "name": "UserAdapter",
                     "interfaceName": "UserAdapterIface",
                     "className": "org.cricketmsf.microsite.out.user.UserEmbededAdapter",
                     "properties": {
-                        "helper-name": "UserDB"
+                        "helper-name": "UserDB",
+                        "confirm-registration": "false"
                     }
                 },
                 {
@@ -276,15 +294,6 @@
                     "description": "",
                     "properties": {
                         "subfolders":"./logs:./data:./www"
-                    }
-                },
-                {
-                    "name": "OpenApi",
-                    "interfaceName": "OpenApiIface",
-                    "className": "org.cricketmsf.in.openapi.OpenApi",
-                    "description": "",
-                    "properties": {
-                        "context": "/api"
                     }
                 },
                 {

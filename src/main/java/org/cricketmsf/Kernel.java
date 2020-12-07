@@ -102,7 +102,6 @@ public abstract class Kernel {
     public String configurationBaseName = null;
     protected ConfigSet configSet = null;
 
-    //private Filter securityFilter = new SecurityFilter();
     private Object securityFilter = null;
     private String securityFilterName = "";
     private ArrayList corsHeaders;
@@ -110,7 +109,6 @@ public abstract class Kernel {
     private long startedAt = 0;
     private boolean started = false;
     private boolean initialized = false;
-    private boolean fineLevel = true;
     private int status = STARTING;
 
     private CricketThreadFactory threadFactory;
@@ -160,10 +158,8 @@ public abstract class Kernel {
         return getEventProcessingResult(event, event.getProcedureName());
     }
 
-    //public Object getEventProcessingResult(Event event, String procedureName) {
     public ResultIface getEventProcessingResult(Event event, String procedureName) {
         String methodName = "unknown";
-        //String procedure = (null == procedureName ? "*" : procedureName);
         try {
             Method m;
             methodName = getHookMethodNameForPort(event.getClass().getName(), procedureName);
@@ -988,21 +984,7 @@ public abstract class Kernel {
             this.sslAlgorithm = (String) getProperties().getOrDefault("ssl", "false");
         }
     }
-
-    /**
-     * @return the fineLevel
-     */
-    public boolean isFineLevel() {
-        return fineLevel;
-    }
-
-    /**
-     * @param fineLevel the fineLevel to set
-     */
-    public void setFineLevel(boolean fineLevel) {
-        this.fineLevel = fineLevel;
-    }
-
+    
     /**
      * @return the websocketPort
      */

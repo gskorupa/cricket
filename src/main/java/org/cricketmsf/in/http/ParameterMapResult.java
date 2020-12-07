@@ -49,6 +49,7 @@ public class ParameterMapResult implements ResultIface {
     private int maxAge;
     private Headers headers;
     private long responseTime = 0;
+    private String procedureName=null;
 
     public ParameterMapResult() {
         setCode(ResponseCode.OK);
@@ -198,5 +199,11 @@ public class ParameterMapResult implements ResultIface {
     @Override
     public void setProcedureName(String procedureName) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ResultIface procedureName(String procedureName) {
+        this.procedureName=procedureName;
+        return this;
     }
 }

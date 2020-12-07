@@ -118,7 +118,7 @@ public abstract class HttpPortedAdapter
         long rootEventId = Kernel.getEventId();
         try {
             Stopwatch timer = null;
-            if (Kernel.getInstance().isFineLevel()) {
+            if (logger.isDebugEnabled()) {
                 timer = new Stopwatch();
             }
             String acceptedResponseType = JSON;
@@ -207,7 +207,7 @@ public abstract class HttpPortedAdapter
                     break;
             }
 
-            if (Kernel.getInstance().isFineLevel()) {
+            if (logger.isDebugEnabled()) {
                 logger.debug("event " + rootEventId + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms");
             }
 

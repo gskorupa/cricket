@@ -15,31 +15,32 @@
  */
 package org.cricketmsf.services;
 
+import java.util.HashMap;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 //import org.cricketmsf.microsite.cms.CmsIface;
 import org.cricketmsf.out.auth.AuthAdapterIface;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
-//import org.cricketmsf.microsite.user.User;
 import org.cricketmsf.out.db.*;
 import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.api.Result;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.in.queue.SubscriberIface;
 /*
 import org.cricketmsf.microsite.in.http.ContentRequestProcessor;
-import org.cricketmsf.microsite.user.UserEvent;
 import org.cricketmsf.microsite.out.notification.*;
-import org.cricketmsf.microsite.*;
 import org.cricketmsf.microsite.cms.TranslatorIface;
 import org.cricketmsf.microsite.event.GetContent;
 import org.cricketmsf.microsite.event.StatusRequested;
  */
 import org.cricketmsf.in.openapi.OpenApiIface;
 import org.cricketmsf.microsite.event.AuthEvent;
+import org.cricketmsf.microsite.event.UserEvent;
 import org.cricketmsf.microsite.out.auth.Token;
 import org.cricketmsf.microsite.out.siteadmin.SiteAdministrationIface;
+import org.cricketmsf.microsite.out.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,7 @@ public class Microsite extends Kernel {
     @Override
     public void getAdapters() {
         // standard Cricket adapters
-        siteAdmin=(SiteAdministrationIface)getRegistered("SiteAdministrationModule");
+        siteAdmin = (SiteAdministrationIface) getRegistered("SiteAdministrationModule");
         //gdprLog = (LoggerAdapterIface) getRegistered("GdprLogger");
         database = (KeyValueDBIface) getRegistered("Database");
         //scheduler = (SchedulerIface) getRegistered("Scheduler");
@@ -131,7 +132,7 @@ public class Microsite extends Kernel {
         setInitialized(true);
         /*
         dispatchEvent(
-                new Event(this.getName(), "SYSTEM", "message", "+10s", getUuid() + " service started")
+                new Event(this.getName(), "SYSTEM", "mess        try{age", "+10s", getUuid() + " service started")
         );
          */
     }
@@ -171,8 +172,8 @@ public class Microsite extends Kernel {
          */
         super.shutdown();
     }
-    
-    public AuthAdapterIface getAuthAdapter(){
+
+    public AuthAdapterIface getAuthAdapter() {
         return authAdapter;
     }
 
@@ -235,50 +236,41 @@ public class Microsite extends Kernel {
      * @param event
      * @return
      */
-    /*
-    @HttpAdapterHook(adapterName = "UserService", requestMethod = "GET")
-    public Object userGet(Event event) {
-        return UserModule.getInstance().handleGetRequest(event, userAdapter);
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "get")
+    public Result userGet(UserEvent event) {
+        return userAdapter.handleGet((HashMap) event.getData()).procedureName("get");
     }
-    
-    
-    @HttpAdapterHook(adapterName = "UserService", requestMethod = "POST")
-    public Object userAdd(Event event) {
-        boolean withConfirmation = "true".equalsIgnoreCase((String) getProperties().getOrDefault("user-confirm", "false"));
-        return UserModule.getInstance().handleRegisterRequest(event, userAdapter, withConfirmation);
+
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "register")
+    public Object userAdd(UserEvent event) {
+        return userAdapter.handleRegisterUser((User) event.getData()).procedureName("register");
     }
-     */
-    /**
-     * Modify user data or sends password reset link
-     *
-     * @param event
-     * @return
-     */
-    /*
-    @HttpAdapterHook(adapterName = "UserService", requestMethod = "PUT")
-    public Object userUpdate(Event event) {
-        String resetPassEmail = event.getRequestParameter("resetpass");
-        if (resetPassEmail == null || resetPassEmail.isEmpty()) {
-            return UserModule.getInstance().handleUpdateRequest(event, userAdapter);
-        } else {
-            String userName = event.getRequestParameter("name");
-            return CustomerModule.getInstance().handleResetRequest(event, userName, resetPassEmail, userAdapter, authAdapter, emailSender);
-        }
+
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "update")
+    public Object userUpdate(UserEvent event) {
+        return userAdapter.handleUpdateRequest((HashMap) event.getData());
     }
-     */
-    /**
-     * Set user as waiting for removal
-     *
-     * @param event
-     * @return
-     */
-    /*
-    @HttpAdapterHook(adapterName = "UserService", requestMethod = "DELETE")
-    public Object userDelete(Event event) {
-        boolean withConfirmation = "true".equalsIgnoreCase((String) getProperties().getOrDefault("user-confirm", "false"));
-        return UserModule.getInstance().handleDeleteRequest(event, userAdapter, withConfirmation);
+
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "delete")
+    public Object userRemove(UserEvent event) {
+        return userAdapter.handleDeleteUser((HashMap) event.getData()).procedureName("delete");
     }
-     */
+
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "confirmRegistration")
+    public Object userConfirmationRequired(UserEvent event) {
+        return null;
+    }
+
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "registrationConfirmed")
+    public Object registrationConfirmed(UserEvent event) {
+        return null;
+    }
+
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "afterUserRemoval")
+    public Object userRemoved(UserEvent event) {
+        return null;
+    }
+
     @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedureName = "login")
     public Result authLogin(AuthEvent event) {
         Token token = authAdapter.login(event.getData().get("login"), event.getData().get("password"));

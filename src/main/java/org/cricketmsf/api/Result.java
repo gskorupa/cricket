@@ -16,10 +16,8 @@
 package org.cricketmsf.api;
 
 import com.sun.net.httpserver.Headers;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -158,6 +156,12 @@ public class Result implements ResultIface {
     @Override
     public long getResponseTime() {
         return -1;
+    }
+    
+    @Override
+    public Result procedureName(String procedureName){
+        this.procedureName=procedureName;
+        return this;
     }
 
 }
