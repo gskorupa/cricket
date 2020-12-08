@@ -107,6 +107,7 @@ public class InboundAdapter implements Runnable, InboundAdapterIface {
         return name;
     }
 
+    @Deprecated
     public void registerEventCategory(String category, String eventClassName) {
         try {
             String[] categories = {category};

@@ -363,10 +363,10 @@ public abstract class HttpPortedAdapter
                 result.setData(pCall.response);
                 result.setHeader("Content-type", pCall.contentType);
             } else { // pCall must be processed by the Kernel
-                logger.debug("sending request to hook method " + pCall.procedureName + "@" + pCall.event.getClass().getSimpleName());
+                logger.debug("sending request to hook method " + pCall.procedure + "@" + pCall.event.getClass().getSimpleName());
                 result = (ResultIface) Kernel.getInstance().getEventProcessingResult(
                         pCall.event,
-                        pCall.procedureName
+                        pCall.procedure
                 );
                 if (null != result) {
                     if (pCall.responseCode != 0) {

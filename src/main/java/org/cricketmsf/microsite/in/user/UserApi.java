@@ -16,15 +16,14 @@
 package org.cricketmsf.microsite.in.user;
 
 import java.util.HashMap;
-import java.util.List;
 import org.cricketmsf.RequestObject;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.http.HttpPortedAdapter;
 import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.api.StandardResult;
 import org.cricketmsf.microsite.event.UserEvent;
-import static org.cricketmsf.microsite.in.auth.AuthApi.LOGIN_PROCEDURE;
 import org.cricketmsf.microsite.out.user.HashMaker;
 import org.cricketmsf.microsite.out.user.User;
 import org.slf4j.Logger;
@@ -84,13 +83,14 @@ public class UserApi extends HttpPortedAdapter {
             number = Long.parseLong(userNumber);
         } catch (NumberFormatException e) {
         }
-        return ProcedureCall.toForward(new UserEvent(uid, requesterID, number, requesterRoles), "get");
+        return ProcedureCall.toForward(new UserEvent(uid, requesterID, number, requesterRoles), Procedures.USER_GET);
     }
 
     private ProcedureCall preprocessDelete(RequestObject request) {
         String uid = request.pathExt;
+        String requesterID = request.headers.getFirst("X-user-id");
         String requesterRoles = request.headers.getFirst("X-user-role");
-        return ProcedureCall.toForward(new UserEvent(uid, requesterRoles), "delete");
+        return ProcedureCall.toForward(new UserEvent(uid, requesterID, requesterRoles), Procedures.USER_REMOVE);
     }
 
     private ProcedureCall preprocessPost(RequestObject request) {
@@ -135,7 +135,7 @@ public class UserApi extends HttpPortedAdapter {
             } else {
                 newUser.setType(User.USER);
             }
-            return ProcedureCall.toForward(new UserEvent(newUser), "register");
+            return ProcedureCall.toForward(new UserEvent(newUser), Procedures.USER_REGISTER);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -187,7 +187,8 @@ public class UserApi extends HttpPortedAdapter {
                 user.setUnregisterRequested("true".equalsIgnoreCase(unregisterRequested));
             }
             String requesterRoles = request.headers.getFirst("X-user-role");
-            return ProcedureCall.toForward(new UserEvent(user, requesterRoles), "update");
+            String requesterID = request.headers.getFirst("X-user-id");
+            return ProcedureCall.toForward(new UserEvent(user, requesterID, requesterRoles), Procedures.USER_UPDATE);
         } catch (NullPointerException e) {
             e.printStackTrace();
             return ProcedureCall.toRespond(ResponseCode.BAD_REQUEST, "");
@@ -200,18 +201,18 @@ public class UserApi extends HttpPortedAdapter {
         StandardResult result = new StandardResult();
         result.setCode(fromService.getCode());
         result.setData(fromService.getData());
-        switch (fromService.getProcedureName()) {
-            case "get":
+        switch (fromService.getProcedure()) {
+            case Procedures.USER_GET:
                 if (null == fromService.getData()) {
                     result.setCode(ResponseCode.UNAUTHORIZED);
                     result.setData("unauthorized (3)");
                 }
                 break;
-            case "register":
+            case Procedures.USER_REGISTER:
                 break;
-            case "update":
+            case Procedures.USER_UPDATE:
                 break;
-            case "delete":
+            case Procedures.USER_REMOVE:
                 break;
             default:
                 result.setCode(ResponseCode.BAD_REQUEST);

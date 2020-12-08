@@ -17,6 +17,7 @@ package org.cricketmsf.in.http;
 
 import java.util.HashMap;
 import org.cricketmsf.RequestObject;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.api.StandardResult;
 import org.cricketmsf.event.GreeterEvent;
@@ -51,7 +52,7 @@ public class GreeterAdapter
         HashMap<String,String>data=new HashMap<>();
         data.put("name", name);
         GreeterEvent event = new GreeterEvent(data);
-        event.setProcedureName("greet");
+        event.setProcedure(Procedures.GREET);
         return ProcedureCall.toForward(event);
     }
     

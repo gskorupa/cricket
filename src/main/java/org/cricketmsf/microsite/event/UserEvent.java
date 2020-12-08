@@ -31,58 +31,64 @@ public class UserEvent extends Event {
     public UserEvent() {
         super();
     }
-    
+
     public UserEvent(String token) {
         super();
-        data=token;
+        data = token;
     }
-    
+
     public UserEvent(Long number) {
         super();
-        data=number;
+        data = number;
     }
 
     public UserEvent(User user) {
         super();
-        this.data=user;
+        this.data = user;
     }
-    
-    public UserEvent(String uid, String requesterID, Long userNumber, String requesterRoles){
+
+    public UserEvent(String uid, String requesterID, Long userNumber, String requesterRoles) {
         super();
-        HashMap map=new HashMap();
+        try {
+            HashMap map = new HashMap();
+            map.put("uid", uid);
+            map.put("requester", requesterID);
+            map.put("userNumber", userNumber);
+            map.put("roles", requesterRoles);
+            data = map;
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public UserEvent(User user, String requesterID, String requesterRoles) {
+        super();
+        HashMap map = new HashMap();
+        map.put("user", user);
+        map.put("requester", requesterID);
+        map.put("roles", requesterRoles);
+        data = map;
+    }
+
+    public UserEvent(String uid, String requesterID, String requesterRoles) {
+        super();
+        HashMap map = new HashMap();
         map.put("uid", uid);
         map.put("requester", requesterID);
-        map.put("userNumber", userNumber);
         map.put("roles", requesterRoles);
-        data=map;
+        data = map;
     }
-    
-    public UserEvent(User user, String requesterRoles){
+
+    public UserEvent(String uid, Long userNumber) {
         super();
-        HashMap map=new HashMap();
-        map.put("user", user);
-        map.put("roles", requesterRoles);
-        data=map;
-    }
-    public UserEvent(String uid, String requesterRoles){
-        super();
-        HashMap map=new HashMap();
-        map.put("uid", uid);
-        map.put("roles", requesterRoles);
-        data=map;
-    }
-    public UserEvent(String uid, Long userNumber){
-        super();
-        HashMap map=new HashMap();
+        HashMap map = new HashMap();
         map.put("uid", uid);
         map.put("number", userNumber);
-        data=map;
+        data = map;
     }
-    
-    
 
     @Override
-    public Object getData(){
+    public Object getData() {
         return data;
     }
 

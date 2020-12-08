@@ -54,7 +54,7 @@ public class EventSubscriberCallback implements MqttCallback {
         String className = detailedTopic.substring(0, detailedTopic.indexOf("/"));
         String procedurename = detailedTopic.substring(detailedTopic.indexOf("/") + 1);
         Event event = (Event)Class.forName(className).newInstance();
-        event.setProcedureName(procedurename);
+        event.setProcedure(Integer.parseInt(procedurename));
         //event.setType(type + typeSuffix);
         event.setData(message.toString());
         Kernel.getInstance().dispatchEvent(event);

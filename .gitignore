@@ -110,3 +110,10 @@ build
 /backup2x.1/
 /scheduler-reschedule.xml
 /run.sh
+/auth.trace.db
+/cms.trace.db
+/local.db
+/cms.mv.db
+/auth.mv.db
+/user.mv.db
+/user.trace.db

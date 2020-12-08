@@ -19,6 +19,7 @@ import org.cricketmsf.microsite.in.user.UserApi;
 import java.util.Base64;
 import java.util.HashMap;
 import org.cricketmsf.RequestObject;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.in.http.HttpPortedAdapter;
 import org.cricketmsf.api.ResponseCode;
@@ -36,11 +37,6 @@ import org.slf4j.LoggerFactory;
 public class AuthApi extends HttpPortedAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(UserApi.class);
-
-    public static final String LOGIN_PROCEDURE = "login";
-    public static final String LOGOUT_PROCEDURE = "logout";
-    public static final String CHECK_PROCEDURE = "check";
-    public static final String REFRESH_PROCEDURE = "refresh";
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -77,12 +73,12 @@ public class AuthApi extends HttpPortedAdapter {
 
     private ProcedureCall preprocessCheckToken(RequestObject request) {
         String token = request.pathExt;
-        return ProcedureCall.toForward(new AuthEvent(null, null, token), CHECK_PROCEDURE);
+        return ProcedureCall.toForward(new AuthEvent(null, null, token), Procedures.AUTH_CHECK_TOKEN);
     }
 
     private ProcedureCall preprocessLogout(RequestObject request) {
         String token = request.pathExt;
-        return ProcedureCall.toForward(new AuthEvent(null, null, token), LOGOUT_PROCEDURE);
+        return ProcedureCall.toForward(new AuthEvent(null, null, token), Procedures.AUTH_LOGOUT);
     }
 
     private ProcedureCall preprocessLogin(RequestObject request) {
@@ -97,7 +93,7 @@ public class AuthApi extends HttpPortedAdapter {
                     }
                     s = authPair.split(":");
                     if (s.length == 2) {
-                        return ProcedureCall.toForward(new AuthEvent(s[0], s[1], null), LOGIN_PROCEDURE);
+                        return ProcedureCall.toForward(new AuthEvent(s[0], s[1], null), Procedures.AUTH_LOGIN);
                     }
                 }
             } catch (Exception e) {
@@ -111,13 +107,13 @@ public class AuthApi extends HttpPortedAdapter {
 
     private ProcedureCall preprocessRefreshToken(RequestObject request) {
         String token = request.headers.getFirst("Authentication");
-        return ProcedureCall.toForward(new AuthEvent(null, null, token), REFRESH_PROCEDURE);
+        return ProcedureCall.toForward(new AuthEvent(null, null, token), Procedures.AUTH_REFRESH_TOKEN);
     }
 
     protected ResultIface postprocess(ResultIface fromService) {
         StandardResult result = new StandardResult();
-        switch (fromService.getProcedureName()) {
-            case LOGIN_PROCEDURE:
+        switch (fromService.getProcedure()) {
+            case Procedures.AUTH_LOGIN:
                 if (null != fromService.getData()) {
                     result.setData(fromService.getData());
                 } else {
@@ -125,9 +121,9 @@ public class AuthApi extends HttpPortedAdapter {
                     result.setData("unauthorized (3)");
                 }
                 break;
-            case LOGOUT_PROCEDURE:
-            case CHECK_PROCEDURE:
-            case REFRESH_PROCEDURE:
+            case Procedures.AUTH_LOGOUT:
+            case Procedures.AUTH_CHECK_TOKEN:
+            case Procedures.AUTH_REFRESH_TOKEN:
                 if (null != fromService.getData() && (Boolean)fromService.getData()) {
                     result.setData(fromService.getData());
                 } else {

@@ -23,10 +23,10 @@ package org.cricketmsf.event;
 @org.cricketmsf.livingdoc.design.Event()
 public class HttpEvent extends Event {
 
-    public HttpEvent(String procedureName, Object request) {
+    public HttpEvent(int procedure, Object request) {
         super();
         setData(request);
-        setProcedureName(procedureName);
+        setProcedure(procedure);
     }
     
 }

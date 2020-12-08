@@ -34,7 +34,6 @@ public class Cli extends InboundAdapter implements Adapter, CliIface {
     Console c = System.console();
     private boolean started = false;
     private String command;
-    private String procedureName;
 
     /**
      * This method is executed while adapter is instantiated during the service
@@ -48,8 +47,7 @@ public class Cli extends InboundAdapter implements Adapter, CliIface {
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         //super.getServiceHooks(adapterName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "200"));
-        procedureName = properties.getOrDefault("procedure", "CLI_COMMAND");
-        logger.info("\tevent-category =" + procedureName);
+        logger.info("\tsampling-interval:" + samplingInterval);
         //super.registerEventCategory(categoryName, Event.class.getName());
     }
 

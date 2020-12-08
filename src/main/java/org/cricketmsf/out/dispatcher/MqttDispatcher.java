@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.in.mqtt.EventSubscriberCallback;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.mqtt.MqttPublisher;
@@ -43,7 +44,7 @@ public class MqttDispatcher extends OutboundAdapter implements Adapter, Dispatch
 
     @Override
     public void dispatch(Event event) throws DispatcherException {
-        String topic = event.getClass().getName() + "/" + event.getProcedureName();
+        String topic = event.getClass().getName() + "/" + Procedures.getName(event.getProcedure());
         if (eventMap.containsKey(event.getClass().getName() + "/*") || eventMap.containsKey(topic)) {
             try {
                 MqttPublisher.publish(brokerURL, clientID, qos, debug, rootTopic+topic, (String) event.getData());

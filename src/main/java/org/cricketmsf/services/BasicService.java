@@ -31,6 +31,7 @@ import org.cricketmsf.out.file.FileReaderAdapterIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.cricketmsf.annotation.EventHook;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.api.Result;
 import org.cricketmsf.api.ResultIface;
 
@@ -86,7 +87,7 @@ public class BasicService extends Kernel {
      * @param event
      * @return ParameterMapResult with the file content as a byte array
      */
-    @EventHook(className = "org.cricketmsf.event.HttpEvent", procedureName = "www")
+    @EventHook(className = "org.cricketmsf.event.HttpEvent", procedure = Procedures.WWW)
     public ResultIface doGet(HttpEvent event) {
         return wwwFileReader.getFile(
                 (RequestObject)event.getData(), 
@@ -95,22 +96,22 @@ public class BasicService extends Kernel {
         );
     }
 
-    @EventHook(className = "org.cricketmsf.event.HttpEvent", procedureName = "getStatus")
+    @EventHook(className = "org.cricketmsf.event.HttpEvent", procedure = Procedures.GET_STATUS)
     public ResultIface handleStatusRequest(HttpEvent requestEvent) {
         return new Result(reportStatus());
     }
 
-    @EventHook(className = "org.cricketmsf.event.GreeterEvent", procedureName = "greet")
+    @EventHook(className = "org.cricketmsf.event.GreeterEvent", procedure = Procedures.GREET)
     public ResultIface doGreet(GreeterEvent event) {
         String name =  ((HashMap<String,String>)event.getData()).get("name");
         ResultIface result = new Result("Hello " + name);
-        result.setProcedureName("greet");
+        result.setProcedure(Procedures.GREET);
         return result;
     }
     
-    @EventHook(className = "org.cricketmsf.event.Event", procedureName = "printInfo")
+    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.PRINT_INFO)
     public Result printInfo(Event event) {
-        logger.info("INFO {} {} {}",event.getProcedureName(), event.getInitialTimePoint(), event.getData());
+        logger.info("INFO {} {} {}",Procedures.getName(event.getProcedure()), event.getInitialTimePoint(), event.getData());
         return null;
     }
 

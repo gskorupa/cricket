@@ -23,6 +23,7 @@ import java.util.Locale;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.cricketmsf.event.Procedures;
 
 /**
  *
@@ -43,14 +44,15 @@ public class StandardResult implements ResultIface {
     private int maxAge;
     private Headers headers;
     private long responseTime = 0;
-    private String procedureName;
+    //private String procedureName;
+    private int procedure=Procedures.ANY;
 
     public StandardResult() {
         setCode(ResponseCode.OK);
         setModificationDate(new Date());
         maxAge = 0;
         headers = new Headers();
-        procedureName=null;
+        //procedureName=null;
     }
 
     public StandardResult(Object data) {
@@ -59,7 +61,7 @@ public class StandardResult implements ResultIface {
         setModificationDate(new Date());
         maxAge = 0;
         headers = new Headers();
-        procedureName=null;
+        //procedureName=null;
     }
 
     /**
@@ -177,6 +179,7 @@ public class StandardResult implements ResultIface {
         return responseTime;
     }
 
+    /*
     @Override
     public String getProcedureName() {
         return procedureName;
@@ -190,6 +193,23 @@ public class StandardResult implements ResultIface {
     @Override
     public ResultIface procedureName(String procedureName) {
         this.procedureName=procedureName;
+        return this;
+    }
+    */
+    
+    @Override
+    public int getProcedure(){
+        return procedure;
+    }
+    
+    @Override
+    public void setProcedure(int procedure) {
+        this.procedure=procedure;
+    }
+
+    @Override
+    public ResultIface procedure(int procedure) {
+        this.procedure=procedure;
         return this;
     }
 }

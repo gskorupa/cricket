@@ -46,6 +46,7 @@ import org.cricketmsf.out.dispatcher.DispatcherIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.cricketmsf.annotation.EventHook;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.out.auth.AuthAdapterIface;
 
@@ -134,45 +135,45 @@ public abstract class Kernel {
 
     private void getEventHooks() {
         String eventClass;
-        String procedureName;
+        int procedure;
         LOGGER.info("REGISTERING EVENT HOOKS");
         // for every method of a Kernel instance (our service class extending Kernel)
         for (Method m : this.getClass().getMethods()) {
             EventHook[] portArray = m.getAnnotationsByType(EventHook.class);
             for (EventHook hook : portArray) {
                 eventClass = hook.className();
-                procedureName = hook.procedureName();
-                addHookMethodNameForPort(procedureName + "@" + eventClass, m.getName());
-                LOGGER.info("{}::{} => {}", eventClass, procedureName, m.getName());
+                procedure = hook.procedure();
+                addHookMethodNameForPort(Procedures.getName(procedure) + "@" + eventClass, m.getName());
+                LOGGER.info("{}::{} => {}", eventClass, Procedures.getName(procedure), m.getName());
             }
         }
         LOGGER.info("END REGISTERING EVENT HOOKS");
         LOGGER.info("");
     }
 
-    private String getHookMethodNameForPort(String className, String procedureName) {
-        return portEventHookMethods.get((null == procedureName ? "*" : procedureName) + "@" + className);
+    private String getHookMethodNameForPort(String className, int procedure) {
+        return portEventHookMethods.get((Procedures.ANY == procedure ? Procedures.getName(Procedures.ANY) : Procedures.getName(procedure)) + "@" + className);
     }
 
     public ResultIface getEventProcessingResult(Event event) {
-        return getEventProcessingResult(event, event.getProcedureName());
+        return getEventProcessingResult(event, event.getProcedure());
     }
 
-    public ResultIface getEventProcessingResult(Event event, String procedureName) {
+    public ResultIface getEventProcessingResult(Event event, int procedure) {
         String methodName = "unknown";
         try {
             Method m;
-            methodName = getHookMethodNameForPort(event.getClass().getName(), procedureName);
+            methodName = getHookMethodNameForPort(event.getClass().getName(), procedure);
             if (null != methodName) {
                 m = getClass().getMethod(methodName, event.getClass());
                 return (ResultIface) m.invoke(this, event);
             } else {
-                methodName = getHookMethodNameForPort(event.getClass().getName(), "*");
+                methodName = getHookMethodNameForPort(event.getClass().getName(), Procedures.ANY);
                 if (null != methodName) {
                     m = getClass().getMethod(methodName, event.getClass());
                     return (ResultIface) m.invoke(this, event);
                 } else {
-                    LOGGER.warn("Don't know how to handle {} procedure {} fired by {}", event.getClass().getName(), procedureName, event.getOrigin().getName());
+                    LOGGER.warn("Don't know how to handle {} procedure {} fired by {}", event.getClass().getName(), procedure, event.getOrigin().getName());
                 }
             }
         } catch (IllegalAccessException | NoSuchMethodException e) {
@@ -578,7 +579,7 @@ public abstract class Kernel {
                 }
             });
 
-            LOGGER.info("Running initialization tasks");
+            LOGGER.info("RUNNING INITIALIZATION TASKS");
             try {
                 runInitTasks();
             } catch (InitException ex) {
@@ -586,7 +587,7 @@ public abstract class Kernel {
             }
             printEventRegister();
 
-            LOGGER.info("Starting listeners ...");
+            LOGGER.info("STARTING LISTENERS");
             // run listeners for inbound adapters
             runListeners();
 
@@ -611,9 +612,9 @@ public abstract class Kernel {
             long startedIn = System.currentTimeMillis() - startedAt;
             printHeader(Kernel.getInstance().configSet.getKernelVersion());
             if (liftMode) {
-                LOGGER.info("# Service: " + getClass().getName());
+                LOGGER.info("# SERVICE: " + getClass().getName());
             } else {
-                LOGGER.info("# Service: " + getId());
+                LOGGER.info("# SERVICE: " + getId());
             }
             LOGGER.info("# UUID   : " + getUuid());
             LOGGER.info("# VERSION: " + Kernel.getInstance().configSet.getServiceVersion());

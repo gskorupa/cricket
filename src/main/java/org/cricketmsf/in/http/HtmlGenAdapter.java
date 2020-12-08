@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.event.ProcedureCall;
 import org.slf4j.Logger;
@@ -125,7 +126,7 @@ public class HtmlGenAdapter extends HttpPortedAdapter implements HtmlGenAdapterI
 
     @Override
     protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
-        HttpEvent event = new HttpEvent("www",request);
+        HttpEvent event = new HttpEvent(Procedures.WWW,request);
         return ProcedureCall.toForward(event);
     }
 

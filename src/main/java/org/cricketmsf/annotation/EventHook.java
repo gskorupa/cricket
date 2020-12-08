@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface EventHook {
     public String className();
-    public String procedureName();
+    public int procedure();
     
     @Documented
     @Retention(RetentionPolicy.RUNTIME)

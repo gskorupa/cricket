@@ -24,6 +24,7 @@ import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.api.Result;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.microsite.event.UserEvent;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.db.KeyValueDBException;
@@ -223,7 +224,7 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
             if (isAdmin(requesterRoles)) {
                 result.setData(getAll());
             } else {
-                return null;
+                result.setCode(ResponseCode.UNAUTHORIZED);
             }
         } catch (UserException e) {
             logger.warn(e.getMessage());
@@ -237,12 +238,12 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
             User user = register(newUser);
             if (withConfirmation) {
                 UserEvent ev = new UserEvent(user.getUid());
-                ev.setProcedureName("confirmRegistration");
+                ev.setProcedure(Procedures.USER_CONFIRM_REGISTRATION);
                 Kernel.getInstance().dispatchEvent(ev);
             } else {
                 confirmRegistration(user.getUid());
                 UserEvent ev = new UserEvent(newUser.getNumber());
-                ev.setProcedureName("registrationConfirmed");
+                ev.setProcedure(Procedures.USER_REGISTRATION_CONFIRMED);
                 Kernel.getInstance().dispatchEvent(ev);
             }
             result.setData(get(user.getUid()));
@@ -263,14 +264,16 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
     }
 
     //TODO: request removal (fired by the user, remove after confirmation by th user)
-    
-    
     public Result handleDeleteUser(HashMap params) {
         String uid = (String) params.get("uid");
+        String requesterID = (String) params.get("requester");
         String[] requesterRoles = ((String) params.get("roles")).split(",");
         Result result = new Result();
-        if (uid == null || !isAdmin(requesterRoles)) {
+        if (uid == null) {
             result.setCode(ResponseCode.FORBIDDEN);
+            return result;
+        } else if (!(uid.equals(requesterID) || isAdmin(requesterRoles))) {
+            result.setCode(ResponseCode.UNAUTHORIZED);
             return result;
         }
         try {
@@ -278,11 +281,11 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
             if (null != tmpUser) {
                 remove(uid);
                 UserEvent event = new UserEvent(tmpUser.getUid(), tmpUser.getNumber());
-                event.setProcedureName("afterUserRemoval");
+                event.setProcedure(Procedures.USER_AFTER_REMOVAL);
                 Kernel.getInstance().dispatchEvent(event);
                 result.setCode(ResponseCode.OK);
                 result.setData(uid);
-            }else{
+            } else {
                 result.setCode(ResponseCode.NOT_FOUND);
             }
         } catch (UserException e) {
@@ -301,6 +304,9 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
             User user = get(updatedUser.getUid());
             if (user == null) {
                 result.setCode(ResponseCode.NOT_FOUND);
+                return result;
+            } else if (!(user.getUid().equals(requesterId) || admin)) {
+                result.setCode(ResponseCode.UNAUTHORIZED);
                 return result;
             }
             if (updatedUser.getEmail() != null) {
@@ -322,10 +328,10 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
                 user.setPassword(HashMaker.md5Java(updatedUser.getPassword()));
             }
 
-            if (updatedUser.isConfirmed() != null) {
+            if (updatedUser.isConfirmed() != null && admin) {
                 user.setConfirmed(updatedUser.isConfirmed());
                 UserEvent ev = new UserEvent(updatedUser.getNumber());
-                ev.setProcedureName("registrationConfirmed");
+                ev.setProcedure(Procedures.USER_REGISTRATION_CONFIRMED);
                 Kernel.getInstance().dispatchEvent(ev);
             }
             if (updatedUser.isUnregisterRequested() != null) {
@@ -333,7 +339,7 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
                 if (!user.isUnregisterRequested() && updatedUser.isUnregisterRequested()) {
                     //fire event
                     UserEvent ev = new UserEvent(user.getUid());
-                    ev.setProcedureName("removalScheduled");
+                    ev.setProcedure(Procedures.USER_REMOVAL_SCHEDULED);
                     Kernel.getInstance().dispatchEvent(ev);
                     user.setStatus(User.IS_UNREGISTERING);
                 }
@@ -342,7 +348,7 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
             modify(user);
             //fire event
             UserEvent ev = new UserEvent(user.getNumber());
-            ev.setProcedureName("updated");
+            ev.setProcedure(Procedures.USER_UPDATED);
             Kernel.getInstance().dispatchEvent(ev);
             result.setCode(ResponseCode.OK);
             result.setData(user);

@@ -24,9 +24,9 @@ import org.cricketmsf.out.auth.AuthAdapterIface;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.out.db.*;
 import org.cricketmsf.annotation.EventHook;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.api.Result;
-import org.cricketmsf.event.Event;
 import org.cricketmsf.in.queue.SubscriberIface;
 /*
 import org.cricketmsf.microsite.in.http.ContentRequestProcessor;
@@ -236,63 +236,63 @@ public class Microsite extends Kernel {
      * @param event
      * @return
      */
-    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "get")
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_GET)
     public Result userGet(UserEvent event) {
-        return userAdapter.handleGet((HashMap) event.getData()).procedureName("get");
+        return userAdapter.handleGet((HashMap) event.getData()).procedure(Procedures.USER_GET);
     }
 
-    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "register")
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_REGISTER)
     public Object userAdd(UserEvent event) {
-        return userAdapter.handleRegisterUser((User) event.getData()).procedureName("register");
+        return userAdapter.handleRegisterUser((User) event.getData()).procedure(Procedures.USER_REGISTER);
     }
 
-    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "update")
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_UPDATE)
     public Object userUpdate(UserEvent event) {
         return userAdapter.handleUpdateRequest((HashMap) event.getData());
     }
 
-    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "delete")
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_REMOVE)
     public Object userRemove(UserEvent event) {
-        return userAdapter.handleDeleteUser((HashMap) event.getData()).procedureName("delete");
+        return userAdapter.handleDeleteUser((HashMap) event.getData()).procedure(Procedures.USER_REMOVE);
     }
 
-    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "confirmRegistration")
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_CONFIRM_REGISTRATION)
     public Object userConfirmationRequired(UserEvent event) {
         return null;
     }
 
-    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "registrationConfirmed")
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_REGISTRATION_CONFIRMED)
     public Object registrationConfirmed(UserEvent event) {
         return null;
     }
 
-    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedureName = "afterUserRemoval")
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_AFTER_REMOVAL)
     public Object userRemoved(UserEvent event) {
         return null;
     }
 
-    @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedureName = "login")
+    @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedure= Procedures.AUTH_LOGIN)
     public Result authLogin(AuthEvent event) {
         Token token = authAdapter.login(event.getData().get("login"), event.getData().get("password"));
-        return new Result(token != null ? token.getToken() : null, "login");
+        return new Result(token != null ? token.getToken() : null, Procedures.AUTH_LOGIN);
     }
 
-    @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedureName = "logout")
+    @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedure = Procedures.AUTH_LOGOUT)
     public Object authLogout(AuthEvent event) {
         Boolean ok = authAdapter.logout(event.getData().get("token"));
-        return new Result(ok, "logout");
+        return new Result(ok, Procedures.AUTH_LOGOUT);
     }
 
-    @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedureName = "check")
+    @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedure = Procedures.AUTH_CHECK_TOKEN)
     public Object authCheck(AuthEvent event) {
         boolean ok = authAdapter.checkToken(event.getData().get("token"));
-        return new Result(ok, "check");
+        return new Result(ok, Procedures.AUTH_CHECK_TOKEN);
     }
 
-    @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedureName = "reftesh")
+    @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedure = Procedures.AUTH_REFRESH_TOKEN)
     public Object authRefresh(AuthEvent event) {
         boolean ok = authAdapter.refreshToken(event.getData().get("token"));
-        return new Result(ok, "refresh");
+        return new Result(ok, Procedures.AUTH_REFRESH_TOKEN);
     }
 
     /*

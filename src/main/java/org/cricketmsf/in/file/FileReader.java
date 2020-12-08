@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.in.InboundAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,8 @@ import org.slf4j.LoggerFactory;
 public class FileReader extends InboundAdapter implements Adapter, WatchdogIface {
 
     private static final Logger logger = LoggerFactory.getLogger(FileReader.class);
-    private String procedureName = "DATA_READY";
+    private String procedureName = "-1";
+    private int procedure = Procedures.ANY;
 
     private String fileName;
     File file;
@@ -57,9 +59,14 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
         logger.info("\tpath: " + fileName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
         logger.info("\tsampling-interval: " + samplingInterval);
-        procedureName = properties.getOrDefault("procedure-name", "dataReady");
-        logger.info("\tprocedure-name: " + procedureName);
-        super.registerEventCategory(procedureName, FileEvent.class.getName());
+        procedureName = properties.getOrDefault("procedure", Procedures.getName(Procedures.ANY));
+        try{
+            procedure=Integer.parseInt(procedureName);
+        }catch(NumberFormatException ex){
+            ex.printStackTrace();
+        }
+        logger.info("\tprocedure: " + procedure);
+        //super.registerEventCategory(procedureName, FileEvent.class.getName());
         running=true;
     }
     
@@ -80,7 +87,7 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
                 logger.debug("reading " + fileName);
                 if (content.length > 0) {
                     FileEvent ev = new FileEvent(content);
-                    ev.setProcedureName(procedureName);
+                    ev.setProcedure(procedure);
                     Kernel.getInstance().dispatchEvent(ev);
                 }
             }

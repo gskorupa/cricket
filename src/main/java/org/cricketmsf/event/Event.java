@@ -35,10 +35,11 @@ public class Event {
     private long createdAt = -1;
     private boolean cyclic = false;
     private Object data;
-    private String procedureName;
+    //private String procedureName;
     private String initialTimePoint;
     private boolean fromInit = false;
     private Class origin;
+    private int procedure=Procedures.ANY;
 
     /**
      * Creates new Event instance. Sets new id and createdAt parameters.
@@ -53,14 +54,16 @@ public class Event {
         //    serviceUuid = Kernel.getInstance().getUuid();
         //}
         calculateTimePoint();
-        procedureName = null;
+        //procedureName = null;
+        procedure=Procedures.ANY;
         data = null;
         fromInit = false;
         origin = null;
     }
     
-    public Event(String procedureName){
-        this(procedureName, null, null, false, null);
+    //public Event(String procedureName){
+    public Event(int procedure){
+        this(procedure, null, null, false, null);
     }
 
     /**
@@ -74,9 +77,10 @@ public class Event {
      * @param timePoint defines when this event should happen.
      * @param data holds additional data
      */
-    public Event(String procedureName, String timePoint, Object data, boolean fromInit, Class origin) {
+    //public Event(String procedureName, String timePoint, Object data, boolean fromInit, Class origin) {
+    public Event(int procedure, String timePoint, Object data, boolean fromInit, Class origin) {
         this.id = Kernel.getEventId();
-        this.procedureName = procedureName;
+        this.procedure = procedure;
         /*
         if (null != Kernel.getInstance()) {
             this.serviceId = Kernel.getInstance().getId();
@@ -95,15 +99,16 @@ public class Event {
         this.origin = origin;
     }
 
-    public Event(Class origin, String name, String timePoint, Object data) {
-        this(name, timePoint, data, false, origin);
+    //public Event(Class origin, String name, String timePoint, Object data) {
+    public Event(Class origin, int procedure, String timePoint, Object data) {
+        this(procedure, timePoint, data, false, origin);
     }
 
     //public Event(String name, String timePoint, Object data) {
     //    this(name, timePoint, data, false, null);
     //}
     public Event(Object origin, String timePoint, Object data) {
-        this(null, timePoint, data, false, null);
+        this(-1, timePoint, data, false, null);
     }
 
     /**
@@ -291,20 +296,21 @@ public class Event {
         setData(JsonReader.jsonToJava(jsonString));
     }
 
-    /**
-     * @return the name
-     */
+    /*
     public String getProcedureName() {
         return procedureName;
     }
-
-    /**
-     * @param procedureName the name to set
-     */
     public void setProcedureName(String procedureName) {
         this.procedureName = procedureName;
     }
-
+*/
+    public int getProcedure() {
+        return procedure;
+    }
+    public void setProcedure(int procedure) {
+        this.procedure = procedure;
+    }
+    
     /**
      * @return the initialTimePoint
      */

@@ -141,7 +141,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
             if (event.getTimePoint() == null) {
                 logger.debug("event.getTimePoint() is null. It should not happen. {} {} {} {}",
                         event.getClass().getSimpleName(),
-                        event.getProcedureName(),
+                        event.getProcedure(),
                         event.getTimePoint(),
                         event.getInitialTimePoint());
                 return false;
@@ -188,8 +188,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                             if (pos > 0) {
                                 remembered = remembered.substring(pos + 1);
                             }
-                            if (databaseRs.containsKey(ev.getProcedureName())) {
-                                ev.setTimePoint((String) databaseRs.get(ev.getProcedureName()));
+                            if (databaseRs.containsKey(""+ev.getProcedure())) {
+                                ev.setTimePoint((String) databaseRs.get(""+ev.getProcedure()));
                             } else {
                                 ev.setTimePoint(remembered);
                             }
@@ -210,7 +210,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
             Delay delay = getDelayForEvent(event, restored);
             if (delay.getDelay() >= 0) {
                 if (systemStart) {
-                    logger.info("event " + event.getProcedureName() + " will start in " + (delay.getDelay() / 1000) + " seconds");
+                    logger.info("event " + event.getProcedure() + " will start in " + (delay.getDelay() / 1000) + " seconds");
                 }
                 if (!(restored || event.isFromInit())) {
                     database.put(event.getId(), event);
@@ -391,7 +391,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                     try {
                         cls = Class.forName(firstParam);
                         Event event = (Event) cls.getConstructor().newInstance();
-                        event.setProcedureName(params[1]);
+                        event.setProcedure(Integer.parseInt(params[1]));
                         event.setTimePoint(params[2]);
                         if (params.length > 3) {
                             event.setData(params[3]);
@@ -404,7 +404,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                 } else {
                     handleEvent(
                             new Event(
-                                    firstParam, //name
+                                    Integer.parseInt(firstParam), //name
                                     params[1], //timePoint
                                     params.length > 2 ? params[2] : null, //data
                                     true,

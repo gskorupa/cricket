@@ -7,11 +7,12 @@ package org.cricketmsf.event;
 public class ProcedureCall {
 
     public Event event = null;
-    public String procedureName = null;
+    //public String procedureName = null;
     public int responseCode = 0;
     public Object response = null;
     public String contentType = "application/json";
     public boolean requestHandled = false;
+    public int procedure;
 
     public ProcedureCall() {
         this.responseCode = 500;
@@ -25,7 +26,7 @@ public class ProcedureCall {
      * @return
      */
     public static ProcedureCall toForward(Event event) {
-        return toForward(event, event.getProcedureName(), 0);
+        return toForward(event, event.getProcedure(), 0);
     }
 
     /**
@@ -36,9 +37,10 @@ public class ProcedureCall {
      * @param procedureName
      * @return
      */
-    public ProcedureCall(Event event, String procedureName) {
+    //public ProcedureCall(Event event, String procedureName) {
+    public ProcedureCall(Event event, int procedure) {
         this.event = event;
-        this.procedureName = procedureName;
+        this.procedure = procedure;
     }
 
     /**
@@ -49,8 +51,9 @@ public class ProcedureCall {
      * @param procedureName
      * @return
      */
-    public static ProcedureCall toForward(Event event, String procedureName) {
-        return toForward(event, procedureName, 0);
+    //public static ProcedureCall toForward(Event event, String procedureName) {
+    public static ProcedureCall toForward(Event event, int procedure) {
+        return toForward(event, procedure, 0);
     }
 
     /**
@@ -62,11 +65,12 @@ public class ProcedureCall {
      * @param responseCode
      * @return
      */
-    public static ProcedureCall toForward(Event event, String procedureName, int responseCode) {
+    //public static ProcedureCall toForward(Event event, String procedureName, int responseCode) {
+    public static ProcedureCall toForward(Event event, int procedure, int responseCode) {
         ProcedureCall pc = new ProcedureCall();
         pc.requestHandled = false;
         pc.event = event;
-        pc.procedureName = procedureName;
+        pc.procedure = procedure;
         pc.responseCode = responseCode;
         return pc;
     }

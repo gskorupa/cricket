@@ -25,8 +25,10 @@ import java.util.List;
  */
 public interface ResultIface {
     
-    public String getProcedureName();
-    public void setProcedureName(String procedureName);
+    //public String getProcedureName();
+    //public void setProcedureName(String procedureName);
+    public int getProcedure();
+    public void setProcedure(int procedure);
     public int getCode();
     public void setCode(int code);
     public String getMessage();
@@ -47,5 +49,6 @@ public interface ResultIface {
     public Headers getHeaders();
     public void setResponseTime(long time);
     public long getResponseTime();
-    public ResultIface procedureName(String procedureName);
+    //public ResultIface procedureName(String procedureName);
+    public ResultIface procedure(int procedure);
 }

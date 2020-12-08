@@ -27,12 +27,13 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author greg
  */
 @XmlRootElement(name = "result")
-@XmlAccessorType (XmlAccessType.FIELD)
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Result implements ResultIface {
 
     private Object data = null;
     private int code;
-    private String procedureName=null;
+    //private String procedureName=null;
+    private int procedure;
 
     public Result() {
         setCode(ResponseCode.OK);
@@ -42,12 +43,20 @@ public class Result implements ResultIface {
         setCode(ResponseCode.OK);
         setData(data);
     }
-    
-    public Result(Object data, String procedureName){
+
+    public Result(Object data, int procedure) {
+        setCode(ResponseCode.OK);
+        setData(data);
+        this.procedure = procedure;
+    }
+
+    /*
+    public Result(Object data, String procedureName) {
         setCode(ResponseCode.OK);
         setData(data);
         setProcedureName(procedureName);
     }
+*/
 
     public int getCode() {
         return code;
@@ -67,7 +76,8 @@ public class Result implements ResultIface {
     public void setData(Object data) {
         this.data = data;
     }
-    
+
+    /*
     @Override
     public String getProcedureName() {
         return procedureName;
@@ -75,8 +85,9 @@ public class Result implements ResultIface {
 
     @Override
     public void setProcedureName(String procedureName) {
-        this.procedureName=procedureName;
+        this.procedureName = procedureName;
     }
+     */
 
     @Override
     public String getMessage() {
@@ -157,11 +168,36 @@ public class Result implements ResultIface {
     public long getResponseTime() {
         return -1;
     }
-    
+
+    /*
     @Override
-    public Result procedureName(String procedureName){
-        this.procedureName=procedureName;
+    public Result procedureName(String procedureName) {
+        this.procedureName = procedureName;
         return this;
     }
+    */
+
+    /**
+     * @return the procedure
+     */
+    @Override
+    public int getProcedure() {
+        return procedure;
+    }
+
+    /**
+     * @param procedure the procedure to set
+     */
+    @Override
+    public void setProcedure(int procedure) {
+        this.procedure = procedure;
+    }
+
+    @Override
+    public Result procedure(int procedure) {
+        this.procedure = procedure;
+        return this;
+    }
+
 
 }

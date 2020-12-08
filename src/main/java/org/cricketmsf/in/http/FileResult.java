@@ -38,7 +38,7 @@ public class FileResult implements ResultIface {
     private int maxAge = 0;
     private Headers headers;
     private long responseTime = 0;
-    private String procedureName=null;
+    private int procedure;
 
     public FileResult() {
         headers = new Headers();
@@ -164,18 +164,18 @@ public class FileResult implements ResultIface {
     }
 
     @Override
-    public String getProcedureName() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public int getProcedure() {
+        return procedure;
     }
 
     @Override
-    public void setProcedureName(String procedureName) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void setProcedure(int procedure) {
+        this.procedure=procedure;
     }
 
     @Override
-    public ResultIface procedureName(String procedureName) {
-        this.procedureName = procedureName;
+    public ResultIface procedure(int procedure) {
+        this.procedure=procedure;
         return this;
     }
 }
