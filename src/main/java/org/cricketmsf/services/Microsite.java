@@ -16,7 +16,9 @@
 package org.cricketmsf.services;
 
 import java.util.HashMap;
+import java.util.List;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 //import org.cricketmsf.microsite.cms.CmsIface;
@@ -27,6 +29,8 @@ import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.event.Procedures;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.api.Result;
+import org.cricketmsf.api.ResultIface;
+import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.queue.SubscriberIface;
 /*
 import org.cricketmsf.microsite.in.http.ContentRequestProcessor;
@@ -36,7 +40,9 @@ import org.cricketmsf.microsite.event.GetContent;
 import org.cricketmsf.microsite.event.StatusRequested;
  */
 import org.cricketmsf.in.openapi.OpenApiIface;
+import org.cricketmsf.microsite.cms.CmsIface;
 import org.cricketmsf.microsite.event.AuthEvent;
+import org.cricketmsf.microsite.event.CmsEvent;
 import org.cricketmsf.microsite.event.UserEvent;
 import org.cricketmsf.microsite.out.auth.Token;
 import org.cricketmsf.microsite.out.siteadmin.SiteAdministrationIface;
@@ -61,8 +67,8 @@ public class Microsite extends Kernel {
     HtmlGenAdapterIface htmlAdapter = null;
     //cms
     KeyValueDBIface cmsDatabase = null;
-    //   FileReaderAdapterIface cmsFileReader = null;
-    //CmsIface cms = null;
+    //FileReaderAdapterIface cmsFileReader = null;
+    CmsIface cms = null;
     //TranslatorIface translator = null;
     //user module
     KeyValueDBIface userDB = null;
@@ -90,8 +96,8 @@ public class Microsite extends Kernel {
         //scheduler = (SchedulerIface) getRegistered("Scheduler");
         //htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
         //cms
-        //cmsDatabase = (KeyValueDBIface) getRegistered("cmsDB");
-        //cms = (CmsIface) getRegistered("cmsAdapter");
+        cmsDatabase = (KeyValueDBIface) getRegistered("cmsDB");
+        cms = (CmsIface) getRegistered("cmsAdapter");
         //translator = (TranslatorIface) getRegistered("cmsTranslator");
         //user
         userAdapter = (UserAdapterIface) getRegistered("UserAdapter");
@@ -230,6 +236,51 @@ public class Microsite extends Kernel {
         return result;
     }
      */
+    
+    @EventHook(className = "org.cricketmsf.event.HttpEvent", procedure = Procedures.WWW)
+    public ResultIface handleWwwRequest(UserEvent event) {
+        RequestObject request=(RequestObject)event.getData();
+        String language = (String) request.parameters.get("language");
+        if (language == null || language.isEmpty()) {
+            language = "en";
+        }
+        ResultIface result = null;
+        String cacheName = "webcache_" + language;
+        try {
+            result = (ParameterMapResult) cms
+                    .getFile(request, htmlAdapter.useCache() ? database : null, cacheName, language, true);
+            //((HashMap) result.getData()).put("serviceurl", getProperties().get("serviceurl"));
+            HashMap rd = (HashMap) result.getData();
+            rd.put("serviceurl", getProperties().get("serviceurl"));
+            rd.put("defaultLanguage", getProperties().get("default-language"));
+            rd.put("token", (String)request.parameters.get("tid"));  // fake tokens doesn't pass SecurityFilter
+            rd.put("user", request.headers.getFirst("X-user-id"));
+            rd.put("environmentName", getName());
+            rd.put("javaversion", System.getProperty("java.version"));
+            rd.put("wwwTheme", getProperties().getOrDefault("www-theme", "theme0"));
+            List<String> roles = request.headers.get("X-user-role");
+            if (roles != null && roles.size() > 0) {
+                StringBuilder sb = new StringBuilder("[");
+                for (String role : roles) {
+                    sb.append(role).append(",");
+                }
+                rd.put("roles", sb.substring(0, sb.length() - 1) + "]");
+            } else {
+                rd.put("roles", "[]");
+            }
+            result.setData(rd);
+            // TODO: caching policy 
+            result.setMaxAge(120);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if ("HEAD".equalsIgnoreCase(request.method)) { //quick hack
+            byte[] empty = {};
+            result.setPayload(empty);
+        }
+        return result;
+    }
+    
     /**
      * Return user data
      *
@@ -294,6 +345,12 @@ public class Microsite extends Kernel {
         boolean ok = authAdapter.refreshToken(event.getData().get("token"));
         return new Result(ok, Procedures.AUTH_REFRESH_TOKEN);
     }
+    
+    @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CS_GET)
+    public Object contentGetPublished(CmsEvent event) {
+        //return getEventProcessingResult(new GetContent(event));
+        return null;
+    }
 
     /*
     @HttpAdapterHook(adapterName = "ContentService", requestMethod = "OPTIONS")
@@ -343,18 +400,7 @@ public class Microsite extends Kernel {
         result.setData("OK");
         return result;
     }
-    @EventHook(eventCategory = Event.CATEGORY_LOG)
-    @EventHook(eventCategory = "Category-Test")
-    public void logEvent(Event event) {
-        logAdapter.log(event);
-        if (event.getType().equals(Event.LOG_SEVERE)) {
-            emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Cricket - error", event.toString());
-        }
-    }
-    @EventHook(eventCategory = Event.CATEGORY_HTTP_LOG)
-    public void logHttpEvent(Event event) {
-        logAdapter.log(event);
-    }
+
     @EventHook(eventCategory = UserEvent.CATEGORY_USER)
     public void processUserEvent(Event event) {
         switch (event.getType()) {

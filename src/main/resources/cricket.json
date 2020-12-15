@@ -23,6 +23,15 @@
                     "properties": {
                         "context": "/api"
                     }
+                },
+                {
+                    "name": "Tester",
+                    "interfaceName": "OpenApiIface",
+                    "className": "org.cricketmsf.in.http.Tester",
+                    "description": "",
+                    "properties": {
+                        "context": "/test"
+                    }
                 }
             ]
         },
@@ -219,6 +228,22 @@
                     "className": "org.cricketmsf.microsite.in.user.UserApi",
                     "properties": {
                         "context": "/api/user"
+                    }
+                },
+                {
+                    "name": "ContentManagerApiHttp",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.microsite.in.cms.ContentApi",
+                    "properties": {
+                        "context": "/api/cm"
+                    }
+                },
+                {
+                    "name": "ContentServiceApiHttp",
+                    "interfaceName": "HttpAdapterIface",
+                    "classFullName": "org.cricketmsf.microsite.in.cms.ContentApi",
+                    "properties": {
+                        "context": "/api/cs"
                     }
                 },
                 {

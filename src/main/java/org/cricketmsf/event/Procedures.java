@@ -24,12 +24,22 @@ public class Procedures {
     public static final int USER_REMOVAL_SCHEDULED = 12;
     public static final int USER_UPDATED = 13;
     
-    public static final int AUTH_LOGIN = 14;
-    public static final int AUTH_LOGOUT = 15;
-    public static final int AUTH_CHECK_TOKEN = 16;
-    public static final int AUTH_REFRESH_TOKEN = 17;
+    public static final int AUTH_LOGIN = 20;
+    public static final int AUTH_LOGOUT = 21;
+    public static final int AUTH_CHECK_TOKEN = 22;
+    public static final int AUTH_REFRESH_TOKEN = 23;
     
+    public static final int SYSTEM_CONTENT_READY = 30;
+    public static final int SYSTEM_SHUTDOWN = 31;
+    public static final int SYSTEM_STATUS = 32;
+    public static final int SYSTEM_BACKUP = 33;
     
+    public static final int CS_GET = 40;
+    
+    public static final int CMS_GET = 50;
+    public static final int CMS_POST = 51;
+    public static final int CMS_PUT = 52;
+    public static final int CMS_DELETE = 53;
     
     
     public static String getName(int id){
@@ -40,6 +50,7 @@ public class Procedures {
             case GET_STATUS: return "GET_STATUS";
             case PRINT_INFO: return "PRINT_INFO";
             case GREET: return "GREET";
+            
             case USER_AFTER_REMOVAL: return "USER_AFTER_REMOVAL";
             case USER_CONFIRM_REGISTRATION: return "USER_CONFIRM_REGISTRATION";
             case USER_GET: return "USER_GET";
@@ -47,10 +58,20 @@ public class Procedures {
             case USER_REGISTRATION_CONFIRMED: return "USER_REGISTRATION_CONFIRMED";
             case USER_REMOVE: return "USER_REMOVE";
             case USER_UPDATE: return "USER_UPDATE";
+            case USER_REMOVAL_SCHEDULED: return "REMOVAL_SCHEDULED";
+            case USER_UPDATED: return "USER_UPDATED";
+            
             case AUTH_CHECK_TOKEN: return "AUTH_CHECK_TOKEN";
             case AUTH_LOGIN: return "AUTH_LOGIN";
             case AUTH_LOGOUT: return "AUTH_LOGOUT";
             case AUTH_REFRESH_TOKEN: return "AUTH_REFRESH_TOKEN";
+            
+            case CS_GET: return "CS_GET";
+            case CMS_GET: return "CMS_GET";
+            case CMS_POST: return "CMS_POST";
+            case CMS_PUT: return "CMS_PUT";
+            case CMS_DELETE: return "CMS_DELETE";
+            
             default: return "UNDEFINED";
         }
     }
