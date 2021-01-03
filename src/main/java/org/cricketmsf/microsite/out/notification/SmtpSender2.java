@@ -146,7 +146,7 @@ public class SmtpSender2 extends OutboundAdapter implements EmailSenderIface, Ad
             mime.setFrom(new InternetAddress(USERNAME));
             mime.setSubject(subject);
             //mime.setText(content);
-            mime.setContent(text, "text/html");
+            mime.setContent(text, "text/html; charset=utf-8");
             mime.setHeader("X-Mailer", mailer);
             mime.setHeader("XPriority", "1");
             mime.setSentDate(new Date());
