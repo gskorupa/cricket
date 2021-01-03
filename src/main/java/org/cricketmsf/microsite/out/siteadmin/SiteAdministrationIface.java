@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.microsite.out.siteadmin;
 
+import org.cricketmsf.api.StandardResult;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.out.db.KeyValueDBIface;
 
@@ -46,5 +47,7 @@ public interface SiteAdministrationIface {
             String type,
             UserAdapterIface userAdapter,
             KeyValueDBIface database);
+    
+    public StandardResult getServiceInfo();
 
 }

@@ -96,8 +96,8 @@ public class BasicService extends Kernel {
         );
     }
 
-    @EventHook(className = "org.cricketmsf.event.HttpEvent", procedure = Procedures.GET_STATUS)
-    public ResultIface handleStatusRequest(HttpEvent requestEvent) {
+    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_STATUS)
+    public ResultIface handleStatusRequest(Event requestEvent) {
         return new Result(reportStatus());
     }
 

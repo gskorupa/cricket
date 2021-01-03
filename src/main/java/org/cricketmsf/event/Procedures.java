@@ -41,6 +41,8 @@ public class Procedures {
     public static final int CMS_PUT = 52;
     public static final int CMS_DELETE = 53;
     
+    public static final int SA_STATUS = 60;
+    
     
     public static String getName(int id){
         switch (id){
@@ -71,6 +73,8 @@ public class Procedures {
             case CMS_POST: return "CMS_POST";
             case CMS_PUT: return "CMS_PUT";
             case CMS_DELETE: return "CMS_DELETE";
+            
+            case SA_STATUS: return "SA_STATUS";
             
             default: return "UNDEFINED";
         }

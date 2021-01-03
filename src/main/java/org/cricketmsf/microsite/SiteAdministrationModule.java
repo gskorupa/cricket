@@ -13,8 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.cricketmsf.microsite.out.siteadmin;
+package org.cricketmsf.microsite;
 
+import java.sql.SQLException;
+import org.cricketmsf.event.Event;
+import org.cricketmsf.RequestObject;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -24,19 +27,21 @@ import java.util.Map;
 import java.util.Random;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.api.StandardResult;
-//import org.cricketmsf.microsite.event.ShutdownRequested;
-//import org.cricketmsf.microsite.event.StatusRequested;
+import org.cricketmsf.config.AdapterConfiguration;
+import org.cricketmsf.event.ShutdownRequested;
+import org.cricketmsf.event.StatusRequested;
+import org.cricketmsf.in.InboundAdapter;
+import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.microsite.out.auth.Token;
 import org.cricketmsf.microsite.out.user.HashMaker;
 import org.cricketmsf.microsite.out.user.User;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.out.OutboundAdapter;
-//import org.cricketmsf.microsite.user.HashMaker;
-//import org.cricketmsf.microsite.user.User;
-import org.cricketmsf.out.db.H2EmbededDB;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
+import org.cricketmsf.out.db.SqlDBIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +49,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class SiteAdministrationModule extends OutboundAdapter implements SiteAdministrationIface, Adapter{
-    private static final Logger logger = LoggerFactory.getLogger(H2EmbededDB.class);
+public class SiteAdministrationModule {
+    private static final Logger logger = LoggerFactory.getLogger(SiteAdministrationModule.class);
+
+    private static SiteAdministrationModule module;
     private String backupFolder = null;
     private boolean backupDaily = false;
     private final int maxCacheSize = 1000;
@@ -62,25 +69,36 @@ public class SiteAdministrationModule extends OutboundAdapter implements SiteAdm
     }
 
     /**
+     * Returns the class instance
+     *
+     * @return SiteAdministrationModule instance object
+     */
+    public static SiteAdministrationModule getInstance() {
+        if (module == null) {
+            module = new SiteAdministrationModule();
+        }
+        return module;
+    }
+
+    /**
      * Process API requests related to platform administration
      *
      * @param event HTTP request encapsulated in Event object
      * @return Result object encapsulating HTTP response
      */
-    /*
     public Object handleRestEvent(Event event) {
-        RequestObject request = event.getRequest();
+        RequestObject request = (RequestObject)event.getData();
         String method = request.method;
         String moduleName = request.pathExt;
         StandardResult result = new StandardResult();
         if ("OPTIONS".equalsIgnoreCase(method)) {
-            result.setCode(HttpAdapter.SC_OK);
+            result.setCode(ResponseCode.OK);
             return result;
         }
         String userID = request.headers.getFirst("X-user-id");
         List<String> roles = request.headers.get("X-user-role");
         if (!hasAccessRights(userID, roles)) {
-            result.setCode(HttpAdapter.SC_FORBIDDEN);
+            result.setCode(ResponseCode.FORBIDDEN);
             return result;
         }
         if ("GET".equalsIgnoreCase(method)) {
@@ -93,12 +111,12 @@ public class SiteAdministrationModule extends OutboundAdapter implements SiteAdm
                     result = getServiceConfig();
                     break;
                 case "shutdown":
-                    result.setCode(HttpAdapter.SC_ACCEPTED);
+                    result.setCode(ResponseCode.ACCEPTED);
                     result.setData("the service will be stopped within a few seconds");
-                    Kernel.getInstance().dispatchEvent(new ShutdownRequested().setDelay(10));
+                    Kernel.getInstance().dispatchEvent(new ShutdownRequested("+10s"));
                     break;
                 default:
-                    result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                    result.setCode(ResponseCode.BAD_REQUEST);
             }
         } else if ("POST".equalsIgnoreCase(method)) {
             switch (moduleName.toLowerCase()) {
@@ -110,11 +128,11 @@ public class SiteAdministrationModule extends OutboundAdapter implements SiteAdm
                         try {
                             result.setData(adapter.execute(query));
                         } catch (SQLException ex) {
-                            result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                            result.setCode(ResponseCode.BAD_REQUEST);
                             result.setData(ex.getMessage());
                         }
                     } else {
-                        result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                        result.setCode(ResponseCode.BAD_REQUEST);
                         result.setData("query not set");
                     }
                     break;
@@ -132,13 +150,13 @@ public class SiteAdministrationModule extends OutboundAdapter implements SiteAdm
                     String propertyName = (String) request.parameters.getOrDefault("property", "");
                     String newValue = (String) request.parameters.getOrDefault("value", "");
                     if (name.isEmpty()) {
-                        result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                        result.setCode(ResponseCode.BAD_REQUEST);
                         result.setData("At least adapter name must be specified");
                         break;
                     }
                     Object adapter = Kernel.getInstance().getAdaptersMap().getOrDefault(name, null);
                     if (null == adapter) {
-                        result.setCode(HttpAdapter.SC_BAD_REQUEST);
+                        result.setCode(ResponseCode.BAD_REQUEST);
                         result.setData("Adapter not found");
                         break;
                     }
@@ -157,25 +175,23 @@ public class SiteAdministrationModule extends OutboundAdapter implements SiteAdm
 
             }
         } else {
-            result.setCode(HttpAdapter.SC_METHOD_NOT_ALLOWED);
+            result.setCode(ResponseCode.METHOD_NOT_ALLOWED);
         }
         return result;
     }
 
-   
+    public StandardResult getServiceInfo() {
+        StandardResult result = new StandardResult();
+        result.setData(Kernel.getInstance().reportStatus());
+        return result;
+    }
 
     private StandardResult getServiceConfig() {
         StandardResult result = new StandardResult();
         result.setData(Kernel.getInstance().getConfigSet().getConfigurationById(Kernel.getInstance().getId()));
         return result;
     }
-*/
-     public StandardResult getServiceInfo() {
-        StandardResult result = new StandardResult();
-        result.setData(Kernel.getInstance().reportStatus());
-        return result;
-    }
-    
+
     /**
      * Creates required database structure and default objects
      *
@@ -301,6 +317,13 @@ public class SiteAdministrationModule extends OutboundAdapter implements SiteAdm
             logger.info(e.getMessage());
         }
 
+    }
+
+    /**
+     * Creates events that should be fired on the Service start.
+     */
+    public void initScheduledTasks(SchedulerIface scheduler) {
+        logger.warn("method not implemented");
     }
 
     /**

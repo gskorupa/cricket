@@ -16,8 +16,8 @@
 package org.cricketmsf.in.http;
 
 import org.cricketmsf.RequestObject;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.event.Procedures;
-import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.event.ProcedureCall;
 
 /**
@@ -33,7 +33,8 @@ public class StatusAdapter
 
     @Override
     protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
-        HttpEvent event = new HttpEvent(Procedures.GET_STATUS, request);
+        Event event = new Event();
+        event.setProcedure(Procedures.SYSTEM_STATUS);
         return ProcedureCall.toForward(event);
     }
 

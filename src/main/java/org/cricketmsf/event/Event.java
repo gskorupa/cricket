@@ -142,6 +142,12 @@ public class Event {
     public void setTimePoint(String timePoint) {
         this.timePoint = timePoint;
     }
+    
+    public Event timePoint(String timePointDefinition){
+        setTimePoint(timePointDefinition);
+        calculateTimePoint();
+        return this;
+    }
 
     public void reschedule() {
         if (isCyclic()) {

@@ -30,6 +30,7 @@ import org.cricketmsf.event.Procedures;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.api.Result;
 import org.cricketmsf.api.ResultIface;
+import org.cricketmsf.event.Event;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.queue.SubscriberIface;
 /*
@@ -40,6 +41,7 @@ import org.cricketmsf.microsite.event.GetContent;
 import org.cricketmsf.microsite.event.StatusRequested;
  */
 import org.cricketmsf.in.openapi.OpenApiIface;
+import org.cricketmsf.microsite.SiteAdministrationModule;
 import org.cricketmsf.microsite.cms.CmsIface;
 import org.cricketmsf.microsite.event.AuthEvent;
 import org.cricketmsf.microsite.event.CmsEvent;
@@ -47,6 +49,7 @@ import org.cricketmsf.microsite.event.UserEvent;
 import org.cricketmsf.microsite.out.auth.Token;
 import org.cricketmsf.microsite.out.siteadmin.SiteAdministrationIface;
 import org.cricketmsf.microsite.out.user.User;
+import org.cricketmsf.out.log.LoggerAdapterIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +64,6 @@ public class Microsite extends Kernel {
 
     // adapterClasses
     SiteAdministrationIface siteAdmin = null;
-    //EchoHttpAdapterIface echoAdapter = null;
     KeyValueDBIface database = null;
     SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
@@ -79,6 +81,8 @@ public class Microsite extends Kernel {
     //
     //EmailSenderIface emailSender = null;
     SubscriberIface queueSubscriber = null;
+    
+    LoggerAdapterIface gdprLogger = null;
 
     OpenApiIface apiGenerator = null;
 
@@ -110,6 +114,8 @@ public class Microsite extends Kernel {
 
         //queueSubscriber = (SubscriberIface) getRegistered("QueueSubscriber");
         apiGenerator = (OpenApiIface) getRegistered("OpenApi");
+        // GDPR
+        gdprLogger = (LoggerAdapterIface)getRegistered("GdprLogger");
     }
 
     @Override
@@ -189,54 +195,7 @@ public class Microsite extends Kernel {
      *
      * @param event
      * @return ParameterMapResult with the file content as a byte array
-     */
-    /*
-    @HttpAdapterHook(adapterName = "WwwService", requestMethod = "GET")
-    public Object wwwGet(Event event) {
-        //TODO: optimization
-        dispatchEvent(Event.logFinest(this.getClass().getSimpleName(), event.getRequest().uri));
-        String language = (String) event.getRequest().parameters.get("language");
-        if (language == null || language.isEmpty()) {
-            language = "en";
-        }
-        ParameterMapResult result = null;
-        String cacheName = "webcache_" + language;
-        try {
-            result = (ParameterMapResult) cms
-                    .getFile(event.getRequest(), htmlAdapter.useCache() ? database : null, cacheName, language, true);
-            //((HashMap) result.getData()).put("serviceurl", getProperties().get("serviceurl"));
-            HashMap rd = (HashMap) result.getData();
-            rd.put("serviceurl", getProperties().get("serviceurl"));
-            rd.put("defaultLanguage", getProperties().get("default-language"));
-            rd.put("token", event.getRequestParameter("tid"));  // fake tokens doesn't pass SecurityFilter
-            rd.put("user", event.getRequest().headers.getFirst("X-user-id"));
-            rd.put("environmentName", getName());
-            rd.put("javaversion", System.getProperty("java.version"));
-            rd.put("wwwTheme", getProperties().getOrDefault("www-theme", "theme0"));
-            List<String> roles = event.getRequest().headers.get("X-user-role");
-            if (roles != null && roles.size() > 0) {
-                StringBuilder sb = new StringBuilder("[");
-                for (String role : roles) {
-                    sb.append(role).append(",");
-                }
-                rd.put("roles", sb.substring(0, sb.length() - 1) + "]");
-            } else {
-                rd.put("roles", "[]");
-            }
-            result.setData(rd);
-            // TODO: caching policy 
-            result.setMaxAge(120);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if ("HEAD".equalsIgnoreCase(event.getRequest().method)) { //quick hack
-            byte[] empty = {};
-            result.setPayload(empty);
-        }
-        return result;
-    }
-     */
-    
+     */    
     @EventHook(className = "org.cricketmsf.event.HttpEvent", procedure = Procedures.WWW)
     public ResultIface handleWwwRequest(UserEvent event) {
         RequestObject request=(RequestObject)event.getData();
@@ -351,8 +310,18 @@ public class Microsite extends Kernel {
         //return getEventProcessingResult(new GetContent(event));
         return null;
     }
+    
+    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_STATUS)
+    public Object getStatusInfo(Event event) {
+        return siteAdmin.getServiceInfo();
+    }
 
-    /*
+    @EventHook(className = "SystemService", requestMethod = "*")
+    public Object systemServiceHandle(Event event) {
+        return new SiteAdministrationModule().handleRestEvent(event);
+    }
+    
+    /*getRegistered("OpenApi");
     @HttpAdapterHook(adapterName = "ContentService", requestMethod = "OPTIONS")
     public Object contentCors(Event requestEvent) {
         StandardResult result = new StandardResult();
@@ -375,10 +344,7 @@ public class Microsite extends Kernel {
             return r;
         }
     }
-    @EventClassHook(className = "org.cricketmsf.microsite.event.StatusRequested")
-    public Object getStatusInfo(StatusRequested event) {
-        return SiteAdministrationModule.getInstance().getServiceInfo();
-    }
+    
     @HttpAdapterHook(adapterName = "ContentManager", requestMethod = "OPTIONS")
     public Object contentManagerCors(Event requestEvent) {
         StandardResult result = new StandardResult();
@@ -388,17 +354,6 @@ public class Microsite extends Kernel {
     @HttpAdapterHook(adapterName = "ContentManager", requestMethod = "*")
     public Object contentManagerHandle(Event event) {
         return new ContentRequestProcessor().processRequest(event, cms, translator);
-    }
-    @HttpAdapterHook(adapterName = "SystemService", requestMethod = "*")
-    public Object systemServiceHandle(Event event) {
-        return new SiteAdministrationModule().handleRestEvent(event);
-    }
-    @HttpAdapterHook(adapterName = "StatusService", requestMethod = "*")
-    public Object systemStatusHandle(Event event) {
-        StandardResult result = new StandardResult();
-        result.setCode(HttpAdapter.SC_OK);
-        result.setData("OK");
-        return result;
     }
 
     @EventHook(eventCategory = UserEvent.CATEGORY_USER)

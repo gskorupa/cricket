@@ -247,6 +247,14 @@
                     }
                 },
                 {
+                    "name": "StatusService",
+                    "interfaceName": "HttpAdapterIface",
+                    "className": "org.cricketmsf.in.http.StatusAdapter",
+                    "properties": {
+                        "context": "/api/status"
+                    }
+                },
+                {
                     "name": "Database",
                     "interfaceName": "KeyValueDBIface",
                     "className": "org.cricketmsf.out.db.KeyValueDB",
@@ -313,6 +321,15 @@
                     }
                 },
                 {
+                    "name": "GdprLogger",
+                    "interfaceName": "LoggerAdapterIface",
+                    "className": "org.cricketmsf.out.log.FileLogger",
+                    "properties": {
+                        "name": "Microsite",
+                        "log-file-name": "./logs/gdpr.log"
+                    }
+                },
+                {
                     "name": "Autostart",
                     "interfaceName": "AutostartIface",
                     "className": "org.cricketmsf.out.autostart.Autostart",
@@ -367,7 +384,7 @@
                 {
                     "name": "StatusService",
                     "interfaceName": "HttpAdapterIface",
-                    "className": "org.cricketmsf.in.http.StandardHttpAdapter",
+                    "className": "org.cricketmsf.in.http.StatusAdapter",
                     "properties": {
                         "context": "/api/status"
                     }
