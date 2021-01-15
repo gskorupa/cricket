@@ -24,10 +24,6 @@ import org.cricketmsf.RequestObject;
 import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.api.StandardResult;
 import org.cricketmsf.event.Event;
-import org.cricketmsf.microsite.cms.CmsException;
-import org.cricketmsf.microsite.cms.CmsIface;
-import org.cricketmsf.microsite.cms.Document;
-import org.cricketmsf.microsite.cms.TranslatorIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +38,6 @@ public class ContentRequestProcessor {
     private static String LANG_REDACTOR = "redactor.";
 
     private boolean hasAccessRights(String userID, List<String> roles) {
-
         if (userID == null || userID.isEmpty()) {
             return false;
         }
@@ -133,11 +128,11 @@ public class ContentRequestProcessor {
 
     public Object processGet(HashMap params, CmsIface adapter) {
         StandardResult result = new StandardResult();
-        String userID =(String)params.get("X-user-id");
-        ArrayList<String> roles = (ArrayList<String>)params.get("X-user-role");
+        String userID =(String)params.get("userid");
+        List<String> roles = (List<String>)params.get("userroles");
         String requiredStatus = (String) params.get("status");
         String language = (String) params.getOrDefault("language", "");
-        String pathExt = (String)params.get("pathExt");
+        String pathExt = (String)params.get("pathext");
         
         if ("wip".equals(requiredStatus) && !hasAccessRights(userID, roles)) {
             result.setCode(ResponseCode.FORBIDDEN);
@@ -153,7 +148,6 @@ public class ContentRequestProcessor {
                     result.setData(doc);
                 } else {
                     result.setCode(ResponseCode.NOT_FOUND);
-                    //System.out.println("doc is null");
                 }
             } catch (CmsException ex) {
                 logger.info(ex.getMessage());
@@ -205,7 +199,6 @@ public class ContentRequestProcessor {
         try {
             if ("application/json".equalsIgnoreCase(contentType)) {
                 String jsonString = request.body;
-                //System.out.println(jsonString);
                 jsonString
                         = "{\"@type\":\"org.cricketmsf.microsite.cms.Document\","
                         + jsonString.substring(jsonString.indexOf("{") + 1);

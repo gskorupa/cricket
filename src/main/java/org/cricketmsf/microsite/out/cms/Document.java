@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.microsite.cms;
+package org.cricketmsf.microsite.out.cms;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -191,7 +191,7 @@ public class Document {
      * @param tags the tags to set
      */
     public void setTags(String tags) {
-        this.tags = tags;
+        this.tags = tags!=null?tags:"";
         if (!this.tags.startsWith(",")) {
             this.tags = "," + this.tags;
         }
@@ -201,7 +201,7 @@ public class Document {
     }
 
     public void forceTags(String tags) {
-        this.tags = tags;
+        this.tags = tags!=null?tags:"";
     }
 
     public void arrayToTags(String[] tagsArray) {

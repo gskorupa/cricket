@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.cricketmsf.microsite.cms;
+package org.cricketmsf.microsite.out.cms;
 
 import java.util.List;
 

@@ -111,7 +111,7 @@ public class BasicService extends Kernel {
     
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.PRINT_INFO)
     public Result printInfo(Event event) {
-        logger.info("INFO {} {} {}",Procedures.getName(event.getProcedure()), event.getInitialTimePoint(), event.getData());
+        logger.info("INFO {} {} {}",getProceduresDictionary().getName(event.getProcedure()), event.getInitialTimePoint(), event.getData());
         return null;
     }
 

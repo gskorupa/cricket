@@ -11,7 +11,7 @@
     </div>
     <div class="row" >
         <div class="col-md-12 text-center">
-            <p style="margin-top: 2em;">Cricket version: cricket-version <!-- will be modified by the build script -->
+            <p style="margin-top: 2em;">Cricket version: {app.cricketVersion} <!-- will be modified by the build script -->
             </p>
             <p>Running on Java { app.jvm }</p>
             <a href="http://www.cricketmsf.org">http://www.cricketmsf.org</a>

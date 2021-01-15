@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf.microsite.cms;
+package org.cricketmsf.microsite.out.cms;
 
+import org.cricketmsf.microsite.out.cms.DefaultRuleEngine;
+import org.cricketmsf.microsite.out.cms.RuleEngineIface;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;

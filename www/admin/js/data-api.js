@@ -396,7 +396,7 @@ function loginSubmit(oFormElement, eventListener, successEventName, errName) {
     eventListener.trigger(getDataCallEventName(null));
     oReq.open("post", app.authAPI);
     oReq.withCredentials = true;
-    oReq.setRequestHeader("Authentication", "Basic " + sEncoded);
+    oReq.setRequestHeader("Authorization", "Basic " + sEncoded);
     oReq.setRequestHeader("Accept", "text/plain");
     oReq.send("action=login");
     return false;

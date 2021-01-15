@@ -55,9 +55,10 @@
         app.authAPI = "$serviceurl" + "/api/auth/";
         app.userAPI = "$serviceurl" + "/api/user/";
         app.csAPI = "$serviceurl" + "/api/cs/";
-        app.cmAPI = "$serviceurl" + "/api/cm/";
+        app.cmAPI = "$serviceurl" + "/api/cm";
         app.systemAPI = "$serviceurl" + "/api/system/";
         app.jvm = "$javaversion";
+        app.cricketVersion = "$cricketversion"
         setLocalConfig();
         riot.mount('*');
         route.start(true);

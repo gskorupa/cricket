@@ -4,7 +4,7 @@ package org.cricketmsf.event;
  *
  * @author greg
  */
-public class Procedures {
+public class Procedures implements ProceduresIface {
 
     public static final int UNDEFINED = -1;
     
@@ -41,10 +41,11 @@ public class Procedures {
     public static final int CMS_PUT = 52;
     public static final int CMS_DELETE = 53;
     
-    public static final int SA_STATUS = 60;
+    public static final int SA_ANY = 60;
+    public static final int SA_STATUS = 61;
     
     
-    public static String getName(int id){
+    public String getName(int id){
         switch (id){
             case UNDEFINED: return "UNDEFINED";
             case ANY: return "*";
@@ -74,10 +75,48 @@ public class Procedures {
             case CMS_PUT: return "CMS_PUT";
             case CMS_DELETE: return "CMS_DELETE";
             
+            case SA_ANY: return "SA_ANY";
             case SA_STATUS: return "SA_STATUS";
             
             default: return "UNDEFINED";
         }
     }
     
+    public int getId(String name){
+        switch (name){
+            case "UNDEFINED": return UNDEFINED;
+            case "ANY": return ANY;
+            case "*": return ANY;
+            case "WWW": return WWW;
+            case "GET_STATUS": return GET_STATUS;
+            case "PRINT_INFO": return PRINT_INFO;
+            case "GREET": return GREET;
+            
+            case "USER_AFTER_REMOVAL": return USER_AFTER_REMOVAL;
+            case "USER_CONFIRM_REGISTRATION": return USER_CONFIRM_REGISTRATION;
+            case "USER_GET": return USER_GET;
+            case "USER_REGISTER": return USER_REGISTER;
+            case "USER_REGISTRATION_CONFIRMED": return USER_REGISTRATION_CONFIRMED;
+            case "USER_REMOVE": return USER_REMOVE;
+            case "USER_UPDATE": return USER_UPDATE;
+            case "USER_REMOVAL_SCHEDULED": return USER_REMOVAL_SCHEDULED;
+            case "USER_UPDATED": return USER_UPDATED;
+            
+            case "AUTH_CHECK_TOKEN": return AUTH_CHECK_TOKEN;
+            case "AUTH_LOGIN": return AUTH_LOGIN;
+            case "AUTH_LOGOUT": return AUTH_LOGOUT;
+            case "AUTH_REFRESH_TOKEN": return AUTH_REFRESH_TOKEN;
+            
+            case "CS_GET": return CS_GET;
+            case "CMS_GET": return CMS_GET;
+            case "CMS_POST": return CMS_POST;
+            case "CMS_PUT": return CMS_PUT;
+            case "CMS_DELETE": return CMS_DELETE;
+            
+            case "SA_STATUS": return SA_STATUS;
+            
+            default: return UNDEFINED;
+        }
+    }
+
 }

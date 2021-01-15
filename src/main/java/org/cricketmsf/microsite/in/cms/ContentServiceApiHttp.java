@@ -34,10 +34,6 @@ public class ContentServiceApiHttp extends HttpPortedAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(ContentServiceApiHttp.class);
 
-    private static String ADMIN = "admin";
-    private static String REDACTOR = "redactor";
-    private static String LANG_REDACTOR = "redactor.";
-
     private String defaultLanguage;
 
     /**
@@ -87,23 +83,6 @@ public class ContentServiceApiHttp extends HttpPortedAdapter {
             return ProcedureCall.toRespond(ResponseCode.FORBIDDEN, "access denied");
         } else {
             return ProcedureCall.toForward(new CmsEvent(params), Procedures.CS_GET);
-        }
-    }
-
-    private boolean hasAccessRights(String userID, List<String> roles, String language) {
-
-        if (userID == null || userID.isEmpty()) {
-            return false;
-        }
-        if (roles.contains(ADMIN) || roles.contains(REDACTOR)) {
-            return true;
-        } else {
-            for (String role : roles) {
-                if (role.equals(LANG_REDACTOR + language)) {
-                    return true;
-                }
-            }
-            return false;
         }
     }
 

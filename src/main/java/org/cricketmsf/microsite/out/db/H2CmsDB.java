@@ -29,9 +29,9 @@ import java.util.Map;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.microsite.cms.CmsException;
-import org.cricketmsf.microsite.cms.Document;
-import org.cricketmsf.microsite.cms.DocumentPathAndTagComparator;
+import org.cricketmsf.microsite.out.cms.CmsException;
+import org.cricketmsf.microsite.out.cms.Document;
+import org.cricketmsf.microsite.out.cms.DocumentPathAndTagComparator;
 import org.cricketmsf.out.db.ComparatorIface;
 import org.cricketmsf.out.db.H2EmbededDB;
 import org.cricketmsf.out.db.KeyValueDBException;
@@ -288,8 +288,8 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
             String queryWithPath = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from ?? where path = ?";
             String queryWithTags = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from ?? where tags like ?";
             String query;
-            boolean tagsOnly = path.isEmpty();
-            boolean pathOnly = tags.isEmpty();
+            boolean tagsOnly = null==path || path.isEmpty();
+            boolean pathOnly = null==tags || tags.isEmpty();
             if (tagsOnly) {
                 query = queryWithTags;
             } else if (pathOnly) {

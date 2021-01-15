@@ -21,32 +21,30 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
 import org.cricketmsf.in.scheduler.SchedulerIface;
-//import org.cricketmsf.microsite.cms.CmsIface;
 import org.cricketmsf.out.auth.AuthAdapterIface;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.out.db.*;
 import org.cricketmsf.annotation.EventHook;
+import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.event.Procedures;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.api.Result;
 import org.cricketmsf.api.ResultIface;
+import org.cricketmsf.api.StandardResult;
 import org.cricketmsf.event.Event;
+import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.queue.SubscriberIface;
-/*
-import org.cricketmsf.microsite.in.http.ContentRequestProcessor;
-import org.cricketmsf.microsite.out.notification.*;
-import org.cricketmsf.microsite.cms.TranslatorIface;
-import org.cricketmsf.microsite.event.GetContent;
-import org.cricketmsf.microsite.event.StatusRequested;
- */
 import org.cricketmsf.in.openapi.OpenApiIface;
 import org.cricketmsf.microsite.SiteAdministrationModule;
-import org.cricketmsf.microsite.cms.CmsIface;
+import org.cricketmsf.microsite.out.cms.CmsIface;
+import org.cricketmsf.microsite.out.cms.RuleEngineIface;
+import org.cricketmsf.microsite.out.cms.TranslatorIface;
 import org.cricketmsf.microsite.event.AuthEvent;
 import org.cricketmsf.microsite.event.CmsEvent;
 import org.cricketmsf.microsite.event.UserEvent;
 import org.cricketmsf.microsite.out.auth.Token;
+import org.cricketmsf.microsite.out.cms.ContentRequestProcessor;
 import org.cricketmsf.microsite.out.siteadmin.SiteAdministrationIface;
 import org.cricketmsf.microsite.out.user.User;
 import org.cricketmsf.out.log.LoggerAdapterIface;
@@ -70,8 +68,9 @@ public class Microsite extends Kernel {
     //cms
     KeyValueDBIface cmsDatabase = null;
     //FileReaderAdapterIface cmsFileReader = null;
-    CmsIface cms = null;
-    //TranslatorIface translator = null;
+    CmsIface contentManager = null;
+    RuleEngineIface ruleEngine = null;
+    TranslatorIface translator = null;
     //user module
     KeyValueDBIface userDB = null;
     UserAdapterIface userAdapter = null;
@@ -95,14 +94,14 @@ public class Microsite extends Kernel {
     public void getAdapters() {
         // standard Cricket adapters
         siteAdmin = (SiteAdministrationIface) getRegistered("SiteAdministrationModule");
-        //gdprLog = (LoggerAdapterIface) getRegistered("GdprLogger");
         database = (KeyValueDBIface) getRegistered("Database");
         //scheduler = (SchedulerIface) getRegistered("Scheduler");
-        //htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
+        htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
         //cms
-        cmsDatabase = (KeyValueDBIface) getRegistered("cmsDB");
-        cms = (CmsIface) getRegistered("cmsAdapter");
-        //translator = (TranslatorIface) getRegistered("cmsTranslator");
+        cmsDatabase = (KeyValueDBIface) getRegistered("CmsDB");
+        contentManager = (CmsIface) getRegistered("ContentManager");
+        ruleEngine = (RuleEngineIface) getRegistered("RuleEngine");
+        translator = (TranslatorIface) getRegistered("CmsTranslator");
         //user
         userAdapter = (UserAdapterIface) getRegistered("UserAdapter");
         userDB = (KeyValueDBIface) getRegistered("UserDB");
@@ -197,7 +196,7 @@ public class Microsite extends Kernel {
      * @return ParameterMapResult with the file content as a byte array
      */    
     @EventHook(className = "org.cricketmsf.event.HttpEvent", procedure = Procedures.WWW)
-    public ResultIface handleWwwRequest(UserEvent event) {
+    public ResultIface handleWwwRequest(HttpEvent event) {
         RequestObject request=(RequestObject)event.getData();
         String language = (String) request.parameters.get("language");
         if (language == null || language.isEmpty()) {
@@ -206,7 +205,7 @@ public class Microsite extends Kernel {
         ResultIface result = null;
         String cacheName = "webcache_" + language;
         try {
-            result = (ParameterMapResult) cms
+            result = (ParameterMapResult) contentManager
                     .getFile(request, htmlAdapter.useCache() ? database : null, cacheName, language, true);
             //((HashMap) result.getData()).put("serviceurl", getProperties().get("serviceurl"));
             HashMap rd = (HashMap) result.getData();
@@ -215,6 +214,7 @@ public class Microsite extends Kernel {
             rd.put("token", (String)request.parameters.get("tid"));  // fake tokens doesn't pass SecurityFilter
             rd.put("user", request.headers.getFirst("X-user-id"));
             rd.put("environmentName", getName());
+            rd.put("cricketversion", getProperties().getOrDefault("cricket-version", ""));
             rd.put("javaversion", System.getProperty("java.version"));
             rd.put("wwwTheme", getProperties().getOrDefault("www-theme", "theme0"));
             List<String> roles = request.headers.get("X-user-role");
@@ -258,7 +258,7 @@ public class Microsite extends Kernel {
 
     @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_UPDATE)
     public Object userUpdate(UserEvent event) {
-        return userAdapter.handleUpdateRequest((HashMap) event.getData());
+        return userAdapter.handleUpdateRequest((HashMap) event.getData()).procedure(Procedures.USER_UPDATE);
     }
 
     @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_REMOVE)
@@ -305,57 +305,77 @@ public class Microsite extends Kernel {
         return new Result(ok, Procedures.AUTH_REFRESH_TOKEN);
     }
     
-    @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CS_GET)
-    public Object contentGetPublished(CmsEvent event) {
-        //return getEventProcessingResult(new GetContent(event));
-        return null;
-    }
-    
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_STATUS)
     public Object getStatusInfo(Event event) {
         return siteAdmin.getServiceInfo();
     }
-
-    @EventHook(className = "SystemService", requestMethod = "*")
+    
+    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SA_ANY)
     public Object systemServiceHandle(Event event) {
         return new SiteAdministrationModule().handleRestEvent(event);
     }
     
-    /*getRegistered("OpenApi");
-    @HttpAdapterHook(adapterName = "ContentService", requestMethod = "OPTIONS")
-    public Object contentCors(Event requestEvent) {
-        StandardResult result = new StandardResult();
-        result.setCode(HttpAdapter.SC_OK);
-        return result;
-    }
-    @HttpAdapterHook(adapterName = "ContentService", requestMethod = "GET")
-    public Object contentGetPublished(Event event) {
-        //synchronous processing
-        return getEventProcessingResult(new GetContent(event));
-    }
-    @EventClassHook(className = "org.cricketmsf.microsite.event.GetContent")
-    public Object getPublishedContent(GetContent event) {
+    @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CS_GET)
+    public Object getPublishedContent(CmsEvent event) {
         try {
-            return new ContentRequestProcessor().processGetPublished(event.getOriginalEvent(), cms);
+            return new ContentRequestProcessor().processGetPublished((HashMap)event.getData(), contentManager);
         } catch (Exception e) {
             e.printStackTrace();
             StandardResult r = new StandardResult();
-            r.setCode(HttpAdapter.SC_NOT_FOUND);
+            r.setCode(ResponseCode.NOT_FOUND);
             return r;
         }
     }
     
-    @HttpAdapterHook(adapterName = "ContentManager", requestMethod = "OPTIONS")
-    public Object contentManagerCors(Event requestEvent) {
-        StandardResult result = new StandardResult();
-        result.setCode(HttpAdapter.SC_OK);
-        return result;
+    @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CMS_GET)
+    public Object getContent(CmsEvent event) {
+        try {
+            return new ContentRequestProcessor().processGet((HashMap)event.getData(), contentManager);
+        } catch (Exception e) {
+            e.printStackTrace();
+            StandardResult r = new StandardResult();
+            r.setCode(ResponseCode.NOT_FOUND);
+            return r;
+        }
     }
-    @HttpAdapterHook(adapterName = "ContentManager", requestMethod = "*")
-    public Object contentManagerHandle(Event event) {
-        return new ContentRequestProcessor().processRequest(event, cms, translator);
+    
+    @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CMS_POST)
+    public Object setContent(CmsEvent event) {
+        try {
+            return new ContentRequestProcessor().processPost(event, contentManager);
+        } catch (Exception e) {
+            e.printStackTrace();
+            StandardResult r = new StandardResult();
+            r.setCode(ResponseCode.NOT_FOUND);
+            return r;
+        }
     }
-
+    
+    @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CMS_PUT)
+    public Object updateContent(CmsEvent event) {
+        try {
+            return new ContentRequestProcessor().processPut(event, contentManager);
+        } catch (Exception e) {
+            e.printStackTrace();
+            StandardResult r = new StandardResult();
+            r.setCode(ResponseCode.NOT_FOUND);
+            return r;
+        }
+    }
+    
+    @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CMS_DELETE)
+    public Object removeContent(CmsEvent event) {
+        try {
+            return new ContentRequestProcessor().processDelete(event, contentManager);
+        } catch (Exception e) {
+            e.printStackTrace();
+            StandardResult r = new StandardResult();
+            r.setCode(ResponseCode.NOT_FOUND);
+            return r;
+        }
+    }
+    
+    /*
     @EventHook(eventCategory = UserEvent.CATEGORY_USER)
     public void processUserEvent(Event event) {
         switch (event.getType()) {
@@ -466,12 +486,11 @@ public class Microsite extends Kernel {
                 dispatchEvent(Event.logWarning("Don't know how to handle event: " + event.getType(), event.getPayload().toString()));
         }
     }
-    @EventHook(eventCategory = "*")
-    public void processEvent(Event event) {
-        dispatchEvent(Event.logWarning(
-                "Event category/type " + event.getCategory() + "/" + event.getType() + " not handled",
-                event.getPayload().toString()
-        ));
-    }
      */
+    
+    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.ANY)
+    public Object logEventsNotHandled(Event event) {
+        logger.warn("org.cricketmsf.event.Event procedure {} not handled", getProceduresDictionary().getName(Procedures.ANY));
+        return null;
+    }
 }

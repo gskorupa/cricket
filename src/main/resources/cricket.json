@@ -11,8 +11,9 @@
                 "port": "7070",
                 "time-zone": "GMT",
                 "request-encoding": "UTF-8",
+                "procedures": "org.cricketmsf.event.Procedures",
                 "serviceurl": "http://localhost:7070",
-                "terms":"https://github.com/gskorupa/cricket"
+                "terms": "https://github.com/gskorupa/cricket"
             },
             "ports": [
                 {
@@ -46,11 +47,12 @@
                 "threads": "0",
                 "filter": "org.cricketmsf.SecurityFilter",
                 "cors": "Access-Control-Allow-Origin:*",
+                "procedures": "org.cricketmsf.event.Procedures",
                 "time-zone": "GMT",
                 "request-encoding": "UTF-8",
                 "file-upload-maxsize": "1000000",
                 "serviceurl": "http://localhost:7070",
-                "terms":"https://github.com/gskorupa/cricket"
+                "terms": "https://github.com/gskorupa/cricket"
             },
             "ports": [
                 {
@@ -151,7 +153,7 @@
                     "className": "org.cricketmsf.in.websocket.WebsocketAdapter",
                     "description": "default websocket adapter",
                     "properties": {
-                        "context":"/test"
+                        "context": "/test"
                     }
                 },
                 {
@@ -160,7 +162,7 @@
                     "className": "org.cricketmsf.out.autostart.Autostart",
                     "description": "",
                     "properties": {
-                        "subfolders":"./logs:./data"
+                        "subfolders": "./logs:./data"
                     }
                 },
                 {
@@ -179,21 +181,23 @@
             "id": "Microsite",
             "active": "true",
             "service": "org.cricketmsf.services.Microsite",
-            "description":"Cricket Microsite service",
+            "description": "Cricket Microsite service",
             "properties": {
+                "cricket-version": "$cricketversion$",
                 "host": "0.0.0.0",
                 "port": "7070",
                 "wsport": "",
                 "ssl": "false",
                 "threads": "0",
-                "shutdown-delay":"2",
+                "shutdown-delay": "2",
                 "filter": "org.cricketmsf.microsite.auth.SecurityFilter",
                 "cors": "Access-Control-Allow-Origin:*|Access-Control-Allow-Credentials:true|Access-Control-Allow-Methods: POST, PATCH, GET, OPTIONS, DELETE, PUT|Access-Control-Allow-Headers:Authentication|Access-Control-Max-Age: 1728000",
                 "time-zone": "GMT",
+                "procedures": "org.cricketmsf.event.Procedures",
                 "initial-admin-email": "user@domain",
                 "initial-admin-password": "cricket",
                 "admin-notification-email": "",
-                "restricted-resources": "DELETE@/api/auth GET@/api/user PUT@/api/user DELETE@/api/user *@/api/cm *@/api/alert *@/api/system",
+                "restricted-resources": "DELETE@/api/auth GET@/api/user PUT@/api/user DELETE@/api/user *@/api/cm *@/api/alert *@/api/system *@/api/siteadmin",
                 "file.upload.maxsize": "1000000",
                 "backup-folder": "./backup",
                 "backup-strategy": "week",
@@ -233,7 +237,7 @@
                 {
                     "name": "ContentManagerApiHttp",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.in.cms.ContentApi",
+                    "className": "org.cricketmsf.microsite.in.cms.ContentManagerApiHttp",
                     "properties": {
                         "context": "/api/cm"
                     }
@@ -241,9 +245,17 @@
                 {
                     "name": "ContentServiceApiHttp",
                     "interfaceName": "HttpAdapterIface",
-                    "classFullName": "org.cricketmsf.microsite.in.cms.ContentApi",
+                    "className": "org.cricketmsf.microsite.in.cms.ContentServiceApiHttp",
                     "properties": {
                         "context": "/api/cs"
+                    }
+                },
+                {
+                    "name": "SiteAdminService",
+                    "interfaceName": "HttpAdapterIface",
+                    "className": "org.cricketmsf.microsite.in.siteadmin.SiteAdminApi",
+                    "properties": {
+                        "context": "/api/system"
                     }
                 },
                 {
@@ -270,7 +282,7 @@
                     "properties": {
                     }
                 },
-                
+
                 {
                     "name": "UserAdapter",
                     "interfaceName": "UserAdapterIface",
@@ -293,7 +305,7 @@
                         "user": "sa",
                         "password": "",
                         "encrypted": "true",
-                        "filePassword":"cr1Ck37#@"
+                        "filePassword": "cr1Ck37#@"
                     }
                 },
                 {
@@ -311,7 +323,7 @@
                     "interfaceName": "SqlDBIface",
                     "className": "org.cricketmsf.microsite.out.db.H2AuthDB",
                     "properties": {
-                        "path":"./data",
+                        "path": "./data",
                         "file": "auth",
                         "test-query": "select * from serviceversion",
                         "version": "1",
@@ -335,7 +347,7 @@
                     "className": "org.cricketmsf.out.autostart.Autostart",
                     "description": "",
                     "properties": {
-                        "subfolders":"./logs:./data:./www"
+                        "subfolders": "./logs:./data:./www"
                     }
                 },
                 {
@@ -346,6 +358,68 @@
                         "path": "./data",
                         "file": "scheduler"
                     }
+                },
+                {
+                    "name": "WwwService",
+                    "interfaceName": "HtmlGenAdapterIface",
+                    "className": "org.cricketmsf.in.http.HtmlGenAdapter",
+                    "properties": {
+                        "context": "/",
+                        "use-cache": "false",
+                        "page-processor": "true",
+                        "dump-request": "false"
+                    }
+                },
+                {
+                    "name": "WwwFileReader",
+                    "interfaceName": "FileReaderAdapterIface",
+                    "className": "org.cricketmsf.out.file.FileReaderAdapter",
+                    "properties": {
+                        "root": "./www/",
+                        "use-cache": "true",
+                        "index-file": "index.html"
+                    }
+                },
+                {
+                    "name": "ContentManager",
+                    "interfaceName": "CmsIface",
+                    "className": "org.cricketmsf.microsite.out.cms.CmsEmbededAdapter",
+                    "properties": {
+                        "helper-name": "CmsDB",
+                        "rule-engine": "CmsRuleEngine",
+                        "root-path": "./www/",
+                        "file-path": "./files/",
+                        "file-path-published": "./www/assets/",
+                        "index-file": "index.html"
+                    }
+                },
+                {
+                    "name": "CmsDB",
+                    "interfaceName": "SqlDBIface",
+                    "className": "org.cricketmsf.microsite.out.db.H2CmsDB",
+                    "properties": {
+                        "path": "./data",
+                        "file": "cms",
+                        "test-query": "select * from serviceversion",
+                        "version": "1",
+                        "name": "content",
+                        "user": "sa",
+                        "password": ""
+                    }
+                },
+                {
+                    "name": "CmsRuleEngine",
+                    "interfaceName": "RuleEngineIface",
+                    "className": "org.cricketmsf.microsite.out.cms.DefaultRuleEngine",
+                    "properties": {
+                    }
+                },
+                {
+                    "name": "CmsTranslator",
+                    "interfaceName": "TranslatorIface",
+                    "className": "org.cricketmsf.microsite.out.cms.DeeplTranslator",
+                    "properties": {
+                    }
                 }
             ]
         },
@@ -354,14 +428,14 @@
             "id": "Microsite",
             "active": "false",
             "service": "org.cricketmsf.services.Microsite",
-            "description":"Cricket Microsite service",
+            "description": "Cricket Microsite service",
             "properties": {
                 "host": "0.0.0.0",
                 "port": "7070",
                 "wsport": "",
                 "ssl": "false",
                 "threads": "0",
-                "shutdown-delay":"2",
+                "shutdown-delay": "2",
                 "filter": "org.cricketmsf.microsite.auth.SecurityFilter",
                 "cors": "Access-Control-Allow-Origin:*|Access-Control-Allow-Credentials:true|Access-Control-Allow-Methods: POST, PATCH, GET, OPTIONS, DELETE, PUT|Access-Control-Allow-Headers:Authentication|Access-Control-Max-Age: 1728000",
                 "time-zone": "GMT",
@@ -437,8 +511,8 @@
                     "properties": {
                         "path": "./data",
                         "file": "scheduler",
-                        "init.0":"Data1,MICROSITE,EVENT,CLEAR_DATA,05:00:00 GMT|*24h,_|_;",
-                        "init.1":"Data2,MICROSITE,EVENT,BACKUP,06:00:00 GMT|*24h,_"
+                        "init.0": "Data1,MICROSITE,EVENT,CLEAR_DATA,05:00:00 GMT|*24h,_|_;",
+                        "init.1": "Data2,MICROSITE,EVENT,BACKUP,06:00:00 GMT|*24h,_"
                     }
                 },
                 {
@@ -527,7 +601,7 @@
                         "user": "sa",
                         "password": "",
                         "encrypted": "true",
-                        "filePassword":"cr1Ck37#@"
+                        "filePassword": "cr1Ck37#@"
                     }
                 },
                 {
@@ -545,7 +619,7 @@
                     "interfaceName": "SqlDBIface",
                     "className": "org.cricketmsf.microsite.out.db.H2AuthDB",
                     "properties": {
-                        "path":"./data",
+                        "path": "./data",
                         "file": "auth",
                         "test-query": "select * from serviceversion",
                         "version": "1",
@@ -559,7 +633,7 @@
                     "interfaceName": "SqlDBIface",
                     "className": "org.cricketmsf.microsite.out.db.H2CmsDB",
                     "properties": {
-                        "path":"./data",
+                        "path": "./data",
                         "file": "cms",
                         "test-query": "select * from serviceversion",
                         "version": "1",
@@ -645,7 +719,7 @@
                     "className": "org.cricketmsf.out.queue.SimpleQueue",
                     "description": "=",
                     "properties": {
-                        "mode":"queue"
+                        "mode": "queue"
                     }
                 },
                 {
@@ -654,7 +728,7 @@
                     "className": "org.cricketmsf.out.autostart.Autostart",
                     "description": "",
                     "properties": {
-                        "subfolders":"./logs:./data:./www"
+                        "subfolders": "./logs:./data:./www"
                     }
                 },
                 {

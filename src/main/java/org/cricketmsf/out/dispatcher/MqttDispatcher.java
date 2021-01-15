@@ -44,7 +44,7 @@ public class MqttDispatcher extends OutboundAdapter implements Adapter, Dispatch
 
     @Override
     public void dispatch(Event event) throws DispatcherException {
-        String topic = event.getClass().getName() + "/" + Procedures.getName(event.getProcedure());
+        String topic = event.getClass().getName() + "/" + Kernel.getInstance().getProceduresDictionary().getName(event.getProcedure());
         if (eventMap.containsKey(event.getClass().getName() + "/*") || eventMap.containsKey(topic)) {
             try {
                 MqttPublisher.publish(brokerURL, clientID, qos, debug, rootTopic+topic, (String) event.getData());

@@ -17,6 +17,7 @@ package org.cricketmsf.in.file;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,14 +33,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author greg
  */
-public class FileReader extends InboundAdapter implements Adapter, WatchdogIface {
+public class FolderObserver extends InboundAdapter implements Adapter, WatchdogIface {
 
-    private static final Logger logger = LoggerFactory.getLogger(FileReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(FolderObserver.class);
     private String procedureName = "-1";
     private int procedure = Procedures.ANY;
 
-    private String fileName;
+    private String folderName;
     File file;
+    File[] processedDirectory[];
     private int samplingInterval = 1000;
     private long lastModified = 0;
     private boolean running = false;
@@ -56,7 +58,7 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
         setFile(properties.getOrDefault("path", ""));
-        logger.info("\tpath: " + fileName);
+        logger.info("\tpath: " + folderName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
         logger.info("\tsampling-interval: " + samplingInterval);
         procedureName = properties.getOrDefault("procedure", Kernel.getInstance().getProceduresDictionary().getName(Procedures.ANY));
@@ -68,7 +70,7 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
 
     private File getFile() {
         if (null == file) {
-            setFile(fileName);
+            setFile(folderName);
         }
         return file;
     }
@@ -76,16 +78,17 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
     @Override
     public void checkStatus() {
         if (getFile() != null) {
+            file = getFile();
             long modified = file.lastModified();
             if (modified > lastModified) {
-                byte[] content = readFile();
+                File filesList[] = getFile().listFiles(new NotDirectoryFilter());
+
                 lastModified = modified;
-                logger.debug("reading " + fileName);
-                if (content.length > 0) {
+                /*if (content.length > 0) {
                     FileEvent ev = new FileEvent(content);
                     ev.setProcedure(procedure);
                     Kernel.getInstance().dispatchEvent(ev);
-                }
+                }*/
             }
         }
     }
@@ -117,7 +120,7 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
      * @param fileName the folderName to set
      */
     public void setFile(String fileName) {
-        this.fileName = fileName;
+        this.folderName = fileName;
         file = new File(fileName);
         try {
             if (!file.exists()) {
