@@ -76,6 +76,14 @@ public class Result implements ResultIface {
     public void setData(Object data) {
         this.data = data;
     }
+    
+    public String getContentType(){
+        return getHeaders().getFirst("Content-type");
+    }
+    
+    public void setContentType(String contentType){
+        getHeaders().set("Content-type", contentType);
+    } 
 
     /*
     @Override

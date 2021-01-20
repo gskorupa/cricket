@@ -92,6 +92,14 @@ public class StandardResult implements ResultIface {
         this.message = message;
     }
 
+        public String getContentType(){
+        return getHeaders().getFirst("Content-type");
+    }
+    
+    public void setContentType(String contentType){
+        getHeaders().set("Content-type", contentType);
+    } 
+
     /**
      * @return the data
      */

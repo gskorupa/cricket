@@ -74,6 +74,14 @@ public class ParameterMapResult implements ResultIface {
         return null != message ? message : "";
     }
 
+    public String getContentType() {
+        return getHeaders().getFirst("Content-type");
+    }
+
+    public void setContentType(String contentType) {
+        getHeaders().set("Content-type", contentType);
+    }
+
     /**
      * @return the data
      */
@@ -143,7 +151,7 @@ public class ParameterMapResult implements ResultIface {
 
     public void setModificationDate(Date date) {
         modificationDate = date;
-        SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z",Locale.ENGLISH);
+        SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.ENGLISH);
         modificationDateFormatted = dt1.format(modificationDate);
 
     }
@@ -173,7 +181,7 @@ public class ParameterMapResult implements ResultIface {
 
     @Override
     public void setHeader(String name, List values) {
-        headers.put(name, (ArrayList)values);
+        headers.put(name, (ArrayList) values);
     }
 
     @Override
@@ -198,12 +206,12 @@ public class ParameterMapResult implements ResultIface {
 
     @Override
     public void setProcedure(int procedure) {
-        this.procedure=procedure;
+        this.procedure = procedure;
     }
 
     @Override
     public ResultIface procedure(int procedure) {
-        this.procedure=procedure;
+        this.procedure = procedure;
         return this;
     }
 }

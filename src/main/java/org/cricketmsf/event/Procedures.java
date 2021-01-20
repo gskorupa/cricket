@@ -40,6 +40,7 @@ public class Procedures implements ProceduresIface {
     public static final int CMS_POST = 51;
     public static final int CMS_PUT = 52;
     public static final int CMS_DELETE = 53;
+    public static final int CMS_CONTENT_CHANGED = 54;
     
     public static final int SA_ANY = 60;
     public static final int SA_STATUS = 61;
@@ -74,6 +75,7 @@ public class Procedures implements ProceduresIface {
             case CMS_POST: return "CMS_POST";
             case CMS_PUT: return "CMS_PUT";
             case CMS_DELETE: return "CMS_DELETE";
+            case CMS_CONTENT_CHANGED: return "CMS_CONTENT_CHANGED";
             
             case SA_ANY: return "SA_ANY";
             case SA_STATUS: return "SA_STATUS";
@@ -112,6 +114,7 @@ public class Procedures implements ProceduresIface {
             case "CMS_POST": return CMS_POST;
             case "CMS_PUT": return CMS_PUT;
             case "CMS_DELETE": return CMS_DELETE;
+            case "CMS_CONTENT_CHANGED": return CMS_CONTENT_CHANGED;
             
             case "SA_STATUS": return SA_STATUS;
             

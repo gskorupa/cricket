@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class SiteAdministrationModule {
+
     private static final Logger logger = LoggerFactory.getLogger(SiteAdministrationModule.class);
 
     private static SiteAdministrationModule module;
@@ -87,7 +88,7 @@ public class SiteAdministrationModule {
      * @return Result object encapsulating HTTP response
      */
     public Object handleRestEvent(Event event) {
-        RequestObject request = (RequestObject)event.getData();
+        RequestObject request = (RequestObject) event.getData();
         String method = request.method;
         String moduleName = request.pathExt;
         StandardResult result = new StandardResult();
@@ -104,8 +105,7 @@ public class SiteAdministrationModule {
         if ("GET".equalsIgnoreCase(method)) {
             switch (moduleName.toLowerCase()) {
                 case "status":
-                    //result = getServiceInfo();
-                    result = (StandardResult) Kernel.getInstance().getEventProcessingResult(new StatusRequested());
+                    result = getServiceInfo();
                     break;
                 case "config":
                     result = getServiceConfig();
@@ -121,12 +121,20 @@ public class SiteAdministrationModule {
         } else if ("POST".equalsIgnoreCase(method)) {
             switch (moduleName.toLowerCase()) {
                 case "database":
+                    try {
                     String adapterName = (String) request.parameters.getOrDefault("adapter", "");
                     String query = (String) request.parameters.get("query");
+                    SqlDBIface adapter;
                     if (null != query) {
-                        SqlDBIface adapter = (SqlDBIface) Kernel.getInstance().getAdaptersMap().get(adapterName);
                         try {
+                            adapter = (SqlDBIface) Kernel.getInstance().getAdaptersMap().get(adapterName);
                             result.setData(adapter.execute(query));
+                        } catch (NullPointerException ex) {
+                            result.setCode(ResponseCode.BAD_REQUEST);
+                            result.setData("unknown adaptername " + adapterName);
+                        } catch (ClassCastException ex) {
+                            result.setCode(ResponseCode.BAD_REQUEST);
+                            result.setData(adapterName + "is not a database adapter");
                         } catch (SQLException ex) {
                             result.setCode(ResponseCode.BAD_REQUEST);
                             result.setData(ex.getMessage());
@@ -135,8 +143,12 @@ public class SiteAdministrationModule {
                         result.setCode(ResponseCode.BAD_REQUEST);
                         result.setData("query not set");
                     }
-                    break;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
                 case "status":
+                    try{
                     String newStatus = (String) request.parameters.getOrDefault("status", "");
                     if ("online".equalsIgnoreCase(newStatus)) {
                         Kernel.getInstance().setStatus(Kernel.ONLINE);
@@ -144,6 +156,9 @@ public class SiteAdministrationModule {
                         Kernel.getInstance().setStatus(Kernel.MAINTENANCE);
                     }
                     result = getServiceInfo();
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
                     break;
                 case "adapter":
                     String name = (String) request.parameters.getOrDefault("name", "");
@@ -385,7 +400,7 @@ public class SiteAdministrationModule {
             } else if ("info".equalsIgnoreCase(errorLevel)) {
                 logger.info("backup error - " + message);
             } else if ("debug".equalsIgnoreCase(errorLevel)) {
-                logger.debug("backup error - "+message);
+                logger.debug("backup error - " + message);
             } else {
                 logger.error("backup error - " + message);
             }

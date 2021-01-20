@@ -15,8 +15,6 @@
  */
 package org.cricketmsf.microsite.out.cms;
 
-import org.cricketmsf.microsite.out.cms.DefaultRuleEngine;
-import org.cricketmsf.microsite.out.cms.RuleEngineIface;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,12 +35,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.api.ResponseCode;
-import org.cricketmsf.api.Result;
 import org.cricketmsf.api.ResultIface;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.microsite.event.CmsEvent;
 import org.cricketmsf.out.OutboundAdapter;
@@ -57,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * @author greg
  */
 public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIface {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(CmsEmbededAdapter.class);
 
     public static int NOT_INITIALIZED = 0;
@@ -78,7 +75,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     private String fileRoot = null; //cms document files root path in the filesystem
     private String publishedFilesRoot = null;
     String indexFileName = "index.html";
-    
+
     private String defaultLanguage = null; // if not null we will be able to get document in the default language when requested language version is not found
 
     private void initRuleEngine() {
@@ -228,7 +225,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         } else {
             throw new CmsException(CmsException.UNSUPPORTED_STATUS, "unsupported status");
         }
-        if(null==ruleEngine){
+        if (null == ruleEngine) {
             initRuleEngine();
         }
         doc = ruleEngine.processDocument(doc, roles);
@@ -321,7 +318,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
 
     @Override
     public void updateDocument(Document doc, List<String> roles) throws CmsException {
-
+        boolean statusChanged = false;
         //TODO: when status changes from wip to published then doc should be removed from wip table
         if (doc.getLanguage() == null || !supportedLanguages.contains(doc.getLanguage())) {
             throw new CmsException(CmsException.UNSUPPORTED_LANGUAGE);
@@ -342,6 +339,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
 
             }
             if (!doc.getStatus().equals(original.getStatus())) {
+                statusChanged = true;
                 if (doc.getStatus().equals("published")) {
                     doc.setPublished(Instant.now().toString());
                 }
@@ -353,7 +351,14 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             logger.error("error while moving document uid=" + doc.getUid() + " database will be inconsistent");
             throw new CmsException(CmsException.HELPER_EXCEPTION, e.getMessage());
         }
-        Kernel.getInstance().dispatchEvent(new CmsEvent(doc.getUid()));
+        if (statusChanged) {
+            CmsEvent event = new CmsEvent(doc.getUid());
+            event.setProcedure(Procedures.CMS_CONTENT_CHANGED);
+            event.setTimePoint("+1s");
+            Kernel.getInstance().dispatchEvent(event);
+        }
+
+        //Kernel.getInstance().dispatchEvent(new CmsEvent(doc.getUid()));
     }
 
     @Override
@@ -456,7 +461,13 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             logger.error("error while moving document uid=" + doc.getUid() + " database will be inconsistent");
             throw new CmsException(CmsException.HELPER_EXCEPTION, e.getMessage());
         }
-        Kernel.getInstance().dispatchEvent(new CmsEvent(doc.getUid()));
+        if (statusChanged) {
+            CmsEvent event = new CmsEvent(doc.getUid());
+            event.setProcedure(Procedures.CMS_CONTENT_CHANGED);
+            event.setTimePoint("+1s");
+            Kernel.getInstance().dispatchEvent(event);
+        }
+        //Kernel.getInstance().dispatchEvent(new CmsEvent(doc.getUid()));
     }
 
     @Override
@@ -482,7 +493,11 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         if (!removed) {
             throw new CmsException(CmsException.HELPER_EXCEPTION, "not found");
         } else {
-            Kernel.getInstance().dispatchEvent(new CmsEvent(doc.getUid()));
+            CmsEvent event = new CmsEvent(doc.getUid());
+            event.setProcedure(Procedures.CMS_CONTENT_CHANGED);
+            event.setTimePoint("+1s");
+            Kernel.getInstance().dispatchEvent(event);
+            //Kernel.getInstance().dispatchEvent(new CmsEvent(doc.getUid()));
             //TODO: remove path if thera are no more documents with this path 
         }
     }
@@ -616,7 +631,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         byte[] content;
         byte[] emptyContent = {};
         ParameterMapResult result = new ParameterMapResult();
-        result.setData(null!=request.parameters?request.parameters:new HashMap());
+        result.setData(null != request.parameters ? request.parameters : new HashMap());
         String modificationString = request.headers.getFirst("If-Modified-Since");
         Date modificationPoint = null;
         if (modificationString != null) {
@@ -735,7 +750,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         // if not found in CMS
         // read from disk
         if (!fileReady) {
-            System.out.println("READING FILE:"+getWwwRoot() + filePath);
+            System.out.println("READING FILE:" + getWwwRoot() + filePath);
             File file = new File(getWwwRoot() + filePath);
             content = readFile(file);
             if (content.length == 0) {

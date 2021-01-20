@@ -45,6 +45,7 @@ import org.cricketmsf.microsite.event.CmsEvent;
 import org.cricketmsf.microsite.event.UserEvent;
 import org.cricketmsf.microsite.out.auth.Token;
 import org.cricketmsf.microsite.out.cms.ContentRequestProcessor;
+import org.cricketmsf.microsite.out.notification.EmailSenderIface;
 import org.cricketmsf.microsite.out.siteadmin.SiteAdministrationIface;
 import org.cricketmsf.microsite.out.user.User;
 import org.cricketmsf.out.log.LoggerAdapterIface;
@@ -78,9 +79,9 @@ public class Microsite extends Kernel {
     KeyValueDBIface authDB = null;
     AuthAdapterIface authAdapter = null;
     //
-    //EmailSenderIface emailSender = null;
+    EmailSenderIface emailSender = null;
     SubscriberIface queueSubscriber = null;
-    
+
     LoggerAdapterIface gdprLogger = null;
 
     OpenApiIface apiGenerator = null;
@@ -109,12 +110,12 @@ public class Microsite extends Kernel {
         authAdapter = (AuthAdapterIface) getRegistered("AuthAdapter");
         authDB = (KeyValueDBIface) getRegistered("AuthDB");
         //
-        //emailSender = (EmailSenderIface) getRegistered("emailSender");
+        emailSender = (EmailSenderIface) getRegistered("EmailSender");
 
         //queueSubscriber = (SubscriberIface) getRegistered("QueueSubscriber");
         apiGenerator = (OpenApiIface) getRegistered("OpenApi");
         // GDPR
-        gdprLogger = (LoggerAdapterIface)getRegistered("GdprLogger");
+        gdprLogger = (LoggerAdapterIface) getRegistered("GdprLogger");
     }
 
     @Override
@@ -143,7 +144,7 @@ public class Microsite extends Kernel {
         setInitialized(true);
         /*
         dispatchEvent(
-                new Event(this.getName(), "SYSTEM", "mess        try{age", "+10s", getUuid() + " service started")
+                new Event(this.getName(), "SYSTEM", "message", "+10s", getUuid() + " service started")
         );
          */
     }
@@ -194,10 +195,10 @@ public class Microsite extends Kernel {
      *
      * @param event
      * @return ParameterMapResult with the file content as a byte array
-     */    
+     */
     @EventHook(className = "org.cricketmsf.event.HttpEvent", procedure = Procedures.WWW)
     public ResultIface handleWwwRequest(HttpEvent event) {
-        RequestObject request=(RequestObject)event.getData();
+        RequestObject request = (RequestObject) event.getData();
         String language = (String) request.parameters.get("language");
         if (language == null || language.isEmpty()) {
             language = "en";
@@ -211,7 +212,7 @@ public class Microsite extends Kernel {
             HashMap rd = (HashMap) result.getData();
             rd.put("serviceurl", getProperties().get("serviceurl"));
             rd.put("defaultLanguage", getProperties().get("default-language"));
-            rd.put("token", (String)request.parameters.get("tid"));  // fake tokens doesn't pass SecurityFilter
+            rd.put("token", (String) request.parameters.get("tid"));  // fake tokens doesn't pass SecurityFilter
             rd.put("user", request.headers.getFirst("X-user-id"));
             rd.put("environmentName", getName());
             rd.put("cricketversion", getProperties().getOrDefault("cricket-version", ""));
@@ -239,7 +240,7 @@ public class Microsite extends Kernel {
         }
         return result;
     }
-    
+
     /**
      * Return user data
      *
@@ -261,6 +262,33 @@ public class Microsite extends Kernel {
         return userAdapter.handleUpdateRequest((HashMap) event.getData()).procedure(Procedures.USER_UPDATE);
     }
 
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_UPDATED)
+    public Object userUpdated(UserEvent event) {
+        gdprLogger.print("USER DATA UPDATED FOR " + event.getData());
+        return null;
+    }
+
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_REMOVAL_SCHEDULED)
+    public Object userRemoveSheduled(UserEvent event) {
+        try {
+            String uid = (String) event.getData();
+            User user = userAdapter.get(uid);
+            gdprLogger.print("DELETE REQUEST FOR " + user.getNumber());
+            emailSender.send(
+                    user.getEmail(),
+                    "Cricket unregistration confirmed",
+                    "We received a request to remove your account from Cricket Platform with this email address.<br>"
+                    + "Your account is locked now and all data related to your account will be deleted to the end of next work day.<br>"
+                    + "If you received this email by mistake, you can contact our support before this date to stop unregistration procedure."
+            );
+            emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Cricket - unregister", uid);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getMessage() + " while sending confirmation emai");
+        }
+        return null;
+    }
+
     @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_REMOVE)
     public Object userRemove(UserEvent event) {
         return userAdapter.handleDeleteUser((HashMap) event.getData()).procedure(Procedures.USER_REMOVE);
@@ -268,20 +296,41 @@ public class Microsite extends Kernel {
 
     @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_CONFIRM_REGISTRATION)
     public Object userConfirmationRequired(UserEvent event) {
+        try {
+            String uid = (String) event.getData();
+            User user = userAdapter.get(uid);
+            gdprLogger.print("REGISTERED USER " + user.getNumber() + " " + user.getUid());
+            long timeout = 1800 * 1000; //30 minut
+            authAdapter.createConfirmationToken(uid, user.getConfirmString(), timeout);
+            emailSender.send(
+                    user.getEmail(),
+                    "Micrisite registration confirmation",
+                    "We received a request to sign up to Microsite with this email address.<br>"
+                    + "<a href='" + getProperties().get("serviceurl") + "/api/confirm?key=" + user.getConfirmString() + "'>Click here to confirm your registration</a><br>"
+                    + "If you received this email by mistake, simply delete it. You won't be registered if you don't click the confirmation link above."
+            );
+            emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Cricket - registration", uid);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error(e.getMessage() + " while sending confirmation emai");
+        }
         return null;
     }
 
     @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_REGISTRATION_CONFIRMED)
     public Object registrationConfirmed(UserEvent event) {
+        gdprLogger.print("REGISTRATION CONFIRMED FOR " + event.getData());
         return null;
     }
 
     @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_AFTER_REMOVAL)
     public Object userRemoved(UserEvent event) {
+        gdprLogger.print("DELETED USER " + event.getData());
         return null;
     }
 
-    @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedure= Procedures.AUTH_LOGIN)
+    @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedure = Procedures.AUTH_LOGIN)
     public Result authLogin(AuthEvent event) {
         Token token = authAdapter.login(event.getData().get("login"), event.getData().get("password"));
         return new Result(token != null ? token.getToken() : null, Procedures.AUTH_LOGIN);
@@ -304,21 +353,22 @@ public class Microsite extends Kernel {
         boolean ok = authAdapter.refreshToken(event.getData().get("token"));
         return new Result(ok, Procedures.AUTH_REFRESH_TOKEN);
     }
-    
+
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_STATUS)
     public Object getStatusInfo(Event event) {
-        return siteAdmin.getServiceInfo();
+        System.out.println(siteAdmin.getServiceInfo().getData());
+        return null;
     }
-    
+
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SA_ANY)
     public Object systemServiceHandle(Event event) {
         return new SiteAdministrationModule().handleRestEvent(event);
     }
-    
+
     @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CS_GET)
     public Object getPublishedContent(CmsEvent event) {
         try {
-            return new ContentRequestProcessor().processGetPublished((HashMap)event.getData(), contentManager);
+            return new ContentRequestProcessor().processGetPublished((HashMap) event.getData(), contentManager);
         } catch (Exception e) {
             e.printStackTrace();
             StandardResult r = new StandardResult();
@@ -326,11 +376,11 @@ public class Microsite extends Kernel {
             return r;
         }
     }
-    
+
     @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CMS_GET)
     public Object getContent(CmsEvent event) {
         try {
-            return new ContentRequestProcessor().processGet((HashMap)event.getData(), contentManager);
+            return new ContentRequestProcessor().processGet((HashMap) event.getData(), contentManager);
         } catch (Exception e) {
             e.printStackTrace();
             StandardResult r = new StandardResult();
@@ -338,7 +388,7 @@ public class Microsite extends Kernel {
             return r;
         }
     }
-    
+
     @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CMS_POST)
     public Object setContent(CmsEvent event) {
         try {
@@ -350,7 +400,7 @@ public class Microsite extends Kernel {
             return r;
         }
     }
-    
+
     @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CMS_PUT)
     public Object updateContent(CmsEvent event) {
         try {
@@ -362,7 +412,7 @@ public class Microsite extends Kernel {
             return r;
         }
     }
-    
+
     @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CMS_DELETE)
     public Object removeContent(CmsEvent event) {
         try {
@@ -374,55 +424,31 @@ public class Microsite extends Kernel {
             return r;
         }
     }
-    
+
+    @EventHook(className = "org.cricketmsf.microsite.event.CmsEvent", procedure = Procedures.CMS_CONTENT_CHANGED)
+    public Object clearWebCache(CmsEvent event) {
+        try {
+            database.clear("webcache_pl");
+        } catch (KeyValueDBException ex) {
+            logger.warn("Problem while clearing web cache - " + ex.getMessage());
+        }
+        try {
+            database.clear("webcache_en");
+        } catch (KeyValueDBException ex) {
+            logger.warn("Problem while clearing web cache - " + ex.getMessage());
+        }
+        try {
+            database.clear("webcache_fr");
+        } catch (KeyValueDBException ex) {
+            logger.warn("Problem while clearing web cache - " + ex.getMessage());
+        }
+        return null;
+    }
+
     /*
     @EventHook(eventCategory = UserEvent.CATEGORY_USER)
     public void processUserEvent(Event event) {
         switch (event.getType()) {
-            case UserEvent.USER_REGISTERED:     //send confirmation email
-                try {
-                    String uid = (String) event.getPayload();
-                    User user = userAdapter.get(uid);
-                    gdprLog.log(Event.logInfo(event.getId(), "REGISTERED USER " + user.getNumber()));
-                    long timeout = 1800 * 1000; //30 minut
-                    authAdapter.createConfirmationToken(uid, user.getConfirmString(), timeout);
-                    emailSender.send(
-                            user.getEmail(),
-                            "Micrisite registration confirmation",
-                            "We received a request to sign up to Microsite with this email address.<br>"
-                            + "<a href='" + getProperties().get("serviceurl") + "/api/confirm?key=" + user.getConfirmString() + "'>Click here to confirm your registration</a><br>"
-                            + "If you received this email by mistake, simply delete it. You won't be registered if you don't click the confirmation link above."
-                    );
-                    emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Cricket - registration", uid);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), e.getMessage() + " while sending confirmation emai"));
-                }
-                break;
-            case UserEvent.USER_DEL_SHEDULED:   //send confirmation email
-                try {
-                    String uid = (String) event.getPayload();
-                    User user = userAdapter.get(uid);
-                    gdprLog.log(Event.logInfo(event.getId(), "DELETE REQUEST FOR " + user.getNumber()));
-                    emailSender.send(
-                            user.getEmail(),
-                            "Cricket unregistration confirmed",
-                            "We received a request to remove your account from Cricket Platform with this email address.<br>"
-                            + "Your account is locked now and all data related to your account will be deleted to the end of next work day.<br>"
-                            + "If you received this email by mistake, you can contact our support before this date to stop unregistration procedure."
-                    );
-                    emailSender.send((String) getProperties().getOrDefault("admin-notification-email", ""), "Cricket - unregister", uid);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    dispatchEvent(Event.logSevere(this.getClass().getSimpleName(), e.getMessage() + " while sending confirmation emai"));
-                }
-                break;
-            case UserEvent.USER_DELETED:        //TODO: authorization
-                String[] tmpPayload = ((String) event.getPayload()).split(" ");
-                gdprLog.log(Event.logInfo(event.getId(), "DELETED USER " + tmpPayload[0] + " " + tmpPayload[1]));
-                break;
             case UserEvent.USER_RESET_PASSWORD:
                 String payload = null;
                 try {
@@ -442,15 +468,6 @@ public class Microsite extends Kernel {
                     dispatchEvent(Event.logWarning("UserEvent.USER_RESET_PASSWORD", "Malformed payload->" + payload));
                 }
                 gdprLog.log(Event.logInfo(event.getId(), "RESET PASSWORD REQUESTED FOR " + event.getPayload()));
-            case UserEvent.USER_REG_CONFIRMED:  //TODO: update user
-                gdprLog.log(Event.logInfo(event.getId(), "REGISTRATION CONFIRMED FOR " + event.getPayload()));
-                break;
-            case UserEvent.USER_UPDATED:
-                gdprLog.log(Event.logInfo(event.getId(), "USER DATA UPDATED FOR " + event.getPayload()));
-                break;
-            default:
-                dispatchEvent(Event.logInfo(this.getClass().getSimpleName(), "Event recived: " + event.getType()));
-                break;
         }
     }
     @EventHook(eventCategory = Event.CATEGORY_GENERIC)
@@ -458,23 +475,6 @@ public class Microsite extends Kernel {
         switch (event.getType()) {
             case "SHUTDOWN":
                 shutdown();
-                break;
-            case "CONTENT":
-                try {
-                    database.clear("webcache_pl");
-                } catch (KeyValueDBException ex) {
-                    dispatchEvent(Event.logWarning(this, "Problem while clearing web cache - " + ex.getMessage()));
-                }
-                try {
-                    database.clear("webcache_en");
-                } catch (KeyValueDBException ex) {
-                    dispatchEvent(Event.logWarning(this, "Problem while clearing web cache - " + ex.getMessage()));
-                }
-                try {
-                    database.clear("webcache_fr");
-                } catch (KeyValueDBException ex) {
-                    dispatchEvent(Event.logWarning(this, "Problem while clearing web cache - " + ex.getMessage()));
-                }
                 break;
             case "STATUS":
                 System.out.println(printStatus());
@@ -487,7 +487,6 @@ public class Microsite extends Kernel {
         }
     }
      */
-    
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.ANY)
     public Object logEventsNotHandled(Event event) {
         logger.warn("org.cricketmsf.event.Event procedure {} not handled", getProceduresDictionary().getName(Procedures.ANY));

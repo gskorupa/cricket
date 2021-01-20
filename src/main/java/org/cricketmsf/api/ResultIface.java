@@ -33,6 +33,8 @@ public interface ResultIface {
     public void setCode(int code);
     public String getMessage();
     public void setMessage(String message);
+    public String getContentType();
+    public void setContentType(String contentType);    
     public Object getData();
     public void setData(Object data);
     public byte[] getPayload();

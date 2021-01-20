@@ -284,7 +284,7 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
                 event.setProcedure(Procedures.USER_AFTER_REMOVAL);
                 Kernel.getInstance().dispatchEvent(event);
                 result.setCode(ResponseCode.OK);
-                result.setData(uid);
+                result.setData(tmpUser.getNumber()+" "+uid);
             } else {
                 result.setCode(ResponseCode.NOT_FOUND);
             }

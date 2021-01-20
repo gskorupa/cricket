@@ -72,6 +72,14 @@ public class FileResult implements ResultIface {
         this.message = message;
     }
 
+    public String getContentType() {
+        return getHeaders().getFirst("Content-type");
+    }
+
+    public void setContentType(String contentType) {
+        getHeaders().set("Content-type", contentType);
+    }
+
     /**
      * @return the code
      */
@@ -170,12 +178,12 @@ public class FileResult implements ResultIface {
 
     @Override
     public void setProcedure(int procedure) {
-        this.procedure=procedure;
+        this.procedure = procedure;
     }
 
     @Override
     public ResultIface procedure(int procedure) {
-        this.procedure=procedure;
+        this.procedure = procedure;
         return this;
     }
 }
