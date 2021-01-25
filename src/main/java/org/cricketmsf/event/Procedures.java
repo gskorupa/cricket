@@ -8,7 +8,7 @@ public class Procedures implements ProceduresIface {
 
     public static final int UNDEFINED = -1;
     
-    public static final int ANY = 0;
+    public static final int DEFAULT = 0;
     public static final int WWW = 1;
     public static final int GET_STATUS = 2;
     public static final int PRINT_INFO = 3;
@@ -49,7 +49,7 @@ public class Procedures implements ProceduresIface {
     public String getName(int id){
         switch (id){
             case UNDEFINED: return "UNDEFINED";
-            case ANY: return "*";
+            case DEFAULT: return "*";
             case WWW: return "WWW";
             case GET_STATUS: return "GET_STATUS";
             case PRINT_INFO: return "PRINT_INFO";
@@ -87,8 +87,8 @@ public class Procedures implements ProceduresIface {
     public int getId(String name){
         switch (name){
             case "UNDEFINED": return UNDEFINED;
-            case "ANY": return ANY;
-            case "*": return ANY;
+            case "DEFAULT": return DEFAULT;
+            case "*": return DEFAULT;
             case "WWW": return WWW;
             case "GET_STATUS": return GET_STATUS;
             case "PRINT_INFO": return PRINT_INFO;

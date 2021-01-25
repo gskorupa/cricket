@@ -37,7 +37,7 @@ public class FolderObserver extends InboundAdapter implements Adapter, WatchdogI
 
     private static final Logger logger = LoggerFactory.getLogger(FolderObserver.class);
     private String procedureName = "-1";
-    private int procedure = Procedures.ANY;
+    private int procedure = Procedures.DEFAULT;
 
     private String folderName;
     File file;
@@ -61,7 +61,7 @@ public class FolderObserver extends InboundAdapter implements Adapter, WatchdogI
         logger.info("\tpath: " + folderName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
         logger.info("\tsampling-interval: " + samplingInterval);
-        procedureName = properties.getOrDefault("procedure", Kernel.getInstance().getProceduresDictionary().getName(Procedures.ANY));
+        procedureName = properties.getOrDefault("procedure", Kernel.getInstance().getProceduresDictionary().getName(Procedures.DEFAULT));
         procedure = Kernel.getInstance().getProceduresDictionary().getId(procedureName);
         logger.info("\tprocedure: " + procedureName);
         //super.registerEventCategory(procedureName, FileEvent.class.getName());

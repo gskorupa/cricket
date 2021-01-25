@@ -86,7 +86,7 @@ public class AuthApi extends HttpPortedAdapter {
         if (authData != null) {
             try {
                 String[] s = authData.split(" ");
-                if (s.length == 2 && s[0].equalsIgnoreCase("Basic")) {
+                if (s.length == 2 && s[0].equals("Basic")) {
                     String authPair = new String(Base64.getDecoder().decode(s[1]));
                     while (authPair.endsWith("\r") || authPair.endsWith("\n")) {
                         authPair = authPair.substring(0, authPair.length() - 1);
@@ -106,7 +106,7 @@ public class AuthApi extends HttpPortedAdapter {
     }
 
     private ProcedureCall preprocessRefreshToken(RequestObject request) {
-        String token = request.headers.getFirst("Authentication");
+        String token = request.headers.getFirst("Authorization");
         return ProcedureCall.toForward(new AuthEvent(null, null, token), Procedures.AUTH_REFRESH_TOKEN);
     }
 

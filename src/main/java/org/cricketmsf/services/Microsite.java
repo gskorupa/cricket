@@ -487,9 +487,9 @@ public class Microsite extends Kernel {
         }
     }
      */
-    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.ANY)
+    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.DEFAULT)
     public Object logEventsNotHandled(Event event) {
-        logger.warn("org.cricketmsf.event.Event procedure {} not handled", getProceduresDictionary().getName(Procedures.ANY));
+        logger.warn("org.cricketmsf.event.Event procedure {} not handled", getProceduresDictionary().getName(Procedures.DEFAULT));
         return null;
     }
 }

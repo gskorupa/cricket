@@ -39,7 +39,7 @@ public class Event {
     private String initialTimePoint;
     private boolean fromInit = false;
     private Class origin;
-    private int procedure=Procedures.ANY;
+    private int procedure=Procedures.DEFAULT;
 
     /**
      * Creates new Event instance. Sets new id and createdAt parameters.
@@ -55,7 +55,7 @@ public class Event {
         //}
         calculateTimePoint();
         //procedureName = null;
-        procedure=Procedures.ANY;
+        procedure=Procedures.DEFAULT;
         data = null;
         fromInit = false;
         origin = null;

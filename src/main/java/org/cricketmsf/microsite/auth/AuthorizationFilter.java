@@ -33,8 +33,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class SecurityFilter extends Filter {
-    private static final Logger logger = LoggerFactory.getLogger(SecurityFilter.class);
+public class AuthorizationFilter extends Filter {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthorizationFilter.class);
 
     private static final String PERMANENT_TOKEN_PREFIX = "~~";
 
@@ -47,7 +48,7 @@ public class SecurityFilter extends Filter {
 
     @Override
     public String description() {
-        return "Default security filter";
+        return "Microsite security filter";
     }
 
     private void initialize() {
@@ -62,7 +63,7 @@ public class SecurityFilter extends Filter {
             String tmpPath;
             String tmpMethod;
             for (String r1 : r) {
-                if(r1.isEmpty()){
+                if (r1.isEmpty()) {
                     continue;
                 }
                 String[] r2 = r1.split("\\@");
@@ -174,7 +175,7 @@ public class SecurityFilter extends Filter {
      * @param exchange request object
      * @return
      */
-    public SecurityFilterResult checkRequest(HttpExchange exchange) {
+    public AuthorizationFilterResult checkRequest(HttpExchange exchange) {
 
         String path = exchange.getRequestURI().getPath();
         boolean authorizationNotRequired = true;
@@ -185,7 +186,7 @@ public class SecurityFilter extends Filter {
             logger.debug(e.getMessage());
         }
         Map parameters = (Map) exchange.getAttribute("parameters");
-        SecurityFilterResult result = new SecurityFilterResult();
+        AuthorizationFilterResult result = new AuthorizationFilterResult();
         result.user = null;
         result.issuer = null;
 
@@ -212,14 +213,28 @@ public class SecurityFilter extends Filter {
             return result;
         }
 
-        String tokenID = exchange.getRequestHeaders().getFirst("Authentication");
+        String tokenID = null;
+        String[] tokenHeader = exchange.getRequestHeaders().getFirst("Authorization").split(" ");
+        if (tokenHeader.length == 2) {
+            switch (tokenHeader[0]) {
+                case "ApiKey":
+                    tokenID=tokenHeader[1];
+                    break;
+                case "Bearer":
+                    // OAuth not implemented
+                    break;
+            }
+        }else if(tokenHeader.length==1){
+            tokenID=tokenHeader[0]; // Deprecated
+        }
+
         User user = null;
         User issuer = null;
         if (tokenID == null || tokenID.isEmpty()) {
             try {
                 if (null != parameters) {
                     tokenID = (String) parameters.get("tid");
-                    if (null!=tokenID && tokenID.endsWith("/")) {
+                    if (null != tokenID && tokenID.endsWith("/")) {
                         tokenID = tokenID.substring(0, tokenID.length() - 1);
                     }
                 }
@@ -285,7 +300,7 @@ public class SecurityFilter extends Filter {
     @Override
     public void doFilter(HttpExchange exchange, Chain chain)
             throws IOException {
-        SecurityFilterResult result = null;
+        AuthorizationFilterResult result = null;
         try {
             result = checkRequest(exchange);
         } catch (Exception e) {

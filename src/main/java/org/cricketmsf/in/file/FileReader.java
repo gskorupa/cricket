@@ -36,7 +36,7 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
 
     private static final Logger logger = LoggerFactory.getLogger(FileReader.class);
     private String procedureName = "-1";
-    private int procedure = Procedures.ANY;
+    private int procedure = Procedures.DEFAULT;
 
     private String fileName;
     File file;
@@ -59,7 +59,7 @@ public class FileReader extends InboundAdapter implements Adapter, WatchdogIface
         logger.info("\tpath: " + fileName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "1000"));
         logger.info("\tsampling-interval: " + samplingInterval);
-        procedureName = properties.getOrDefault("procedure", Kernel.getInstance().getProceduresDictionary().getName(Procedures.ANY));
+        procedureName = properties.getOrDefault("procedure", Kernel.getInstance().getProceduresDictionary().getName(Procedures.DEFAULT));
         procedure = Kernel.getInstance().getProceduresDictionary().getId(procedureName);
         logger.info("\tprocedure: " + procedureName);
         //super.registerEventCategory(procedureName, FileEvent.class.getName());

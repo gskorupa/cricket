@@ -45,7 +45,7 @@ public class StandardResult implements ResultIface {
     private Headers headers;
     private long responseTime = 0;
     //private String procedureName;
-    private int procedure=Procedures.ANY;
+    private int procedure=Procedures.DEFAULT;
 
     public StandardResult() {
         setCode(ResponseCode.OK);

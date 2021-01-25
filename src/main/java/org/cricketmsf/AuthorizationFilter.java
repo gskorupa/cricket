@@ -25,7 +25,7 @@ import java.io.IOException;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class SecurityFilter extends Filter {
+public class AuthorizationFilter extends Filter {
 
     private int errorCode = 200;
     private String errorMessage = "";
@@ -41,8 +41,8 @@ public class SecurityFilter extends Filter {
      * @param exchange request object
      * @return
      */
-    public SecurityFilterResult checkRequest(HttpExchange exchange) {
-        SecurityFilterResult result = new SecurityFilterResult();
+    public AuthorizationFilterResult checkRequest(HttpExchange exchange) {
+        AuthorizationFilterResult result = new AuthorizationFilterResult();
         // below is simple example how to ovetwrite this method
         /*
         boolean problemDetected = false;

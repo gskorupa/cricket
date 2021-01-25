@@ -136,7 +136,7 @@ function getData(url, query, token, callback, eventListener, errName) {
     oReq.open("get", url, true);
     if (token != null) {
         oReq.withCredentials = true;
-        oReq.setRequestHeader("Authentication", token);
+        oReq.setRequestHeader("Authorization", "ApiKey "+token);
     }
     app.requests++;
     eventListener.trigger(getDataCallEventName(null));
@@ -192,7 +192,7 @@ function sendData(data, method, url, token, callback, eventListener, errName) {
     oReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     if (token != null) {
         oReq.withCredentials = true;
-        oReq.setRequestHeader("Authentication", token);
+        oReq.setRequestHeader("Authorization", "ApiKey "+token);
     }
     oReq.send(urlEncodedData);
     return false;
@@ -239,7 +239,7 @@ function sendFormData(formData, method, url, token, callback, eventListener, err
     oReq.open(method, url);
     if (token != null) {
         oReq.withCredentials = true;
-        oReq.setRequestHeader("Authentication", token);
+        oReq.setRequestHeader("Authorization", "ApiKey "+token);
     }
     oReq.send(formData);
     return false;
@@ -282,7 +282,7 @@ function deleteData(url, token, callback, eventListener, successEventName, error
     oReq.open("DELETE", url, true);
     if (token != null) {
         oReq.withCredentials = true;
-        oReq.setRequestHeader("Authentication", token);
+        oReq.setRequestHeader("Authorization", "ApiKey "+token);
     }
     oReq.send(null);
     return false;
@@ -350,7 +350,7 @@ function loginSubmit(oFormElement, eventListener, successEventName, errName) {
     eventListener.trigger(getDataCallEventName(null));
     oReq.open("post", app.authAPI);
     oReq.withCredentials = true;
-    oReq.setRequestHeader("Authentication", "Basic " + sEncoded);
+    oReq.setRequestHeader("Authorization", "Basic " + sEncoded);
     oReq.setRequestHeader("Accept", "text/plain");
     oReq.send("action=login");
     return false;

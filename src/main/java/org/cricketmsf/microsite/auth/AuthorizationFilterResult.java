@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.cricketmsf;
+package org.cricketmsf.microsite.auth;
+
+import org.cricketmsf.microsite.out.user.User;
 
 /**
  *
  * @author greg
  */
-public class SecurityFilterResult {
-    public int code = 0;
+public class AuthorizationFilterResult {
+    public int code = 200;
     public String message = "";
+    public User user;
+    public User issuer;
 }

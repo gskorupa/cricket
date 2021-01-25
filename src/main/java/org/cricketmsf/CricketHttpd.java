@@ -119,7 +119,7 @@ public class CricketHttpd implements HttpdIface {
                     }
                     context.getFilters().add(new MaintenanceFilter());
                     context.getFilters().add(new ParameterFilter());
-                    context.getFilters().add(service.getSecurityFilter());
+                    context.getFilters().add(service.getAuthorizationFilter());
                 }
             }
         } catch (NoSuchAlgorithmException | IOException | KeyStoreException | CertificateException | UnrecoverableKeyException | KeyManagementException ex) {
