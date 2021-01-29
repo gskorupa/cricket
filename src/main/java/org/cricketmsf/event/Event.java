@@ -28,10 +28,10 @@ import org.cricketmsf.Kernel;
  * @author Grzegorz Skorupa
  */
 public class Event {
-
+    
     private Long id = null;
-    private String timePoint = null; // rename to timeDefinition
-    private long calculatedTimePoint = -1; // rename to timeMillis
+    private String timeDefinition = null;
+    private long timeMillis = -1;
     private long createdAt = -1;
     private boolean cyclic = false;
     private Object data;
@@ -39,7 +39,7 @@ public class Event {
     private String initialTimePoint;
     private boolean fromInit = false;
     private Class origin;
-    private int procedure=Procedures.DEFAULT;
+    private int procedure = Procedures.DEFAULT;
 
     /**
      * Creates new Event instance. Sets new id and createdAt parameters.
@@ -49,48 +49,39 @@ public class Event {
             this.id = Kernel.getEventId();
         }
         createdAt = System.currentTimeMillis();
-        //if (null != Kernel.getInstance()) {
-        //    serviceId = Kernel.getInstance().getId();
-        //    serviceUuid = Kernel.getInstance().getUuid();
-        //}
-        calculateTimePoint();
+        //calculateTimePoint();
         //procedureName = null;
-        procedure=Procedures.DEFAULT;
+        procedure = Procedures.DEFAULT;
         data = null;
         fromInit = false;
         origin = null;
     }
     
-    //public Event(String procedureName){
-    public Event(int procedure){
-        this(procedure, null, null, false, null);
+    public Event(int procedure) {
+        this(procedure, -1, null, false, null);
     }
 
     /**
-     * Used to create new Event instance. Values of id and createdAt parameters
-     * are set within the constructor. Parameter timePoint can be one of two
-     * forms: a) "+9u" defines distance from event creation. "9" - number, "u" -
+     * Used to create new Event instance.Values of id and createdAt parameters
+     * are set within the constructor.Parameter timePoint can be one of two
+     * forms: a) "+9u" defines distance from event creation."9" - number, "u" -
      * unit (s,m,h,d - seconds, minutes, hours, days) where "9" means 10 seconds
      * after the event creation b) "yyyy.MM.dd HH:mm:ss Z" defines exact time
      * (see: SimpleDateFormat) )
      *
+     * @param procedure
      * @param timePoint defines when this event should happen.
      * @param data holds additional data
+     * @param fromInit
+     * @param origin
      */
-    //public Event(String procedureName, String timePoint, Object data, boolean fromInit, Class origin) {
     public Event(int procedure, String timePoint, Object data, boolean fromInit, Class origin) {
         this.id = Kernel.getEventId();
         this.procedure = procedure;
-        /*
-        if (null != Kernel.getInstance()) {
-            this.serviceId = Kernel.getInstance().getId();
-            this.serviceUuid = Kernel.getInstance().getUuid();
-        }
-         */
         if (timePoint != null && timePoint.isEmpty()) {
-            this.timePoint = null;
+            this.timeDefinition = null;
         } else {
-            this.timePoint = timePoint;
+            this.timeDefinition = timePoint;
         }
         createdAt = System.currentTimeMillis();
         calculateTimePoint();
@@ -98,16 +89,28 @@ public class Event {
         this.fromInit = fromInit;
         this.origin = origin;
     }
+    
+    public Event(int procedure, long timePoint, Object data, boolean fromInit, Class origin) {
+        this.id = Kernel.getEventId();
+        this.procedure = procedure;
+        createdAt = System.currentTimeMillis();
+        calculateTimePoint(timePoint);
+        setData(data);
+        this.fromInit = fromInit;
+        this.origin = origin;
+    }
 
-    //public Event(Class origin, String name, String timePoint, Object data) {
     public Event(Class origin, int procedure, String timePoint, Object data) {
         this(procedure, timePoint, data, false, origin);
     }
+    public Event(Class origin, int procedure, long timePoint, Object data) {
+        this(procedure, timePoint, data, false, origin);
+    }
 
-    //public Event(String name, String timePoint, Object data) {
-    //    this(name, timePoint, data, false, null);
-    //}
     public Event(Object origin, String timePoint, Object data) {
+        this(-1, timePoint, data, false, null);
+    }
+    public Event(Object origin, long timePoint, Object data) {
         this(-1, timePoint, data, false, null);
     }
 
@@ -128,37 +131,45 @@ public class Event {
     /**
      * @return the timePoint
      */
-    public String getTimePoint() {
-        return timePoint;
+    public String getTimeDefinition() {
+        return timeDefinition;
     }
-
+    
     public boolean isFutureEvent() {
-        return getTimePoint() != null;
+        return getTimeDefinition() != null;
     }
 
     /**
-     * @param timePoint the timePoint to set
+     * @param timeDefinition the timePoint to set
      */
-    public void setTimePoint(String timePoint) {
-        this.timePoint = timePoint;
+    public void setTimeDefinition(String timeDefinition) {
+        this.timeDefinition = timeDefinition;
     }
     
-    public Event timePoint(String timePointDefinition){
-        setTimePoint(timePointDefinition);
+    public Event timePoint(String timePointDefinition) {
+        setTimeDefinition(timePointDefinition);
         calculateTimePoint();
         return this;
     }
-
+    
     public void reschedule() {
         if (isCyclic()) {
             calculateTimePoint();
         }
     }
-
+    
+    private void calculateTimePoint(long timeDelay) {
+        if(timeDelay>-1){
+            setTimeMillis(timeDelay+createdAt);
+        }else{
+            setTimeMillis(-1);
+        }
+    }
+    
     private void calculateTimePoint() {
-        String dateDefinition = getTimePoint();
+        String dateDefinition = getTimeDefinition();
         if (dateDefinition == null) {
-            calculatedTimePoint = -1;
+            setTimeMillis(-1);
             return;
         }
         long delay;
@@ -167,41 +178,41 @@ public class Event {
             try {
                 delay = Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1));
             } catch (NumberFormatException e) {
-                setCalculatedTimePoint(-1);
+                setTimeMillis(-1);
                 return;
             }
             String unit = dateDefinition.substring(dateDefinition.length() - 1);
             long multiplicator = 1;
             switch (unit) {
-                case "d":
+                case "d": //day
                     multiplicator = 24 * 60 * 60000;
                     break;
-                case "h":
+                case "h": //hour
                     multiplicator = 60 * 60000;
                     break;
-                case "m":
+                case "m": //minute
                     multiplicator = 60000;
                     break;
-                case "s":
+                case "s": //second
                     multiplicator = 1000;
                     break;
                 default:
-                    setCalculatedTimePoint(-1);
+                    setTimeMillis(-1);
                     return;
             }
             if (isCyclic()) {
-                setCalculatedTimePoint(multiplicator * delay + System.currentTimeMillis());
+                setTimeMillis(multiplicator * delay + createdAt);
             } else {
-                setCalculatedTimePoint(multiplicator * delay + getCreatedAt());
+                setTimeMillis(multiplicator * delay + getCreatedAt());
             }
         } else {
             //parse date and replace with delay from now
             Date target;
             try {
                 target = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss Z").parse(dateDefinition);
-                setCalculatedTimePoint(target.getTime());
+                setTimeMillis(target.getTime());
             } catch (ParseException e) {
-                setCalculatedTimePoint(-1);
+                setTimeMillis(-1);
             }
         }
     }
@@ -209,17 +220,17 @@ public class Event {
     /**
      * @return the calculatedTimePoint
      */
-    public long getCalculatedTimePoint() {
-        return calculatedTimePoint;
+    public long getTimeMillis() {
+        return timeMillis;
     }
 
     /**
-     * @param calculatedTimePoint the calculatedTimePoint to set
+     * @param timeMillis the calculatedTimePoint to set
      */
-    public void setCalculatedTimePoint(long calculatedTimePoint) {
-        this.calculatedTimePoint = calculatedTimePoint;
+    public void setTimeMillis(long timeMillis) {
+        this.timeMillis = timeMillis;
     }
-
+    
     public void setCalculatedTimePoint(Delay delay, long now) {
         long time = now;
         switch (delay.getUnit()) {
@@ -241,7 +252,7 @@ public class Event {
             default:
                 time = 0;
         }
-        calculatedTimePoint = time;
+        timeMillis = time;
     }
 
     /**
@@ -271,11 +282,11 @@ public class Event {
     public void setCyclic(boolean cyclic) {
         this.cyclic = cyclic;
     }
-
+    
     public String toJson() {
         return JsonWriter.objectToJson(this);
     }
-
+    
     public static Event fromJson(String json) {
         return (Event) JsonReader.jsonToJava(json);
     }
@@ -293,11 +304,11 @@ public class Event {
     public void setData(Object data) {
         this.data = data;
     }
-
+    
     public String serialize() {
         return JsonWriter.objectToJson(getData());
     }
-
+    
     public void deserialize(String jsonString) {
         setData(JsonReader.jsonToJava(jsonString));
     }
@@ -309,14 +320,15 @@ public class Event {
     public void setProcedureName(String procedureName) {
         this.procedureName = procedureName;
     }
-*/
+     */
     public int getProcedure() {
         return procedure;
     }
+    
     public void setProcedure(int procedure) {
         this.procedure = procedure;
     }
-    
+
     /**
      * @return the initialTimePoint
      */
@@ -358,5 +370,5 @@ public class Event {
     public void setOrigin(Class origin) {
         this.origin = origin;
     }
-
+    
 }

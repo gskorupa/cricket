@@ -138,11 +138,11 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     @Override
     public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
         try {
-            if (event.getTimePoint() == null) {
+            if (event.getTimeDefinition() == null) {
                 logger.debug("event.getTimePoint() is null. It should not happen. {} {} {} {}",
                         event.getClass().getSimpleName(),
                         event.getProcedure(),
-                        event.getTimePoint(),
+                        event.getTimeDefinition(),
                         event.getInitialTimePoint());
                 return false;
             }
@@ -164,8 +164,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                 @Override
                 public void run() {
                     // we should reset timepoint to prevent sending this event back from the service
-                    String remembered = ev.getTimePoint();
-                    ev.setTimePoint(null);
+                    String remembered = ev.getTimeDefinition();
+                    ev.setTimeDefinition(null);
                     ev.setInitialTimePoint(remembered);
                     // we should wait until Kernel finishes initialization process
                     while (!Kernel.getInstance().isStarted()) {
@@ -189,9 +189,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                                 remembered = remembered.substring(pos + 1);
                             }
                             if (databaseRs.containsKey(""+ev.getProcedure())) {
-                                ev.setTimePoint((String) databaseRs.get(""+ev.getProcedure()));
+                                ev.setTimeDefinition((String) databaseRs.get(""+ev.getProcedure()));
                             } else {
-                                ev.setTimePoint(remembered);
+                                ev.setTimeDefinition(remembered);
                             }
                             ev.reschedule();
                             handleEvent(ev);
@@ -241,7 +241,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         Delay d = new Delay();
         if (restored) {
             d.setUnit(TimeUnit.MILLISECONDS);
-            long delay = ev.getCalculatedTimePoint() - System.currentTimeMillis();
+            long delay = ev.getTimeMillis() - System.currentTimeMillis();
             if (delay < MINIMAL_DELAY) {
                 delay = MINIMAL_DELAY;
             }
@@ -250,7 +250,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         }
 
         boolean wrongFormat = false;
-        String dateDefinition = ev.getTimePoint();
+        String dateDefinition = ev.getTimeDefinition();
         if (dateDefinition.startsWith("+") || dateDefinition.startsWith("*")) {
             try {
                 d.setDelay(Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1)));
@@ -392,7 +392,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                         cls = Class.forName(firstParam);
                         Event event = (Event) cls.getConstructor().newInstance();
                         event.setProcedure(Integer.parseInt(params[1]));
-                        event.setTimePoint(params[2]);
+                        event.setTimeDefinition(params[2]);
                         if (params.length > 3) {
                             event.setData(params[3]);
                         }
@@ -417,7 +417,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public void dispatch(Event event) throws DispatcherException {
-        if (event.getTimePoint() == null) {
+        if (event.getTimeMillis()==-1) {
             Kernel.getInstance().getEventProcessingResult(event);
         } else {
             handleEvent(event);

@@ -218,13 +218,13 @@ public abstract class Kernel {
 
     public ResultIface dispatchEvent(Event event) {
         try {
-            if (null != event.getTimePoint() && !event.getTimePoint().isEmpty() && null != schedulerAdapter) {
+            if (-1 != event.getTimeMillis() && null != schedulerAdapter) {
                 schedulerAdapter.handleEvent(event);
             } else {
                 eventDispatcher.dispatch(event);
             }
             return null;
-        } catch (NullPointerException | DispatcherException ex) {
+        }catch (NullPointerException | DispatcherException ex) {
             return getEventProcessingResult(event);
         } catch (Exception ex) {
             ex.printStackTrace();
