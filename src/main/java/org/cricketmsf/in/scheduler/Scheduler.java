@@ -36,6 +36,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import org.cricketmsf.event.Procedures;
 import org.cricketmsf.exception.DispatcherException;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
 import org.slf4j.Logger;
@@ -51,7 +52,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     //private String storagePath;
     private String fileName;
-    private String reshedulingFile;
+    private String reschedulingFile;
     private KeyValueStore database;
     private KeyValueStore databaseRs;
     protected boolean restored = false;
@@ -59,7 +60,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     private String initialTasks;
     private ConcurrentHashMap<String, String> killList;
 
-    private long MINIMAL_DELAY = 1000;
+    private long MINIMAL_DELAY = 0;
 
     private ThreadFactory factory = Kernel.getInstance().getThreadFactory();
     public final ScheduledExecutorService scheduler
@@ -76,40 +77,22 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        //setStoragePath(properties.get("path"));
-        //logger.info("\tpath: " + getStoragePath());
-        // fix to handle '.'
-        //TODO: ?
-        //if (getStoragePath().startsWith(".")) {
-        //    setStoragePath(System.getProperty("user.dir") + getStoragePath().substring(1));
-        //}
         setFileName(properties.get("file") + ".xml");
-        reshedulingFile = properties.get("file") + "-reschedule.xml";
+        reschedulingFile = properties.get("file") + "-reschedule.xml";
         logger.info("\tfile: " + getFileName());
-        /*String pathSeparator = System.getProperty("file.separator");
-        setStoragePath(
-                getStoragePath().endsWith(pathSeparator)
-                ? getStoragePath() + getFileName()
-                : getStoragePath() + pathSeparator + getFileName()
-        );
-         */
         logger.info("\tscheduler database file location: " + getFileName());
-
         initialTasks = properties.getOrDefault("init", "");
         logger.info("\tinit: " + initialTasks);
-
         properties.put("init", initialTasks);
-
         database = new KeyValueStore();
         database.setStoragePath(getFileName());
         database.read();
         setRestored(database.getSize() > 0);
         databaseRs = new KeyValueStore();
-        databaseRs.setStoragePath(reshedulingFile);
+        databaseRs.setStoragePath(reschedulingFile);
         databaseRs.read();
         processDatabase();
         killList = new ConcurrentHashMap<>();
-
     }
 
     @Override
@@ -117,15 +100,6 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         initScheduledTasks();
     }
 
-    /*private void setStoragePath(String storagePath) {
-        this.storagePath = storagePath;
-    }
-    
-
-    private String getStoragePath() {
-        return storagePath;
-    }
-     */
     @Override
     public boolean handleEvent(Event event) {
         return handleEvent(event, false, false);
@@ -137,12 +111,15 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
+        if(null==event){
+            return false;
+        }
         try {
-            if (event.getTimeDefinition() == null) {
-                logger.debug("event.getTimePoint() is null. It should not happen. {} {} {} {}",
+            if (event.getTimeMillis() < 0) {
+                logger.debug("event.getTimeMillis() < 0. It should not happen. {} {} {} {}",
                         event.getClass().getSimpleName(),
                         event.getProcedure(),
-                        event.getTimeDefinition(),
+                        event.getTimeMillis(),
                         event.getInitialTimePoint());
                 return false;
             }
@@ -157,14 +134,14 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                 }
             }
 
-            final Runnable runnable;
-            runnable = new Runnable() {
+            final Runnable runnable = new Runnable() {
                 Event ev;
 
                 @Override
                 public void run() {
                     // we should reset timepoint to prevent sending this event back from the service
                     String remembered = ev.getTimeDefinition();
+                    long rememberedTimepoint = ev.getTimeMillis();
                     ev.setTimeDefinition(null);
                     ev.setInitialTimePoint(remembered);
                     // we should wait until Kernel finishes initialization process
@@ -188,8 +165,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                             if (pos > 0) {
                                 remembered = remembered.substring(pos + 1);
                             }
-                            if (databaseRs.containsKey(""+ev.getProcedure())) {
-                                ev.setTimeDefinition((String) databaseRs.get(""+ev.getProcedure()));
+                            if (databaseRs.containsKey("" + ev.getProcedure())) {
+                                ev.setTimeDefinition((String) databaseRs.get("" + ev.getProcedure()));
                             } else {
                                 ev.setTimeDefinition(remembered);
                             }
@@ -238,52 +215,52 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     }
 
     private Delay getDelayForEvent(Event ev, boolean restored) {
-        Delay d = new Delay();
+        Delay delay = new Delay();
         if (restored) {
-            d.setUnit(TimeUnit.MILLISECONDS);
-            long delay = ev.getTimeMillis() - System.currentTimeMillis();
-            if (delay < MINIMAL_DELAY) {
-                delay = MINIMAL_DELAY;
+            delay.setUnit(TimeUnit.MILLISECONDS);
+            long d = ev.getTimeMillis() - System.currentTimeMillis();
+            if (d < MINIMAL_DELAY) {
+                d = MINIMAL_DELAY;
             }
-            d.setDelay(delay);
-            return d;
+            delay.setDelay(d);
+            return delay;
         }
 
         boolean wrongFormat = false;
         String dateDefinition = ev.getTimeDefinition();
         if (dateDefinition.startsWith("+") || dateDefinition.startsWith("*")) {
             try {
-                d.setDelay(Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1)));
+                delay.setDelay(Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1)));
             } catch (NumberFormatException e) {
                 wrongFormat = true;
             }
             String unit = dateDefinition.substring(dateDefinition.length() - 1);
             switch (unit) {
                 case "d":
-                    d.setUnit(TimeUnit.DAYS);
+                    delay.setUnit(TimeUnit.DAYS);
                     break;
                 case "h":
-                    d.setUnit(TimeUnit.HOURS);
+                    delay.setUnit(TimeUnit.HOURS);
                     break;
                 case "m":
-                    d.setUnit(TimeUnit.MINUTES);
+                    delay.setUnit(TimeUnit.MINUTES);
                     break;
                 case "s":
-                    d.setUnit(TimeUnit.SECONDS);
+                    delay.setUnit(TimeUnit.SECONDS);
                     break;
                 default:
                     wrongFormat = true;
             }
         } else {
             //parse date and replace with delay from now
-            d.setUnit(TimeUnit.MILLISECONDS);
-            d.setDelay(getDelay(dateDefinition));
+            delay.setUnit(TimeUnit.MILLISECONDS);
+            delay.setDelay(getDelay(dateDefinition));
         }
         if (wrongFormat) {
             logger.info("WARNING unsuported delay format: " + dateDefinition);
             return null;
         }
-        return d;
+        return delay;
     }
 
     private long getDelay(String dateStr) {
@@ -382,15 +359,17 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         String[] tasks;
         String firstParam;
         if (initialTasks != null && !initialTasks.isEmpty()) {
+            Event event;
             tasks = initialTasks.split(";");
             for (String task : tasks) {
                 params = task.split(",");
                 firstParam = params[0];
                 if (firstParam.contains(".")) {
+                    //event class name is provided
                     Class cls;
                     try {
                         cls = Class.forName(firstParam);
-                        Event event = (Event) cls.getConstructor().newInstance();
+                        event = (Event) cls.getConstructor().newInstance();
                         event.setProcedure(Integer.parseInt(params[1]));
                         event.setTimeDefinition(params[2]);
                         if (params.length > 3) {
@@ -400,24 +379,30 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                         event.setOrigin(this.getClass());
                     } catch (NoSuchMethodException | InvocationTargetException | ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
                         logger.warn(ex.getMessage());
+                        event = null;
                     }
                 } else {
-                    handleEvent(
-                            new Event(
-                                    Integer.parseInt(firstParam), //name
-                                    params[1], //timePoint
-                                    params.length > 2 ? params[2] : null, //data
-                                    true,
-                                    this.getClass()
-                            ));
+                    int procedureNumber = Procedures.DEFAULT;
+                    try {
+                        procedureNumber = Integer.parseInt(firstParam);
+                    } catch (NumberFormatException ex) {
+                    }
+                    event = new Event(
+                            procedureNumber,
+                            params[1], //timePoint
+                            params.length > 2 ? params[2] : null, //data
+                            true,
+                            this.getClass()
+                    );
                 }
+                handleEvent(event);
             }
         }
     }
 
     @Override
     public void dispatch(Event event) throws DispatcherException {
-        if (event.getTimeMillis()==-1) {
+        if (event.getTimeMillis() < 0) {
             Kernel.getInstance().getEventProcessingResult(event);
         } else {
             handleEvent(event);

@@ -165,7 +165,6 @@ public abstract class Kernel {
     }
 
     private String getHookMethodNameForPort(String className, int procedure) {
-        //return portEventHookMethods.get((Procedures.DEFAULT == procedure ? getProceduresDictionary().getName(Procedures.DEFAULT) : getProceduresDictionary().getName(procedure)) + "@" + className);
         String result;
         result = portEventHookMethods.get(getProceduresDictionary().getName(procedure).concat("@").concat(className));
         if (null == result) {
@@ -183,18 +182,12 @@ public abstract class Kernel {
         try {
             Method m;
             methodName = getHookMethodNameForPort(event.getClass().getName(), procedure);
-            //if (null != methodName) {
-            //    m = getClass().getMethod(methodName, event.getClass());
-            //    return (ResultIface) m.invoke(this, event);
-            //} else {
-            //    methodName = getHookMethodNameForPort(event.getClass().getName(), Procedures.DEFAULT);
                 if (null != methodName) {
                     m = getClass().getMethod(methodName, event.getClass());
                     return (ResultIface) m.invoke(this, event);
                 } else {
                     LOGGER.warn("Don't know how to handle {} procedure {} fired by {}", event.getClass().getName(), procedure, event.getOrigin().getName());
                 }
-            //}
         } catch (IllegalAccessException | NoSuchMethodException e) {
             LOGGER.warn("Handler method {} not compatible with event class {}", methodName, event.getClass().getName());
         } catch (InvocationTargetException e) {
@@ -383,7 +376,7 @@ public abstract class Kernel {
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.http.HttpPortedAdapter) {
                         setHttpHandlerLoaded(true);
                     } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.websocket.WebsocketAdapter) {
-
+                        //TODO
                     } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.InboundAdapter) {
                         setInboundAdaptersLoaded(true);
                     }

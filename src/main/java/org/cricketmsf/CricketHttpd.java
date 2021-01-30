@@ -55,7 +55,7 @@ public class CricketHttpd implements HttpdIface {
         String host = service.getHost();
         int backlog = 0;
         try {
-            backlog = Integer.parseInt((String) service.getProperties().getOrDefault("threads", "0"));
+            backlog = Integer.parseInt((String) service.getProperties().getOrDefault("threads", "256"));
         } catch (NumberFormatException | ClassCastException e) {
         }
         keystore = (String) service.getProperties().getOrDefault("keystore", "");

@@ -64,11 +64,16 @@ public class InboundAdapter implements Runnable, InboundAdapterIface {
     public void run() {
     }
     
-    @Override
+    /**
+     *
+     * @param input
+     * @return
+     */
+    /*@Override
     public Object handleInput(Object input){
         return null;
     }
-
+*/
     protected Result handle(String method, String payload) {
         return null;
     }

@@ -35,5 +35,35 @@ public class Tester extends HttpPortedAdapter {
         logger.info(dumpRequest(request));
         return ProcedureCall.toRespond(ResponseCode.OK, "");
     }
+    
+        public static String dumpRequest(RequestObject req) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("************** REQUEST ****************").append("\r\n");
+        sb.append("URI:").append(req.uri).append("\r\n");
+        sb.append("PATHEXT:").append(req.pathExt).append("\r\n");
+        sb.append("METHOD:").append(req.method).append("\r\n");
+        sb.append("ACCEPT:").append(req.acceptedResponseType).append("\r\n");
+        sb.append("CLIENT IP:").append(req.clientIp).append("\r\n");
+        sb.append("***BODY:").append("\r\n");
+        sb.append(req.body).append("\r\n");
+        sb.append("***BODY.").append("\r\n");
+        sb.append("***HEADERS:").append("\r\n");
+        req.headers.keySet().forEach(key -> {
+            sb.append(key)
+                    .append(":")
+                    .append(req.headers.getFirst(key))
+                    .append("\r\n");
+        });
+        sb.append("***HEADERS.").append("\r\n");
+        sb.append("***PARAMETERS:").append("\r\n");
+        req.parameters.keySet().forEach(key -> {
+            sb.append(key)
+                    .append(":")
+                    .append(req.parameters.get(key))
+                    .append("\r\n");
+        });
+        sb.append("***PARAMETERS.").append("\r\n");
+        return sb.toString();
+    }
 
 }

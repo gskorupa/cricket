@@ -28,7 +28,7 @@ import org.cricketmsf.Kernel;
  * @author Grzegorz Skorupa
  */
 public class Event {
-    
+
     private Long id = null;
     private String timeDefinition = null;
     private long timeMillis = -1;
@@ -56,7 +56,7 @@ public class Event {
         fromInit = false;
         origin = null;
     }
-    
+
     public Event(int procedure) {
         this(procedure, -1, null, false, null);
     }
@@ -84,12 +84,12 @@ public class Event {
             this.timeDefinition = timePoint;
         }
         createdAt = System.currentTimeMillis();
+        this.fromInit = fromInit;
         calculateTimePoint();
         setData(data);
-        this.fromInit = fromInit;
         this.origin = origin;
     }
-    
+
     public Event(int procedure, long timePoint, Object data, boolean fromInit, Class origin) {
         this.id = Kernel.getEventId();
         this.procedure = procedure;
@@ -103,6 +103,7 @@ public class Event {
     public Event(Class origin, int procedure, String timePoint, Object data) {
         this(procedure, timePoint, data, false, origin);
     }
+
     public Event(Class origin, int procedure, long timePoint, Object data) {
         this(procedure, timePoint, data, false, origin);
     }
@@ -110,6 +111,7 @@ public class Event {
     public Event(Object origin, String timePoint, Object data) {
         this(-1, timePoint, data, false, null);
     }
+
     public Event(Object origin, long timePoint, Object data) {
         this(-1, timePoint, data, false, null);
     }
@@ -134,7 +136,7 @@ public class Event {
     public String getTimeDefinition() {
         return timeDefinition;
     }
-    
+
     public boolean isFutureEvent() {
         return getTimeDefinition() != null;
     }
@@ -145,30 +147,30 @@ public class Event {
     public void setTimeDefinition(String timeDefinition) {
         this.timeDefinition = timeDefinition;
     }
-    
+
     public Event timePoint(String timePointDefinition) {
         setTimeDefinition(timePointDefinition);
         calculateTimePoint();
         return this;
     }
-    
+
     public void reschedule() {
         if (isCyclic()) {
             calculateTimePoint();
         }
     }
-    
+
     private void calculateTimePoint(long timeDelay) {
-        if(timeDelay>-1){
-            setTimeMillis(timeDelay+createdAt);
-        }else{
+        if (timeDelay > -1) {
+            setTimeMillis(timeDelay + createdAt);
+        } else {
             setTimeMillis(-1);
         }
     }
-    
+
     private void calculateTimePoint() {
         String dateDefinition = getTimeDefinition();
-        if (dateDefinition == null) {
+        if (fromInit && dateDefinition == null) {
             setTimeMillis(-1);
             return;
         }
@@ -230,7 +232,7 @@ public class Event {
     public void setTimeMillis(long timeMillis) {
         this.timeMillis = timeMillis;
     }
-    
+
     public void setCalculatedTimePoint(Delay delay, long now) {
         long time = now;
         switch (delay.getUnit()) {
@@ -282,11 +284,11 @@ public class Event {
     public void setCyclic(boolean cyclic) {
         this.cyclic = cyclic;
     }
-    
+
     public String toJson() {
         return JsonWriter.objectToJson(this);
     }
-    
+
     public static Event fromJson(String json) {
         return (Event) JsonReader.jsonToJava(json);
     }
@@ -304,11 +306,11 @@ public class Event {
     public void setData(Object data) {
         this.data = data;
     }
-    
+
     public String serialize() {
         return JsonWriter.objectToJson(getData());
     }
-    
+
     public void deserialize(String jsonString) {
         setData(JsonReader.jsonToJava(jsonString));
     }
@@ -324,7 +326,7 @@ public class Event {
     public int getProcedure() {
         return procedure;
     }
-    
+
     public void setProcedure(int procedure) {
         this.procedure = procedure;
     }
@@ -370,5 +372,5 @@ public class Event {
     public void setOrigin(Class origin) {
         this.origin = origin;
     }
-    
+
 }

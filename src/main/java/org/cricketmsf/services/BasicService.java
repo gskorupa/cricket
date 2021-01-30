@@ -41,6 +41,7 @@ import org.cricketmsf.api.ResultIface;
  * @author greg
  */
 public class BasicService extends Kernel {
+
     private static final Logger logger = LoggerFactory.getLogger(BasicService.class);
 
     // outbound adapters
@@ -71,7 +72,7 @@ public class BasicService extends Kernel {
         }
         try {
             cacheDB.addTable("webcache", 100, false);
-        } catch (NullPointerException|KeyValueDBException e) {
+        } catch (NullPointerException | KeyValueDBException e) {
         }
         apiGenerator.init(this);
         setInitialized(true);
@@ -90,8 +91,8 @@ public class BasicService extends Kernel {
     @EventHook(className = "org.cricketmsf.event.HttpEvent", procedure = Procedures.WWW)
     public ResultIface doGet(HttpEvent event) {
         return wwwFileReader.getFile(
-                (RequestObject)event.getData(), 
-                cacheDB, 
+                (RequestObject) event.getData(),
+                cacheDB,
                 "webcache"
         );
     }
@@ -103,15 +104,20 @@ public class BasicService extends Kernel {
 
     @EventHook(className = "org.cricketmsf.event.GreeterEvent", procedure = Procedures.GREET)
     public ResultIface doGreet(GreeterEvent event) {
-        String name =  ((HashMap<String,String>)event.getData()).get("name");
+        String name = ((HashMap<String, String>) event.getData()).get("name");
         ResultIface result = new Result("Hello " + name);
         result.setProcedure(Procedures.GREET);
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException ex) {
+
+        }
         return result;
     }
-    
+
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.PRINT_INFO)
     public Result printInfo(Event event) {
-        logger.info("INFO {} {} {}",getProceduresDictionary().getName(event.getProcedure()), event.getInitialTimePoint(), event.getData());
+        logger.info("INFO {} {} {}", getProceduresDictionary().getName(event.getProcedure()), event.getInitialTimePoint(), event.getData());
         return null;
     }
 
