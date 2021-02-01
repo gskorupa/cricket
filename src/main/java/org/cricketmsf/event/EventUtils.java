@@ -32,94 +32,35 @@ public class EventUtils {
     private static final Logger logger = LoggerFactory.getLogger(EventUtils.class);
     public static long MINIMAL_DELAY = 0;
 
-    /*
-    public static Delay getDelayForEvent(Event ev, boolean restored) {
-        Delay delay = new Delay();
-        if (restored) {
-            delay.setUnit(TimeUnit.MILLISECONDS);
-            long d = ev.getExecutionTime() - System.currentTimeMillis();
-            if (d < MINIMAL_DELAY) {
-                d = MINIMAL_DELAY;
-            }
-            delay.setDelay(d);
-            return delay;
-        }
-
-        boolean wrongFormat = false;
-        String dateDefinition = ev.getTimeDefinition();
-        if (null == dateDefinition) {
-            delay.setCyclic(ev.isCyclic());
-            delay.setDelay(ev.getExecutionTime() - System.currentTimeMillis());
-            if (delay.getDelay() < 0) {
-                delay.setDelay(MINIMAL_DELAY);
-            }
-            delay.setUnit(TimeUnit.MILLISECONDS);
-        } else {
-            delay.setCyclic(dateDefinition.startsWith("*") || dateDefinition.indexOf("|*") > 0);
-            if (dateDefinition.startsWith("+") || dateDefinition.startsWith("*")) {
-                try {
-                    delay.setDelay(Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1)));
-                } catch (NumberFormatException e) {
-                    wrongFormat = true;
-                }
-                String unit = dateDefinition.substring(dateDefinition.length() - 1);
-                switch (unit) {
-                    case "d":
-                        delay.setUnit(TimeUnit.DAYS);
-                        break;
-                    case "h":
-                        delay.setUnit(TimeUnit.HOURS);
-                        break;
-                    case "m":
-                        delay.setUnit(TimeUnit.MINUTES);
-                        break;
-                    case "s":
-                        delay.setUnit(TimeUnit.SECONDS);
-                        break;
-                    default:
-                        wrongFormat = true;
-                }
-            } else {
-                //parse date and replace with delay from now
-                delay.setUnit(TimeUnit.MILLISECONDS);
-                delay.setFirstExecutionTime(parseFirstExecutionTime(dateDefinition, delay.isCyclic()));
-            }
-            if (wrongFormat) {
-                logger.info("WARNING unsuported delay format: " + dateDefinition);
-                return null;
-            }
-        }
-        return delay;
-    }
-*/
-    public static Delay getDelayForEvent(String dateDefinition) {
+    public static Delay getDelayFromDateDefinition(String dateDefinition) {
         Delay delay = new Delay();
         boolean wrongFormat = false;
         // +10s
         // *10s
         // 2021.01.31 23:59:00 UTC
-        // 2021.01.31 23:59:00 UTC|*60s
+        //2021.01.31 23:59:00 UTC|*60s //TODO: not implemented
 
-        String[] params = dateDefinition.split("|");
-        for (String param : params) {
-            if (param.startsWith("*")) {
-                delay.setCyclic(true);
-            }
-        }
-        if (params[0].startsWith("+") || params[0].startsWith("*")) {
+        if (dateDefinition.startsWith("+") || dateDefinition.startsWith("*")) {
+            delay.setCyclic(dateDefinition.startsWith("*"));
             try {
-                delay.setDelay(parseDelay(params[0].substring(1, params[0].length() - 1)));
+                delay.setDelay(parseDelay(dateDefinition.substring(1, dateDefinition.length() - 1)));
             } catch (NumberFormatException e) {
                 wrongFormat = true;
             }
-            delay.setUnit(parseUnit(params[0].substring(params[0].length() - 1)));
+            delay.setUnit(parseUnit(dateDefinition.substring(dateDefinition.length() - 1)));
             if (null == delay.getUnit()) {
                 wrongFormat = true;
             }
         } else {
             //parse date and replace with delay from now
-            delay.setFirstExecutionTime(parseFirstExecutionTime(params[0], delay.isCyclic()));
+            delay.setExecutionDateDefined(true);
+            long tmp = parseFirstExecutionTime(dateDefinition);
+            if (tmp <= 0) {
+                wrongFormat = true;
+            }
+            delay.setFirstExecutionTime(tmp);
             delay.setUnit(TimeUnit.MILLISECONDS);
+            /*
             if (delay.isCyclic()) {
                 try {
                     delay.setDelay(parseDelay(params[1].substring(1, params[1].length() - 1)));
@@ -131,9 +72,10 @@ public class EventUtils {
                     wrongFormat = true;
                 }
             }
+             */
         }
         if (wrongFormat) {
-            logger.info("WARNING unsuported delay format: " + dateDefinition);
+            logger.warn("WARNING unsuported delay format: {}", dateDefinition);
             return null;
         }
 
@@ -159,8 +101,17 @@ public class EventUtils {
         }
     }
 
-    private static long parseFirstExecutionTime(String dateStr, boolean cyclic) {
+    private static long parseFirstExecutionTime(String dateStr) {
+        /*
+        String[] params = dateStr.split("|");
+        if (params.length==2 && params[1].startsWith("*")) {
+            cyclic=true;
+            //TODO: delay & unit
+            //TODO: return delay
+        }
+         */
         long result;
+        boolean cyclic = false;
         Date target;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss Z");
         try {

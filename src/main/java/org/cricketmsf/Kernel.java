@@ -63,7 +63,7 @@ public abstract class Kernel {
     public final static int ONLINE = 1;
     public final static int MAINTENANCE = 2;
     public final static int SHUTDOWN = 3;
-    
+
     public final static String DEFAULT_AUTHORIZATION_FILTER = "org.cricketmsf.AuthorizationFilter";
 
     // emergency LOGGER
@@ -178,16 +178,19 @@ public abstract class Kernel {
     }
 
     public ResultIface getEventProcessingResult(Event event, int procedure) {
+        if (null == event || !event.isValid()) {
+            return null;
+        }
         String methodName = "unknown";
         try {
             Method m;
             methodName = getHookMethodNameForPort(event.getClass().getName(), procedure);
-                if (null != methodName) {
-                    m = getClass().getMethod(methodName, event.getClass());
-                    return (ResultIface) m.invoke(this, event);
-                } else {
-                    LOGGER.warn("Don't know how to handle {} procedure {} fired by {}", event.getClass().getName(), procedure, event.getOrigin().getName());
-                }
+            if (null != methodName) {
+                m = getClass().getMethod(methodName, event.getClass());
+                return (ResultIface) m.invoke(this, event);
+            } else {
+                LOGGER.warn("Don't know how to handle {} procedure {} fired by {}", event.getClass().getName(), procedure, event.getOrigin().getName());
+            }
         } catch (IllegalAccessException | NoSuchMethodException e) {
             LOGGER.warn("Handler method {} not compatible with event class {}", methodName, event.getClass().getName());
         } catch (InvocationTargetException e) {
@@ -210,18 +213,23 @@ public abstract class Kernel {
     }
 
     public ResultIface dispatchEvent(Event event) {
-        try {
-            if (-1 != event.getExecutionTime() && null != schedulerAdapter) {
-                schedulerAdapter.handleEvent(event);
-            } else {
-                eventDispatcher.dispatch(event);
+        if (null != event && event.isValid()) {
+            try {
+                if (-1 != event.getExecutionTime() && null != schedulerAdapter) {
+                    schedulerAdapter.handleEvent(event);
+                } else {
+                    eventDispatcher.dispatch(event);
+                }
+                return null;
+            } catch (NullPointerException | DispatcherException ex) {
+                return getEventProcessingResult(event);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return null;
             }
+        } else {
             return null;
-        }catch (NullPointerException | DispatcherException ex) {
-            return getEventProcessingResult(event);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
+            //warning is logged by EventUtils, so not needed here
         }
     }
 

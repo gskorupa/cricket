@@ -22,16 +22,19 @@ import java.util.concurrent.TimeUnit;
  * @author greg
  */
 public class Delay {
+
     private TimeUnit unit;
     private long delay;
     private long firstExecutionTime;
     private boolean cyclic = false;
-    
-    public Delay(){
-        delay=-1;
-        firstExecutionTime=-1;
-        cyclic=false;
-        unit=null;
+    private boolean executionDateDefined;
+
+    public Delay() {
+        delay = -1;
+        firstExecutionTime = -1;
+        cyclic = false;
+        unit = null;
+        executionDateDefined = false;
     }
 
     /**
@@ -59,21 +62,21 @@ public class Delay {
      * @param delay the delay to set
      */
     public void setDelay(long delay) {
-        firstExecutionTime=System.currentTimeMillis()+delay;
+        firstExecutionTime = System.currentTimeMillis() + delay;
         this.delay = delay;
     }
-    
-    public long getFirstExecutionTime(){
+
+    public long getFirstExecutionTime() {
         return firstExecutionTime;
     }
-    
-    public void setFirstExecutionTime(long timepoint){
-        firstExecutionTime=timepoint;
+
+    public void setFirstExecutionTime(long timepoint) {
+        firstExecutionTime = timepoint;
     }
-    
+
     @Override
-    public String toString(){
-        return "DELAY "+getDelay()+" "+getUnit();
+    public String toString() {
+        return "DELAY " + getDelay() + " " + getUnit();
     }
 
     /**
@@ -88,5 +91,19 @@ public class Delay {
      */
     public void setCyclic(boolean cyclic) {
         this.cyclic = cyclic;
+    }
+
+    /**
+     * @return the fromDateDefinition
+     */
+    public boolean isExecutionDateDefined() {
+        return executionDateDefined;
+    }
+
+    /**
+     * @param executionDateDefined the fromDateDefinition to set
+     */
+    public void setExecutionDateDefined(boolean executionDateDefined) {
+        this.executionDateDefined = executionDateDefined;
     }
 }

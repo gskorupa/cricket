@@ -25,7 +25,7 @@ public class ShutdownRequested extends Event {
 
     public ShutdownRequested(long delay) {
         super();
-        super.setOriginalDelay(delay);
+        super.setEventDelay(delay);
     }
     
 }

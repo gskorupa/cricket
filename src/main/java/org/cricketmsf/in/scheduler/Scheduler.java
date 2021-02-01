@@ -103,7 +103,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
-        if (null == event) {
+        if (null == event || !event.isValid()) {
             return false;
         }
         try {
@@ -126,43 +126,35 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
             }
 
             final Runnable runnable = new Runnable() {
-                Event ev;
-
+                Event eventToRun;
                 @Override
                 public void run() {
-                    // we should reset timepoint to prevent sending this event back from the service
-                    String remembered = ev.getTimeDefinition();
-                    long rememberedTimepoint = ev.getExecutionTime();
-                    ev.setExecutionTime(-1);
-                    // we should wait until Kernel finishes initialization process
+                    // reset timepoint to prevent sending this event back from the service
+                    eventToRun.setExecutionTime(-1);
+                    // wait until Kernel finishes initialization process
                     while (!Kernel.getInstance().isStarted()) {
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException ex) {
                         }
                     }
-
-                    if (!killList.containsKey("" + ev.getId())) {
-                        Kernel.getInstance().dispatchEvent(ev);
+                    // execute target handler
+                    if (!killList.containsKey("" + eventToRun.getId())) {
+                        Kernel.getInstance().dispatchEvent(eventToRun);
                     }
-
                     threadsCounter--;
-                    database.remove(ev.getId());
-                    try {
-                        if (ev.isCyclic()) {
-                            if (databaseRs.containsKey(ev.getProcedure() + "@" + ev.getClass().getName())) {
-                                ev.setOriginalDelay((Long) databaseRs.get("" + ev.getProcedure()));
-                            }
-                            ev.reschedule();
-                            handleEvent(ev);
+                    // remove event from persistance database
+                    database.remove(eventToRun.getId());
+                    if (eventToRun.isCyclic()) {
+                        if (databaseRs.containsKey(eventToRun.getProcedure() + "@" + eventToRun.getClass().getName())) {
+                            eventToRun.setEventDelay((Long) databaseRs.get("" + eventToRun.getProcedure()));
                         }
-                    } catch (Exception e) {
-                        logger.warn("malformed event time definition - unable to reschedule");
+                        eventToRun.reschedule();
+                        handleEvent(eventToRun);
                     }
                 }
-
                 public Runnable init(Event event) {
-                    this.ev = event;
+                    this.eventToRun = event;
                     return (this);
                 }
             }.init(event);
@@ -173,6 +165,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                     logger.info("event " + event.getProcedure() + " will start in " + (delay.getDelay() / 1000) + " seconds");
                 }
                 if (!(restored || event.isFromInit())) {
+                    // save event to persistance database
                     database.put(event.getId(), event);
                 }
                 threadsCounter++;

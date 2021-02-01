@@ -91,7 +91,7 @@ public class Procedures implements ProceduresIface {
         
     }
     
-    void add(int identifier, String name){
+    public void add(int identifier, String name){
         names.put(identifier,name);
         identifiers.put(name, identifier);
     }
