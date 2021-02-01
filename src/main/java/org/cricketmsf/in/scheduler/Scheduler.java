@@ -22,10 +22,6 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.out.db.KeyValueStore;
 import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.event.Delay;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -35,7 +31,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 import org.cricketmsf.event.Procedures;
 import org.cricketmsf.exception.DispatcherException;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
@@ -50,7 +45,6 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
-    //private String storagePath;
     private String fileName;
     private String reschedulingFile;
     private KeyValueStore database;
@@ -59,8 +53,6 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     long threadsCounter = 0;
     private String initialTasks;
     private ConcurrentHashMap<String, String> killList;
-
-    private long MINIMAL_DELAY = 0;
 
     private ThreadFactory factory = Kernel.getInstance().getThreadFactory();
     public final ScheduledExecutorService scheduler
@@ -111,16 +103,15 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
-        if(null==event){
+        if (null == event) {
             return false;
         }
         try {
-            if (event.getTimeMillis() < 0) {
-                logger.debug("event.getTimeMillis() < 0. It should not happen. {} {} {} {}",
+            if (event.getExecutionTime() < 0) {
+                logger.debug("event.getTimeMillis() < 0. It should not happen. {} {} {}",
                         event.getClass().getSimpleName(),
                         event.getProcedure(),
-                        event.getTimeMillis(),
-                        event.getInitialTimePoint());
+                        event.getExecutionTime());
                 return false;
             }
             if (systemStart) {
@@ -141,9 +132,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                 public void run() {
                     // we should reset timepoint to prevent sending this event back from the service
                     String remembered = ev.getTimeDefinition();
-                    long rememberedTimepoint = ev.getTimeMillis();
-                    ev.setTimeDefinition(null);
-                    ev.setInitialTimePoint(remembered);
+                    long rememberedTimepoint = ev.getExecutionTime();
+                    ev.setExecutionTime(-1);
                     // we should wait until Kernel finishes initialization process
                     while (!Kernel.getInstance().isStarted()) {
                         try {
@@ -160,15 +150,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                     database.remove(ev.getId());
                     try {
                         if (ev.isCyclic()) {
-                            //if timePoint has form dateformatted|*cyclicdelay
-                            int pos = remembered.indexOf("|*");
-                            if (pos > 0) {
-                                remembered = remembered.substring(pos + 1);
-                            }
-                            if (databaseRs.containsKey("" + ev.getProcedure())) {
-                                ev.setTimeDefinition((String) databaseRs.get("" + ev.getProcedure()));
-                            } else {
-                                ev.setTimeDefinition(remembered);
+                            if (databaseRs.containsKey(ev.getProcedure() + "@" + ev.getClass().getName())) {
+                                ev.setOriginalDelay((Long) databaseRs.get("" + ev.getProcedure()));
                             }
                             ev.reschedule();
                             handleEvent(ev);
@@ -184,7 +167,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                 }
             }.init(event);
 
-            Delay delay = getDelayForEvent(event, restored);
+            Delay delay = event.getDelay();
             if (delay.getDelay() >= 0) {
                 if (systemStart) {
                     logger.info("event " + event.getProcedure() + " will start in " + (delay.getDelay() / 1000) + " seconds");
@@ -193,11 +176,13 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                     database.put(event.getId(), event);
                 }
                 threadsCounter++;
+                logger.info("SCHEDULING {} {}", delay.getDelay(), delay.getUnit());
                 final ScheduledFuture<?> workerHandle = scheduler.schedule(runnable, delay.getDelay(), delay.getUnit());
             }
             return true;
         } catch (Exception e) {
             System.out.println("EXCEPTION " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
@@ -212,86 +197,6 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
             //scheduler properties
             handleEvent((Event) database.get(key), true);
         }
-    }
-
-    private Delay getDelayForEvent(Event ev, boolean restored) {
-        Delay delay = new Delay();
-        if (restored) {
-            delay.setUnit(TimeUnit.MILLISECONDS);
-            long d = ev.getTimeMillis() - System.currentTimeMillis();
-            if (d < MINIMAL_DELAY) {
-                d = MINIMAL_DELAY;
-            }
-            delay.setDelay(d);
-            return delay;
-        }
-
-        boolean wrongFormat = false;
-        String dateDefinition = ev.getTimeDefinition();
-        if (dateDefinition.startsWith("+") || dateDefinition.startsWith("*")) {
-            try {
-                delay.setDelay(Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1)));
-            } catch (NumberFormatException e) {
-                wrongFormat = true;
-            }
-            String unit = dateDefinition.substring(dateDefinition.length() - 1);
-            switch (unit) {
-                case "d":
-                    delay.setUnit(TimeUnit.DAYS);
-                    break;
-                case "h":
-                    delay.setUnit(TimeUnit.HOURS);
-                    break;
-                case "m":
-                    delay.setUnit(TimeUnit.MINUTES);
-                    break;
-                case "s":
-                    delay.setUnit(TimeUnit.SECONDS);
-                    break;
-                default:
-                    wrongFormat = true;
-            }
-        } else {
-            //parse date and replace with delay from now
-            delay.setUnit(TimeUnit.MILLISECONDS);
-            delay.setDelay(getDelay(dateDefinition));
-        }
-        if (wrongFormat) {
-            logger.info("WARNING unsuported delay format: " + dateDefinition);
-            return null;
-        }
-        return delay;
-    }
-
-    private long getDelay(String dateStr) {
-        long result;
-        Date target;
-        String dateStrNoRepeat;
-        int pos = dateStr.indexOf("|");
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss Z");
-        if (pos > 0) {
-            dateStrNoRepeat = dateStr.substring(0, pos);
-        } else {
-            dateStrNoRepeat = dateStr;
-        }
-        try {
-            target = dateFormat.parse(dateStrNoRepeat);
-            result = target.getTime() - System.currentTimeMillis();
-        } catch (ParseException e) {
-            try {
-                String today = java.time.LocalDate.now(ZoneId.of("UTC")).toString();
-                //String today = new SimpleDateFormat("yyy.MM.dd ").format(new Date());
-                target = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z").parse(today + " " + dateStrNoRepeat);
-                result = target.getTime() - System.currentTimeMillis();
-                if (result < 0) {
-                    result = result + 24 * 60 * 60 * 1000;
-                }
-            } catch (ParseException ex) {
-                logger.warn(ex.getMessage());
-                return -1;
-            }
-        }
-        return result;
     }
 
     @Override
@@ -355,54 +260,74 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public void initScheduledTasks() {
+        if (initialTasks == null || initialTasks.isEmpty()) {
+            return;
+        }
         String[] params;
         String[] tasks;
-        String firstParam;
-        if (initialTasks != null && !initialTasks.isEmpty()) {
-            Event event;
-            tasks = initialTasks.split(";");
-            for (String task : tasks) {
-                params = task.split(",");
-                firstParam = params[0];
-                if (firstParam.contains(".")) {
-                    //event class name is provided
-                    Class cls;
-                    try {
-                        cls = Class.forName(firstParam);
-                        event = (Event) cls.getConstructor().newInstance();
-                        event.setProcedure(Integer.parseInt(params[1]));
-                        event.setTimeDefinition(params[2]);
-                        if (params.length > 3) {
-                            event.setData(params[3]);
-                        }
-                        event.setFromInit(true);
-                        event.setOrigin(this.getClass());
-                    } catch (NoSuchMethodException | InvocationTargetException | ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-                        logger.warn(ex.getMessage());
-                        event = null;
-                    }
-                } else {
-                    int procedureNumber = Procedures.DEFAULT;
-                    try {
-                        procedureNumber = Integer.parseInt(firstParam);
-                    } catch (NumberFormatException ex) {
-                    }
-                    event = new Event(
-                            procedureNumber,
-                            params[1], //timePoint
-                            params.length > 2 ? params[2] : null, //data
-                            true,
-                            this.getClass()
-                    );
-                }
-                handleEvent(event);
+        String className;
+        int procedureNumber;
+        String timeDefinition;
+        String data;
+        Event event;
+        tasks = initialTasks.split(";");
+        for (String task : tasks) {
+            params = task.split(",");
+            if (params.length < 2) {
+                logger.warn("insufficient event definition {}", task);
+                continue;
             }
+            procedureNumber = Procedures.DEFAULT;
+            className = null;
+            if (params[0].contains(".")) {
+                //event class name is provided
+                className = params[0];
+                try {
+                    procedureNumber = Integer.parseInt(params[1]);
+                } catch (NumberFormatException ex) {
+                }
+                timeDefinition = params[2];
+                if (params.length > 3) {
+                    data = params[3];
+                } else {
+                    data = null;
+                }
+            } else {
+                try {
+                    procedureNumber = Integer.parseInt(params[0]);
+                } catch (NumberFormatException ex) {
+                }
+                timeDefinition = params[1];
+                if (params.length > 2) {
+                    data = params[2];
+                } else {
+                    data = null;
+                }
+            }
+            if (null != className) {
+                Class cls;
+                try {
+                    cls = Class.forName(className);
+                    event = (Event) cls.getConstructor().newInstance();
+                } catch (NoSuchMethodException | InvocationTargetException | ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                    logger.warn(ex.getMessage());
+                    continue;
+                }
+            } else {
+                event = new Event();
+            }
+            event.setProcedure(procedureNumber);
+            event.setFromInit(true);
+            event.calculateExecutionTime(timeDefinition);
+            event.setData(data);
+            event.setOrigin(this.getClass());
+            handleEvent(event);
         }
     }
 
     @Override
     public void dispatch(Event event) throws DispatcherException {
-        if (event.getTimeMillis() < 0) {
+        if (event.getExecutionTime() < 0) {
             Kernel.getInstance().getEventProcessingResult(event);
         } else {
             handleEvent(event);
@@ -419,7 +344,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     }
 
     @Override
-    public void reschedule(String processName, String newTimepoint) {
-        databaseRs.put(processName, newTimepoint);
+    public void reschedule(String className, int procedure, Long newDelay
+    ) {
+        databaseRs.put(procedure + "@" + className, newDelay);
     }
 }

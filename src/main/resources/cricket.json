@@ -420,6 +420,34 @@
                     "className": "org.cricketmsf.microsite.out.cms.DeeplTranslator",
                     "properties": {
                     }
+                },
+                {
+                    "name": "QueueClient",
+                    "interfaceName": "QueueClientIface",
+                    "className": "org.cricketmsf.out.queue.SimpleQueueClient",
+                    "description": "using internal Queue",
+                    "properties": {
+                        "queue-adapter-name": "Queue"
+                    }
+                },
+                {
+                    "name": "QueueSubscriber",
+                    "interfaceName": "QueueClientIface",
+                    "className": "org.cricketmsf.in.queue.SimpleQueueSubscriber",
+                    "description": "using internal Queue",
+                    "properties": {
+                        "queue-adapter-name": "Queue",
+                        "channels": "*"
+                    }
+                },
+                {
+                    "name": "Queue",
+                    "interfaceName": "QueueIface",
+                    "className": "org.cricketmsf.out.queue.SimpleQueue",
+                    "description": "=",
+                    "properties": {
+                        "mode": "queue"
+                    }
                 }
             ]
         },

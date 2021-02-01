@@ -211,7 +211,7 @@ public abstract class Kernel {
 
     public ResultIface dispatchEvent(Event event) {
         try {
-            if (-1 != event.getTimeMillis() && null != schedulerAdapter) {
+            if (-1 != event.getExecutionTime() && null != schedulerAdapter) {
                 schedulerAdapter.handleEvent(event);
             } else {
                 eventDispatcher.dispatch(event);
@@ -225,8 +225,8 @@ public abstract class Kernel {
         }
     }
 
-    public void reschedule(String procedureName, String timepoint) {
-        schedulerAdapter.reschedule(procedureName, timepoint);
+    public void reschedule(String className, int procedure, long newDelay) {
+        schedulerAdapter.reschedule(className, procedure, newDelay);
     }
 
     public HashMap<String, Object> getAdaptersMap() {

@@ -19,6 +19,7 @@ import com.cedarsoftware.util.io.JsonWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import org.cricketmsf.util.JsonReader;
 import org.cricketmsf.Kernel;
 
@@ -31,15 +32,16 @@ public class Event {
 
     private Long id = null;
     private String timeDefinition = null;
-    private long timeMillis = -1;
+    //private String initialTimeDefinition;
+    private long executionTime = -1;
     private long createdAt = -1;
     private boolean cyclic = false;
+    private long cycleLength;
     private Object data;
-    //private String procedureName;
-    private String initialTimePoint;
     private boolean fromInit = false;
     private Class origin;
     private int procedure = Procedures.DEFAULT;
+    private long originalDelay = 0;
 
     /**
      * Creates new Event instance. Sets new id and createdAt parameters.
@@ -49,8 +51,6 @@ public class Event {
             this.id = Kernel.getEventId();
         }
         createdAt = System.currentTimeMillis();
-        //calculateTimePoint();
-        //procedureName = null;
         procedure = Procedures.DEFAULT;
         data = null;
         fromInit = false;
@@ -70,32 +70,40 @@ public class Event {
      * (see: SimpleDateFormat) )
      *
      * @param procedure
-     * @param timePoint defines when this event should happen.
+     * @param timeDefinition defines when this event should happen.
      * @param data holds additional data
      * @param fromInit
      * @param origin
      */
-    public Event(int procedure, String timePoint, Object data, boolean fromInit, Class origin) {
+    public Event(int procedure, String timeDefinition, Object data, boolean fromInit, Class origin) {
         this.id = Kernel.getEventId();
         this.procedure = procedure;
-        if (timePoint != null && timePoint.isEmpty()) {
+        this.timeDefinition=timeDefinition;
+        /*
+        if (timeDefinition != null && timeDefinition.isEmpty()) {
             this.timeDefinition = null;
         } else {
-            this.timeDefinition = timePoint;
+            this.timeDefinition = timeDefinition;
         }
+         */
         createdAt = System.currentTimeMillis();
+        Delay delay = EventUtils.getDelayForEvent(timeDefinition);
+        executionTime=delay.getFirstExecutionTime();
+        cyclic=delay.isCyclic();
+        originalDelay=delay.getDelay();
+        //calculateExecutionTime(timeDefinition);
+        this.data=data;
         this.fromInit = fromInit;
-        calculateTimePoint();
-        setData(data);
         this.origin = origin;
     }
 
-    public Event(int procedure, long timePoint, Object data, boolean fromInit, Class origin) {
+    public Event(int procedure, long delay, Object data, boolean fromInit, Class origin) {
         this.id = Kernel.getEventId();
         this.procedure = procedure;
         createdAt = System.currentTimeMillis();
-        calculateTimePoint(timePoint);
-        setData(data);
+        originalDelay = delay;
+        executionTime=createdAt + delay;
+        this.data=data;
         this.fromInit = fromInit;
         this.origin = origin;
     }
@@ -130,57 +138,72 @@ public class Event {
         this.id = id;
     }
 
-    /**
-     * @return the timePoint
-     */
+    /*
     public String getTimeDefinition() {
         return timeDefinition;
     }
-
-    public boolean isFutureEvent() {
-        return getTimeDefinition() != null;
-    }
-
-    /**
-     * @param timeDefinition the timePoint to set
-     */
-    public void setTimeDefinition(String timeDefinition) {
+public void setTimeDefinition(String timeDefinition) {
         this.timeDefinition = timeDefinition;
     }
+    
+     */
+    public boolean isFutureEvent() {
+        return originalDelay > 0;
+    }
 
+    /*
     public Event timePoint(String timePointDefinition) {
         setTimeDefinition(timePointDefinition);
-        calculateTimePoint();
+        calculateExecutionTime();
         return this;
     }
-
+     */
     public void reschedule() {
-        if (isCyclic()) {
-            calculateTimePoint();
+        if (isCyclic() && originalDelay > 0) {
+            setExecutionTime(originalDelay + System.currentTimeMillis());
         }
     }
 
-    private void calculateTimePoint(long timeDelay) {
+    private void calculateExecutionTime(long timeDelay) {
+        this.originalDelay = timeDelay;
         if (timeDelay > -1) {
-            setTimeMillis(timeDelay + createdAt);
+            setExecutionTime(timeDelay + createdAt);
         } else {
-            setTimeMillis(-1);
+            setExecutionTime(-1);
         }
     }
+    
+    public void calculateExecutionTime(String dateDefinition){
+        Delay delay=EventUtils.getDelayForEvent(dateDefinition);
+        setOriginalDelay(delay.getDelay());
+        if (delay.getDelay() > -1) {
+            setExecutionTime(delay.getFirstExecutionTime());
+        } else {
+            setExecutionTime(-1);
+        }
+        setCyclic(delay.isCyclic());
+        
+    }
 
-    private void calculateTimePoint() {
-        String dateDefinition = getTimeDefinition();
+    /*
+    public void calculateExecutionTime(String dateDefinition) {
         if (fromInit && dateDefinition == null) {
-            setTimeMillis(-1);
+            setExecutionTime(-1);
             return;
         }
         long delay;
-        setCyclic(dateDefinition.startsWith("*") || dateDefinition.indexOf("|*") > 0);
+        String[] params=dateDefinition.split("|");
+        for(int i=0;i<params.length;i++){
+            if(params[i].startsWith("*")){
+                setCyclic(true);
+            }
+        }
         if (dateDefinition.startsWith("+") || dateDefinition.startsWith("*")) {
             try {
                 delay = Long.parseLong(dateDefinition.substring(1, dateDefinition.length() - 1));
             } catch (NumberFormatException e) {
-                setTimeMillis(-1);
+                originalDelay=-1;
+                setExecutionTime(-1);
                 return;
             }
             String unit = dateDefinition.substring(dateDefinition.length() - 1);
@@ -199,40 +222,40 @@ public class Event {
                     multiplicator = 1000;
                     break;
                 default:
-                    setTimeMillis(-1);
+                    setExecutionTime(-1);
                     return;
             }
-            if (isCyclic()) {
-                setTimeMillis(multiplicator * delay + createdAt);
-            } else {
-                setTimeMillis(multiplicator * delay + getCreatedAt());
-            }
+            originalDelay=delay;
+            setExecutionTime(multiplicator * delay + createdAt);
         } else {
             //parse date and replace with delay from now
             Date target;
             try {
                 target = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss Z").parse(dateDefinition);
-                setTimeMillis(target.getTime());
+                setExecutionTime(target.getTime());
+                originalDelay=target.getTime()-System.currentTimeMillis();
             } catch (ParseException e) {
-                setTimeMillis(-1);
+                originalDelay=-1;
+                setExecutionTime(-1);
             }
         }
     }
-
+     */
     /**
      * @return the calculatedTimePoint
      */
-    public long getTimeMillis() {
-        return timeMillis;
+    public long getExecutionTime() {
+        return executionTime;
     }
 
     /**
-     * @param timeMillis the calculatedTimePoint to set
+     * @param executionTime the calculatedTimePoint to set
      */
-    public void setTimeMillis(long timeMillis) {
-        this.timeMillis = timeMillis;
+    public void setExecutionTime(long executionTime) {
+        this.executionTime = executionTime;
     }
 
+    /*  
     public void setCalculatedTimePoint(Delay delay, long now) {
         long time = now;
         switch (delay.getUnit()) {
@@ -240,7 +263,7 @@ public class Event {
                 time = time + delay.getDelay() * 3600000 * 24;
                 break;
             case HOURS:
-                time = time + delay.getDelay() * 3600000;
+                time =firstExecutionTime + delay.getDelay() * 3600000;
                 break;
             case MILLISECONDS:
                 time = time + delay.getDelay();
@@ -254,9 +277,9 @@ public class Event {
             default:
                 time = 0;
         }
-        timeMillis = time;
+        executionTime = time;
     }
-
+     */
     /**
      * @return the createdAt
      */
@@ -331,20 +354,15 @@ public class Event {
         this.procedure = procedure;
     }
 
-    /**
-     * @return the initialTimePoint
-     */
-    public String getInitialTimePoint() {
-        return initialTimePoint;
+    /*
+    public String getInitialTimeDefinition() {
+        return initialTimeDefinition;
     }
 
-    /**
-     * @param initialTimePoint the initialTimePoint to set
-     */
-    public void setInitialTimePoint(String initialTimePoint) {
-        this.initialTimePoint = initialTimePoint;
+    public void setInitialTimeDefinition(String initialTimeDefinition) {
+        this.initialTimeDefinition = initialTimeDefinition;
     }
-
+     */
     /**
      * @return the fromInit
      */
@@ -371,6 +389,36 @@ public class Event {
      */
     public void setOrigin(Class origin) {
         this.origin = origin;
+    }
+
+    /**
+     * @return the originalDelay
+     */
+    public long getOriginalDelay() {
+        return originalDelay;
+    }
+
+    /**
+     * @param originalDelay the originalDelay to set
+     */
+    public void setOriginalDelay(long originalDelay) {
+        this.originalDelay = originalDelay;
+    }
+
+    /**
+     * @return the timeDefinition
+     */
+    public String getTimeDefinition() {
+        return timeDefinition;
+    }
+    
+    public Delay getDelay(){
+        Delay result=new Delay();
+        result.setCyclic(cyclic);
+        result.setDelay(originalDelay);
+        result.setFirstExecutionTime(executionTime);
+        result.setUnit(TimeUnit.MILLISECONDS);
+        return result;
     }
 
 }

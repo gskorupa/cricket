@@ -21,6 +21,7 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.cricketmsf.event.Procedures;
 
 /**
  *
@@ -32,7 +33,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface EventHook {
     public String className();
-    public int procedure();
+    public int procedure() default Procedures.DEFAULT;
     
     @Documented
     @Retention(RetentionPolicy.RUNTIME)

@@ -23,9 +23,9 @@ package org.cricketmsf.event;
 @org.cricketmsf.livingdoc.design.Event()
 public class ShutdownRequested extends Event {
 
-    public ShutdownRequested(String timePoint) {
+    public ShutdownRequested(long delay) {
         super();
-        super.timePoint(timePoint);
+        super.setOriginalDelay(delay);
     }
     
 }

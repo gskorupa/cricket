@@ -113,7 +113,7 @@ public class SiteAdministrationModule {
                 case "shutdown":
                     result.setCode(ResponseCode.ACCEPTED);
                     result.setData("the service will be stopped within a few seconds");
-                    Kernel.getInstance().dispatchEvent(new ShutdownRequested("+10s"));
+                    Kernel.getInstance().dispatchEvent(new ShutdownRequested(10000));
                     break;
                 default:
                     result.setCode(ResponseCode.BAD_REQUEST);

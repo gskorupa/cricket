@@ -20,7 +20,6 @@ import java.util.List;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.HtmlGenAdapterIface;
-import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.auth.AuthAdapterIface;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.out.db.*;
@@ -33,6 +32,7 @@ import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.api.StandardResult;
 import org.cricketmsf.event.Event;
 import org.cricketmsf.event.HttpEvent;
+import org.cricketmsf.exception.QueueException;
 import org.cricketmsf.in.http.ParameterMapResult;
 import org.cricketmsf.in.queue.SubscriberIface;
 import org.cricketmsf.in.openapi.OpenApiIface;
@@ -64,11 +64,10 @@ public class Microsite extends Kernel {
     // adapterClasses
     SiteAdministrationIface siteAdmin = null;
     KeyValueDBIface database = null;
-    SchedulerIface scheduler = null;
+    //SchedulerIface scheduler = null;
     HtmlGenAdapterIface htmlAdapter = null;
     //cms
     KeyValueDBIface cmsDatabase = null;
-    //FileReaderAdapterIface cmsFileReader = null;
     CmsIface contentManager = null;
     RuleEngineIface ruleEngine = null;
     TranslatorIface translator = null;
@@ -96,7 +95,7 @@ public class Microsite extends Kernel {
         // standard Cricket adapters
         siteAdmin = (SiteAdministrationIface) getRegistered("SiteAdministrationModule");
         database = (KeyValueDBIface) getRegistered("Database");
-        //scheduler = (SchedulerIface) getRegistered("Scheduler");
+        //scheduler = (SchedulerIface) getRegistered("Scheduler"); // not needed -inbound
         htmlAdapter = (HtmlGenAdapterIface) getRegistered("WwwService");
         //cms
         cmsDatabase = (KeyValueDBIface) getRegistered("CmsDB");
@@ -112,7 +111,7 @@ public class Microsite extends Kernel {
         //
         emailSender = (EmailSenderIface) getRegistered("EmailSender");
 
-        //queueSubscriber = (SubscriberIface) getRegistered("QueueSubscriber");
+        queueSubscriber = (SubscriberIface) getRegistered("QueueSubscriber");
         apiGenerator = (OpenApiIface) getRegistered("OpenApi");
         // GDPR
         gdprLogger = (LoggerAdapterIface) getRegistered("GdprLogger");
@@ -132,21 +131,20 @@ public class Microsite extends Kernel {
                 (String) getProperties().getOrDefault("admin-notification-email", ""),
                 getId()+" started", getId()+" service has been started."
         );
-        
+         */
+
         try {
             queueSubscriber.init();
         } catch (QueueException ex) {
             ex.printStackTrace();
             shutdown();
         }
-         */
+
         apiGenerator.init(this);
         setInitialized(true);
-        /*
         dispatchEvent(
-                new Event(this.getName(), "SYSTEM", "message", "+10s", getUuid() + " service started")
+                new Event(Procedures.SYSTEM_STATUS, 5000, getUuid() + " service started", false, this.getClass())
         );
-         */
     }
 
     @Override
@@ -330,6 +328,29 @@ public class Microsite extends Kernel {
         return null;
     }
 
+    @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_RESET_PASSWORD)
+    public Object userResetPassword(UserEvent event) {
+        String payload = null;
+        try {
+            payload = (String) event.getData();
+        } catch (ClassCastException e) {
+        }
+        if (payload != null && !payload.isEmpty()) {
+            String[] params = payload.split(":");
+            if (params.length == 2) {
+                //TODO: email templates from CMS
+                String passResetLink = properties.getOrDefault("serviceurl", "") + "?tid=" + params[0] + "#account";
+                emailSender.send(params[1], "Password Reset Request", "Click here to change password: <a href=\"" + passResetLink + "\">" + passResetLink + "</a>");
+            } else {
+                logger.warn("Malformed payload->{}", payload);
+            }
+        } else {
+            logger.warn("Malformed payload->{}", payload);
+        }
+        gdprLogger.print("RESET PASSWORD REQUESTED FOR " + event.getData());
+        return null;
+    }
+
     @EventHook(className = "org.cricketmsf.microsite.event.AuthEvent", procedure = Procedures.AUTH_LOGIN)
     public Result authLogin(AuthEvent event) {
         Token token = authAdapter.login(event.getData().get("login"), event.getData().get("password"));
@@ -444,50 +465,26 @@ public class Microsite extends Kernel {
         }
         return null;
     }
+    
+    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_SHUTDOWN)
+    public Object handleShutdownRequest(Event event) {
+        shutdown();
+        return null;
+    }
 
-    /*
-    @EventHook(eventCategory = UserEvent.CATEGORY_USER)
-    public void processUserEvent(Event event) {
-        switch (event.getType()) {
-            case UserEvent.USER_RESET_PASSWORD:
-                String payload = null;
-                try {
-                    payload = (String) event.getPayload();
-                } catch (ClassCastException e) {
-                }
-                if (payload != null && !payload.isEmpty()) {
-                    String[] params = payload.split(":");
-                    if (params.length == 2) {
-                        //TODO: email templates from CMS
-                        String passResetLink = properties.getOrDefault("serviceurl", "") + "?tid=" + params[0] + "#account";
-                        emailSender.send(params[1], "Password Reset Request", "Click here to change password: <a href=\"" + passResetLink + "\">" + passResetLink + "</a>");
-                    } else {
-                        dispatchEvent(Event.logWarning("UserEvent.USER_RESET_PASSWORD", "Malformed payload->" + payload));
-                    }
-                } else {
-                    dispatchEvent(Event.logWarning("UserEvent.USER_RESET_PASSWORD", "Malformed payload->" + payload));
-                }
-                gdprLog.log(Event.logInfo(event.getId(), "RESET PASSWORD REQUESTED FOR " + event.getPayload()));
-        }
+    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_STATUS)
+    public Object handleStatusRequest(Event event) {
+        System.out.println(printStatus());
+        return null;
     }
-    @EventHook(eventCategory = Event.CATEGORY_GENERIC)
-    public void processSystemEvent(Event event) {
-        switch (event.getType()) {
-            case "SHUTDOWN":
-                shutdown();
-                break;
-            case "STATUS":
-                System.out.println(printStatus());
-                break;
-            case "BACKUP":
-                SiteAdministrationModule.getInstance().backupDatabases(database, userDB, authDB, cmsDatabase,(String)event.getPayload());
-                break;
-            default:
-                dispatchEvent(Event.logWarning("Don't know how to handle event: " + event.getType(), event.getPayload().toString()));
-        }
+
+    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_BACKUP)
+    public Object handleBackupRequest(Event event) {
+        SiteAdministrationModule.getInstance().backupDatabases(database, userDB, authDB, cmsDatabase,(String)event.getData());
+        return null;
     }
-     */
-    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.DEFAULT)
+
+    @EventHook(className = "org.cricketmsf.event.Event")
     public Object logEventsNotHandled(Event event) {
         logger.warn("org.cricketmsf.event.Event procedure {} not handled", getProceduresDictionary().getName(Procedures.DEFAULT));
         return null;

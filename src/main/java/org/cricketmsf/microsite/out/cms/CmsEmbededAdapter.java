@@ -354,7 +354,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         if (statusChanged) {
             CmsEvent event = new CmsEvent(doc.getUid());
             event.setProcedure(Procedures.CMS_CONTENT_CHANGED);
-            event.setTimeDefinition("+1s");
+            event.setOriginalDelay(1000);
             Kernel.getInstance().dispatchEvent(event);
         }
 
@@ -464,7 +464,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         if (statusChanged) {
             CmsEvent event = new CmsEvent(doc.getUid());
             event.setProcedure(Procedures.CMS_CONTENT_CHANGED);
-            event.setTimeDefinition("+1s");
+            event.setOriginalDelay(1000);
             Kernel.getInstance().dispatchEvent(event);
         }
         //Kernel.getInstance().dispatchEvent(new CmsEvent(doc.getUid()));
@@ -495,7 +495,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         } else {
             CmsEvent event = new CmsEvent(doc.getUid());
             event.setProcedure(Procedures.CMS_CONTENT_CHANGED);
-            event.setTimeDefinition("+1s");
+            event.setOriginalDelay(1000);
             Kernel.getInstance().dispatchEvent(event);
             //Kernel.getInstance().dispatchEvent(new CmsEvent(doc.getUid()));
             //TODO: remove path if thera are no more documents with this path 

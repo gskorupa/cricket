@@ -1,5 +1,7 @@
 package org.cricketmsf.event;
 
+import java.util.HashMap;
+
 /**
  *
  * @author greg
@@ -23,7 +25,8 @@ public class Procedures implements ProceduresIface {
     public static final int USER_AFTER_REMOVAL = 11;
     public static final int USER_REMOVAL_SCHEDULED = 12;
     public static final int USER_UPDATED = 13;
-    
+    public static final int USER_RESET_PASSWORD = 14;
+            
     public static final int AUTH_LOGIN = 20;
     public static final int AUTH_LOGOUT = 21;
     public static final int AUTH_CHECK_TOKEN = 22;
@@ -43,9 +46,65 @@ public class Procedures implements ProceduresIface {
     public static final int CMS_CONTENT_CHANGED = 54;
     
     public static final int SA_ANY = 60;
-    public static final int SA_STATUS = 61;
     
+    public static HashMap<Integer,String> names;
+    public static HashMap<String,Integer> identifiers;
     
+    public Procedures(){
+        add(UNDEFINED,"UNDEFNIED");
+        add(DEFAULT,"DEFAULT");
+        add(WWW,"WWW");
+        add(GET_STATUS,"GET_STATUS");
+        add(PRINT_INFO,"PRINT_INFO");
+        add(GREET, "GREET");
+        
+        add(USER_AFTER_REMOVAL, "USER_AFTER_REMOVAL");
+        add(USER_CONFIRM_REGISTRATION,"USER_CONFIRM_REGISTRATION");
+        add(USER_GET,"USER_GET");
+        add(USER_REGISTER, "USER_REGISTER");
+        add(USER_REGISTRATION_CONFIRMED,"USER_REGISTRATION_CONFIRMED");
+        add(USER_REMOVAL_SCHEDULED, "USER_REMOVAL_SCHEDULED");
+        add(USER_REMOVE,"USER_REMOVE");
+        add(USER_RESET_PASSWORD, "USER_RESET_PASSWORD");
+        add(USER_UPDATE, "USER_UPDATE");
+        add(USER_UPDATED, "USER_UPDATED");
+        
+        add(AUTH_CHECK_TOKEN, "AUTH_CHECK_TOKEN");
+        add(AUTH_LOGIN, "AUTH_LOGIN");
+        add(AUTH_LOGOUT, "AUTH_LOGOUT");
+        add(AUTH_REFRESH_TOKEN, "AUTH_REFRESH_TOKEN");
+        
+        add(SYSTEM_BACKUP, "SYSTEM_BACKUP");
+        add(SYSTEM_CONTENT_READY, "SYSTEM_CONTENT_READY");
+        add(SYSTEM_SHUTDOWN, "SYSTEM_SHUTDOWN");
+        add(SYSTEM_STATUS, "SYSTEM_STATUS");
+        
+        add(CS_GET, "CS_GET");
+        
+        add(CMS_CONTENT_CHANGED, "CMS_CONTENT_CHANGED");
+        add(CMS_DELETE, "CMS_DELETE");
+        add(CMS_GET, "CMS_GET");
+        add(CMS_POST, "CMS_POST");
+        add(CMS_PUT, "CMS_PUT");
+        
+        add(SA_ANY, "SA_ANY");
+        
+    }
+    
+    void add(int identifier, String name){
+        names.put(identifier,name);
+        identifiers.put(name, identifier);
+    }
+    
+    public String getName(int id){
+        return names.getOrDefault(id, "DEFAULT");
+    }
+    
+    public int getId(String name){
+        return identifiers.getOrDefault(name, DEFAULT);
+    }
+    
+    /*
     public String getName(int id){
         switch (id){
             case UNDEFINED: return "UNDEFINED";
@@ -77,8 +136,8 @@ public class Procedures implements ProceduresIface {
             case CMS_DELETE: return "CMS_DELETE";
             case CMS_CONTENT_CHANGED: return "CMS_CONTENT_CHANGED";
             
-            case SA_ANY: return "SA_ANY";
-            case SA_STATUS: return "SA_STATUS";
+            //case SA_ANY: return "SA_ANY";
+            //case SA_STATUS: return "SA_STATUS";
             
             default: return "UNDEFINED";
         }
@@ -116,10 +175,11 @@ public class Procedures implements ProceduresIface {
             case "CMS_DELETE": return CMS_DELETE;
             case "CMS_CONTENT_CHANGED": return CMS_CONTENT_CHANGED;
             
-            case "SA_STATUS": return SA_STATUS;
+            //case "SA_STATUS": return SA_STATUS;
+            //case "SA_SHUTDOWN": return SA_HUTDOWN;
             
             default: return UNDEFINED;
         }
     }
-
+*/
 }

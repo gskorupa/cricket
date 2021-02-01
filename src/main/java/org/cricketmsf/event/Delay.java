@@ -24,7 +24,15 @@ import java.util.concurrent.TimeUnit;
 public class Delay {
     private TimeUnit unit;
     private long delay;
-    private long definedTimepoint;
+    private long firstExecutionTime;
+    private boolean cyclic = false;
+    
+    public Delay(){
+        delay=-1;
+        firstExecutionTime=-1;
+        cyclic=false;
+        unit=null;
+    }
 
     /**
      * @return the unit
@@ -51,16 +59,34 @@ public class Delay {
      * @param delay the delay to set
      */
     public void setDelay(long delay) {
-        definedTimepoint=System.currentTimeMillis()+delay;
+        firstExecutionTime=System.currentTimeMillis()+delay;
         this.delay = delay;
     }
     
-    public long getDefinedTimepoint(){
-        return definedTimepoint;
+    public long getFirstExecutionTime(){
+        return firstExecutionTime;
+    }
+    
+    public void setFirstExecutionTime(long timepoint){
+        firstExecutionTime=timepoint;
     }
     
     @Override
     public String toString(){
         return "DELAY "+getDelay()+" "+getUnit();
+    }
+
+    /**
+     * @return the cyclic
+     */
+    public boolean isCyclic() {
+        return cyclic;
+    }
+
+    /**
+     * @param cyclic the cyclic to set
+     */
+    public void setCyclic(boolean cyclic) {
+        this.cyclic = cyclic;
     }
 }
