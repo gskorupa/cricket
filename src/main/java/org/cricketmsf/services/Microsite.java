@@ -375,12 +375,13 @@ public class Microsite extends Kernel {
         return new Result(ok, Procedures.AUTH_REFRESH_TOKEN);
     }
 
+    /*
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_STATUS)
     public Object getStatusInfo(Event event) {
         System.out.println(siteAdmin.getServiceInfo().getData());
         return null;
     }
-
+*/
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SA_ANY)
     public Object systemServiceHandle(Event event) {
         return new SiteAdministrationModule().handleRestEvent(event);

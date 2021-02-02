@@ -51,6 +51,23 @@ public class EventUtils {
             if (null == delay.getUnit()) {
                 wrongFormat = true;
             }
+            if (TimeUnit.SECONDS == delay.getUnit()) {
+                delay.setDelay(delay.getDelay() * 1000);
+                delay.setFirstExecutionTime(delay.getDelay() + System.currentTimeMillis());
+            }
+            if (TimeUnit.MINUTES == delay.getUnit()) {
+                delay.setDelay(delay.getDelay() * 1000 * 60);
+                delay.setFirstExecutionTime(delay.getDelay() + System.currentTimeMillis());
+            }
+            if (TimeUnit.HOURS == delay.getUnit()) {
+                delay.setDelay(delay.getDelay() * 1000 * 60 * 60);
+                delay.setFirstExecutionTime(delay.getDelay() + System.currentTimeMillis());
+            }
+            if (TimeUnit.DAYS == delay.getUnit()) {
+                delay.setDelay(delay.getDelay() * 1000 * 60 * 60 * 24);
+                delay.setFirstExecutionTime(delay.getDelay() + System.currentTimeMillis());
+            }
+
         } else {
             //parse date and replace with delay from now
             delay.setExecutionDateDefined(true);

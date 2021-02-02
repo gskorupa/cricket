@@ -215,7 +215,7 @@ public abstract class Kernel {
     public ResultIface dispatchEvent(Event event) {
         if (null != event && event.isValid()) {
             try {
-                if (-1 != event.getExecutionTime() && null != schedulerAdapter) {
+                if (event.getExecutionTime()>=0 && null != schedulerAdapter) {
                     schedulerAdapter.handleEvent(event);
                 } else {
                     eventDispatcher.dispatch(event);

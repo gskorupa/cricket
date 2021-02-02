@@ -163,7 +163,7 @@ public class Event {
     }
 
     public void calculateExecutionTime(String dateDefinition) {
-        Delay delay = EventUtils.getDelayFromDateDefinition(dateDefinition);
+/*        Delay delay = EventUtils.getDelayFromDateDefinition(dateDefinition);
         if (null != delay) {
             setEventDelay(delay.getDelay());
             if (delay.getDelay() > -1) {
@@ -175,7 +175,15 @@ public class Event {
         } else {
             valid=false;
         }
-
+*/
+        Delay delay = EventUtils.getDelayFromDateDefinition(dateDefinition);
+        if (null != delay) {
+            this.eventDelay = delay.getDelay();
+            this.executionTime = delay.getFirstExecutionTime();
+            this.cyclic = delay.isCyclic();
+        } else {
+            valid = false;
+        }
     }
 
     /**
@@ -190,7 +198,6 @@ public class Event {
      */
     public void setExecutionTime(long executionTime) {
         this.executionTime = executionTime;
-        calculate();
     }
 
     /**

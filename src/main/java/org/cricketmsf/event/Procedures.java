@@ -51,6 +51,8 @@ public class Procedures implements ProceduresIface {
     public static HashMap<String,Integer> identifiers;
     
     public Procedures(){
+        names=new HashMap<>();
+        identifiers=new HashMap<>();
         add(UNDEFINED,"UNDEFNIED");
         add(DEFAULT,"DEFAULT");
         add(WWW,"WWW");

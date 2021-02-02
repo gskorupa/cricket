@@ -169,7 +169,6 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                     database.put(event.getId(), event);
                 }
                 threadsCounter++;
-                logger.info("SCHEDULING {} {}", delay.getDelay(), delay.getUnit());
                 final ScheduledFuture<?> workerHandle = scheduler.schedule(runnable, delay.getDelay(), delay.getUnit());
             }
             return true;
