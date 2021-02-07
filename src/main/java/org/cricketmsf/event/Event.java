@@ -16,9 +16,6 @@
 package org.cricketmsf.event;
 
 import com.cedarsoftware.util.io.JsonWriter;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import org.cricketmsf.util.JsonReader;
 import org.cricketmsf.Kernel;
@@ -85,28 +82,6 @@ public class Event {
         calculate(timeDefinition);
     }
 
-    private void calculate(String timeDefinition) {
-        Delay delay = EventUtils.getDelayFromDateDefinition(timeDefinition);
-        if (null != delay) {
-            this.eventDelay = delay.getDelay();
-            this.executionTime = delay.getFirstExecutionTime();
-            this.cyclic = delay.isCyclic();
-        } else {
-            valid = false;
-        }
-    }
-
-    private void calculate(long delay) {
-        this.eventDelay = delay;
-        this.executionTime = createdAt + eventDelay;
-        this.cyclic = false;
-    }
-
-    private void calculate() {
-        this.executionTime = createdAt + eventDelay;
-        this.cyclic = false;
-    }
-
     public Event(int procedure, long delay, Object data, boolean fromInit, Class origin) {
         this.id = Kernel.getEventId();
         this.procedure = procedure;
@@ -138,6 +113,28 @@ public class Event {
         this(-1, timePoint, data, false, null);
     }
 
+        private void calculate(String timeDefinition) {
+        Delay delay = EventUtils.getDelayFromDateDefinition(timeDefinition, createdAt);
+        if (null != delay) {
+            this.eventDelay = delay.getDelay();
+            this.executionTime = delay.getFirstExecutionTime();
+            this.cyclic = delay.isCyclic();
+        } else {
+            valid = false;
+        }
+    }
+
+    private void calculate(long delay) {
+        this.eventDelay = delay;
+        this.executionTime = createdAt + eventDelay;
+        this.cyclic = false;
+    }
+
+    private void calculate() {
+        this.executionTime = createdAt + eventDelay;
+        this.cyclic = false;
+    }
+
     /**
      * @return the id
      */
@@ -163,20 +160,7 @@ public class Event {
     }
 
     public void calculateExecutionTime(String dateDefinition) {
-/*        Delay delay = EventUtils.getDelayFromDateDefinition(dateDefinition);
-        if (null != delay) {
-            setEventDelay(delay.getDelay());
-            if (delay.getDelay() > -1) {
-                setExecutionTime(delay.getFirstExecutionTime());
-            } else {
-                setExecutionTime(-1);
-            }
-            setCyclic(delay.isCyclic());
-        } else {
-            valid=false;
-        }
-*/
-        Delay delay = EventUtils.getDelayFromDateDefinition(dateDefinition);
+        Delay delay = EventUtils.getDelayFromDateDefinition(dateDefinition, createdAt);
         if (null != delay) {
             this.eventDelay = delay.getDelay();
             this.executionTime = delay.getFirstExecutionTime();

@@ -47,7 +47,7 @@ public class Cli extends InboundAdapter implements Adapter, CliIface {
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         //super.getServiceHooks(adapterName);
         setSamplingInterval(properties.getOrDefault("sampling-interval", "200"));
-        logger.info("\tsampling-interval:" + samplingInterval);
+        logger.info("\tsampling-interval: " + samplingInterval);
         //super.registerEventCategory(categoryName, Event.class.getName());
     }
 

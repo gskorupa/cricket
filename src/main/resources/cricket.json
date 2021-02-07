@@ -194,9 +194,9 @@
                 "cors": "Access-Control-Allow-Origin:*|Access-Control-Allow-Credentials:true|Access-Control-Allow-Methods: POST, PATCH, GET, OPTIONS, DELETE, PUT|Access-Control-Allow-Headers:Authorization|Access-Control-Max-Age: 1728000",
                 "time-zone": "GMT",
                 "procedures": "org.cricketmsf.event.Procedures",
-                "initial-admin-email": "user@domain",
+                "initial-admin-email": "$CRICKET_ADMIN_EMAIL",
                 "initial-admin-password": "cricket",
-                "admin-notification-email": "",
+                "admin-notification-email": "$CRICKET_ADMIN_EMAIL",
                 "restricted-resources": "DELETE@/api/auth GET@/api/user PUT@/api/user DELETE@/api/user *@/api/cm *@/api/alert *@/api/system *@/api/siteadmin",
                 "file.upload.maxsize": "1000000",
                 "backup-folder": "./backup",
@@ -447,6 +447,18 @@
                     "description": "=",
                     "properties": {
                         "mode": "queue"
+                    }
+                },
+                {
+                    "name": "EmailSender",
+                    "interfaceName": "EmailSenderIface",
+                    "className": "org.cricketmsf.microsite.out.notification.SmtpSender2",
+                    "properties": {
+                        "from": "$CRICKET_EMAILSENDER_FROM",
+                        "mailhost": "$CRICKET_EMAILSENDER_HOST",
+                        "user": "$CRICKET_EMAILSENDER_USER",
+                        "password": "$CRICKET_EMAILSENDER_PASSWORD",
+                        "debug-session": "false"
                     }
                 }
             ]

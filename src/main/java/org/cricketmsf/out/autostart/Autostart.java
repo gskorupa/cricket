@@ -41,7 +41,7 @@ public class Autostart extends OutboundAdapter implements OutboundAdapterIface, 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         String pathNames = properties.getOrDefault("subfolders", "");
-        logger.info("\tsubfolders=" + pathNames);
+        logger.info("\tsubfolders: " + pathNames);
         paths = pathNames.split(":");
     }
     

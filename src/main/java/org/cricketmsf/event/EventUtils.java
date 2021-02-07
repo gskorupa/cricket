@@ -32,7 +32,7 @@ public class EventUtils {
     private static final Logger logger = LoggerFactory.getLogger(EventUtils.class);
     public static long MINIMAL_DELAY = 0;
 
-    public static Delay getDelayFromDateDefinition(String dateDefinition) {
+    public static Delay getDelayFromDateDefinition(String dateDefinition, long eventCreationDate) {
         Delay delay = new Delay();
         boolean wrongFormat = false;
         // +10s
@@ -53,25 +53,25 @@ public class EventUtils {
             }
             if (TimeUnit.SECONDS == delay.getUnit()) {
                 delay.setDelay(delay.getDelay() * 1000);
-                delay.setFirstExecutionTime(delay.getDelay() + System.currentTimeMillis());
+                delay.setFirstExecutionTime(delay.getDelay() + eventCreationDate);
             }
             if (TimeUnit.MINUTES == delay.getUnit()) {
                 delay.setDelay(delay.getDelay() * 1000 * 60);
-                delay.setFirstExecutionTime(delay.getDelay() + System.currentTimeMillis());
+                delay.setFirstExecutionTime(delay.getDelay() + eventCreationDate);
             }
             if (TimeUnit.HOURS == delay.getUnit()) {
                 delay.setDelay(delay.getDelay() * 1000 * 60 * 60);
-                delay.setFirstExecutionTime(delay.getDelay() + System.currentTimeMillis());
+                delay.setFirstExecutionTime(delay.getDelay() + eventCreationDate);
             }
             if (TimeUnit.DAYS == delay.getUnit()) {
                 delay.setDelay(delay.getDelay() * 1000 * 60 * 60 * 24);
-                delay.setFirstExecutionTime(delay.getDelay() + System.currentTimeMillis());
+                delay.setFirstExecutionTime(delay.getDelay() + eventCreationDate);
             }
 
         } else {
             //parse date and replace with delay from now
             delay.setExecutionDateDefined(true);
-            long tmp = parseFirstExecutionTime(dateDefinition);
+            long tmp = parseFirstExecutionTime(dateDefinition, eventCreationDate);
             if (tmp <= 0) {
                 wrongFormat = true;
             }
@@ -118,7 +118,7 @@ public class EventUtils {
         }
     }
 
-    private static long parseFirstExecutionTime(String dateStr) {
+    private static long parseFirstExecutionTime(String dateStr, long eventCreationDate) {
         /*
         String[] params = dateStr.split("|");
         if (params.length==2 && params[1].startsWith("*")) {
@@ -148,7 +148,7 @@ public class EventUtils {
             if (cyclic) {
                 result = result + 24 * 60 * 60 * 1000;
             } else {
-                result = System.currentTimeMillis();
+                result = eventCreationDate;
             }
         }
         return result;

@@ -45,13 +45,13 @@ public class SmtpSender2 extends OutboundAdapter implements EmailSenderIface, Ad
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
-
+        super.loadProperties(properties, adapterName);
         from = properties.getOrDefault("from", "");
         forcedCC = properties.getOrDefault("cc", "");
         forcedBCC = properties.getOrDefault("bcc", "");
         mailhost = properties.getOrDefault("mailhost", "");
-        localhost = properties.getOrDefault("localhosthost", "");
-        mailer = properties.getOrDefault("mailer", "signomix");
+        localhost = properties.getOrDefault("localhost", "");
+        mailer = properties.getOrDefault("mailer", "cricketmsf");
         protocol = properties.getOrDefault("protocol", "SMTP");
         user = properties.getOrDefault("user", "");
         password = properties.getOrDefault("password", "");
@@ -91,6 +91,10 @@ public class SmtpSender2 extends OutboundAdapter implements EmailSenderIface, Ad
 
     @Override
     public String send(String to, String cc, String bcc, String subject, String text) {
+        if(!ready){
+            logger.warn("not configured - cannot send e-mail");
+            return null;
+        }
         if ((null == to || to.isBlank())&&(null == cc || cc.isBlank())&&(null == bcc || bcc.isBlank())) {
             return "";
         }

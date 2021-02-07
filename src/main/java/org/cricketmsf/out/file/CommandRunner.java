@@ -47,7 +47,7 @@ public class CommandRunner extends OutboundAdapter implements Adapter, CommandRu
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
         command = properties.getOrDefault("command", "");
-        logger.info("\tcommand=" + command);
+        logger.info("\tcommand: " + command);
 
     }
 

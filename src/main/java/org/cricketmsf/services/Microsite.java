@@ -127,11 +127,10 @@ public class Microsite extends Kernel {
         }
 
         siteAdmin.initDatabases(database, userDB, authDB);
-        /*emailSender.send(
+        emailSender.send(
                 (String) getProperties().getOrDefault("admin-notification-email", ""),
                 getId()+" started", getId()+" service has been started."
         );
-         */
 
         try {
             queueSubscriber.init();
@@ -170,7 +169,6 @@ public class Microsite extends Kernel {
 
     @Override
     public void shutdown() {
-        /*
         try {
             emailSender.send(
                     (String) getProperties().getOrDefault("admin-notification-email", ""),
@@ -179,7 +177,6 @@ public class Microsite extends Kernel {
         } catch (Exception e) {
             e.printStackTrace();
         }
-         */
         super.shutdown();
     }
 
