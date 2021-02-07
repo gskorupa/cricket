@@ -35,8 +35,8 @@ public class Tester extends HttpPortedAdapter {
         logger.info(dumpRequest(request));
         return ProcedureCall.toRespond(ResponseCode.OK, "");
     }
-    
-        public static String dumpRequest(RequestObject req) {
+
+    public static String dumpRequest(RequestObject req) {
         StringBuilder sb = new StringBuilder();
         sb.append("************** REQUEST ****************").append("\r\n");
         sb.append("URI:").append(req.uri).append("\r\n");
@@ -45,7 +45,7 @@ public class Tester extends HttpPortedAdapter {
         sb.append("ACCEPT:").append(req.acceptedResponseType).append("\r\n");
         sb.append("CLIENT IP:").append(req.clientIp).append("\r\n");
         sb.append("***BODY:").append("\r\n");
-        sb.append(req.body).append("\r\n");
+        sb.append(req.body).append(req.body.isEmpty()?"":"\r\n");
         sb.append("***BODY.").append("\r\n");
         sb.append("***HEADERS:").append("\r\n");
         req.headers.keySet().forEach(key -> {

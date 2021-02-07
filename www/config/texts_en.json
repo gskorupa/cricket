@@ -1,7 +1,0 @@
-{
-    "notfound": "File not found!",
-    "home_hello": "Hello!",
-    "home_notconfigured": "It seems that your application is not configured. More information: <a href='https://github.com/gskorupa/Cricket/wiki/Microsite-Quickstart'>Microsite Quickstart</a>",
-    "details": "View details",
-    "search": "Search"
-}

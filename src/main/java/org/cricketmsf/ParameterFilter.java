@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * Many thanks for Leonardo Marcelino https://leonardom.wordpress.com
  */
 public class ParameterFilter extends Filter {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(Kernel.class);
 
     public final static char CR = (char) 0x0D;
@@ -90,7 +90,7 @@ public class ParameterFilter extends Filter {
                     tmp = parsePostParameters(exchange);
                     if (tmp.containsKey("&&&data")) {
                         exchange.setAttribute("body", tmp.get("&&&data"));
-                        //tmp.remove("&&&data");
+                        tmp.remove("&&&data");
                     }
                     exchange.setAttribute("parameters", tmp);
                     break;
@@ -137,11 +137,12 @@ public class ParameterFilter extends Filter {
         String query;
         StringBuilder content = new StringBuilder();
         switch (contentType) {
-            case "multipart/form-data":
+            case "multipart/form-data": {
                 try {
-                parameters = parseForm(contentTypeHeader.substring(contentType.length() + 11), exchange.getRequestBody());
-            } catch (IndexOutOfBoundsException e) {
-                throw new IOException("request content inconsistent with declared content type");
+                    parameters = parseForm(contentTypeHeader.substring(contentType.length() + 11), exchange.getRequestBody());
+                } catch (IndexOutOfBoundsException e) {
+                    throw new IOException("request content inconsistent with declared content type");
+                }
             }
             break;
             case "text/plain":
@@ -154,7 +155,6 @@ public class ParameterFilter extends Filter {
                 while (sc.hasNext()) {
                     sb.append(sc.nextLine());
                 }
-                //parameters.put("data", sb.toString()); //TODO: remove "data" parameter
                 parameters.put("&&&data", sb.toString());
                 break;
             case "application/x-www-form-urlencoded":
