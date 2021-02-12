@@ -272,7 +272,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             if (doc.getType().equals(Document.FILE)) {
                 String fileLocation = (String) parameters.getOrDefault("file", "");
                 String[] fParams = fileLocation.split(";");
-                if (fParams.length == 3) {
+                if (fParams.length >= 3) {
                     //TODO: move file to default location
                     doc.setContent(moveFile(fParams[2], getFileRoot(), doc.getUid()));
                     doc.setMimeType(fParams[0].substring(fParams[0].indexOf(" ")));
@@ -420,7 +420,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
             if (Document.FILE.equals(doc.getType())) {
                 String fileLocation = (String) parameters.getOrDefault("file", "");
                 String[] fParams = fileLocation.split(";");
-                if (fParams.length == 3) {
+                if (fParams.length >= 3) {
                     //new file uploaded
                     //TODO: move file to default location, overwrite existing one
                     if ("published".equalsIgnoreCase(doc.getStatus())) {

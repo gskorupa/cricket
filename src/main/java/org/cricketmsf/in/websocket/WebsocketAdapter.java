@@ -212,7 +212,7 @@ public class WebsocketAdapter extends InboundAdapter implements InboundAdapterIf
         if (get.find()) {
             String pathWithQuery = get.group();
             String[] parts = pathWithQuery.split(" ");
-            if (parts.length == 3) {
+            if (parts.length >= 3) {
                 path = parts[1].split("\\?")[0];
             } else {
                 path = "/";

@@ -15,7 +15,6 @@
  */
 package org.cricketmsf;
 
-import org.cricketmsf.event.Event;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.Filter.Chain;
 import com.sun.net.httpserver.HttpExchange;
@@ -60,7 +59,7 @@ public class ParameterFilter extends Filter {
 
     private void init() {
         setParameterEncoding((String) Kernel.getInstance().properties.getOrDefault("request-encoding", "UTF-8"));
-        setFileSizeLimit((String) Kernel.getInstance().properties.getOrDefault("file.upload.maxsize", "1000000"));
+        setFileSizeLimit((String) Kernel.getInstance().properties.getOrDefault("file-upload-maxsize", "1000000"));
     }
 
     @Override
@@ -223,7 +222,15 @@ public class ParameterFilter extends Filter {
                     parameters.put(paramName, value);
                 } else {
                     fileParameter = readFileContent(br, startLine + CR + LF, endLine + CR + LF, getFileSizeLimit(), fileName);
-                    parameters.put(paramName, contentType + ";" + fileParameter.fileSize + ";" + fileParameter.fileLocation);
+                    StringBuilder sb = new StringBuilder(contentType)
+                            .append(";")
+                            .append(fileParameter.fileSize)
+                            .append(";")
+                            .append(fileParameter.fileLocation)
+                            .append(";")
+                            .append(fileName);
+                    parameters.put(paramName, sb.toString());
+                    //parameters.put(paramName, contentType + ";" + fileParameter.fileSize + ";" + fileParameter.fileLocation);
                     line = fileParameter.nextLine;
                 }
 
@@ -234,7 +241,7 @@ public class ParameterFilter extends Filter {
         return parameters;
     }
 
-    private FileParameter readFileContent(InputStream is, String startLine, String endLine, long fileSizeLimit, String fileName) throws IOException {
+    private FileParameter readFileContent(InputStream is, String startLine, String endLine, long fileSizeLimit, String fileName) throws IOException, AssertionError {
         FileParameter fileParameter = new FileParameter();
         int bufferLength = 1024;
         int endLineLength1 = endLine.length() - 1;
