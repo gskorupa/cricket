@@ -380,7 +380,12 @@ public abstract class Kernel {
                         LOGGER.error(adapterName + " adapter class is abstract: " + ac.getAdapterClassName());
                         continue;
                     }
-                    adaptersMap.put(adapterName, c.getDeclaredConstructor().newInstance());
+                    try{
+                        adaptersMap.put(adapterName, c.getDeclaredConstructor().newInstance());
+                    }catch(SecurityException|NoSuchMethodException exc){
+                        LOGGER.error("{} adapter class {} has no public constructor",adapterName,ac.getAdapterClassName());
+                        continue;
+                    }
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.http.HttpPortedAdapter) {
                         setHttpHandlerLoaded(true);
                     } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.websocket.WebsocketAdapter) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2021 Grzegorz Skorupa <g.skorupa at gmail.com>.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.cricketmsf.out.db;
  *
  * @author greg
  */
-public class KeyValueDBException extends DBException {
+public class DBException extends Exception {
     
     public static int UNKNOWN = 999;
     public static int CANNOT_CREATE = 1;
@@ -33,15 +33,7 @@ public class KeyValueDBException extends DBException {
     private int code = UNKNOWN;
     private String message;
     
-    public KeyValueDBException(int code){
-        super(code);
-    }
-    
-    public KeyValueDBException(int code, String message){
-        super(code, message);
-    }
-    
-    /*public KeyValueDBException(int code){
+    public DBException(int code){
         this.code = code;
         switch (code){
             case 1:
@@ -59,7 +51,7 @@ public class KeyValueDBException extends DBException {
         }
     }
     
-    public KeyValueDBException(int code, String message){
+    public DBException(int code, String message){
         this.code = code;
         this.message = message;
     }
@@ -72,5 +64,4 @@ public class KeyValueDBException extends DBException {
         return code;
     }
     
-    */
 }
