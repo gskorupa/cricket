@@ -33,14 +33,19 @@
                 <img class="img-responsive" src="local-resources/cricket-logo.svg" width="320px" alt="Cricket Microservices Framework"/>
             </div>
             <div class="col-sm-12" align="center">
+                <h5 style="margin-top: 1.5rem; margin-bottom: 0rem;"><b>VERSION 2</b></h5>
+            </div>
+            <div class="col-sm-12" align="center">
                 <h5 style="margin-top: 1.5rem; margin-bottom: 2rem;"><i>You do not need to download a half of the Internet to have your job done</i></h5>
             </div>
         </div>
         <div class="row row-centered">
             <div class="col-sm-4 intro" >
                 <h2>Lightweight</h2>
-                4.4MB fat jar, including external libraries<br>
-                Java 13
+                4.3MB fat jar<br>
+                Java 13<br>
+                216 classes<br>
+                16k LOC<br>
             </div>
             <div class="col-sm-4 intro">
                 <h2>Free</h2>
@@ -61,45 +66,30 @@
         </div>
         <div class="row row-centered">
             <div id="feat1" class="col-sm-6 feature">
-                <h4>Cloud Ready</h4>
-                <p>
-                    Services build with Cricket can be deployed in cloud environments that supports Java or Docker containers.
-                </p>
-            </div>
-            <div id="feat1" class="col-sm-6 feature">
-                <h4>Hexagonal architecture</h4>
-                <p>
-                    Implements the "ports and adapters" (hexagonal) architecture pattern. 
-                    Event driven with a bit of dependency injection.
-                </p>
-            </div>
-        </div>
-        <div class="row row-centered">
-            <div id="feat2" class="col-sm-6 feature">
-                <h4>Embeded HTTP server</h4>
-                <p>
-                    HTTP/S requests handled internally to serve both REST and HTML page calls.
+                <h4>Main components</h4>
+                <p class="text-left">
+                <ul class="text-left">
+                    <li>HTTP server</li>
+                    <li>websocket server</li>
+                    <li>auth module</li>
+                    <li>headless CMS</li>
+                    <li>H2 database</li>
+                    <li>key-value database</li>
+                    <li>scheduler</li>
+                    <li>JSON serialization/deserialization</li>
+                </ul>
                 </p>
             </div>
             <div id="feat2" class="col-sm-6 feature">
-                <h4>Embeded databases</h4>
-                <p>
-                    Ready to use, in-memory databases: key-value (no sql) and H2 Database (sql).<br>
-                    Simple switching to the use of an external database.
-                </p>
-            </div>
-        </div>
-        <div class="row row-centered">
-            <div id="feat1" class="col-sm-6 feature">
-                <h4>JSON handling</h4>
-                <p>
-                    Automatic JSON serialization/deserialization.
-                </p>
-            </div>
-            <div id="feat2" class="col-sm-6 feature">
-                <h4>Scheduler</h4>
-                <p>
-                    One-time or repetitive tasks can be configured or created programatically.
+                <h4>Main features</h4>
+                <p class="text-left">
+                <ul class="text-left">
+                    <li>Hexagonal architecture</li>
+                    <li>Event driven</li>
+                    <li>Cloud ready</li>
+                    <li>Low memory requirements</li>
+                    <li>REST API</li>
+                </ul>
                 </p>
             </div>
         </div>
@@ -151,7 +141,7 @@ cd myservice
 wget https://github.com/gskorupa/cricket/releases/latest/download/cricket.jar
 mkdir www
 echo "Hello World!">www/index.html
-java -jar cricket.jar -r</pre>
+java -jar cricket.jar -r -s BasicService</pre>
             </div>
         </div>
 
@@ -169,7 +159,6 @@ java -jar cricket.jar -r</pre>
                     <li><a href="https://dzone.com/articles/fast-prototyping-from-monolith-to-microservices">Fast Prototyping: From Monolith to Microservices</a></li>
                     <li><a href="https://dzone.com/articles/gdpr-ready-microservices-framework">GDPR-Ready Microservices Framework</a></li>
                     <li><a href="https://dzone.com/articles/java-microservice-testing-a-minimalist-approach">Java Microservices Testing — A Minimalist Approach</a></li>
-                    <li><a href="https://www.signocom.com/category/microservices/">Signocom'a blog - microservices</a></li>
                 </ul>
             </div>
         </div>
@@ -205,7 +194,7 @@ java -jar cricket.jar -r</pre>
                 <a href="https://www.experiot.com.pl"><img src="local-resources/experiot-logo.svg" width="150px;"/></a>
                 <p>IT consulting services including software design and implementation.</p>
                 <p>Support in the implementation of microservices based on Cricket MSF.</p>
-                
+
             </div>
         </div>
     </div>
