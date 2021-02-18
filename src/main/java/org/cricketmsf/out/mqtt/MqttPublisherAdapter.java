@@ -21,7 +21,7 @@ import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.OutboundAdapterIface;
-import org.cricketmsf.out.dispatcher.QueueDispatcher;
+import org.cricketmsf.out.dispatcher.MessageDispatcher;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;

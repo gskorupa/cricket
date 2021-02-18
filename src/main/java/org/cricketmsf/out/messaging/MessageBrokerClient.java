@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.cricketmsf.out.queue;
+package org.cricketmsf.out.messaging;
 
 import org.cricketmsf.queue.QueueClientIface;
 import org.cricketmsf.queue.QueueIface;
@@ -22,7 +22,7 @@ import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.exception.QueueException;
 import org.cricketmsf.out.OutboundAdapter;
-import org.cricketmsf.out.dispatcher.QueueDispatcher;
+import org.cricketmsf.out.dispatcher.MessageDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author greg
  */
-public class SimpleQueueClient extends OutboundAdapter implements QueueClientIface, Adapter {
-    private static final Logger logger = LoggerFactory.getLogger(SimpleQueueClient.class);
+public class MessageBrokerClient extends OutboundAdapter implements QueueClientIface, Adapter {
+    private static final Logger logger = LoggerFactory.getLogger(MessageBrokerClient.class);
     private QueueIface queue = null;
     String queueAdapterName=null;
 

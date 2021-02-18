@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.cricketmsf.out.queue;
+package org.cricketmsf.out.messaging;
 
 import org.cricketmsf.queue.QueueIface;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import org.cricketmsf.exception.QueueException;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.OutboundAdapterIface;
 import org.cricketmsf.in.queue.QueueCallbackIface;
-import org.cricketmsf.out.dispatcher.QueueDispatcher;
+import org.cricketmsf.out.dispatcher.MessageDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +41,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author greg
  */
-public class SimpleQueue extends OutboundAdapter implements QueueIface, OutboundAdapterIface, Adapter {
-    private static final Logger logger = LoggerFactory.getLogger(SimpleQueue.class);
+public class MessageBroker extends OutboundAdapter implements QueueIface, OutboundAdapterIface, Adapter {
+    private static final Logger logger = LoggerFactory.getLogger(MessageBroker.class);
     private ConcurrentHashMap<String, ArrayList<QueueCallbackIface>> subscribers;
     private ConcurrentHashMap<String, QueueLinkedMap> channels;
     private ConcurrentHashMap<String, ArrayList<Object>> listChannels;

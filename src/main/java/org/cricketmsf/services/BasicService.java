@@ -16,11 +16,8 @@
 package org.cricketmsf.services;
 
 import java.util.HashMap;
-import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
-import org.cricketmsf.event.GreeterEvent;
-import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.api.StandardResult;
@@ -30,10 +27,6 @@ import org.cricketmsf.out.db.KeyValueDBIface;
 import org.cricketmsf.out.file.FileReaderAdapterIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.cricketmsf.annotation.EventHook;
-import org.cricketmsf.event.Procedures;
-import org.cricketmsf.api.Result;
-import org.cricketmsf.api.ResultIface;
 
 /**
  * This is example service.
@@ -45,13 +38,14 @@ public class BasicService extends Kernel {
     private static final Logger logger = LoggerFactory.getLogger(BasicService.class);
 
     // outbound adapters
-    KeyValueDBIface cacheDB = null;
-    FileReaderAdapterIface wwwFileReader = null;
+    public KeyValueDBIface cacheDB = null;
+    public FileReaderAdapterIface wwwFileReader = null;
     // other adapters whose methods must be available
     OpenApiIface apiGenerator = null;
 
     public BasicService() {
         super();
+        eventRouter = new BasicEventRouter(this);
         this.configurationBaseName = "BasicService";
     }
 
@@ -84,43 +78,10 @@ public class BasicService extends Kernel {
     }
 
     /**
-     *
-     * @param event
-     * @return ParameterMapResult with the file content as a byte array
+     * Not used
+     * @param request
+     * @return 
      */
-    @EventHook(className = "org.cricketmsf.event.HttpEvent", procedure = Procedures.WWW)
-    public ResultIface doGet(HttpEvent event) {
-        return wwwFileReader.getFile(
-                (RequestObject) event.getData(),
-                cacheDB,
-                "webcache"
-        );
-    }
-
-    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_STATUS)
-    public ResultIface handleStatusRequest(Event requestEvent) {
-        return new Result(reportStatus());
-    }
-
-    @EventHook(className = "org.cricketmsf.event.GreeterEvent", procedure = Procedures.GREET)
-    public ResultIface doGreet(GreeterEvent event) {
-        String name = ((HashMap<String, String>) event.getData()).get("name");
-        ResultIface result = new Result("Hello " + name);
-        result.setProcedure(Procedures.GREET);
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException ex) {
-
-        }
-        return result;
-    }
-
-    @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.PRINT_INFO)
-    public Result printInfo(Event event) {
-        logger.info("INFO {} {} {}", getProceduresDictionary().getName(event.getProcedure()), event.getTimeDefinition(), event.getData());
-        return null;
-    }
-
     public Object sendEcho(RequestObject request) {
         StandardResult r = new StandardResult();
         r.setCode(ResponseCode.OK);

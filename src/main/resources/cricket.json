@@ -92,8 +92,8 @@
                 {
                     "name": "Dispatcher",
                     "interfaceName": "DispatcherIface",
-                    "className": "org.cricketmsf.out.dispatcher.QueueDispatcher",
-                    "description": "event dispatcher using internal Queue",
+                    "className": "org.cricketmsf.out.dispatcher.MessageDispatcher",
+                    "description": "event dispatcher using internal message broker",
                     "properties": {
                         "event-classes": "org.cricketmsf.event.GreeterEvent",
                         "queue-client-name": "QueueClient"
@@ -102,8 +102,8 @@
                 {
                     "name": "QueueClient",
                     "interfaceName": "QueueClientIface",
-                    "className": "org.cricketmsf.out.queue.SimpleQueueClient",
-                    "description": "internal Queue client",
+                    "className": "org.cricketmsf.out.messaging.MessageBrokerClient",
+                    "description": "internal messaging client",
                     "properties": {
                         "queue-adapter-name": "Queue"
                     }
@@ -111,7 +111,7 @@
                 {
                     "name": "QueueSubscriber",
                     "interfaceName": "QueueClientIface",
-                    "className": "org.cricketmsf.in.queue.SimpleQueueSubscriber",
+                    "className": "org.cricketmsf.in.messaging.MessageSubscriber",
                     "description": "internal Queue subscriber",
                     "properties": {
                         "queue-adapter-name": "Queue",
@@ -121,7 +121,7 @@
                 {
                     "name": "Queue",
                     "interfaceName": "QueueIface",
-                    "className": "org.cricketmsf.out.queue.SimpleQueue",
+                    "className": "org.cricketmsf.out.messaging.MessageBroker",
                     "description": "embeded queue inplementation",
                     "properties": {
                     }
@@ -424,7 +424,7 @@
                 {
                     "name": "QueueClient",
                     "interfaceName": "QueueClientIface",
-                    "className": "org.cricketmsf.out.queue.SimpleQueueClient",
+                    "className": "org.cricketmsf.out.messaging.MessageBrokerClient",
                     "description": "using internal Queue",
                     "properties": {
                         "queue-adapter-name": "Queue"
@@ -433,7 +433,7 @@
                 {
                     "name": "QueueSubscriber",
                     "interfaceName": "QueueClientIface",
-                    "className": "org.cricketmsf.in.queue.SimpleQueueSubscriber",
+                    "className": "org.cricketmsf.in.messaging.MessageSubscriber",
                     "description": "using internal Queue",
                     "properties": {
                         "queue-adapter-name": "Queue",
@@ -443,7 +443,7 @@
                 {
                     "name": "Queue",
                     "interfaceName": "QueueIface",
-                    "className": "org.cricketmsf.out.queue.SimpleQueue",
+                    "className": "org.cricketmsf.out.messaging.MessageBroker",
                     "description": "=",
                     "properties": {
                         "mode": "queue"

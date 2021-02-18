@@ -31,9 +31,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
-public class QueueDispatcher extends OutboundAdapter implements Adapter, DispatcherIface {
+public class MessageDispatcher extends OutboundAdapter implements Adapter, DispatcherIface {
 
-    private static final Logger logger = LoggerFactory.getLogger(QueueDispatcher.class);
+    private static final Logger logger = LoggerFactory.getLogger(MessageDispatcher.class);
     private ConcurrentHashMap eventMap = new ConcurrentHashMap();
     private String queueClientName = null;
     private boolean handleAll = false;

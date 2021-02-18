@@ -239,7 +239,7 @@ public abstract class HttpPortedAdapter
     
     @Override
     public final void addOperationConfig(Operation operation) {
-        System.out.println(">>> " + getName() + " adding operation " + operation.getMethod() + " " + operation.getParameters().size());
+        logger.debug(">>> {} adding operation {} with {} params", getName(), operation.getMethod(), operation.getParameters().size());
         operations.put(operation.getMethod(), operation);
     }
 

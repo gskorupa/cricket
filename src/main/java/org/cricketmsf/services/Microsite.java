@@ -125,6 +125,7 @@ public class Microsite extends Kernel {
             ex.printStackTrace();
             shutdown();
         }
+        eventRouter=new MicrositeEventRouter(this);
 
         siteAdmin.initDatabases(database, userDB, authDB);
         emailSender.send(
