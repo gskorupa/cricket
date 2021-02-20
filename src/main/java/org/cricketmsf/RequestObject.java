@@ -25,6 +25,7 @@ import java.util.Map;
  */
 public class RequestObject {
 
+    public Long rootEventId = null;
     public String clientIp = null;
     public String method = null;
     public String uri = null;

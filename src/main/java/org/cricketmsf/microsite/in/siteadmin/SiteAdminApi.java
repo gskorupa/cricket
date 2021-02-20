@@ -48,13 +48,13 @@ public class SiteAdminApi extends HttpPortedAdapter {
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        super.getServiceHooks(adapterName);
+        //super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         logger.info("\tcontext=" + getContext());
     }
 
     @Override
-    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+    protected ProcedureCall preprocess(RequestObject request) {
         if ("post".equalsIgnoreCase(request.method)) {
             Event event=new Event();
             event.setData(request);

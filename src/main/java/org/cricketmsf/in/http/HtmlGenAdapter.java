@@ -54,7 +54,7 @@ public class HtmlGenAdapter extends HttpPortedAdapter implements HtmlGenAdapterI
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        super.getServiceHooks(adapterName);
+        //super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         logger.info("\tcontext=" + getContext());
         useCache = properties.getOrDefault("use-cache", "false").equalsIgnoreCase("true");
@@ -125,7 +125,7 @@ public class HtmlGenAdapter extends HttpPortedAdapter implements HtmlGenAdapterI
     }
 
     @Override
-    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+    protected ProcedureCall preprocess(RequestObject request) {
         HttpEvent event = new HttpEvent(Procedures.WWW,request);
         return ProcedureCall.toForward(event);
     }

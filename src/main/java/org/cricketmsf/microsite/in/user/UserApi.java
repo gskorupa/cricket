@@ -49,7 +49,7 @@ public class UserApi extends HttpPortedAdapter {
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        super.getServiceHooks(adapterName);
+        //super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         withConfirmation = Boolean.parseBoolean(properties.get("confirm-registration"));
         logger.info("\tconfirm-registration: " + withConfirmation);
@@ -57,7 +57,7 @@ public class UserApi extends HttpPortedAdapter {
     }
 
     @Override
-    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+    protected ProcedureCall preprocess(RequestObject request) {
         if ("post".equalsIgnoreCase(request.method)) {
             return preprocessPost(request);
         } else if ("put".equalsIgnoreCase(request.method)) {

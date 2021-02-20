@@ -78,8 +78,8 @@ public class InboundAdapter implements Runnable, InboundAdapterIface {
         return null;
     }
 
-    protected void getServiceHooks(String adapterName) {
-    }
+    //protected void getServiceHooks(String adapterName) {
+    //}
 
     public void addHookMethodNameForMethod(String requestMethod, String hookMethodName) {
         //hookMethodNames.put(requestMethod, hookMethodName);

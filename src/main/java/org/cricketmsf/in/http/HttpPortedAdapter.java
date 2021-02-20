@@ -176,7 +176,7 @@ public abstract class HttpPortedAdapter
         return r;
     }
 
-    protected abstract ProcedureCall preprocess(RequestObject request, long rootEventId);
+    protected abstract ProcedureCall preprocess(RequestObject request);
 
     protected ResultIface postprocess(ResultIface result) {
         return result;

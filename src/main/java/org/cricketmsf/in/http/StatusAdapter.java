@@ -32,7 +32,7 @@ public class StatusAdapter
     }
 
     @Override
-    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+    protected ProcedureCall preprocess(RequestObject request) {
         Event event = new Event();
         event.setProcedure(Procedures.SYSTEM_STATUS);
         return ProcedureCall.toForward(event);

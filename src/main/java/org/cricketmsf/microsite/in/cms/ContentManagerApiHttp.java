@@ -51,7 +51,7 @@ public class ContentManagerApiHttp extends HttpPortedAdapter {
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        super.getServiceHooks(adapterName);
+        //super.getServiceHooks(adapterName);
         setContext(properties.get("context"));
         defaultLanguage = properties.getOrDefault("default-language", "en");
         logger.info("\tdefault-language: {}", defaultLanguage);
@@ -59,7 +59,7 @@ public class ContentManagerApiHttp extends HttpPortedAdapter {
     }
 
     @Override
-    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+    protected ProcedureCall preprocess(RequestObject request) {
         if ("options".equalsIgnoreCase(request.method)) {
             return ProcedureCall.toRespond(ResponseCode.OK, "");
         } else if ("get".equalsIgnoreCase(request.method)) {

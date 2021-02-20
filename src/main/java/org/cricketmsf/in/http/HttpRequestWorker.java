@@ -51,7 +51,7 @@ public class HttpRequestWorker implements Runnable {
             } catch (Exception e) {
             }
             // cerating Result object
-            RequestObject requestObject = buildRequestObject(exchange, acceptedResponseType);
+            RequestObject requestObject = buildRequestObject(exchange, acceptedResponseType, rootEventId);
             if (null != adapter.properties.get("dump-request") && "true".equalsIgnoreCase(adapter.properties.get("dump-request"))) {
                 logger.info(dumpRequest(requestObject));
             }
@@ -153,6 +153,10 @@ public class HttpRequestWorker implements Runnable {
     }
 
     RequestObject buildRequestObject(HttpExchange exchange, String acceptedResponseType) {
+        return buildRequestObject(exchange,acceptedResponseType, -1);
+    }
+    
+    RequestObject buildRequestObject(HttpExchange exchange, String acceptedResponseType, long rootEventId) {
         // Remember that "parameters" attribute is created by filter
         Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
         String method = exchange.getRequestMethod();
@@ -165,6 +169,7 @@ public class HttpRequestWorker implements Runnable {
         }
 
         RequestObject requestObject = new RequestObject();
+        requestObject.rootEventId=rootEventId;
         requestObject.method = method;
         requestObject.parameters = parameters;
         requestObject.uri = exchange.getRequestURI().toString();
@@ -194,7 +199,7 @@ public class HttpRequestWorker implements Runnable {
         }
 
         try {
-            ProcedureCall pCall = adapter.preprocess(requestObject, Kernel.getEventId());
+            ProcedureCall pCall = adapter.preprocess(requestObject);
             if (pCall.requestHandled) { // request processed by the adapter
                 if (pCall.responseCode < 100 || pCall.responseCode > 1000) {
                     result.setCode(ResponseCode.BAD_REQUEST);

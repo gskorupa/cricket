@@ -37,7 +37,7 @@ public class GreeterAdapter
     }
 
     @Override
-    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+    protected ProcedureCall preprocess(RequestObject request) {
         // validation and translation 
         String name = (String) request.parameters.getOrDefault("name", "");
         if (name.isEmpty() || !"world".equalsIgnoreCase(name)) {

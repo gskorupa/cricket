@@ -42,7 +42,7 @@ public class OpenApi extends HttpPortedAdapter implements OpenApiIface, InboundA
     private ArrayList<PathItem> paths = null;
 
     @Override
-    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+    protected ProcedureCall preprocess(RequestObject request) {
         // validation and translation 
         String method = request.method;
         if ("GET".equalsIgnoreCase(method)) {

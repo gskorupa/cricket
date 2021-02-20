@@ -31,7 +31,7 @@ public class Tester extends HttpPortedAdapter {
     private static final Logger logger = LoggerFactory.getLogger(Tester.class);
 
     @Override
-    protected ProcedureCall preprocess(RequestObject request, long rootEventId) {
+    protected ProcedureCall preprocess(RequestObject request) {
         logger.info(dumpRequest(request));
         return ProcedureCall.toRespond(ResponseCode.OK, "");
     }

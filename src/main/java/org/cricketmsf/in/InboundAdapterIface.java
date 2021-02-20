@@ -26,5 +26,4 @@ public interface InboundAdapterIface {
     public String setProperty(String name, String value);
     public Map<String,Object> getStatus(String name);
     public String getName();
-    //public Object handleInput(Object input);
 }
