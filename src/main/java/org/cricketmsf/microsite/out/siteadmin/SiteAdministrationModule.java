@@ -87,7 +87,7 @@ public class SiteAdministrationModule extends OutboundAdapter implements SiteAdm
             switch (moduleName.toLowerCase()) {
                 case "status":
                     //result = getServiceInfo();
-                    result = (StandardResult) Kernel.getInstance().getEventProcessingResult(new StatusRequested());
+                    result = (StandardResult) Kernel.getInstance().handleEvent(new StatusRequested());
                     break;
                 case "config":
                     result = getServiceConfig();

@@ -70,7 +70,7 @@ public class MessageSubscriber extends InboundAdapter implements SubscriberIface
         try {
             ev = (Event)Class.forName(channelName).newInstance();
             ev.deserialize((String) value);
-            Kernel.getInstance().getEventProcessingResult(ev);
+            Kernel.getInstance().handleEvent(ev);
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
             Kernel.getInstance().dispatchEvent(Event.fromJson((String) value));
         }

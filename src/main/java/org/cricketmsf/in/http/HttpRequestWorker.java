@@ -210,7 +210,7 @@ public class HttpRequestWorker implements Runnable {
                 result.setHeader("Content-type", pCall.contentType);
             } else { // pCall must be processed by the Kernel
                 logger.debug("sending request to hook method " + pCall.procedure + "@" + pCall.event.getClass().getSimpleName());
-                result = (ResultIface) Kernel.getInstance().getEventProcessingResult(
+                result = (ResultIface) Kernel.getInstance().handleEvent(
                         pCall.event,
                         pCall.procedure
                 );

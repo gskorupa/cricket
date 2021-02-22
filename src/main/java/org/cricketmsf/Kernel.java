@@ -202,11 +202,17 @@ public abstract class Kernel {
         return result;
     }
 
-    public ResultIface getEventProcessingResult(Event event) {
-        return getEventProcessingResult(event, event.getProcedure());
+    /**
+     * Invokes the service method annotated as dedicated to this event category
+     *
+     * @param event event object that should be processed
+     * @return result of event processing
+     */
+    public ResultIface handleEvent(Event event) {
+        return handleEvent(event, event.getProcedure());
     }
 
-    public ResultIface getEventProcessingResult(Event event, int procedure) {
+    public ResultIface handleEvent(Event event, int procedure) {
         if (null == event || !event.isValid()) {
             return null;
         }
@@ -238,16 +244,6 @@ public abstract class Kernel {
         return null;
     }
 
-    /**
-     * Invokes the service method annotated as dedicated to this event category
-     *
-     * @param event event object that should be processed
-     * @return result of event processing
-     */
-    public static ResultIface handle(Event event) {
-        return Kernel.getInstance().getEventProcessingResult(event);
-    }
-
     public ResultIface dispatchEvent(Event event) {
         if (null != event && event.isValid()) {
             try {
@@ -258,7 +254,7 @@ public abstract class Kernel {
                 }
                 return null;
             } catch (NullPointerException | DispatcherException ex) {
-                return getEventProcessingResult(event);
+                return Kernel.this.handleEvent(event);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 return null;

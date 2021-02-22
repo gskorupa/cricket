@@ -320,7 +320,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     @Override
     public void dispatch(Event event) throws DispatcherException {
         if (event.getExecutionTime() < 0) {
-            Kernel.getInstance().getEventProcessingResult(event);
+            Kernel.getInstance().handleEvent(event);
         } else {
             handleEvent(event);
         }
