@@ -64,6 +64,8 @@ public abstract class Kernel {
     public final static int MAINTENANCE = 2;
     public final static int SHUTDOWN = 3;
 
+    private static final long DISPATCHER_WAIT_TIME = 300000;
+    
     public final static String DEFAULT_AUTHORIZATION_FILTER = "org.cricketmsf.AuthorizationFilter";
 
     // emergency LOGGER
@@ -472,6 +474,19 @@ public abstract class Kernel {
         // Scheduler can be used only if there is no other dispatcher configured
         if (null == eventDispatcher || eventDispatcher.getName().equals("Scheduler")) {
             eventDispatcher = (DispatcherIface) adapter;
+            LOGGER.info("event dispatcher is starting ...");
+            long start=System.currentTimeMillis();
+            while(!eventDispatcher.isReady()){
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    LOGGER.error(ex.getMessage());
+                }
+                if(System.currentTimeMillis()-start>DISPATCHER_WAIT_TIME){
+                    LOGGER.error("service shutdown due to unavailable dispatcher");
+                    shutdown();
+                }
+            }
         }
     }
 
@@ -647,6 +662,7 @@ public abstract class Kernel {
             LOGGER.info("STARTING LISTENERS");
             // run listeners for inbound adapters
             runListeners();
+            runDispatcher();
 
             LOGGER.info("Starting http listener ...");
             String httpdName = (String) getProperties().getOrDefault("httpd", "");
@@ -702,6 +718,10 @@ public abstract class Kernel {
             LOGGER.error("Inbound ports not configured. Exiting ...");
             System.exit(MIN_PRIORITY);
         }
+    }
+    
+    private void runDispatcher(){
+        
     }
 
     /**

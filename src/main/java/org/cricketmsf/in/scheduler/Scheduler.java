@@ -91,6 +91,15 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     public void run() {
         initScheduledTasks();
     }
+    
+    @Override 
+    public void start(){
+        
+    }
+    
+    public boolean isReady(){
+        return true;
+    }
 
     @Override
     public boolean handleEvent(Event event) {

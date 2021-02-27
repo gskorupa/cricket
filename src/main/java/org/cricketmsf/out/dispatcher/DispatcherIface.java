@@ -26,4 +26,6 @@ public interface DispatcherIface {
     public void dispatch(Event event) throws DispatcherException;
     public void registerEventTypes(String categories) throws DispatcherException;
     public String getName();
+    public void start();
+    public boolean isReady();
 }

@@ -91,4 +91,13 @@ public class MessageDispatcher extends OutboundAdapter implements Adapter, Dispa
         return this;
     }
 
+    @Override
+    public void start() {
+    }
+
+    @Override
+    public boolean isReady() {
+        return true;
+    }
+
 }

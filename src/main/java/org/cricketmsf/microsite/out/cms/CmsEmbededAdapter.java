@@ -129,12 +129,6 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
         try { // each document uid has list of comments
             database.addTable("comments", 2000, true);
         } catch (KeyValueDBException e) {
-            Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
-        }
-        try { // each unique tag has list of documents uids
-            database.addTable("tags", 100, true);
-        } catch (KeyValueDBException e) {
-            Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), e.getMessage()));
         }
          */
         try { // document paths
