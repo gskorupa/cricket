@@ -44,6 +44,7 @@ import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.DispatcherException;
 import org.cricketmsf.exception.InitException;
 import org.cricketmsf.exception.WebsocketException;
+import org.cricketmsf.in.event.EventListenerIface;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.out.autostart.AutostartIface;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
@@ -67,11 +68,12 @@ public abstract class Kernel {
     // emergency LOGGER
     //private static final Logger LOGGER = Logger.getLogger(org.cricketmsf.Kernel.class.getName());
     private static final Logger LOGGER = LoggerFactory.getLogger(Kernel.class);
-    
+
     // standard logger
     protected static LoggerAdapterIface logger = null;
     // event dispatcher
     protected DispatcherIface eventDispatcher = null;
+    protected EventListenerIface eventListener = null;
 
     // singleton
     private static Kernel instance = null;
@@ -252,15 +254,15 @@ public abstract class Kernel {
                 m = getClass().getMethod(methodName, event.getClass());
                 o = m.invoke(this, event);
             } else {
-                LOGGER.warn("Don't know how to handle event {} procedure {}",procedureName,event.getClass().getName());
+                LOGGER.warn("Don't know how to handle event {} procedure {}", procedureName, event.getClass().getName());
             }
         } catch (IllegalAccessException | NoSuchMethodException e) {
-            LOGGER.warn("Handler method {} not compatible with event class {}",methodName,event.getClass().getName());
+            LOGGER.warn("Handler method {} not compatible with event class {}", methodName, event.getClass().getName());
         } catch (InvocationTargetException e) {
-            LOGGER.warn("Event class {} handler method {} exception {} {}",event.getClass().getName(),methodName,e.getCause().getClass(), e.getCause().getMessage());
+            LOGGER.warn("Event class {} handler method {} exception {} {}", event.getClass().getName(), methodName, e.getCause().getClass(), e.getCause().getMessage());
             e.printStackTrace();
         } catch (NullPointerException e) {
-            LOGGER.warn("Unable to find method {} for event class {}",methodName,event.getClass().getName());
+            LOGGER.warn("Unable to find method {} for event class {}", methodName, event.getClass().getName());
         }
         return o;
     }
@@ -315,7 +317,7 @@ public abstract class Kernel {
     }
 
     public Object dispatchEvent(EventDecorator event) {
-        if (null!=event.getOriginalEvent() && null != event.getOriginalEvent().getTimePoint()) {
+        if (null != event.getOriginalEvent() && null != event.getOriginalEvent().getTimePoint()) {
             try {
                 ((SchedulerIface) getAdaptersMap().get("Scheduler")).handleEvent(event);
                 return null;
@@ -488,8 +490,8 @@ public abstract class Kernel {
                 getLogger().print("ADAPTER: " + adapterName);
                 try {
                     Class c = Class.forName(ac.getAdapterClassName());
-                    if(Modifier.isAbstract(c.getModifiers() )){
-                        getLogger().print("ERROR: " + adapterName + " adapter class is abstract: "+ac.getAdapterClassName());
+                    if (Modifier.isAbstract(c.getModifiers())) {
+                        getLogger().print("ERROR: " + adapterName + " adapter class is abstract: " + ac.getAdapterClassName());
                         continue;
                     }
                     adaptersMap.put(adapterName, c.getDeclaredConstructor().newInstance());
@@ -523,6 +525,8 @@ public abstract class Kernel {
                         setAutostartAdapter(adaptersMap.get(adapterName));
                     } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.out.log.LoggerAdapterIface) {
                         setLoggerAdapter(adaptersMap.get(adapterName));
+                    } else if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.event.EventListenerIface) {
+                        setEventListener(adaptersMap.get(adapterName));
                     }
                 } catch (NullPointerException | ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                     //adaptersMap.put(adapterName, null);
@@ -550,8 +554,15 @@ public abstract class Kernel {
         if (adapter != null) {
             // Scheduler can be used only if there is no other dispatcher configured
             //if (null == eventDispatcher && !"org.cricketmsf.in.scheduler.Scheduler".equals(adapter.getClass().getName())) {
-            if (null == eventDispatcher || eventDispatcher.getName().equals("Scheduler")) {
+            if (null == eventDispatcher || eventDispatcher.getName().equalsIgnoreCase("Scheduler")) {
                 eventDispatcher = (DispatcherIface) adapter;
+            }
+        }
+    }
+    private void setEventListener(Object adapter) {
+        if (adapter != null) {
+            if (null == eventListener) {
+                eventListener = (EventListenerIface) adapter;
             }
         }
     }
@@ -745,6 +756,7 @@ public abstract class Kernel {
             getLogger().print("Starting listeners ...");
             // run listeners for inbound adapters
             runListeners();
+            connectToExternalDispatcher();
 
             getLogger().print("Starting http listener ...");
             if (!"jetty".equalsIgnoreCase((String) getProperties().getOrDefault("httpd", ""))) {
@@ -805,13 +817,42 @@ public abstract class Kernel {
         }
     }
 
+    private void connectToExternalDispatcher() {
+        getLogger().print("Starting event dispatcher ...");
+        try {
+            long startDisp = System.currentTimeMillis();
+            while (!eventDispatcher.isReady()) {
+                if (System.currentTimeMillis() - startDisp > 300000) {
+                    LOGGER.error("Unable to start dispatcher");
+                    shutdown();
+                }
+                eventDispatcher.start();
+                Thread.sleep(1000);
+            }
+            startDisp = System.currentTimeMillis();
+            if (null != eventListener) {
+                while (!eventListener.isReady()) {
+                    if (System.currentTimeMillis() - startDisp > 300000) {
+                        LOGGER.error("Unable to start event listener");
+                        shutdown();
+                    }
+                    eventListener.start();
+                    Thread.sleep(100);
+                }
+            }
+        } catch (InterruptedException ex) {
+            LOGGER.error(ex.getMessage());
+            shutdown();
+        }
+    }
+
     /**
      * Could be overriden in a service implementation to run required code at
      * the service start. As the last step of the service starting procedure
      * before HTTP service.
      */
     protected void runInitTasks() throws InitException {
-        if(null!=getAutostartAdapter()){
+        if (null != getAutostartAdapter()) {
             getAutostartAdapter().execute();
         }
         setInitialized(true);
@@ -976,8 +1017,8 @@ public abstract class Kernel {
     public String getName() {
         return name;
     }
-    
-    public String getServiceVersion(){
+
+    public String getServiceVersion() {
         return getConfigSet().getServiceVersion();
     }
 
@@ -991,16 +1032,16 @@ public abstract class Kernel {
             tmp = System.getenv(variableName);
         } catch (Exception e) {
         }
-        if(null==tmp||tmp.isBlank()){
-            tmp=(String)getProperties().getOrDefault("servicename", "");
+        if (null == tmp || tmp.isBlank()) {
+            tmp = (String) getProperties().getOrDefault("servicename", "");
         }
-        if(null==tmp||tmp.isBlank()){
-            tmp=getId();
+        if (null == tmp || tmp.isBlank()) {
+            tmp = getId();
         }
         if (tmp.isBlank()) {
             this.name = "CricketService";
-        }else{
-            this.name=tmp;
+        } else {
+            this.name = tmp;
         }
     }
 
@@ -1008,9 +1049,9 @@ public abstract class Kernel {
      * @return the logger
      */
     public static LoggerAdapterIface getLogger() {
-        if(null==logger){
+        if (null == logger) {
             return new Slf4jLogger();
-        }else{
+        } else {
             return logger;
         }
     }
@@ -1059,6 +1100,7 @@ public abstract class Kernel {
         args.put(JsonWriter.TYPE, false);
         return JsonWriter.objectToJson(reportStatus(), args);
     }
+
     public String printExtendedProperties(HashMap props) {
         HashMap args = new HashMap();
         args.put(JsonWriter.PRETTY_PRINT, true);
@@ -1207,7 +1249,7 @@ public abstract class Kernel {
     public void setAutostartAdapter(Object autostartAdapter) {
         this.autostartAdapter = (AutostartIface) autostartAdapter;
     }
-    
+
     public void setLoggerAdapter(Object loggerAdapter) {
         this.logger = (LoggerAdapterIface) loggerAdapter;
     }

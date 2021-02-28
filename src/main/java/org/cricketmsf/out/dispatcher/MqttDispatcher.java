@@ -124,4 +124,13 @@ public class MqttDispatcher extends OutboundAdapter implements Adapter, Dispatch
     public DispatcherIface getDispatcher() {
         return this;
     }
+
+    @Override
+    public void start() {
+    }
+
+    @Override
+    public boolean isReady() {
+        return true;
+    }
 }

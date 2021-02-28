@@ -105,3 +105,5 @@ build
 /dependency-reduced-pom.xml
 /gradlefiles/
 /backup2x/
+/scheduler-reschedule.xml
+/scheduler.xml

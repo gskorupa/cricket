@@ -41,13 +41,12 @@ import org.cricketmsf.out.dispatcher.DispatcherIface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  *
  * @author greg
  */
 public class Scheduler extends InboundAdapter implements SchedulerIface, DispatcherIface, Adapter {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
     private String storagePath;
@@ -63,8 +62,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     private ThreadFactory factory = Kernel.getInstance().getThreadFactory();
     public final ScheduledExecutorService scheduler
-            = Executors.newScheduledThreadPool(10,factory);
-    
+            = Executors.newScheduledThreadPool(10, factory);
+
     /**
      * This method is executed while adapter is instantiated during the service
      * start. It's used to configure the adapter according to the configuration.
@@ -80,7 +79,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         Kernel.getInstance().getLogger().print("\tpath: " + getStoragePath());
         setEnvVariable(properties.get("envVariable"));
         Kernel.getInstance().getLogger().print("\tenvVAriable name: " + getEnvVariable());
-        if (null!=getEnvVariable() && System.getenv(getEnvVariable()) != null) {
+        if (null != getEnvVariable() && System.getenv(getEnvVariable()) != null) {
             setStoragePath(System.getenv(getEnvVariable()));
         }
         // fix to handle '.'
@@ -110,9 +109,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
         killList = new ConcurrentHashMap<>();
 
     }
-    
+
     @Override
-    public void run(){
+    public void run() {
         initScheduledTasks();
     }
 
@@ -143,91 +142,91 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public boolean handleEvent(Event event, boolean restored, boolean systemStart) {
-        try{
-        if (event.getTimePoint() == null) {
-            logger.debug("event.getTimePoint() is null. It should not happen");
-            return false;
-        }
-        if (systemStart) {
-            String oldCopy = "";
-            //when events initialized on the service start, we need to create new instances of these events
-            if (event.getName() != null && !event.getName().isEmpty()) {
-                if (database.containsKey(event.getName())) {
-                    oldCopy = ((Event) database.get(event.getName())).getId() + "";
-                }
-            } else {
-                if (database.containsKey("" + event.getId())) {
-                    oldCopy = ((Event) database.get("" + event.getId())).getId() + "";
-                }
+        try {
+            if (event.getTimePoint() == null) {
+                logger.debug("event.getTimePoint() is null. It should not happen");
+                return false;
             }
-            if (!oldCopy.isEmpty()) {
-                killList.put(oldCopy, oldCopy);
-            }
-        }
-
-        final Runnable runnable;
-        runnable = new Runnable() {
-            Event ev;
-
-            @Override
-            public void run() {
-                // we should reset timepoint to prevent sending this event back from the service
-                String remembered = ev.getTimePoint();
-                ev.setTimePoint(null);
-                // we should wait until Kernel finishes initialization process
-                while (!Kernel.getInstance().isStarted()) {
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException ex) {
-                    }
-                }
-
-                if (!killList.containsKey("" + ev.getId())) {
-                    Kernel.getInstance().dispatchEvent(ev);
-                }
-
-                threadsCounter--;
-                database.remove("" + ev.getId());
-                try {
-                    if (ev.isCyclic()) {
-                        //if timePoint has form dateformatted|*cyclicdelay
-                        int pos = remembered.indexOf("|*");
-                        if (pos > 0) {
-                            remembered = remembered.substring(pos + 1);
-                        }
-                        ev.setTimePoint(remembered);
-                        ev.reschedule();
-                        handleEvent(ev);
-                    }
-                } catch (Exception e) {
-                    Kernel.getLogger().log(Event.logWarning(this, "malformed event time definition - unable to reschedule"));
-                }
-            }
-
-            public Runnable init(Event event) {
-                this.ev = event;
-                return (this);
-            }
-        }.init(event);
-
-        Delay delay = getDelayForEvent(event, restored);
-        if (delay.getDelay() >= 0) {
-            if(systemStart){
-                Kernel.getLogger().log(Event.logInfo(this, "event " + event.getName() + " will start in " + (delay.getDelay() / 1000) + " seconds"));
-            }
-            if (!restored) {
+            if (systemStart) {
+                String oldCopy = "";
+                //when events initialized on the service start, we need to create new instances of these events
                 if (event.getName() != null && !event.getName().isEmpty()) {
-                    database.put(event.getName(), event);
+                    if (database.containsKey(event.getName())) {
+                        oldCopy = ((Event) database.get(event.getName())).getId() + "";
+                    }
                 } else {
-                    database.put("" + event.getId(), event);
+                    if (database.containsKey("" + event.getId())) {
+                        oldCopy = ((Event) database.get("" + event.getId())).getId() + "";
+                    }
+                }
+                if (!oldCopy.isEmpty()) {
+                    killList.put(oldCopy, oldCopy);
                 }
             }
-            threadsCounter++;
-            final ScheduledFuture<?> workerHandle  = scheduler.schedule(runnable, delay.getDelay(), delay.getUnit());
-        }
-        return true;
-        }catch(Exception e){
-            System.out.println("EXCEPTION "+e.getMessage());
+
+            final Runnable runnable;
+            runnable = new Runnable() {
+                Event ev;
+
+                @Override
+                public void run() {
+                    // we should reset timepoint to prevent sending this event back from the service
+                    String remembered = ev.getTimePoint();
+                    ev.setTimePoint(null);
+                    // we should wait until Kernel finishes initialization process
+                    while (!Kernel.getInstance().isStarted()) {
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException ex) {
+                        }
+                    }
+
+                    if (!killList.containsKey("" + ev.getId())) {
+                        Kernel.getInstance().dispatchEvent(ev);
+                    }
+
+                    threadsCounter--;
+                    database.remove("" + ev.getId());
+                    try {
+                        if (ev.isCyclic()) {
+                            //if timePoint has form dateformatted|*cyclicdelay
+                            int pos = remembered.indexOf("|*");
+                            if (pos > 0) {
+                                remembered = remembered.substring(pos + 1);
+                            }
+                            ev.setTimePoint(remembered);
+                            ev.reschedule();
+                            handleEvent(ev);
+                        }
+                    } catch (Exception e) {
+                        Kernel.getLogger().log(Event.logWarning(this, "malformed event time definition - unable to reschedule"));
+                    }
+                }
+
+                public Runnable init(Event event) {
+                    this.ev = event;
+                    return (this);
+                }
+            }.init(event);
+
+            Delay delay = getDelayForEvent(event, restored);
+            if (delay.getDelay() >= 0) {
+                if (systemStart) {
+                    Kernel.getLogger().log(Event.logInfo(this, "event " + event.getName() + " will start in " + (delay.getDelay() / 1000) + " seconds"));
+                }
+                if (!restored) {
+                    if (event.getName() != null && !event.getName().isEmpty()) {
+                        database.put(event.getName(), event);
+                    } else {
+                        database.put("" + event.getId(), event);
+                    }
+                }
+                threadsCounter++;
+                final ScheduledFuture<?> workerHandle = scheduler.schedule(runnable, delay.getDelay(), delay.getUnit());
+            }
+            return true;
+        } catch (Exception e) {
+            System.out.println("EXCEPTION " + e.getMessage());
             return false;
         }
     }
@@ -366,8 +365,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     public long getThreadsCount() {
         return threadsCounter;
     }
-    
-    private String getThreadsInfo(){
+
+    private String getThreadsInfo() {
         return "";
     }
 
@@ -397,9 +396,9 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                                     params[2], //category
                                     params[3], //type
                                     params[4], //timePoint
-                                    params[5]  //payload
-                            ).putName(params[0]), 
-                            false, 
+                                    params[5] //payload
+                            ).putName(params[0]),
+                            false,
                             true
                     );
                 }
@@ -409,28 +408,37 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     @Override
     public void dispatch(Event event) throws DispatcherException {
-        if(event.getTimePoint()==null){
+        if (event.getTimePoint() == null) {
             Kernel.getInstance().getEventProcessingResult(event);
-        }else{
+        } else {
             handleEvent(event);
         }
     }
-    
+
     @Override
     public void dispatch(EventDecorator event) throws DispatcherException {
-        if(event.getTimePoint()==null){
+        if (event.getTimePoint() == null) {
             Kernel.getInstance().getEventProcessingResult(event);
-        }else{
+        } else {
             handleEvent(event);
         }
     }
-    
+
     @Override
-    public DispatcherIface getDispatcher(){
+    public DispatcherIface getDispatcher() {
         return this;
     }
 
     @Override
     public void registerEventTypes(String categories) throws DispatcherException {
+    }
+
+    @Override
+    public void start() {
+    }
+
+    @Override
+    public boolean isReady() {
+        return true;
     }
 }
