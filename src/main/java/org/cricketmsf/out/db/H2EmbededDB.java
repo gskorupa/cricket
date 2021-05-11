@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2017 Grzegorz Skorupa .
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.event.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -470,7 +469,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     }
 
     /**
-     * @param autocommit the autocommit to set
+     * @param value TODO doc
      */
     public void setAutocommit(String value) {
         this.autocommit = Boolean.parseBoolean(value);

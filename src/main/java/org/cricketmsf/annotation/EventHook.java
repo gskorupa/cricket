@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2020 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.cricketmsf.event.Procedures;
 
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author Grzegorz Skorupa 
  */
 @Documented
 @Repeatable(EventHook.List.class)

@@ -7,7 +7,6 @@ package org.cricketmsf.event;
 public class ProcedureCall {
 
     public Event event = null;
-    //public String procedureName = null;
     public int responseCode = 0;
     public Object response = null;
     public String contentType = "application/json";
@@ -22,8 +21,8 @@ public class ProcedureCall {
      * Creates ProcedureCall object to be forwarded to the service for
      * processing.
      *
-     * @param event
-     * @return
+     * @param event TODO doc
+     * @return TODO doc
      */
     public static ProcedureCall toForward(Event event) {
         return toForward(event, event.getProcedure(), 0);
@@ -33,11 +32,9 @@ public class ProcedureCall {
      * Creates ProcedureCall object to be forwarded to the service for
      * processing.
      *
-     * @param event
-     * @param procedureName
-     * @return
+     * @param event TODO doc
+     * @param procedure TODO doc
      */
-    //public ProcedureCall(Event event, String procedureName) {
     public ProcedureCall(Event event, int procedure) {
         this.event = event;
         this.procedure = procedure;
@@ -47,11 +44,10 @@ public class ProcedureCall {
      * Creates ProcedureCall object to be forwarded to the service for
      * processing.
      *
-     * @param event
-     * @param procedureName
-     * @return
+     * @param event TODO doc
+     * @param procedure TODO doc
+     * @return TODO doc
      */
-    //public static ProcedureCall toForward(Event event, String procedureName) {
     public static ProcedureCall toForward(Event event, int procedure) {
         return toForward(event, procedure, 0);
     }
@@ -60,12 +56,11 @@ public class ProcedureCall {
      * Creates ProcedureCall object to be forwarded to the service for
      * processing.
      *
-     * @param event
-     * @param procedureName
-     * @param responseCode
-     * @return
+     * @param event TODO doc
+     * @param procedure TODO doc
+     * @param responseCode TODO doc
+     * @return TODO doc
      */
-    //public static ProcedureCall toForward(Event event, String procedureName, int responseCode) {
     public static ProcedureCall toForward(Event event, int procedure, int responseCode) {
         ProcedureCall pc = new ProcedureCall();
         pc.requestHandled = false;
@@ -78,9 +73,9 @@ public class ProcedureCall {
     /**
      * Creates ProcedureCall object to be processed by the inbound adapter without calling the service.
      * 
-     * @param responseCode
-     * @param responseObject
-     * @return 
+     * @param responseCode TODO doc
+     * @param responseObject TODO doc
+     * @return TODO doc
      */
     public static ProcedureCall toRespond(int responseCode, Object responseObject) {
         ProcedureCall pc = new ProcedureCall();
@@ -93,10 +88,10 @@ public class ProcedureCall {
     /**
      * Creates ProcedureCall object to be processed by the inbound adapter without calling the service.
      * 
-     * @param responseCode
-     * @param contentType
-     * @param responseObject
-     * @return 
+     * @param responseCode TODO doc
+     * @param contentType TODO doc
+     * @param responseObject TODO doc
+     * @return TODO doc
      */
     public static ProcedureCall toRespond(int responseCode, String contentType, Object responseObject) {
         ProcedureCall pc = new ProcedureCall();

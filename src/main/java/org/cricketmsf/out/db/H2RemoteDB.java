@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2019 Grzegorz Skorupa .
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public class H2RemoteDB extends H2EmbededDB implements SqlDBIface, Adapter {
         getStatus(adapterName); //required if we need to overwrite updateStatusItem() method
         //
         setHost(properties.get("host"));
-        logger.info("\thost: " + getPath());
+        logger.info("\thost: " + getHost());
         setFileName(properties.get("dbfile"));
         logger.info("\tdbfile: " + getFileName());
         setLocation("tcp://"+getHost()+File.separator+getFileName());

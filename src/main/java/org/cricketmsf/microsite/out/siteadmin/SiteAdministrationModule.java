@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2017 Grzegorz Skorupa .
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,11 @@ import java.util.Random;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.api.StandardResult;
-//import org.cricketmsf.microsite.event.ShutdownRequested;
-//import org.cricketmsf.microsite.event.StatusRequested;
 import org.cricketmsf.microsite.out.auth.Token;
 import org.cricketmsf.microsite.out.user.HashMaker;
 import org.cricketmsf.microsite.out.user.User;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.out.OutboundAdapter;
-//import org.cricketmsf.microsite.user.HashMaker;
-//import org.cricketmsf.microsite.user.User;
 import org.cricketmsf.out.db.H2EmbededDB;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
@@ -42,7 +38,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author Grzegorz Skorupa 
  */
 public class SiteAdministrationModule extends OutboundAdapter implements SiteAdministrationIface, Adapter{
     private static final Logger logger = LoggerFactory.getLogger(H2EmbededDB.class);
@@ -60,116 +56,6 @@ public class SiteAdministrationModule extends OutboundAdapter implements SiteAdm
         }
         return roles.contains(ADMIN);
     }
-
-    /**
-     * Process API requests related to platform administration
-     *
-     * @param event HTTP request encapsulated in Event object
-     * @return Result object encapsulating HTTP response
-     */
-    /*
-    public Object handleRestEvent(Event event) {
-        RequestObject request = event.getRequest();
-        String method = request.method;
-        String moduleName = request.pathExt;
-        StandardResult result = new StandardResult();
-        if ("OPTIONS".equalsIgnoreCase(method)) {
-            result.setCode(HttpAdapter.SC_OK);
-            return result;
-        }
-        String userID = request.headers.getFirst("X-user-id");
-        List<String> roles = request.headers.get("X-user-role");
-        if (!hasAccessRights(userID, roles)) {
-            result.setCode(HttpAdapter.SC_FORBIDDEN);
-            return result;
-        }
-        if ("GET".equalsIgnoreCase(method)) {
-            switch (moduleName.toLowerCase()) {
-                case "status":
-                    //result = getServiceInfo();
-                    result = (StandardResult) Kernel.getInstance().handleEvent(new StatusRequested());
-                    break;
-                case "config":
-                    result = getServiceConfig();
-                    break;
-                case "shutdown":
-                    result.setCode(HttpAdapter.SC_ACCEPTED);
-                    result.setData("the service will be stopped within a few seconds");
-                    Kernel.getInstance().dispatchEvent(new ShutdownRequested().setDelay(10));
-                    break;
-                default:
-                    result.setCode(HttpAdapter.SC_BAD_REQUEST);
-            }
-        } else if ("POST".equalsIgnoreCase(method)) {
-            switch (moduleName.toLowerCase()) {
-                case "database":
-                    String adapterName = (String) request.parameters.getOrDefault("adapter", "");
-                    String query = (String) request.parameters.get("query");
-                    if (null != query) {
-                        SqlDBIface adapter = (SqlDBIface) Kernel.getInstance().getAdaptersMap().get(adapterName);
-                        try {
-                            result.setData(adapter.execute(query));
-                        } catch (SQLException ex) {
-                            result.setCode(HttpAdapter.SC_BAD_REQUEST);
-                            result.setData(ex.getMessage());
-                        }
-                    } else {
-                        result.setCode(HttpAdapter.SC_BAD_REQUEST);
-                        result.setData("query not set");
-                    }
-                    break;
-                case "status":
-                    String newStatus = (String) request.parameters.getOrDefault("status", "");
-                    if ("online".equalsIgnoreCase(newStatus)) {
-                        Kernel.getInstance().setStatus(Kernel.ONLINE);
-                    } else if ("maintenance".equalsIgnoreCase(newStatus)) {
-                        Kernel.getInstance().setStatus(Kernel.MAINTENANCE);
-                    }
-                    result = getServiceInfo();
-                    break;
-                case "adapter":
-                    String name = (String) request.parameters.getOrDefault("name", "");
-                    String propertyName = (String) request.parameters.getOrDefault("property", "");
-                    String newValue = (String) request.parameters.getOrDefault("value", "");
-                    if (name.isEmpty()) {
-                        result.setCode(HttpAdapter.SC_BAD_REQUEST);
-                        result.setData("At least adapter name must be specified");
-                        break;
-                    }
-                    Object adapter = Kernel.getInstance().getAdaptersMap().getOrDefault(name, null);
-                    if (null == adapter) {
-                        result.setCode(HttpAdapter.SC_BAD_REQUEST);
-                        result.setData("Adapter not found");
-                        break;
-                    }
-                    if (adapter instanceof InboundAdapter) {
-                        if (!newValue.isEmpty() && !propertyName.isEmpty()) {
-                            ((InboundAdapter) adapter).setProperty(propertyName, newValue);
-
-                        }
-                    } else if (adapter instanceof OutboundAdapter) {
-                        if (!newValue.isEmpty() && !propertyName.isEmpty()) {
-                            ((OutboundAdapter) adapter).setProperty(propertyName, newValue);
-                        }
-                    }
-                    result.setData(new AdapterConfiguration((Adapter) adapter));
-                    break;
-
-            }
-        } else {
-            result.setCode(HttpAdapter.SC_METHOD_NOT_ALLOWED);
-        }
-        return result;
-    }
-
-   
-
-    private StandardResult getServiceConfig() {
-        StandardResult result = new StandardResult();
-        result.setData(Kernel.getInstance().getConfigSet().getConfigurationById(Kernel.getInstance().getId()));
-        return result;
-    }
-*/
      public StandardResult getServiceInfo() {
         StandardResult result = new StandardResult();
         result.setData(Kernel.getInstance().reportStatus());
@@ -179,10 +65,11 @@ public class SiteAdministrationModule extends OutboundAdapter implements SiteAdm
     /**
      * Creates required database structure and default objects
      *
-     * @param database
-     * @param userDB
-     * @param authDB
+     * @param database TODO doc
+     * @param userDB TODO doc
+     * @param authDB TODO doc
      */
+    @Override
     public void initDatabases(
             KeyValueDBIface database,
             KeyValueDBIface userDB,
@@ -306,11 +193,13 @@ public class SiteAdministrationModule extends OutboundAdapter implements SiteAdm
     /**
      * Runs backup for all databases
      *
-     * @param database
-     * @param userDB
-     * @param authDB
-     * @param cmsDB
+     * @param database TODO doc
+     * @param userDB TODO doc
+     * @param authDB TODO doc
+     * @param cmsDB TODO doc
+     * @param errorLevel TODO doc
      */
+    @Override
     public void backupDatabases(
             KeyValueDBIface database,
             KeyValueDBIface userDB,
@@ -371,10 +260,12 @@ public class SiteAdministrationModule extends OutboundAdapter implements SiteAdm
         logger.info("database backup done");
     }
 
+    @Override
     public void clearUserData(String userId) {
         logger.warn("method clearUserData not implemented");
     }
 
+    @Override
     public void clearData(
             boolean demoMode,
             String category,

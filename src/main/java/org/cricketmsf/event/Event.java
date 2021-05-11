@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2016 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,11 +65,11 @@ public class Event {
      * after the event creation b) "yyyy.MM.dd HH:mm:ss Z" defines exact time
      * (see: SimpleDateFormat) )
      *
-     * @param procedure
+     * @param procedure TODO doc
      * @param timeDefinition defines when this event should happen.
      * @param data holds additional data
-     * @param fromInit
-     * @param origin
+     * @param fromInit TODO doc
+     * @param origin TODO doc
      */
     public Event(int procedure, String timeDefinition, Object data, boolean fromInit, Class origin) {
         this.id = Kernel.getEventId();

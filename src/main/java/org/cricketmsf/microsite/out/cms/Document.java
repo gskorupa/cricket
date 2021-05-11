@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2017 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ public class Document {
 
     /**
      * @param uid the uid to set
+     * @throws org.cricketmsf.microsite.out.cms.CmsException TODO doc
      */
     public void setUid(String uid) throws CmsException {
         if (uid != null && !uid.isEmpty()) {
@@ -89,7 +90,7 @@ public class Document {
     }
 
     /**
-     * @param uid the uid to set
+     * @param author TODO doc
      */
     public void setAuthor(String author) {
         this.author = author;
@@ -251,7 +252,7 @@ public class Document {
     }
 
     /**
-     * @param metadata the metadata to set
+     * @param mimeType TODO doc
      */
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
@@ -314,6 +315,7 @@ public class Document {
 
     /**
      * @param rights the rights to set
+     * @return TODO doc
      */
     public Document setRights(String rights) {
         this.rights = rights;

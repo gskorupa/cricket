@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2020 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author Grzegorz Skorupa 
  */
 public abstract class HttpPortedAdapter
         extends InboundAdapter
@@ -86,6 +86,11 @@ public abstract class HttpPortedAdapter
         }
     }
 
+    /**
+     *
+     * @param properties TODO doc
+     * @param adapterName TODO doc
+     */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
@@ -135,8 +140,8 @@ public abstract class HttpPortedAdapter
     /**
      * Calculates response type based on the file type
      *
-     * @param acceptedResponseType
-     * @param fileExt
+     * @param acceptedResponseType TODO doc
+     * @param fileExt TODO doc
      * @return response type
      */
     protected String setResponseType(String acceptedResponseType, String fileExt) {
@@ -221,7 +226,7 @@ public abstract class HttpPortedAdapter
     }
 
     /**
-     * @param paramValue
+     * @param paramValue TODO doc
      */
     public void setExtendedResponse(String paramValue) {
         this.extendedResponse = !("false".equalsIgnoreCase(paramValue));

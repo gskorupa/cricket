@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2017 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,6 @@ public interface AuthAdapterIface {
 
     public void cmsAuthorize(String docId, String role) throws AuthException;
 
-    //public void appAuthorize(String id, String role) throws AuthException;
     public Token createToken(String userID) throws AuthException;
 
     public Token createConfirmationToken(String userID, String token, long timeout) throws AuthException;
@@ -53,7 +52,7 @@ public interface AuthAdapterIface {
      * Removes permanent token from database
      *
      * @param tokenID token identifier
-     * @throws AuthException
+     * @throws AuthException TODO doc
      */
     public void removePermanentToken(String tokenID) throws AuthException;
 

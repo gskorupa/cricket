@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2017 Grzegorz Skorupa .
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.api.StandardResult;
 import org.cricketmsf.config.AdapterConfiguration;
 import org.cricketmsf.event.ShutdownRequested;
-import org.cricketmsf.event.StatusRequested;
 import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.microsite.out.auth.Token;
@@ -47,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author Grzegorz Skorupa 
  */
 public class SiteAdministrationModule {
 
@@ -210,9 +209,9 @@ public class SiteAdministrationModule {
     /**
      * Creates required database structure and default objects
      *
-     * @param database
-     * @param userDB
-     * @param authDB
+     * @param database TODO doc
+     * @param userDB TODO doc
+     * @param authDB TODO doc
      */
     public void initDatabases(
             KeyValueDBIface database,
@@ -336,6 +335,7 @@ public class SiteAdministrationModule {
 
     /**
      * Creates events that should be fired on the Service start.
+     * @param scheduler Scheduler
      */
     public void initScheduledTasks(SchedulerIface scheduler) {
         logger.warn("method not implemented");
@@ -344,10 +344,11 @@ public class SiteAdministrationModule {
     /**
      * Runs backup for all databases
      *
-     * @param database
-     * @param userDB
-     * @param authDB
-     * @param cmsDB
+     * @param database TODO doc
+     * @param userDB TODO doc
+     * @param authDB TODO doc
+     * @param cmsDB TODO doc
+     * @param errorLevel TODO doc
      */
     public void backupDatabases(
             KeyValueDBIface database,

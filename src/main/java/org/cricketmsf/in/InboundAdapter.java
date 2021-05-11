@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2015 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.cricketmsf.out.dispatcher.DispatcherIface;
 
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author Grzegorz Skorupa 
  */
 public class InboundAdapter implements Runnable, InboundAdapterIface {
 
@@ -64,22 +64,9 @@ public class InboundAdapter implements Runnable, InboundAdapterIface {
     public void run() {
     }
     
-    /**
-     *
-     * @param input
-     * @return
-     */
-    /*@Override
-    public Object handleInput(Object input){
-        return null;
-    }
-*/
     protected Result handle(String method, String payload) {
         return null;
     }
-
-    //protected void getServiceHooks(String adapterName) {
-    //}
 
     public void addHookMethodNameForMethod(String requestMethod, String hookMethodName) {
         //hookMethodNames.put(requestMethod, hookMethodName);

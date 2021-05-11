@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2016 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.cricketmsf.Adapter;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.event.Procedures;
 import org.cricketmsf.event.HttpEvent;
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author Grzegorz Skorupa 
  */
 public class HtmlGenAdapter extends HttpPortedAdapter implements HtmlGenAdapterIface, Adapter {
     private static final Logger logger = LoggerFactory.getLogger(HtmlGenAdapter.class);
@@ -71,7 +70,7 @@ public class HtmlGenAdapter extends HttpPortedAdapter implements HtmlGenAdapterI
     /**
      * Formats response sent back by this adapter
      *
-     * @param type 
+     * @param type TODO doc
      * @param result received back from the service
      * @return the payload field of the result modified with parameters
      */

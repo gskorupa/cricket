@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2015 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * the parameters map which could be easily accessible within adapters or
  * service methods.
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author Grzegorz Skorupa 
  * Many thanks for Leonardo Marcelino https://leonardom.wordpress.com
  */
 public class ParameterFilter extends Filter {

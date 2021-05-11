@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2016 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.io.IOException;
  * This is default filter used to check required request conditions. 
  * It does nothing but could be used as a starting point to implement required filter.
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author Grzegorz Skorupa 
  */
 public class AuthorizationFilter extends Filter {
 
@@ -39,7 +39,7 @@ public class AuthorizationFilter extends Filter {
      * Does request analysis
      *
      * @param exchange request object
-     * @return
+     * @return true when authorized
      */
     public AuthorizationFilterResult checkRequest(HttpExchange exchange) {
         AuthorizationFilterResult result = new AuthorizationFilterResult();

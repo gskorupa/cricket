@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2017 Grzegorz Skorupa .
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,21 @@ import java.util.List;
 
 /**
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
+ * @author Grzegorz Skorupa 
  */
 public interface SqlDBIface extends KeyValueDBIface{
 
     /**
      * Creates database 
      * @param conn database connection
+     * @param version TODO doc
      */
     public void createDatabase(Connection conn, String version);
     
     /**
      * Gets new database connection from the connection pool
      * @return database connection
-     * @throws SQLException
+     * @throws SQLException TODO doc
      */
     public Connection getConnection() throws SQLException;
     
@@ -50,16 +51,17 @@ public interface SqlDBIface extends KeyValueDBIface{
      * @param statement SQL prepared statement
      * @param parameters array of the statement parameters
      * @return list of objects matching the statement
-     * @throws KeyValueDBException
+     * @throws KeyValueDBException TODO doc
      */
+    @Override
     public List search(String tableName, String statement, Object[] parameters) throws KeyValueDBException;
     
     /**
      * Executes database query
      * 
-     * @param query
+     * @param query TODO doc
      * @return query result
-     * @throws SQLException 
+     * @throws SQLException TODO doc
      */
     public List execute(String query) throws SQLException;
     

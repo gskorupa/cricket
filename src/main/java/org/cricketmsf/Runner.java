@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2016 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,7 +163,7 @@ public class Runner {
      * EchoService-help.txt
      *
      * @param serviceName the service class simple name
-     * @return
+     * @return help text
      */
     public String getHelp(String serviceName) {
         String content = "Help file not found";

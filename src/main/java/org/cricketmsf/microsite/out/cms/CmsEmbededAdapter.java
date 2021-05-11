@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2018 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,6 +106,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
 
     /**
      * We want to use configured adapters so we must provide these adapters
+     * @throws org.cricketmsf.microsite.out.cms.CmsException TODO doc
      */
     public void initDB() throws CmsException {
         //TODO: load languages from properties
@@ -786,7 +787,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
     /**
      * Sets the root path
      *
-     * @param wwwRoot
+     * @param wwwRoot TODO doc
      */
     private void setWwwRoot(String wwwRoot) {
         this.wwwRoot = wwwRoot;

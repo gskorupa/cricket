@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Grzegorz Skorupa <g.skorupa at gmail.com>.
+ * Copyright 2015 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.cricketmsf.annotation.EventHook;
 import org.cricketmsf.event.Procedures;
 import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.event.ProceduresIface;
+import org.cricketmsf.in.event.EventListenerIface;
 import org.cricketmsf.out.auth.AuthAdapterIface;
 
 /**
@@ -65,7 +66,7 @@ public abstract class Kernel {
     public final static int SHUTDOWN = 3;
 
     private static final long DISPATCHER_WAIT_TIME = 300000;
-    
+
     public final static String DEFAULT_AUTHORIZATION_FILTER = "org.cricketmsf.AuthorizationFilter";
 
     // emergency LOGGER
@@ -73,6 +74,7 @@ public abstract class Kernel {
 
     // event dispatcher
     protected DispatcherIface eventDispatcher = null;
+    protected EventListenerIface eventListener = null;
 
     // singleton
     private static Kernel instance = null;
@@ -448,6 +450,9 @@ public abstract class Kernel {
                     if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.scheduler.SchedulerIface) {
                         setSchedulerAdapter(adaptersMap.get(adapterName));
                     }
+                    if (adaptersMap.get(adapterName) instanceof org.cricketmsf.in.event.EventListenerIface) {
+                        setEventListener(adaptersMap.get(adapterName));
+                    }
                 } catch (NullPointerException | ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
                     LOGGER.error(adapterName + " configuration: " + ex.getClass().getSimpleName());
                     ex.printStackTrace();
@@ -474,18 +479,13 @@ public abstract class Kernel {
         // Scheduler can be used only if there is no other dispatcher configured
         if (null == eventDispatcher || eventDispatcher.getName().equals("Scheduler")) {
             eventDispatcher = (DispatcherIface) adapter;
-            LOGGER.info("event dispatcher is starting ...");
-            long start=System.currentTimeMillis();
-            while(!eventDispatcher.isReady()){
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    LOGGER.error(ex.getMessage());
-                }
-                if(System.currentTimeMillis()-start>DISPATCHER_WAIT_TIME){
-                    LOGGER.error("service shutdown due to unavailable dispatcher");
-                    shutdown();
-                }
+        }
+    }
+
+    private void setEventListener(Object adapter) {
+        if (adapter != null) {
+            if (null == eventListener) {
+                eventListener = (EventListenerIface) adapter;
             }
         }
     }
@@ -630,8 +630,7 @@ public abstract class Kernel {
 
     /**
      * Starts the service instance
-     *
-     * @throws InterruptedException
+     * @throws java.lang.InterruptedException TODO
      */
     public void start() throws InterruptedException {
         getAdapters();
@@ -663,6 +662,7 @@ public abstract class Kernel {
             // run listeners for inbound adapters
             runListeners();
             runDispatcher();
+            connectToExternalDispatcher();
 
             LOGGER.info("Starting http listener ...");
             String httpdName = (String) getProperties().getOrDefault("httpd", "");
@@ -719,15 +719,31 @@ public abstract class Kernel {
             System.exit(MIN_PRIORITY);
         }
     }
-    
-    private void runDispatcher(){
-        
+
+    private void runDispatcher() {
+        LOGGER.info("event dispatcher is starting ...");
+        eventDispatcher.start();
+        /*
+        long start = System.currentTimeMillis();
+        while (!eventDispatcher.isReady()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                LOGGER.error(ex.getMessage());
+            }
+            if (System.currentTimeMillis() - start > DISPATCHER_WAIT_TIME) {
+                LOGGER.error("service shutdown due to unavailable dispatcher");
+                shutdown();
+            }
+        }
+        */
     }
 
     /**
      * Could be overriden in a service implementation to run required code at
-     * the service start. As the last step of the service starting procedure
-     * before HTTP service.
+     * the service start.As the last step of the service starting procedure before HTTP service.
+     * 
+     * @throws org.cricketmsf.exception.InitException TODO
      */
     protected void runInitTasks() throws InitException {
         if (null != getAutostartAdapter()) {
@@ -755,6 +771,35 @@ public abstract class Kernel {
                     LOGGER.info(adapterEntry.getKey() + " (" + adapterEntry.getValue().getClass().getSimpleName() + ")");
                 }
             }
+        }
+    }
+
+    private void connectToExternalDispatcher() {
+        LOGGER.info("Starting event dispatcher ...");
+        try {
+            long startDisp = System.currentTimeMillis();
+            while (!eventDispatcher.isReady()) {
+                if (System.currentTimeMillis() - startDisp > 300000) {
+                    LOGGER.error("Unable to start dispatcher");
+                    shutdown();
+                }
+                eventDispatcher.start();
+                Thread.sleep(1000);
+            }
+            startDisp = System.currentTimeMillis();
+            if (null != eventListener) {
+                while (!eventListener.isReady()) {
+                    if (System.currentTimeMillis() - startDisp > 300000) {
+                        LOGGER.error("Unable to start event listener");
+                        shutdown();
+                    }
+                    eventListener.start();
+                    Thread.sleep(100);
+                }
+            }
+        } catch (InterruptedException ex) {
+            LOGGER.error(ex.getMessage());
+            shutdown();
         }
     }
 
@@ -1101,7 +1146,7 @@ public abstract class Kernel {
 
     /**
      *
-     * @param schedulerAdapter
+     * @param schedulerAdapter Scheduler
      */
     public void setSchedulerAdapter(Object schedulerAdapter) {
         this.schedulerAdapter = (SchedulerIface) schedulerAdapter;
