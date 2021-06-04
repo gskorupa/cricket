@@ -41,7 +41,7 @@ public class HttpRequestWorker implements Runnable {
         long rootEventId = Kernel.getEventId();
         try {
             Stopwatch timer = null;
-            if (logger.isDebugEnabled()) {
+            if (logger.isInfoEnabled()) {
                 timer = new Stopwatch();
             }
             String acceptedResponseType = JSON;
@@ -56,7 +56,7 @@ public class HttpRequestWorker implements Runnable {
                 logger.info(dumpRequest(requestObject));
             }
 
-            ResultIface result = createResponse(requestObject, rootEventId);
+            ResultIface result = createResponse(requestObject);
 
             acceptedResponseType = adapter.setResponseType(acceptedResponseType, result.getFileExtension());
             //set content type and print response to string format as JSON if needed
@@ -129,11 +129,6 @@ public class HttpRequestWorker implements Runnable {
                     }
                     break;
             }
-
-            if (logger.isDebugEnabled()) {
-                logger.debug("event " + rootEventId + " processing takes " + timer.time(TimeUnit.MILLISECONDS) + "ms");
-            }
-
             if (responseData.length > 0) {
                 exchange.sendResponseHeaders(result.getCode(), responseData.length);
                 try (OutputStream os = exchange.getResponseBody()) {
@@ -142,20 +137,15 @@ public class HttpRequestWorker implements Runnable {
             } else {
                 exchange.sendResponseHeaders(result.getCode(), -1);
             }
-            //sendLogEvent(exchange, responseData.length);
+            logger.info("{} {} {} {} {}ms", requestObject.rootEventId, requestObject.method, requestObject.uri, result.getCode(), timer.time(TimeUnit.MILLISECONDS));
             result = null;
         } catch (IOException e) {
             e.printStackTrace();
             logger.warn(exchange.getRequestURI().getPath() + " " + e.getMessage());
         }
         exchange.close();
-
     }
 
-    RequestObject buildRequestObject(HttpExchange exchange, String acceptedResponseType) {
-        return buildRequestObject(exchange,acceptedResponseType, -1);
-    }
-    
     RequestObject buildRequestObject(HttpExchange exchange, String acceptedResponseType, long rootEventId) {
         // Remember that "parameters" attribute is created by filter
         Map<String, Object> parameters = (Map<String, Object>) exchange.getAttribute("parameters");
@@ -169,7 +159,7 @@ public class HttpRequestWorker implements Runnable {
         }
 
         RequestObject requestObject = new RequestObject();
-        requestObject.rootEventId=rootEventId;
+        requestObject.rootEventId = rootEventId;
         requestObject.method = method;
         requestObject.parameters = parameters;
         requestObject.uri = exchange.getRequestURI().toString();
@@ -183,8 +173,8 @@ public class HttpRequestWorker implements Runnable {
         }
         return requestObject;
     }
-    
-    private ResultIface createResponse(RequestObject requestObject, long rootEventId) {
+
+    private ResultIface createResponse(RequestObject requestObject) {
         String methodName = null;
         ResultIface result = new StandardResult();
         if (adapter.mode == WEBSITE_MODE) {
@@ -209,7 +199,10 @@ public class HttpRequestWorker implements Runnable {
                 result.setData(pCall.response);
                 result.setHeader("Content-type", pCall.contentType);
             } else { // pCall must be processed by the Kernel
-                logger.debug("sending request to hook method " + pCall.procedure + "@" + pCall.event.getClass().getSimpleName());
+                logger.debug("redirecting event {} {}@{}",
+                        requestObject.rootEventId,
+                        Kernel.getInstance().getProceduresDictionary().getName(pCall.procedure),
+                        pCall.event.getClass().getName());
                 result = (ResultIface) Kernel.getInstance().handleEvent(
                         pCall.event,
                         pCall.procedure
@@ -219,7 +212,7 @@ public class HttpRequestWorker implements Runnable {
                         result.setCode(pCall.responseCode);
                     } else {
                         result = adapter.postprocess(result);
-                        if (null!=result && (result.getCode() < 100 || result.getCode() > 1000)) {
+                        if (null != result && (result.getCode() < 100 || result.getCode() > 1000)) {
                             result.setCode(ResponseCode.BAD_REQUEST);
                         }
                     }
@@ -239,8 +232,8 @@ public class HttpRequestWorker implements Runnable {
         }
         return result;
     }
-    
-        public static String dumpRequest(RequestObject req) {
+
+    public static String dumpRequest(RequestObject req) {
         StringBuilder sb = new StringBuilder();
         sb.append("************** REQUEST ****************").append("\r\n");
         sb.append("URI:").append(req.uri).append("\r\n");
@@ -269,6 +262,5 @@ public class HttpRequestWorker implements Runnable {
         sb.append("***PARAMETERS.").append("\r\n");
         return sb.toString();
     }
-
 
 }

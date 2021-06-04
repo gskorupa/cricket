@@ -36,5 +36,6 @@ public class RequestObject {
     public String body = null;
 
     public RequestObject() {
+        rootEventId=Kernel.getEventId();
     }
 }

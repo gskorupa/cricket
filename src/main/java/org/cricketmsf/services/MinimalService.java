@@ -47,13 +47,13 @@ public class MinimalService extends Kernel {
     public void runInitTasks() {
         try {
             super.runInitTasks();
-            // we should register event categories used by this service
-            //EventMaster.registerEventCategories(new Event().getCategories(), Event.class.getName());
         } catch (InitException ex) {
             ex.printStackTrace();
             shutdown();
         }
-        apiGenerator.init(this);
+        if(null!=apiGenerator){
+            apiGenerator.init(this);
+        }
         setInitialized(true);
     }
 
@@ -65,7 +65,9 @@ public class MinimalService extends Kernel {
     @Override
     public void runOnce() {
         super.runOnce();
-        apiGenerator.init(this);
+        if(null!=apiGenerator){
+            apiGenerator.init(this);
+        }
         logger.info("MinimalService.runOnce() executed");
     }
     

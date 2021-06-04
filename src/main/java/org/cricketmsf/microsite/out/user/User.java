@@ -54,6 +54,13 @@ public class User {
         authStatus = IS_REGISTERING;
         createdAt = System.currentTimeMillis();
     }
+    
+    public void clearStatus(){
+        confirmed = null;
+        unregisterRequested = null;
+        authStatus = null;  
+        type=null;
+    }
 
     /**
      * @return the uid
@@ -172,7 +179,6 @@ public class User {
      */
     public void setPassword(String password) {
         this.password = password;
-        //this.password = password;
     }
 
     public Boolean checkPassword(String passToCheck) {

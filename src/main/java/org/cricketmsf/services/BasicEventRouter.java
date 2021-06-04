@@ -11,7 +11,6 @@ import org.cricketmsf.event.Event;
 import org.cricketmsf.event.GreeterEvent;
 import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.event.Procedures;
-import org.cricketmsf.services.BasicService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,0 +1,30 @@
+{
+    "@type": "org.cricketmsf.config.ConfigSet",
+    "description": "ToDo service",
+    "services": [
+        {
+            "@type": "org.cricketmsf.config.Configuration",
+            "id": "MyTodoService",
+            "service": "mytodo.TodoService",
+            "properties": {
+                "port": "8080"
+            },
+            "ports": [
+                {
+                    "name": "TaskAPI",
+                    "className": "mytodo.in.TodoHttpApi",
+                    "properties": {
+                        "context": "/api/task"
+                    }
+                },
+                {
+                    "name": "TodoDao",
+                    "interfaceName": "mytodo.out.TodoDaoIface",
+                    "className": "mytodo.out.TodoDao",
+                    "properties": {
+                    }
+                }
+            ]
+        }
+    ]
+}

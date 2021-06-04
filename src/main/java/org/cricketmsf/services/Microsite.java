@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.services;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import org.cricketmsf.Kernel;
@@ -87,6 +88,7 @@ public class Microsite extends Kernel {
 
     public Microsite() {
         super();
+        setEventRouter(new MicrositeEventRouter(this));
         this.configurationBaseName = "Microsite";
     }
 
@@ -118,19 +120,17 @@ public class Microsite extends Kernel {
     }
 
     @Override
-    public void runInitTasks() throws InitException {
+    public void runInitTasks() {
         try {
             super.runInitTasks();
         } catch (InitException ex) {
             ex.printStackTrace();
             shutdown();
         }
-        eventRouter=new MicrositeEventRouter(this);
-
         siteAdmin.initDatabases(database, userDB, authDB);
         emailSender.send(
                 (String) getProperties().getOrDefault("admin-notification-email", ""),
-                getId()+" started", getId()+" service has been started."
+                getId() + " started", getId() + " service has been started."
         );
 
         try {
@@ -142,9 +142,22 @@ public class Microsite extends Kernel {
 
         apiGenerator.init(this);
         setInitialized(true);
+        checkAdmWebappInstallation();
         dispatchEvent(
                 new Event(Procedures.SYSTEM_STATUS, 5000, getUuid() + " service started", false, this.getClass())
         );
+    }
+
+    private void checkAdmWebappInstallation() {
+        boolean ok = false;
+        try {
+            ok = new File("./www/adm/index.html").isFile();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        if(!ok){
+            logger.warn("The web application for the site administrator is not available. Check if it has been properly installed in the 'www/adm' subfolder.");
+        }
     }
 
     @Override
@@ -173,7 +186,7 @@ public class Microsite extends Kernel {
         try {
             emailSender.send(
                     (String) getProperties().getOrDefault("admin-notification-email", ""),
-                    getId()+" shutdown", getId()+" service is going down."
+                    getId() + " shutdown", getId() + " service is going down."
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -211,7 +224,8 @@ public class Microsite extends Kernel {
             rd.put("token", (String) request.parameters.get("tid"));  // fake tokens doesn't pass SecurityFilter
             rd.put("user", request.headers.getFirst("X-user-id"));
             rd.put("environmentName", getName());
-            rd.put("cricketversion", getProperties().getOrDefault("cricket-version", ""));
+            rd.put("serviceversion", getServiceVersion());
+            rd.put("cricketversion", getKernelVersion());
             rd.put("javaversion", System.getProperty("java.version"));
             rd.put("wwwTheme", getProperties().getOrDefault("www-theme", "theme0"));
             List<String> roles = request.headers.get("X-user-role");
@@ -255,7 +269,7 @@ public class Microsite extends Kernel {
 
     @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_UPDATE)
     public Object userUpdate(UserEvent event) {
-        return userAdapter.handleUpdateRequest((HashMap) event.getData()).procedure(Procedures.USER_UPDATE);
+        return userAdapter.handleUpdateUser((HashMap) event.getData()).procedure(Procedures.USER_UPDATE);
     }
 
     @EventHook(className = "org.cricketmsf.microsite.event.UserEvent", procedure = Procedures.USER_UPDATED)
@@ -379,7 +393,7 @@ public class Microsite extends Kernel {
         System.out.println(siteAdmin.getServiceInfo().getData());
         return null;
     }
-*/
+     */
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SA_ANY)
     public Object systemServiceHandle(Event event) {
         return new SiteAdministrationModule().handleRestEvent(event);
@@ -464,7 +478,7 @@ public class Microsite extends Kernel {
         }
         return null;
     }
-    
+
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_SHUTDOWN)
     public Object handleShutdownRequest(Event event) {
         shutdown();
@@ -479,7 +493,7 @@ public class Microsite extends Kernel {
 
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_BACKUP)
     public Object handleBackupRequest(Event event) {
-        SiteAdministrationModule.getInstance().backupDatabases(database, userDB, authDB, cmsDatabase,(String)event.getData());
+        SiteAdministrationModule.getInstance().backupDatabases(database, userDB, authDB, cmsDatabase, (String) event.getData());
         return null;
     }
 

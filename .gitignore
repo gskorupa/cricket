@@ -117,3 +117,4 @@ build
 /auth.mv.db
 /user.mv.db
 /user.trace.db
+/examples/todo/target/

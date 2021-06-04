@@ -124,7 +124,7 @@ public abstract class Kernel {
     private int status = STARTING;
 
     private CricketThreadFactory threadFactory;
-    public Object eventRouter = null;
+    private Object eventRouter = null;
 
     public Kernel() {
     }
@@ -160,15 +160,15 @@ public abstract class Kernel {
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
             LOGGER.error(id);
         }
-        if (null != eventRouter) {
-            LOGGER.info("Event router: {}", eventRouter.getClass().getName());
-            for (Method m : eventRouter.getClass().getMethods()) {
+        if (null != getEventRouter()) {
+            LOGGER.info("Event router: {}", getEventRouter().getClass().getName());
+            for (Method m : getEventRouter().getClass().getMethods()) {
                 EventHook[] portArray = m.getAnnotationsByType(EventHook.class);
                 for (EventHook hook : portArray) {
                     eventClass = hook.className();
                     procedure = hook.procedure();
                     addHookRouterMethodName(getProceduresDictionary().getName(procedure) + "@" + eventClass, m.getName());
-                    LOGGER.info("{}::{} => {}.{}", eventClass, getProceduresDictionary().getName(procedure), eventRouter.getClass().getSimpleName(), m.getName());
+                    LOGGER.info("{}::{} => {}.{}", eventClass, getProceduresDictionary().getName(procedure), getEventRouter().getClass().getSimpleName(), m.getName());
                 }
             }
         } else {
@@ -192,7 +192,7 @@ public abstract class Kernel {
         String result;
         result = eventHookMethods.get(getProceduresDictionary().getName(procedure).concat("@").concat(className));
         if (null == result) {
-            result = eventHookMethods.get(getProceduresDictionary().getName(Procedures.DEFAULT).concat("@").concat(className));
+            result = eventHookMethods.get(getProceduresDictionary().getName(Procedures.START).concat("@").concat(className));
         }
         return result;
     }
@@ -201,7 +201,7 @@ public abstract class Kernel {
         String result;
         result = eventHookRouterMethods.get(getProceduresDictionary().getName(procedure).concat("@").concat(className));
         if (null == result) {
-            result = eventHookRouterMethods.get(getProceduresDictionary().getName(Procedures.DEFAULT).concat("@").concat(className));
+            result = eventHookRouterMethods.get(getProceduresDictionary().getName(Procedures.START).concat("@").concat(className));
         }
         return result;
     }
@@ -222,28 +222,35 @@ public abstract class Kernel {
         }
         String methodName = null;
         String routerMethodName;
+        String reportedMethodName = null;
         try {
             Method m;
             routerMethodName = getHookRouterMethodName(event.getClass().getName(), procedure);
             if (null == routerMethodName) {
                 methodName = getHookMethodName(event.getClass().getName(), procedure);
+                reportedMethodName = this.getClass().getName() + "." + methodName;
+            } else {
+                reportedMethodName = getEventRouter().getClass().getName() + "." + routerMethodName;
             }
+            LOGGER.debug("event handler: {} {}", event.getRootId(), reportedMethodName);
             if (null != routerMethodName) {
-                m = eventRouter.getClass().getMethod(routerMethodName, event.getClass());
-                return (ResultIface) m.invoke(eventRouter, event);
+                m = getEventRouter().getClass().getMethod(routerMethodName, event.getClass());
+                return (ResultIface) m.invoke(getEventRouter(), event);
             } else if (null != methodName) {
                 m = getClass().getMethod(methodName, event.getClass());
                 return (ResultIface) m.invoke(this, event);
             } else {
                 LOGGER.warn("Don't know how to handle {} procedure {} fired by {}", event.getClass().getName(), procedure, event.getOrigin().getName());
             }
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-            LOGGER.warn("Handler method {} not compatible with event class {}", methodName, event.getClass().getName());
+        } catch (NoSuchMethodException e) {
+            LOGGER.warn("No such method {} for event class {}", reportedMethodName, event.getClass().getName());
+        } catch (IllegalAccessException e) {
+            LOGGER.warn("Illegal access to method {} for event class {}", reportedMethodName, event.getClass().getName());
         } catch (InvocationTargetException e) {
-            LOGGER.warn("Event class {} handler method {} exception {} {}", event.getClass().getName(), methodName, e.getCause().getClass(), e.getCause().getMessage());
+            LOGGER.warn("Event class {} handler method {} exception {} {}", event.getClass().getName(), reportedMethodName, e.getCause().getClass(), e.getCause().getMessage());
             e.printStackTrace();
         } catch (NullPointerException e) {
-            LOGGER.warn("Unable to find procedure@method {}@{} for event class {} ", procedure, methodName, event.getClass().getName());
+            LOGGER.warn("Unable to find procedure@method {}@{} for event class {} ", procedure, reportedMethodName, event.getClass().getName());
         }
         return null;
     }
@@ -630,6 +637,7 @@ public abstract class Kernel {
 
     /**
      * Starts the service instance
+     *
      * @throws java.lang.InterruptedException TODO
      */
     public void start() throws InterruptedException {
@@ -721,28 +729,17 @@ public abstract class Kernel {
     }
 
     private void runDispatcher() {
-        LOGGER.info("event dispatcher is starting ...");
-        eventDispatcher.start();
-        /*
-        long start = System.currentTimeMillis();
-        while (!eventDispatcher.isReady()) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                LOGGER.error(ex.getMessage());
-            }
-            if (System.currentTimeMillis() - start > DISPATCHER_WAIT_TIME) {
-                LOGGER.error("service shutdown due to unavailable dispatcher");
-                shutdown();
-            }
+        if(null!=eventDispatcher){
+            LOGGER.info("event dispatcher is starting ...");
+            eventDispatcher.start();
         }
-        */
     }
 
     /**
      * Could be overriden in a service implementation to run required code at
-     * the service start.As the last step of the service starting procedure before HTTP service.
-     * 
+     * the service start.As the last step of the service starting procedure
+     * before HTTP service.
+     *
      * @throws org.cricketmsf.exception.InitException TODO
      */
     protected void runInitTasks() throws InitException {
@@ -775,6 +772,9 @@ public abstract class Kernel {
     }
 
     private void connectToExternalDispatcher() {
+        if(null==eventDispatcher){
+            return;
+        }
         LOGGER.info("Starting event dispatcher ...");
         try {
             long startDisp = System.currentTimeMillis();
@@ -939,6 +939,10 @@ public abstract class Kernel {
 
     public String getServiceVersion() {
         return getConfigSet().getServiceVersion();
+    }
+    
+    public String getKernelVersion(){
+        return getConfigSet().getKernelVersion();
     }
 
     /**
@@ -1171,6 +1175,24 @@ public abstract class Kernel {
      */
     public ProceduresIface getProceduresDictionary() {
         return proceduresDictionary;
+    }
+
+    /**
+     * @return the eventRouter
+     */
+    public Object getEventRouter() {
+        return eventRouter;
+    }
+
+    /**
+     * @param eventRouter the eventRouter to set
+     */
+    public void setEventRouter(Object eventRouter) {
+        this.eventRouter = eventRouter;
+    }
+    
+    public String getEventProcedureName(int procedureNumber){
+        return proceduresDictionary.getName(procedureNumber);
     }
 
 }

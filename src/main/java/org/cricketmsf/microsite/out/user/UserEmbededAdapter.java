@@ -294,14 +294,17 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
         return result;
     }
 
-    public Result handleUpdateRequest(HashMap params) {
+    @Override
+    public Result handleUpdateUser(HashMap params) {
         User updatedUser = (User) params.get("user");
         String requesterId = (String) params.get("requester");
-        String[] roles = ((String) params.getOrDefault("roles", "")).split(",");
+        String[] requesterRoles = ((String) params.getOrDefault("roles", "")).split(",");
         Result result = new Result();
-        boolean admin = isAdmin(roles);
+        boolean admin = isAdmin(requesterRoles);
         try {
             User user = get(updatedUser.getUid());
+            User requester= get(requesterId);
+            
             if (user == null) {
                 result.setCode(ResponseCode.NOT_FOUND);
                 return result;
@@ -325,10 +328,12 @@ public class UserEmbededAdapter extends OutboundAdapter implements Adapter, User
                 user.setType(updatedUser.getType());
             }
             if (updatedUser.getPassword() != null) {
-                user.setPassword(HashMaker.md5Java(updatedUser.getPassword()));
+                //user.setPassword(HashMaker.md5Java(updatedUser.getPassword()));
+                System.out.println("NEW PASSWORD: "+updatedUser.getPassword());
+                user.setPassword(updatedUser.getPassword());
             }
 
-            if (updatedUser.isConfirmed() != null && admin) {
+            if ((!user.isConfirmed()) && updatedUser.isConfirmed() != null && admin) {
                 user.setConfirmed(updatedUser.isConfirmed());
                 UserEvent ev = new UserEvent(updatedUser.getNumber());
                 ev.setProcedure(Procedures.USER_REGISTRATION_CONFIRMED);

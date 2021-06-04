@@ -278,7 +278,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                 logger.warn("insufficient event definition {}", task);
                 continue;
             }
-            procedureNumber = Procedures.DEFAULT;
+            procedureNumber = Procedures.START;
             className = null;
             if (params[0].contains(".")) {
                 //event class name is provided

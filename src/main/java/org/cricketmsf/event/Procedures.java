@@ -11,6 +11,7 @@ public class Procedures implements ProceduresIface {
     public static final int UNDEFINED = -1;
     
     public static final int DEFAULT = 0;
+    public static final int START = 0;
     public static final int WWW = 1;
     public static final int GET_STATUS = 2;
     public static final int PRINT_INFO = 3;
@@ -55,6 +56,7 @@ public class Procedures implements ProceduresIface {
         identifiers=new HashMap<>();
         add(UNDEFINED,"UNDEFNIED");
         add(DEFAULT,"DEFAULT");
+        add(START,"START"); //overrides DEFAULT
         add(WWW,"WWW");
         add(GET_STATUS,"GET_STATUS");
         add(PRINT_INFO,"PRINT_INFO");
@@ -99,11 +101,11 @@ public class Procedures implements ProceduresIface {
     }
     
     public String getName(int id){
-        return names.getOrDefault(id, "DEFAULT");
+        return names.getOrDefault(id, "START");
     }
     
     public int getId(String name){
-        return identifiers.getOrDefault(name, DEFAULT);
+        return identifiers.getOrDefault(name, START);
     }
     
     /*

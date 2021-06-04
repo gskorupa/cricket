@@ -27,7 +27,7 @@ import org.cricketmsf.api.Result;
 public interface UserAdapterIface {
     public Result handleGet(HashMap params);
     public Result handleRegisterUser(User newUser);
-    public Result handleUpdateRequest(HashMap params);
+    public Result handleUpdateUser(HashMap params);
     public Result handleDeleteUser(HashMap params);
     
     public User get(String uid) throws UserException;

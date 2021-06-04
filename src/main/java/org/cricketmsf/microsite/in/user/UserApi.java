@@ -43,8 +43,8 @@ public class UserApi extends HttpPortedAdapter {
      * start. It's used to configure the adapter according to the configuration.
      *
      * @param properties map of properties readed from the configuration file
-     * @param adapterName name of the adapter set in the configuration file (can
-     * be different from the interface and class name.
+     * @param adapterName firstName of the adapter set in the configuration file (can
+ be different from the interface and class firstName.
      */
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -149,20 +149,21 @@ public class UserApi extends HttpPortedAdapter {
         }
         try {
             User user = new User();
+            user.clearStatus(); //important!
             user.setUid(uid);
             String email = (String) request.parameters.get("email");
             String type = (String) request.parameters.get("type");
             String role = (String) request.parameters.get("role");
             String password = (String) request.parameters.get("password");
             String confirmed = (String) request.parameters.get("confirmed");
-            String name = (String) request.parameters.get("name");
+            String firstName = (String) request.parameters.get("name");
             String surname = (String) request.parameters.get("surname");
             String unregisterRequested = (String) request.parameters.get("unregisterRequested");
             if (email != null) {
                 user.setEmail(email);
             }
-            if (name != null) {
-                user.setName(name);
+            if (firstName != null) {
+                user.setName(firstName);
             }
             if (surname != null) {
                 user.setSurname(surname);

@@ -11,9 +11,7 @@
                 "port": "7070",
                 "time-zone": "GMT",
                 "request-encoding": "UTF-8",
-                "procedures": "org.cricketmsf.event.Procedures",
-                "serviceurl": "http://localhost:7070",
-                "terms": "https://github.com/gskorupa/cricket"
+                "procedures": "org.cricketmsf.event.Procedures"
             },
             "ports": [
                 {
@@ -23,15 +21,6 @@
                     "description": "",
                     "properties": {
                         "context": "/api"
-                    }
-                },
-                {
-                    "name": "Tester",
-                    "interfaceName": "OpenApiIface",
-                    "className": "org.cricketmsf.in.http.Tester",
-                    "description": "",
-                    "properties": {
-                        "context": "/test"
                     }
                 }
             ]
@@ -205,8 +194,7 @@
                 "serviceurl": "http://localhost:7070",
                 "servicename": "",
                 "maintenance-paths": "/api/system /api/cm /api/auth /api/user /admin",
-                "default-language": "en",
-                "www-theme": "theme0"
+                "default-language": "en"
             },
             "ports": [
                 {
@@ -347,7 +335,7 @@
                     "className": "org.cricketmsf.out.autostart.Autostart",
                     "description": "",
                     "properties": {
-                        "subfolders": "./logs:./data:./www"
+                        "subfolders": "./logs:./data:./backup:./www"
                     }
                 },
                 {

@@ -45,7 +45,7 @@ public class BasicService extends Kernel {
 
     public BasicService() {
         super();
-        eventRouter = new BasicEventRouter(this);
+        setEventRouter(new BasicEventRouter(this));
         this.configurationBaseName = "BasicService";
     }
 

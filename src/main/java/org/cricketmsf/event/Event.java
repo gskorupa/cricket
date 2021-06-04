@@ -28,6 +28,7 @@ import org.cricketmsf.Kernel;
 public class Event {
 
     private long id;
+    private long rootId = -1;
     private String timeDefinition;
     private long executionTime;
     private long createdAt;
@@ -45,7 +46,8 @@ public class Event {
      */
     public Event() {
         this.id = Kernel.getEventId();
-        this.procedure = Procedures.DEFAULT;
+        this.rootId=this.id;
+        this.procedure = Procedures.START;
         this.timeDefinition = null;
         this.createdAt = System.currentTimeMillis();
         this.data = null;
@@ -73,6 +75,7 @@ public class Event {
      */
     public Event(int procedure, String timeDefinition, Object data, boolean fromInit, Class origin) {
         this.id = Kernel.getEventId();
+        this.rootId=this.id;
         this.procedure = procedure;
         this.timeDefinition = timeDefinition;
         this.createdAt = System.currentTimeMillis();
@@ -84,6 +87,7 @@ public class Event {
 
     public Event(int procedure, long delay, Object data, boolean fromInit, Class origin) {
         this.id = Kernel.getEventId();
+        this.rootId=this.id;
         this.procedure = procedure;
         this.timeDefinition = null;
         this.createdAt = System.currentTimeMillis();
@@ -113,7 +117,7 @@ public class Event {
         this(-1, timePoint, data, false, null);
     }
 
-        private void calculate(String timeDefinition) {
+    private void calculate(String timeDefinition) {
         Delay delay = EventUtils.getDelayFromDateDefinition(timeDefinition, createdAt);
         if (null != delay) {
             this.eventDelay = delay.getDelay();
@@ -216,6 +220,10 @@ public class Event {
         return JsonWriter.objectToJson(this);
     }
 
+    public String toString() {
+        return getClass().getName() + " " + Kernel.getInstance().getEventProcedureName(procedure);
+    }
+
     public static Event fromJson(String json) {
         return (Event) JsonReader.jsonToJava(json);
     }
@@ -314,6 +322,20 @@ public class Event {
      */
     public boolean isValid() {
         return valid;
+    }
+
+    /**
+     * @return the rootId
+     */
+    public long getRootId() {
+        return rootId;
+    }
+
+    /**
+     * @param rootId the rootId to set
+     */
+    public void setRootId(long rootId) {
+        this.rootId = rootId;
     }
 
 }

@@ -249,7 +249,7 @@ public class Runner {
                     Manifest manifest = new Manifest(url.openStream());
                     Attributes attributes = manifest.getMainAttributes();
                     if ("org.cricketmsf.Runner".equals(attributes.getValue("Main-Class"))) {
-                        return attributes.getValue("Service-Version");
+                        return attributes.getValue("Implementation-Version");
                     }
                 } catch (IOException ex) {
                     return "";
