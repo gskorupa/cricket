@@ -487,7 +487,7 @@ public class Microsite extends Kernel {
 
     @EventHook(className = "org.cricketmsf.event.Event", procedure = Procedures.SYSTEM_STATUS)
     public Object handleStatusRequest(Event event) {
-        System.out.println(printStatus());
+        //System.out.println(printStatus());
         return null;
     }
 

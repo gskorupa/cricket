@@ -16,8 +16,10 @@
 package org.cricketmsf.api;
 
 import com.sun.net.httpserver.Headers;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -139,7 +141,8 @@ public class Result implements ResultIface {
 
     @Override
     public String getModificationDateFormatted() {
-        return null;
+        SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z",Locale.ENGLISH);
+        return dt1.format(new Date());
     }
 
     @Override

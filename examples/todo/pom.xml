@@ -15,7 +15,6 @@
         <dependency>
             <groupId>org.cricketmsf</groupId>
             <artifactId>cricket</artifactId>
-            <!--<version>2.0.0-rc44</version>-->
             <version>${cricket.version}</version>
         </dependency>
         <dependency>

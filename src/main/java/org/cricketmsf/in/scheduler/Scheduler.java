@@ -45,6 +45,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
     private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
+    private static final String DEFAULT_FILE_NAME = "./scheduler";
+
     private String fileName;
     private String reschedulingFile;
     private KeyValueStore database;
@@ -69,8 +71,8 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        setFileName(properties.get("file") + ".xml");
-        reschedulingFile = properties.get("file") + "-reschedule.xml";
+        setFileName(properties.get("file"));
+        setReschedulingFile(properties.get("file"));
         logger.info("\tfile: " + getFileName());
         logger.info("\tscheduler database file location: " + getFileName());
         initialTasks = properties.getOrDefault("init", "");
@@ -91,13 +93,13 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     public void run() {
         initScheduledTasks();
     }
-    
-    @Override 
-    public void start(){
-        
+
+    @Override
+    public void start() {
+
     }
-    
-    public boolean isReady(){
+
+    public boolean isReady() {
         return true;
     }
 
@@ -136,6 +138,7 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
 
             final Runnable runnable = new Runnable() {
                 Event eventToRun;
+
                 @Override
                 public void run() {
                     // reset timepoint to prevent sending this event back from the service
@@ -156,12 +159,13 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
                     database.remove(eventToRun.getId());
                     if (eventToRun.isCyclic()) {
                         if (databaseRs.containsKey(eventToRun.getProcedure() + "@" + eventToRun.getClass().getName())) {
-                            eventToRun.setEventDelay((Long) databaseRs.get("" + eventToRun.getProcedure()));
+                            eventToRun.setEventDelay((Long) databaseRs.get(eventToRun.getProcedure() + "@" + eventToRun.getClass().getName()));
                         }
                         eventToRun.reschedule();
                         handleEvent(eventToRun);
                     }
                 }
+
                 public Runnable init(Event event) {
                     this.eventToRun = event;
                     return (this);
@@ -220,7 +224,11 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
      * @param fileName the fileName to set
      */
     public void setFileName(String fileName) {
-        this.fileName = fileName;
+        if (null == fileName) {
+            this.fileName = DEFAULT_FILE_NAME + ".xml";
+        } else {
+            this.fileName = fileName + ".xml";
+        }
     }
 
     /**
@@ -348,5 +356,16 @@ public class Scheduler extends InboundAdapter implements SchedulerIface, Dispatc
     public void reschedule(String className, int procedure, Long newDelay
     ) {
         databaseRs.put(procedure + "@" + className, newDelay);
+    }
+
+    /**
+     * @param reschedulingFile the reschedulingFile to set
+     */
+    public void setReschedulingFile(String reschedulingFile) {
+        if (null == reschedulingFile) {
+            this.reschedulingFile = DEFAULT_FILE_NAME + "-reschedule.xml";
+        } else {
+            this.reschedulingFile = reschedulingFile + "-reschedule.xml";
+        }
     }
 }

@@ -29,6 +29,7 @@ public class KeyValueDBException extends DBException {
     public static int CANNOT_RESTORE = 5;
     public static int NOT_SUPPORTED = 6;
     public static int NOT_IMPLEMENTED = 7;
+    public static int TABLE_EXISTS = 9;
     
     private int code = UNKNOWN;
     private String message;

@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.RequestObject;
 import org.cricketmsf.api.ResponseCode;
+import org.cricketmsf.api.Result;
 import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.api.StandardResult;
 import org.cricketmsf.event.ProcedureCall;
@@ -62,14 +63,18 @@ public class HttpRequestWorker implements Runnable {
             //set content type and print response to string format as JSON if needed
             Headers headers = exchange.getResponseHeaders();
             byte[] responseData;
-            Iterator it = result.getHeaders().keySet().iterator();
-            String key;
-            while (it.hasNext()) {
-                key = (String) it.next();
-                List<String> values = result.getHeaders().get(key);
-                for (int i = 0; i < values.size(); i++) {
-                    headers.set(key, values.get(i));
+            try {
+                Iterator it = result.getHeaders().keySet().iterator();
+                String key;
+                while (it.hasNext()) {
+                    key = (String) it.next();
+                    List<String> values = result.getHeaders().get(key);
+                    for (int i = 0; i < values.size(); i++) {
+                        headers.set(key, values.get(i));
+                    }
                 }
+            } catch (Exception ex) {
+                
             }
             switch (result.getCode()) {
                 case ResponseCode.MOVED_PERMANENTLY:
@@ -203,18 +208,25 @@ public class HttpRequestWorker implements Runnable {
                         requestObject.rootEventId,
                         Kernel.getInstance().getProceduresDictionary().getName(pCall.procedure),
                         pCall.event.getClass().getName());
-                result = (ResultIface) Kernel.getInstance().handleEvent(
+                ResultIface tmp;
+                tmp = (ResultIface) Kernel.getInstance().handleEvent(
                         pCall.event,
                         pCall.procedure
                 );
-                if (null != result) {
+                if (null != tmp) {
                     if (pCall.responseCode != 0) {
-                        result.setCode(pCall.responseCode);
+                        tmp.setCode(pCall.responseCode);
                     } else {
-                        result = adapter.postprocess(result);
-                        if (null != result && (result.getCode() < 100 || result.getCode() > 1000)) {
-                            result.setCode(ResponseCode.BAD_REQUEST);
+                        tmp= adapter.postprocess(tmp);
+                        if (null != tmp && (tmp.getCode() < 100 || tmp.getCode() > 1000)) {
+                            tmp.setCode(ResponseCode.BAD_REQUEST);
                         }
+                    }
+                    if(tmp instanceof Result){
+                        result.setCode(tmp.getCode());
+                        result.setData(tmp.getData());
+                    }else{
+                        result=tmp;
                     }
                 }
             }
