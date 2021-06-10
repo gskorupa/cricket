@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="CricketService" 
+	 default="all" basedir="." xmlns:if="ant:if" xmlns:unless="ant:unless">
+    
+    <!-- ################################################################### -->
+    <!--                                                                     -->
+    <!-- BUILD CONFIGURATION                                                 -->
+    <!--                                                                     -->
+    <!-- Remember to modify the project name (see line 2 of this file)       -->
+    <!--                                                                     -->
+    <description>Cricket Service</description>
+    <property name="version" value="1.0.0"/> <!-- service version            -->
+    <property name="cricket-version" value="1.2.45" />
+    <!-- END OF CONFIGURATION                                                -->
+    <!-- ################################################################### -->
+
+    <!-- do not modify properties below -->
+    <property name="src" location="src/java"/>
+    <property name="build" location="build/classes"/>
+    <property name="web" location="www"/>
+    <property name="work.dir" location="work"/>
+    <property name="lib" location="lib"/>
+    <property name="cricket.jar" location="cricket-${cricket-version}.jar"/>
+    
+    <path id="project-classpath">
+        <pathelement location="${cricket.jar}"/>
+        <pathelement location="${build}"/>
+    </path>
+
+    <target name="bootstrap">
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${src}"/>
+        <mkdir dir="${src}/my/example"/>
+        <mkdir dir="${web}/local"/>
+        <unzip src="${cricket.jar}" dest="src/java/my/example">
+            <patternset>
+                <include name="src/java/my/example/Microsite.java"/>
+            </patternset>
+            <mapper type="flatten"/>
+        </unzip>
+        <unzip src="${cricket.jar}" dest="${web}/local">
+            <patternset>
+                <include name="src/html/index.html"/>
+            </patternset>
+            <mapper type="flatten"/>
+        </unzip>
+        <copy file="run.sh" tofile="run-local.sh"/>
+        <copy file="work/config/cricket.json" tofile="src/cricket.json"/>
+        <replace file="src/cricket.json" token="org.cricketmsf.services.Microsite" value="my.example.Microsite"/>
+        <replace file="run-local.sh" token="-c work/config/cricket.json" value="-c src/cricket.json"/>
+        <replace file="run-local.sh" token="-jar cricket-${cricket-version}.jar" value="-cp ${build}:${cricket.jar} org.cricketmsf.Runner"/>
+    </target>
+
+    <target name="init">
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build}"/>
+    </target>
+   
+    <target name="compile" depends="init" description="compile the source">
+        <!-- Compile the java code from ${src} into ${build} -->
+        <javac 
+            fork="true"
+            target="1.8" 
+            source="1.8" 
+            srcdir="${src}" 
+            destdir="${build}"
+            includeantruntime="false" 
+            debug="on"
+            classpathref="project-classpath">
+            <!--<compilerarg value="-Xlint:unchecked"/>-->
+        </javac>
+    </target>
+
+    <target name="clean" description="clean up">
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+    
+    <target name="run" description="run local distribution">
+        <exec 
+            dir="${dist}"
+            executable="sh">
+            <arg value="run-local.sh"/>
+        </exec>
+        <!--<exec 
+            dir="${dist}"
+            executable="java">
+            <arg value="-jar"/>
+            <arg value="${ant.project.name}-${version}.jar"/>
+            <arg value="-r"/>
+        </exec>-->
+    </target>
+</project>

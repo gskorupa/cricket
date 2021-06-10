@@ -201,16 +201,18 @@
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
                                         <exclude>META-INF/licenses/*.*</exclude>
-                                        <exclude>META-INF/maven/*.*</exclude>
+                                        <exclude>META-INF/maven/**</exclude>
                                         <exclude>META-INF/NOTICE.txt</exclude>
                                         <exclude>META-INF/LICENSE</exclude>
                                         <exclude>META-INF/LICENSE.txt</exclude>
-                                        <exclude>checkstyle/*.*</exclude>
-                                        <exclude>findbugs/*.*</exclude>
-                                        <exclude>pmd/*.*</exclude>
+                                        <exclude>checkstyle/**</exclude>
+                                        <exclude>findbugs/**</exclude>
+                                        <exclude>pmd/**</exclude>
                                         <exclude>bundle.properties</exclude>
                                         <exclude>about.html</exclude>
                                         <exclude>.netbeans_automatic_build</exclude>
+                                        <exclude>com/zaxxer/**</exclude>
+                                        <exclude>org/quartz/**</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
