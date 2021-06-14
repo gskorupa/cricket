@@ -165,7 +165,12 @@ public abstract class HttpPortedAdapter
                 case ResponseCode.MOVED_PERMANENTLY:
                 case ResponseCode.MOVED_TEMPORARY:
                     if (!headers.containsKey("Location")) {
-                        String newLocation = result.getMessage() != null ? result.getMessage() : "/";
+                        String newLocation = "/";
+                        if(result.getData() != null){
+                            newLocation=""+result.getData();
+                        }else if(result.getMessage()!=null){
+                            newLocation=result.getMessage();
+                        }
                         headers.set("Location", newLocation);
                         responseData = ("moved to ".concat(newLocation)).getBytes("UTF-8");
                     } else {
