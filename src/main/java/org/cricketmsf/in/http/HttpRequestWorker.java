@@ -74,13 +74,18 @@ public class HttpRequestWorker implements Runnable {
                     }
                 }
             } catch (Exception ex) {
-                
+
             }
             switch (result.getCode()) {
                 case ResponseCode.MOVED_PERMANENTLY:
                 case ResponseCode.MOVED_TEMPORARY:
                     if (!headers.containsKey("Location")) {
-                        String newLocation = result.getMessage() != null ? result.getMessage() : "/";
+                        String newLocation = "/";
+                        if (result.getData() != null) {
+                            newLocation = "" + result.getData();
+                        } else if (result.getMessage() != null) {
+                            newLocation = result.getMessage();
+                        }
                         headers.set("Location", newLocation);
                         responseData = ("moved to ".concat(newLocation)).getBytes("UTF-8");
                     } else {
@@ -136,7 +141,7 @@ public class HttpRequestWorker implements Runnable {
             }
             if (responseData.length > 0) {
                 exchange.sendResponseHeaders(result.getCode(), responseData.length);
-                try (OutputStream os = exchange.getResponseBody()) {
+                try ( OutputStream os = exchange.getResponseBody()) {
                     os.write(responseData);
                 }
             } else {
@@ -217,16 +222,16 @@ public class HttpRequestWorker implements Runnable {
                     if (pCall.responseCode != 0) {
                         tmp.setCode(pCall.responseCode);
                     } else {
-                        tmp= adapter.postprocess(tmp);
+                        tmp = adapter.postprocess(tmp);
                         if (null != tmp && (tmp.getCode() < 100 || tmp.getCode() > 1000)) {
                             tmp.setCode(ResponseCode.BAD_REQUEST);
                         }
                     }
-                    if(tmp instanceof Result){
+                    if (tmp instanceof Result) {
                         result.setCode(tmp.getCode());
                         result.setData(tmp.getData());
-                    }else{
-                        result=tmp;
+                    } else {
+                        result = tmp;
                     }
                 }
             }
