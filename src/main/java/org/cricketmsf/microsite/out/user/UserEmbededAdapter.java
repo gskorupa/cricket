@@ -25,7 +25,7 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.api.Result;
 import org.cricketmsf.event.Procedures;
-import org.cricketmsf.microsite.event.UserEvent;
+import org.cricketmsf.microsite.event.user.UserEvent;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;

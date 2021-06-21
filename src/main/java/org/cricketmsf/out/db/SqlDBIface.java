@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.out.db;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -64,5 +65,7 @@ public interface SqlDBIface extends KeyValueDBIface{
      * @throws SQLException TODO doc
      */
     public List execute(String query) throws SQLException;
+    
+    public File getBackupFile();
     
 }

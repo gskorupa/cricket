@@ -25,7 +25,7 @@ import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.api.StandardResult;
 import org.cricketmsf.event.Event;
-import org.cricketmsf.microsite.event.AuthEvent;
+import org.cricketmsf.microsite.event.auth.AuthEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

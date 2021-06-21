@@ -45,7 +45,7 @@ public class BasicEventRouter {
      * @param event
      * @return ParameterMapResult with the file content as a byte array
      */
-    @EventHook(className = "org.cricketmsf.event.HttpEvent", procedure = Procedures.WWW)
+    @EventHook(className = "org.cricketmsf.event.HttpEvent"/*, procedure = Procedures.WWW*/)
     public ResultIface doGet(HttpEvent event) {
         return service.wwwFileReader.getFile(
                 (RequestObject) event.getData(),

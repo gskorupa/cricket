@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.out.db;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -556,5 +557,10 @@ public class PostgreSqlDB extends OutboundAdapter implements SqlDBIface, Adapter
             }
         }
         this.ports = tmp;
+    }
+
+    @Override
+    public File getBackupFile() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

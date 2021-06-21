@@ -22,7 +22,7 @@ import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.event.ProcedureCall;
 import org.cricketmsf.event.Procedures;
 import org.cricketmsf.in.http.HttpPortedAdapter;
-import org.cricketmsf.microsite.event.CmsEvent;
+import org.cricketmsf.microsite.event.cms.CmsEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

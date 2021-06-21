@@ -38,7 +38,7 @@ public class Document {
     private String path;
     private String title;
     private String summary;
-    private String content; // not encoded (previously Base64 encoded) 
+    private String content;
     private String tags;
     private String language;
     private boolean commentable;

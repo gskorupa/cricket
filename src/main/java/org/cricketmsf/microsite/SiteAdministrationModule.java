@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.microsite;
 
+import java.io.File;
 import java.sql.SQLException;
 import org.cricketmsf.event.Event;
 import org.cricketmsf.RequestObject;
@@ -41,17 +42,20 @@ import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
 import org.cricketmsf.out.db.SqlDBIface;
+import org.cricketmsf.util.FileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
- * @author Grzegorz Skorupa 
+ * @author Grzegorz Skorupa
  */
 public class SiteAdministrationModule {
 
     private static final Logger logger = LoggerFactory.getLogger(SiteAdministrationModule.class);
 
+    public static final String ADMIN = "admin";
+    
     private static SiteAdministrationModule module;
     private String backupFolder = null;
     private boolean backupDaily = false;
@@ -59,7 +63,7 @@ public class SiteAdministrationModule {
     private final int maxUsers = 100;
     private String backupStrategy;
 
-    private final String ADMIN = "admin";
+    
 
     private boolean hasAccessRights(String userID, List<String> roles) {
         if (userID == null || userID.isEmpty()) {
@@ -123,6 +127,7 @@ public class SiteAdministrationModule {
                     try {
                     String adapterName = (String) request.parameters.getOrDefault("adapter", "");
                     String query = (String) request.parameters.get("query");
+                    String backup = (String) request.parameters.get("backup");
                     SqlDBIface adapter;
                     if (null != query) {
                         try {
@@ -138,16 +143,36 @@ public class SiteAdministrationModule {
                             result.setCode(ResponseCode.BAD_REQUEST);
                             result.setData(ex.getMessage());
                         }
+                    } else if (null != backup && backup.equalsIgnoreCase("true")) {
+                        //TODO
+                        adapter = (SqlDBIface) Kernel.getInstance().getAdaptersMap().get(adapterName);
+                        File f = adapter.getBackupFile();
+                        if (null != f) {
+                            result.setPayload(FileReader.readFile(f));
+                            result.setMessage("OK");
+                            result.setData(null);
+                            result.setFileExtension(".zip");
+                            result.setModificationDate(new Date());
+                            result.setContentType("application/zip");
+                            result.setHeader("Content-Disposition", "inline; filename=\""+adapterName+".zip\"");
+                            result.setCode(ResponseCode.OK);
+                            f.delete();
+                        } else {
+                            result.setCode(ResponseCode.BAD_REQUEST);
+                            result.setData("error while creating backup file");
+                        }
                     } else {
                         result.setCode(ResponseCode.BAD_REQUEST);
                         result.setData("query not set");
                     }
                 } catch (Exception e) {
+                    result.setCode(ResponseCode.INTERNAL_SERVER_ERROR);
+                    result.setData(e.getMessage());
                     e.printStackTrace();
                 }
                 break;
                 case "status":
-                    try{
+                    try {
                     String newStatus = (String) request.parameters.getOrDefault("status", "");
                     if ("online".equalsIgnoreCase(newStatus)) {
                         Kernel.getInstance().setStatus(Kernel.ONLINE);
@@ -155,10 +180,10 @@ public class SiteAdministrationModule {
                         Kernel.getInstance().setStatus(Kernel.MAINTENANCE);
                     }
                     result = getServiceInfo();
-                    }catch(Exception e){
-                        e.printStackTrace();
-                    }
-                    break;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
                 case "adapter":
                     String name = (String) request.parameters.getOrDefault("name", "");
                     String propertyName = (String) request.parameters.getOrDefault("property", "");
@@ -335,6 +360,7 @@ public class SiteAdministrationModule {
 
     /**
      * Creates events that should be fired on the Service start.
+     *
      * @param scheduler Scheduler
      */
     public void initScheduledTasks(SchedulerIface scheduler) {

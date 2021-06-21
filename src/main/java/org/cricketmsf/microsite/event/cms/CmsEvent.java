@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa .
+ * Copyright 2020 Grzegorz Skorupa .
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,34 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.cricketmsf.microsite.event;
+package org.cricketmsf.microsite.event.cms;
 
-import java.util.HashMap;
 import org.cricketmsf.event.Event;
 
 /**
  *
  * @author greg
  */
-public class AuthEvent extends Event {
+public class CmsEvent extends Event {
 
-    HashMap<String, String> data;
-
-    public AuthEvent() {
-        super();
-        data=new HashMap<>();
+    Object data;
+    
+    public CmsEvent(){
+        
     }
 
-    public AuthEvent(String login, String password, String token) {
+    public CmsEvent(Object data) {
         super();
-        data=new HashMap<>();
-        data.put("login",login);
-        data.put("password", password);
-        data.put("token", token);
+        this.data = data;
     }
 
     @Override
-    public HashMap<String,String> getData(){
+    public Object getData() {
         return data;
     }
 

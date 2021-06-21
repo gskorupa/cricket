@@ -41,7 +41,7 @@ import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.event.Procedures;
 import org.cricketmsf.in.http.ParameterMapResult;
-import org.cricketmsf.microsite.event.CmsEvent;
+import org.cricketmsf.microsite.event.cms.CmsEvent;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
@@ -691,8 +691,8 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
                 File file = new File(doc.getContent());
                 content = readFile(file);
             } else if (doc != null && Document.CODE.equals(doc.getType())) {
+                //TODO: remove decoding
                 try {
-                    //content = Base64.getDecoder().decode(doc.getContent());
                     content = URLDecoder.decode(doc.getContent(), "UTF-8").getBytes();
                 } catch (UnsupportedEncodingException ex) {
                     content = "".getBytes();

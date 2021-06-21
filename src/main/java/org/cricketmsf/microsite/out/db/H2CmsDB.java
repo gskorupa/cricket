@@ -15,6 +15,9 @@
  */
 package org.cricketmsf.microsite.out.db;
 
+import com.cedarsoftware.util.io.JsonWriter;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,11 +30,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.event.Event;
-import org.cricketmsf.Kernel;
 import org.cricketmsf.microsite.out.cms.CmsException;
 import org.cricketmsf.microsite.out.cms.Document;
 import org.cricketmsf.microsite.out.cms.DocumentPathAndTagComparator;
+import org.cricketmsf.out.archiver.ZipArchiver;
 import org.cricketmsf.out.db.ComparatorIface;
 import org.cricketmsf.out.db.H2EmbededDB;
 import org.cricketmsf.out.db.KeyValueDBException;
@@ -77,7 +79,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
                 .append("published timestamp,")
                 .append("extra varchar)");
         docQuery = sb.toString();
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             PreparedStatement pst;
             if (tableName.startsWith("published_") || tableName.startsWith("wip_")) {
                 pst = conn.prepareStatement("create table " + tableName + docQuery);
@@ -115,7 +117,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
     }
 
     private void putDocument(String tableName, String key, Document doc) throws KeyValueDBException {
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "merge into ?? (uid,name,author,type,path,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra) key (uid) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             query = query.replaceFirst("\\?\\?", tableName);
             PreparedStatement pstmt = conn.prepareStatement(query);
@@ -150,7 +152,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
     }
 
     private void putPath(String path) throws KeyValueDBException {
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "merge into paths values (?)";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, path);
@@ -162,7 +164,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
     }
 
     private void putTags(String tags) throws KeyValueDBException {
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String[] tagArray = tags.split(",");
             String query = "merge into tags values (?)";
             PreparedStatement pstmt = conn.prepareStatement(query);
@@ -207,7 +209,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
         } else {
             return map;
         }
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -231,7 +233,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
         } else {
             throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unsupported table " + tableName);
         }
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
             ResultSet rs = pstmt.executeQuery();
@@ -260,7 +262,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
         } else {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             PreparedStatement pst;
             pst = conn.prepareStatement(query);
             pst.setString(1, key);
@@ -288,8 +290,8 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
             String queryWithPath = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from ?? where path = ?";
             String queryWithTags = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from ?? where tags like ?";
             String query;
-            boolean tagsOnly = null==path || path.isEmpty();
-            boolean pathOnly = null==tags || tags.isEmpty();
+            boolean tagsOnly = null == path || path.isEmpty();
+            boolean pathOnly = null == tags || tags.isEmpty();
             if (tagsOnly) {
                 query = queryWithTags;
             } else if (pathOnly) {
@@ -299,7 +301,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
             }
             query = query.replaceFirst("\\?\\?", tableName);
             ArrayList list = new ArrayList();
-            try (Connection conn = getConnection()) {
+            try ( Connection conn = getConnection()) {
                 PreparedStatement pstmt = conn.prepareStatement(query);
                 if (pathOnly) {
                     pstmt.setString(1, path);
@@ -351,7 +353,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     private Object getDocument(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         Document doc = null;
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from " + tableName + " where uid=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
@@ -373,7 +375,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     private Object getPath(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         String path = null;
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "select * from paths where path=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
@@ -393,7 +395,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     private Object getTag(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         String path = null;
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "select * from tags where tag=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
@@ -408,6 +410,43 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
             return defaultResult;
         } else {
             return path;
+        }
+    }
+
+    @Override
+    public File getBackupFile() {
+        ArrayList<String> supportedLanguages = new ArrayList<>();
+        supportedLanguages.add("pl");
+        supportedLanguages.add("en");
+        supportedLanguages.add("fr");
+        supportedLanguages.add("it");
+        try {
+            ZipArchiver archiver = new ZipArchiver("cms-", ".zip");
+            Map args = new HashMap();
+            args.put(JsonWriter.TYPE, true);
+            args.put(JsonWriter.PRETTY_PRINT, true);
+            Map map;
+            map = getAll("paths");
+            String json = JsonWriter.objectToJson(map, args);
+            archiver.addFileContent("paths.json", json);
+            map = getAll("tags");
+            json = JsonWriter.objectToJson(map, args);
+            archiver.addFileContent("tags.json", json);
+
+            for (int i = 0; i < supportedLanguages.size(); i++) {
+                map = getAll("published_" + supportedLanguages.get(i));
+                json = JsonWriter.objectToJson(map, args);
+                archiver.addFileContent("published_"+supportedLanguages.get(i)+".json", json);
+            }
+            for (int i = 0; i < supportedLanguages.size(); i++) {
+                map = getAll("wip_" + supportedLanguages.get(i));
+                json = JsonWriter.objectToJson(map, args);
+                archiver.addFileContent("wip_"+supportedLanguages.get(i)+".json", json);
+            }
+            return archiver.getFile();
+        } catch (KeyValueDBException | IOException ex) {
+            logger.error(ex.getMessage());
+            return null;
         }
     }
 

@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.cricketmsf.microsite.event;
+package org.cricketmsf.microsite.event.user;
 
 import java.util.HashMap;
 import java.util.List;

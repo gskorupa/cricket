@@ -23,7 +23,7 @@ import org.cricketmsf.in.http.HttpPortedAdapter;
 import org.cricketmsf.api.ResponseCode;
 import org.cricketmsf.api.ResultIface;
 import org.cricketmsf.api.StandardResult;
-import org.cricketmsf.microsite.event.UserEvent;
+import org.cricketmsf.microsite.event.user.UserEvent;
 import org.cricketmsf.microsite.out.user.HashMaker;
 import org.cricketmsf.microsite.out.user.User;
 import org.slf4j.Logger;

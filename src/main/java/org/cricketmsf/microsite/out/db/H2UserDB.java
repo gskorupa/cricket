@@ -15,6 +15,9 @@
  */
 package org.cricketmsf.microsite.out.db;
 
+import com.cedarsoftware.util.io.JsonWriter;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,16 +29,20 @@ import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.microsite.out.user.User;
+import org.cricketmsf.out.archiver.ZipArchiver;
 import org.cricketmsf.out.db.ComparatorIface;
 import org.cricketmsf.out.db.H2EmbededDB;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.SqlDBIface;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author greg
  */
 public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
+
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(H2UserDB.class);
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -62,7 +69,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
                 .append("created timestamp,")
                 .append("user_number bigint default user_number_seq.nextval )");
         query = sb.toString();
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             PreparedStatement pst;
             if (tableName.equals("users")) {
                 pst = conn.prepareStatement(query);
@@ -97,7 +104,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
     }
 
     private void putUser(String tableName, String key, User user) throws KeyValueDBException {
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "merge into ?? (uid,type,email,name,surname,role,secret,password,confirmed,unregisterreq,authstatus,created) key (uid) values (?,?,?,?,?,?,?,?,?,?,?,?)";
             query = query.replaceFirst("\\?\\?", tableName);
             PreparedStatement pstmt = conn.prepareStatement(query);
@@ -142,7 +149,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
         //TODO: nie używać, zastąpić konkretnymi search'ami
         if (tableName.equals("users")) {
             String query = "select uid,type,email,name,surname,role,secret,password,confirmed,unregisterreq,authstatus,created,user_number from users";
-            try (Connection conn = getConnection()) {
+            try ( Connection conn = getConnection()) {
                 PreparedStatement pstmt = conn.prepareStatement(query);
                 ResultSet rs = pstmt.executeQuery();
                 while (rs.next()) {
@@ -163,7 +170,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
         } else {
             throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unsupported table " + tableName);
         }
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
             ResultSet rs = pstmt.executeQuery();
@@ -185,7 +192,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
         } else {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             PreparedStatement pst;
             pst = conn.prepareStatement(query);
             pst.setString(1, key);
@@ -201,7 +208,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
     @Override
     public List search(String tableName, String statement, Object[] parameters) throws KeyValueDBException {
         ArrayList<User> result = new ArrayList<>();
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "select uid,type,email,name,surname,role,secret,password,confirmed,unregisterreq,authstatus,created,user_number from " + tableName + " where user_number=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setLong(1, (Long) parameters[0]);
@@ -241,7 +248,7 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     private Object getUser(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         User user = null;
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "select uid,type,email,name,surname,role,secret,password,confirmed,unregisterreq,authstatus,created,user_number from " + tableName + " where uid=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
@@ -275,6 +282,25 @@ public class H2UserDB extends H2EmbededDB implements SqlDBIface, Adapter {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public File getBackupFile() {
+        try {
+            ZipArchiver archiver = new ZipArchiver("users-", ".zip");
+            // users table
+            Map users = getAll("users");
+            Map args = new HashMap();
+            args.put(JsonWriter.TYPE, true);
+            args.put(JsonWriter.PRETTY_PRINT, true);
+            String json = JsonWriter.objectToJson(users, args);
+            archiver.addFileContent("users.json", json);
+            return archiver.getFile();
+        } catch (KeyValueDBException | IOException ex) {
+            ex.printStackTrace();
+            logger.error(ex.getMessage());
+            return null;
         }
     }
 

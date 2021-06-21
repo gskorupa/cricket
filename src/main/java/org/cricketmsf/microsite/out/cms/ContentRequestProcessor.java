@@ -215,7 +215,6 @@ public class ContentRequestProcessor {
                         doc.validateUid(); // prepend doc.uid with "/" if needed and update doc.path
                         doc.setStatus("wip");
                         doc.setCreatedBy(userID);
-                        // make sure that content is allways Base64 encoded
                         doc.setContent(doc.getContent());
                         try {
                             adapter.addDocument(doc, roles);
