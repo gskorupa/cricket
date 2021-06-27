@@ -15,6 +15,9 @@
  */
 package org.cricketmsf.microsite.out.db;
 
+import com.cedarsoftware.util.io.JsonWriter;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,7 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
+import org.cricketmsf.Event;
+import org.cricketmsf.Kernel;
 import org.cricketmsf.microsite.out.auth.Token;
+import org.cricketmsf.out.archiver.ZipArchiver;
 import org.cricketmsf.out.db.ComparatorIface;
 import org.cricketmsf.out.db.H2EmbededDB;
 import org.cricketmsf.out.db.KeyValueDBException;
@@ -241,6 +247,27 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
             return defaultResult;
         } else {
             return token;
+        }
+    }
+    
+    @Override
+    public File getBackupFile() {
+        try {
+            ZipArchiver archiver = new ZipArchiver("auth-", ".zip");
+            // users table
+            Map args = new HashMap();
+            args.put(JsonWriter.TYPE, true);
+            args.put(JsonWriter.PRETTY_PRINT, true);
+            Map tokens = getAll("tokens");
+            String json = JsonWriter.objectToJson(tokens, args);
+            archiver.addFileContent("tokens.json", json);
+            Map ptokens = getAll("ptokens");
+            json = JsonWriter.objectToJson(ptokens, args);
+            archiver.addFileContent("ptokens.json", json);
+            return archiver.getFile();
+        } catch (KeyValueDBException | IOException ex) {
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
+            return null;
         }
     }
 

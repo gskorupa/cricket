@@ -15,6 +15,9 @@
  */
 package org.cricketmsf.microsite.out.db;
 
+import com.cedarsoftware.util.io.JsonWriter;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,7 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
+import org.cricketmsf.Event;
+import org.cricketmsf.Kernel;
 import org.cricketmsf.microsite.user.User;
+import org.cricketmsf.out.archiver.ZipArchiver;
 import org.cricketmsf.out.db.ComparatorIface;
 import org.cricketmsf.out.db.H2RemoteDB;
 import org.cricketmsf.out.db.KeyValueDBException;
@@ -279,4 +285,22 @@ public class H2RemoteUserDB extends H2RemoteDB implements SqlDBIface, Adapter {
         }
     }
 
+    @Override
+    public File getBackupFile() {
+        try {
+            ZipArchiver archiver = new ZipArchiver("users-", ".zip");
+            // users table
+            Map users = getAll("users");
+            Map args = new HashMap();
+            args.put(JsonWriter.TYPE, true);
+            args.put(JsonWriter.PRETTY_PRINT, true);
+            String json = JsonWriter.objectToJson(users, args);
+            archiver.addFileContent("users.json", json);
+            return archiver.getFile();
+        } catch (KeyValueDBException | IOException ex) {
+            ex.printStackTrace();
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
+            return null;
+        }
+    }
 }

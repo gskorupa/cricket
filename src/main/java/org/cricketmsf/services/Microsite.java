@@ -184,6 +184,10 @@ public class Microsite extends Kernel {
         }
         super.shutdown();
     }
+    
+    public CmsIface getCmsAdapter(){
+        return cms;
+    }
 
     /**
      * Process requests from simple web server implementation given by

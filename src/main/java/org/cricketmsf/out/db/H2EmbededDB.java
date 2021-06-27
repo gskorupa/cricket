@@ -535,4 +535,9 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     public void setSkipUpdate(boolean skipUpdate) {
         this.skipUpdate = skipUpdate;
     }
+    
+    @Override
+    public File getBackupFile() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

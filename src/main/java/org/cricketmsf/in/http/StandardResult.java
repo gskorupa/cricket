@@ -29,11 +29,11 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author greg
  */
 @XmlRootElement(name = "result")
-@XmlAccessorType (XmlAccessType.FIELD)
+@XmlAccessorType(XmlAccessType.FIELD)
 public class StandardResult implements Result {
 
     private Object data = null;
-    
+
     private int code;
     private String message = null;
     private byte[] payload = {};
@@ -73,6 +73,10 @@ public class StandardResult implements Result {
         this.code = code;
     }
 
+    public void setContentType(String contentType) {
+        getHeaders().set("Content-type", contentType);
+    }
+
     /**
      * @return the status message
      */
@@ -102,7 +106,7 @@ public class StandardResult implements Result {
     }
 
     public byte[] getPayload() {
-        if(payload.length==0 && null!=data){
+        if (payload.length == 0 && null != data) {
             buildPayload(data.toString());
         }
         return payload;
@@ -111,7 +115,7 @@ public class StandardResult implements Result {
     public void setPayload(byte[] payload) {
         this.payload = payload;
     }
-    
+
     public void buildPayload(String payload) {
         this.payload = payload.getBytes();
     }
@@ -126,7 +130,7 @@ public class StandardResult implements Result {
 
     public void setModificationDate(Date date) {
         modificationDate = date;
-        SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z",Locale.ENGLISH);
+        SimpleDateFormat dt1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.ENGLISH);
         modificationDateFormatted = dt1.format(modificationDate);
 
     }
@@ -138,35 +142,35 @@ public class StandardResult implements Result {
     public String getModificationDateFormatted() {
         return modificationDateFormatted;
     }
-    
+
     @Override
-    public int getMaxAge(){
+    public int getMaxAge() {
         return maxAge;
     }
-    
+
     @Override
-    public void setMaxAge(int maxAge){
+    public void setMaxAge(int maxAge) {
         this.maxAge = maxAge;
     }
-    
+
     @Override
-    public void setHeader(String name, String value){
+    public void setHeader(String name, String value) {
         headers.set(name, value);
     }
-    
+
     @Override
-    public void setHeader(String name, List values){
+    public void setHeader(String name, List values) {
         headers.put(name, values);
     }
-    
+
     @Override
-    public Headers getHeaders(){
+    public Headers getHeaders() {
         return headers;
     }
 
     @Override
     public void setResponseTime(long time) {
-        this.responseTime=time;
+        this.responseTime = time;
     }
 
     @Override

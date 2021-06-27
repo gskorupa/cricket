@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.microsite;
 
+import java.io.File;
 import java.sql.SQLException;
 import org.cricketmsf.Event;
 import org.cricketmsf.RequestObject;
@@ -31,6 +32,7 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.config.AdapterConfiguration;
 import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.in.http.HttpAdapter;
+import org.cricketmsf.in.http.ResponseCode;
 import org.cricketmsf.in.scheduler.SchedulerIface;
 import org.cricketmsf.microsite.event.ShutdownRequested;
 import org.cricketmsf.microsite.event.StatusRequested;
@@ -42,6 +44,7 @@ import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.KeyValueDBIface;
 import org.cricketmsf.out.db.SqlDBIface;
+import org.cricketmsf.util.FileReader;
 
 /**
  *
@@ -127,20 +130,44 @@ public class SiteAdministrationModule {
         } else if ("POST".equalsIgnoreCase(method)) {
             switch (moduleName.toLowerCase()) {
                 case "database":
+                    try {
                     String adapterName = (String) request.parameters.getOrDefault("adapter", "");
                     String query = (String) request.parameters.get("query");
+                    String backup = (String) request.parameters.get("backup");
+                    SqlDBIface adapter = (SqlDBIface) Kernel.getInstance().getAdaptersMap().get(adapterName);
                     if (null != query) {
-                        SqlDBIface adapter = (SqlDBIface) Kernel.getInstance().getAdaptersMap().get(adapterName);
                         try {
                             result.setData(adapter.execute(query));
                         } catch (SQLException ex) {
                             result.setCode(HttpAdapter.SC_BAD_REQUEST);
                             result.setData(ex.getMessage());
                         }
+                    } else if (null != backup && backup.equalsIgnoreCase("true")) {
+                        //TODO
+                        File f = adapter.getBackupFile();
+                        if (null != f) {
+                            result.setPayload(FileReader.readFile(f));
+                            result.setMessage("OK");
+                            result.setData(null);
+                            result.setFileExtension(".zip");
+                            result.setModificationDate(new Date());
+                            result.setContentType("application/zip");
+                            result.setHeader("Content-Disposition", "inline; filename=\""+adapterName+".zip\"");
+                            result.setCode(ResponseCode.OK);
+                            f.delete();
+                        } else {
+                            result.setCode(ResponseCode.BAD_REQUEST);
+                            result.setData("error while creating backup file");
+                        }
                     } else {
                         result.setCode(HttpAdapter.SC_BAD_REQUEST);
                         result.setData("query not set");
                     }
+                    } catch (Exception e) {
+                    result.setCode(ResponseCode.INTERNAL_SERVER_ERROR);
+                    result.setData(e.getMessage());
+                    e.printStackTrace();
+                }
                     break;
                 case "status":
                     String newStatus = (String) request.parameters.getOrDefault("status", "");

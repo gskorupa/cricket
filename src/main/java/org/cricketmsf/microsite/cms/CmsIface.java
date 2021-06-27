@@ -15,6 +15,7 @@
  */
 package org.cricketmsf.microsite.cms;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.RequestObject;
@@ -46,6 +47,7 @@ public interface CmsIface {
     //public Result getFile(String uid, String language) throws CmsException;
     public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName, String language);
     public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName, String language, boolean updateCache);
+    public byte[] readFile(File file);
     public void updateCache(RequestObject request, KeyValueDBIface cache, String tableName, String language, String fileContent);
     public String getDefaultLanguage();
 }

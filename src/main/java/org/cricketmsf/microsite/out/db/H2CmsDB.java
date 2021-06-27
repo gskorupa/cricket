@@ -15,6 +15,9 @@
  */
 package org.cricketmsf.microsite.out.db;
 
+import com.cedarsoftware.util.io.JsonWriter;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,18 +27,22 @@ import java.time.Instant;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.microsite.cms.CmsException;
+import org.cricketmsf.microsite.cms.CmsIface;
 import org.cricketmsf.microsite.cms.Document;
 import org.cricketmsf.microsite.cms.DocumentPathAndTagComparator;
+import org.cricketmsf.out.archiver.ZipArchiver;
 import org.cricketmsf.out.db.ComparatorIface;
 import org.cricketmsf.out.db.H2EmbededDB;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.SqlDBIface;
+import org.cricketmsf.services.Microsite;
 
 /**
  *
@@ -407,6 +414,59 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
             return defaultResult;
         } else {
             return path;
+        }
+    }
+
+    @Override
+    public File getBackupFile() {
+        Document doc;
+        CmsIface adapter= ((Microsite)Kernel.getInstance()).getCmsAdapter();
+        ArrayList<String> supportedLanguages = new ArrayList<>();
+        supportedLanguages.add("pl");
+        supportedLanguages.add("en");
+        supportedLanguages.add("fr");
+        supportedLanguages.add("it");
+        try {
+            ZipArchiver archiver = new ZipArchiver("cms-", ".zip");
+            Map args = new HashMap();
+            args.put(JsonWriter.TYPE, true);
+            args.put(JsonWriter.PRETTY_PRINT, true);
+            Map map;
+            map = getAll("paths");
+            String json = JsonWriter.objectToJson(map, args);
+            archiver.addFileContent("paths.json", json);
+            map = getAll("tags");
+            json = JsonWriter.objectToJson(map, args);
+            archiver.addFileContent("tags.json", json);
+
+            for (int i = 0; i < supportedLanguages.size(); i++) {
+                map = getAll("published_" + supportedLanguages.get(i));
+                json = JsonWriter.objectToJson(map, args);
+                archiver.addFileContent("published_"+supportedLanguages.get(i)+".json", json);
+                Iterator it=map.values().iterator();
+                while(it.hasNext()){
+                    doc=(Document)it.next();
+                    if(Document.FILE==doc.getType()){
+                        archiver.addFile("published/"+doc.getContent(), adapter.readFile(new File(doc.getContent())));
+                    }
+                }
+            }
+            for (int i = 0; i < supportedLanguages.size(); i++) {
+                map = getAll("wip_" + supportedLanguages.get(i));
+                json = JsonWriter.objectToJson(map, args);
+                archiver.addFileContent("wip_"+supportedLanguages.get(i)+".json", json);
+                Iterator it=map.values().iterator();
+                while(it.hasNext()){
+                    doc=(Document)it.next();
+                    if(Document.FILE==doc.getType()){
+                        archiver.addFile("wip/"+doc.getContent(), adapter.readFile(new File(doc.getContent())));
+                    }
+                }
+            }
+            return archiver.getFile();
+        } catch (KeyValueDBException | IOException ex) {
+            Kernel.getInstance().dispatchEvent(Event.logWarning(this.getClass().getSimpleName(), ex.getMessage()));
+            return null;
         }
     }
 
