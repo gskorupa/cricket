@@ -27,10 +27,13 @@ import java.time.Instant;
 import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
+import org.cricketmsf.Kernel;
 import org.cricketmsf.microsite.out.cms.CmsException;
+import org.cricketmsf.microsite.out.cms.CmsIface;
 import org.cricketmsf.microsite.out.cms.Document;
 import org.cricketmsf.microsite.out.cms.DocumentPathAndTagComparator;
 import org.cricketmsf.out.archiver.ZipArchiver;
@@ -38,6 +41,7 @@ import org.cricketmsf.out.db.ComparatorIface;
 import org.cricketmsf.out.db.H2RemoteDB;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.SqlDBIface;
+import org.cricketmsf.services.Microsite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,12 +207,20 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
         String query;
         HashMap<String, String> map = new HashMap<>();
         if (tableName.equals("paths")) {
-            query = "select path from paths";
-        } else if (tableName.equals("tags")) {
-            query = "select tag from tags";
-        } else {
+            query = "select path from " + tableName;
+            try ( Connection conn = getConnection()) {
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    map.put(rs.getString(1), rs.getString(1));
+                }
+            } catch (SQLException e) {
+                throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+            }
             return map;
         }
+        if (tableName.equals("tags")) {
+            query = "select tag from " + tableName;
         try ( Connection conn = getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
@@ -219,6 +231,29 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
             throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
         }
         return map;
+    }
+
+        if (tableName.startsWith("published_") || tableName.startsWith("wip_")) {
+            HashMap<String, Document> docMap = new HashMap<>();
+            Document doc;
+            try ( Connection conn = getConnection()) {
+                query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from " + tableName;
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    doc = buildDocument(rs);
+                    docMap.put(rs.getString(1), doc);
+                }
+                return docMap;
+            } catch (SQLException e) {
+                throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+            } catch (CmsException ex) {
+                logger.error("unable to restore UID");
+            }
+        } else {
+            return new HashMap<String,String>();
+        }
+        return null;
     }
 
     @Override
@@ -290,8 +325,8 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
             String queryWithPath = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from ?? where path = ?";
             String queryWithTags = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from ?? where tags like ?";
             String query;
-            boolean tagsOnly = path.isEmpty();
-            boolean pathOnly = tags.isEmpty();
+            boolean tagsOnly = null == path || path.isEmpty();
+            boolean pathOnly = null == tags || tags.isEmpty();
             if (tagsOnly) {
                 query = queryWithTags;
             } else if (pathOnly) {
@@ -415,6 +450,9 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
 
     @Override
     public File getBackupFile() {
+        Document doc;
+        String tmpFileName;
+        CmsIface adapter = ((Microsite) Kernel.getInstance()).getCmsAdapter();
         ArrayList<String> supportedLanguages = new ArrayList<>();
         supportedLanguages.add("pl");
         supportedLanguages.add("en");
@@ -436,12 +474,27 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
             for (int i = 0; i < supportedLanguages.size(); i++) {
                 map = getAll("published_" + supportedLanguages.get(i));
                 json = JsonWriter.objectToJson(map, args);
-                archiver.addFileContent("published_" + supportedLanguages.get(i) + ".json", json);
+                archiver.addFileContent("published_"+supportedLanguages.get(i)+".json", json);
+                Iterator it=map.values().iterator();
+                while(it.hasNext()){
+                    doc=(Document)it.next();
+                    if(Document.FILE==doc.getType()){
+                        archiver.addFile("published/"+doc.getContent(), adapter.readFile(new File(doc.getContent())));
+            }
+                }
             }
             for (int i = 0; i < supportedLanguages.size(); i++) {
                 map = getAll("wip_" + supportedLanguages.get(i));
                 json = JsonWriter.objectToJson(map, args);
-                archiver.addFileContent("wip_" + supportedLanguages.get(i) + ".json", json);
+                archiver.addFileContent("wip_"+supportedLanguages.get(i)+".json", json);
+                Iterator it=map.values().iterator();
+                while(it.hasNext()){
+                    doc=(Document)it.next();
+                    if(Document.FILE.equals(doc.getType())){
+                        tmpFileName=doc.getContent().substring(doc.getContent().lastIndexOf(File.separator)+1);
+                        archiver.addFile("wip_"+supportedLanguages.get(i)+"/"+tmpFileName, adapter.readFile(new File(doc.getContent())));
+            }
+                }
             }
             return archiver.getFile();
         } catch (KeyValueDBException | IOException ex) {

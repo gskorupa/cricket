@@ -192,5 +192,9 @@ public class Microsite extends Kernel {
     public AuthAdapterIface getAuthAdapter() {
         return authAdapter;
     }
+    
+    public CmsIface getCmsAdapter(){
+        return contentManager;
+    }
 
 }

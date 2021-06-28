@@ -49,6 +49,13 @@ public class ZipArchiver {
         out.write(data, 0, data.length);
         out.closeEntry();
     }
+    
+    public void addFile(String fileName, byte[] fileContent) throws IOException {
+        ZipEntry e = new ZipEntry(fileName);
+        out.putNextEntry(e);
+        out.write(fileContent, 0, fileContent.length);
+        out.closeEntry();
+    }
 
     public File getFile() throws IOException {
         out.close();
