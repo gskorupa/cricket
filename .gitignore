@@ -107,3 +107,5 @@ build
 /backup2x/
 /scheduler-reschedule.xml
 /scheduler.xml
+/files/
+/www/assets/

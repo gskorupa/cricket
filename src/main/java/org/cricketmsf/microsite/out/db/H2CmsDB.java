@@ -207,22 +207,53 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
         String query;
         HashMap<String, String> map = new HashMap<>();
         if (tableName.equals("paths")) {
-            query = "select path from paths";
-        } else if (tableName.equals("tags")) {
-            query = "select tag from tags";
-        } else {
+            query = "select path from " + tableName;
+            try ( Connection conn = getConnection()) {
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    map.put(rs.getString(1), rs.getString(1));
+                }
+            } catch (SQLException e) {
+                throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+            }
             return map;
         }
-        try (Connection conn = getConnection()) {
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                map.put(rs.getString(1), rs.getString(1));
+        if (tableName.equals("tags")) {
+            query = "select tag from " + tableName;
+            try ( Connection conn = getConnection()) {
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    map.put(rs.getString(1), rs.getString(1));
+                }
+            } catch (SQLException e) {
+                throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
             }
-        } catch (SQLException e) {
-            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+            return map;
         }
-        return map;
+
+        if (tableName.startsWith("published_") || tableName.startsWith("wip_")) {
+            HashMap<String, Document> docMap = new HashMap<>();
+            Document doc;
+            try ( Connection conn = getConnection()) {
+                query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from " + tableName;
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    doc = buildDocument(rs);
+                    docMap.put(rs.getString(1), doc);
+                }
+                return docMap;
+            } catch (SQLException e) {
+                throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+            } catch (CmsException ex) {
+                Kernel.getInstance().dispatchEvent(Event.logSevere(this, "unable to restore UID"));
+            }
+        } else {
+            return new HashMap<String,String>();
+        }
+        return null;
     }
 
     @Override
@@ -420,6 +451,7 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
     @Override
     public File getBackupFile() {
         Document doc;
+        String tmpFileName;
         CmsIface adapter= ((Microsite)Kernel.getInstance()).getCmsAdapter();
         ArrayList<String> supportedLanguages = new ArrayList<>();
         supportedLanguages.add("pl");
@@ -446,8 +478,9 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
                 Iterator it=map.values().iterator();
                 while(it.hasNext()){
                     doc=(Document)it.next();
-                    if(Document.FILE==doc.getType()){
-                        archiver.addFile("published/"+doc.getContent(), adapter.readFile(new File(doc.getContent())));
+                    if(Document.FILE.equals(doc.getType())){
+                        tmpFileName=doc.getContent().substring(doc.getContent().lastIndexOf(File.separator)+1);
+                        archiver.addFile("published_"+supportedLanguages.get(i)+"/"+tmpFileName, adapter.readFile(new File(doc.getContent())));
                     }
                 }
             }
@@ -458,8 +491,9 @@ public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
                 Iterator it=map.values().iterator();
                 while(it.hasNext()){
                     doc=(Document)it.next();
-                    if(Document.FILE==doc.getType()){
-                        archiver.addFile("wip/"+doc.getContent(), adapter.readFile(new File(doc.getContent())));
+                    if(Document.FILE.equals(doc.getType())){
+                        tmpFileName=doc.getContent().substring(doc.getContent().lastIndexOf(File.separator)+1);
+                        archiver.addFile("wip_"+supportedLanguages.get(i)+"/"+tmpFileName, adapter.readFile(new File(doc.getContent())));
                     }
                 }
             }

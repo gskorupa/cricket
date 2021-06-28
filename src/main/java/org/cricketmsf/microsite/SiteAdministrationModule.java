@@ -152,10 +152,11 @@ public class SiteAdministrationModule {
                             result.setFileExtension(".zip");
                             result.setModificationDate(new Date());
                             result.setContentType("application/zip");
-                            result.setHeader("Content-Disposition", "inline; filename=\""+adapterName+".zip\"");
+                            result.setHeader("Content-Disposition", "inline; filename=\"" + adapterName + ".zip\"");
                             result.setCode(ResponseCode.OK);
                             f.delete();
                         } else {
+                            System.out.println("NULL FILE");
                             result.setCode(ResponseCode.BAD_REQUEST);
                             result.setData("error while creating backup file");
                         }
@@ -163,12 +164,12 @@ public class SiteAdministrationModule {
                         result.setCode(HttpAdapter.SC_BAD_REQUEST);
                         result.setData("query not set");
                     }
-                    } catch (Exception e) {
+                } catch (Exception e) {
                     result.setCode(ResponseCode.INTERNAL_SERVER_ERROR);
                     result.setData(e.getMessage());
                     e.printStackTrace();
                 }
-                    break;
+                break;
                 case "status":
                     String newStatus = (String) request.parameters.getOrDefault("status", "");
                     if ("online".equalsIgnoreCase(newStatus)) {
@@ -430,7 +431,7 @@ public class SiteAdministrationModule {
             } else if ("info".equalsIgnoreCase(errorLevel)) {
                 Kernel.getInstance().dispatchEvent(Event.logInfo(this, "backup error - " + message));
             } else if ("debug".equalsIgnoreCase(errorLevel)) {
-                Kernel.getInstance().dispatchEvent(Event.logFine(this, "backup error - "+message));
+                Kernel.getInstance().dispatchEvent(Event.logFine(this, "backup error - " + message));
             } else {
                 Kernel.getInstance().dispatchEvent(Event.logSevere(this, "backup error - " + message));
             }

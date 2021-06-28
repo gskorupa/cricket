@@ -80,7 +80,7 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
                 .append("published timestamp,")
                 .append("extra varchar)");
         docQuery = sb.toString();
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             PreparedStatement pst;
             if (tableName.startsWith("published_") || tableName.startsWith("wip_")) {
                 pst = conn.prepareStatement("create table " + tableName + docQuery);
@@ -118,7 +118,7 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
     }
 
     private void putDocument(String tableName, String key, Document doc) throws KeyValueDBException {
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "merge into ?? (uid,name,author,type,path,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra) key (uid) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             query = query.replaceFirst("\\?\\?", tableName);
             PreparedStatement pstmt = conn.prepareStatement(query);
@@ -153,7 +153,7 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
     }
 
     private void putPath(String path) throws KeyValueDBException {
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "merge into paths values (?)";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, path);
@@ -165,9 +165,9 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
     }
 
     private void putTags(String tags) throws KeyValueDBException {
-        try (Connection conn = getConnection()) {
-            if(null==tags){
-                tags="";
+        try ( Connection conn = getConnection()) {
+            if (null == tags) {
+                tags = "";
             }
             String[] tagArray = tags.split(",");
             String query = "merge into tags values (?)";
@@ -207,22 +207,53 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
         String query;
         HashMap<String, String> map = new HashMap<>();
         if (tableName.equals("paths")) {
-            query = "select path from paths";
-        } else if (tableName.equals("tags")) {
-            query = "select tag from tags";
-        } else {
+            query = "select path from " + tableName;
+            try ( Connection conn = getConnection()) {
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    map.put(rs.getString(1), rs.getString(1));
+                }
+            } catch (SQLException e) {
+                throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+            }
             return map;
         }
-        try (Connection conn = getConnection()) {
-            PreparedStatement pstmt = conn.prepareStatement(query);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                map.put(rs.getString(1), rs.getString(1));
+        if (tableName.equals("tags")) {
+            query = "select tag from " + tableName;
+            try ( Connection conn = getConnection()) {
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    map.put(rs.getString(1), rs.getString(1));
+                }
+            } catch (SQLException e) {
+                throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
             }
-        } catch (SQLException e) {
-            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+            return map;
         }
-        return map;
+
+        if (tableName.startsWith("published_") || tableName.startsWith("wip_")) {
+            HashMap<String, Document> docMap = new HashMap<>();
+            Document doc;
+            try ( Connection conn = getConnection()) {
+                query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from " + tableName;
+                PreparedStatement pstmt = conn.prepareStatement(query);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    doc = buildDocument(rs);
+                    docMap.put(rs.getString(1), doc);
+                }
+                return docMap;
+            } catch (SQLException e) {
+                throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+            } catch (CmsException ex) {
+                Kernel.getInstance().dispatchEvent(Event.logSevere(this, "unable to restore UID"));
+            }
+        } else {
+            return new HashMap<String, String>();
+        }
+        return null;
     }
 
     @Override
@@ -237,7 +268,7 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
         } else {
             throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unsupported table " + tableName);
         }
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
             ResultSet rs = pstmt.executeQuery();
@@ -266,7 +297,7 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
         } else {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             PreparedStatement pst;
             pst = conn.prepareStatement(query);
             pst.setString(1, key);
@@ -305,7 +336,7 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
             }
             query = query.replaceFirst("\\?\\?", tableName);
             ArrayList list = new ArrayList();
-            try (Connection conn = getConnection()) {
+            try ( Connection conn = getConnection()) {
                 PreparedStatement pstmt = conn.prepareStatement(query);
                 if (pathOnly) {
                     pstmt.setString(1, path);
@@ -357,7 +388,7 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
 
     private Object getDocument(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         Document doc = null;
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published,extra from " + tableName + " where uid=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
@@ -379,7 +410,7 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
 
     private Object getPath(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         String path = null;
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "select * from paths where path=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
@@ -399,7 +430,7 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
 
     private Object getTag(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         String path = null;
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "select * from tags where tag=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
@@ -416,11 +447,12 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
             return path;
         }
     }
-    
+
     @Override
     public File getBackupFile() {
         Document doc;
-        CmsIface adapter= ((Microsite)Kernel.getInstance()).getCmsAdapter();
+        String tmpFileName;
+        CmsIface adapter = ((Microsite) Kernel.getInstance()).getCmsAdapter();
         ArrayList<String> supportedLanguages = new ArrayList<>();
         supportedLanguages.add("pl");
         supportedLanguages.add("en");
@@ -442,25 +474,27 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
             for (int i = 0; i < supportedLanguages.size(); i++) {
                 map = getAll("published_" + supportedLanguages.get(i));
                 json = JsonWriter.objectToJson(map, args);
-                archiver.addFileContent("published_"+supportedLanguages.get(i)+".json", json);
-                Iterator it=map.values().iterator();
-                while(it.hasNext()){
-                    doc=(Document)it.next();
-                    if(Document.FILE==doc.getType()){
-                        archiver.addFile("published/"+doc.getContent(), adapter.readFile(new File(doc.getContent())));
-            }
+                archiver.addFileContent("published_" + supportedLanguages.get(i) + ".json", json);
+                Iterator it = map.values().iterator();
+                while (it.hasNext()) {
+                    doc = (Document) it.next();
+                    if (Document.FILE.equals(doc.getType())) {
+                        tmpFileName = doc.getContent().substring(doc.getContent().lastIndexOf(File.separator) + 1);
+                        archiver.addFile("published_" + supportedLanguages.get(i) + "/" + tmpFileName, adapter.readFile(new File(doc.getContent())));
+                    }
                 }
             }
             for (int i = 0; i < supportedLanguages.size(); i++) {
                 map = getAll("wip_" + supportedLanguages.get(i));
                 json = JsonWriter.objectToJson(map, args);
-                archiver.addFileContent("wip_"+supportedLanguages.get(i)+".json", json);
-                Iterator it=map.values().iterator();
-                while(it.hasNext()){
-                    doc=(Document)it.next();
-                    if(Document.FILE==doc.getType()){
-                        archiver.addFile("wip/"+doc.getContent(), adapter.readFile(new File(doc.getContent())));
-            }
+                archiver.addFileContent("wip_" + supportedLanguages.get(i) + ".json", json);
+                Iterator it = map.values().iterator();
+                while (it.hasNext()) {
+                    doc = (Document) it.next();
+                    if (Document.FILE.equals(doc.getType())) {
+                        tmpFileName = doc.getContent().substring(doc.getContent().lastIndexOf(File.separator) + 1);
+                        archiver.addFile("wip_" + supportedLanguages.get(i) + "/" + tmpFileName, adapter.readFile(new File(doc.getContent())));
+                    }
                 }
             }
             return archiver.getFile();
