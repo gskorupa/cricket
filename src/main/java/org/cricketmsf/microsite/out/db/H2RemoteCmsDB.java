@@ -473,29 +473,34 @@ public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
 
             for (int i = 0; i < supportedLanguages.size(); i++) {
                 map = getAll("published_" + supportedLanguages.get(i));
-                json = JsonWriter.objectToJson(map, args);
-                archiver.addFileContent("published_" + supportedLanguages.get(i) + ".json", json);
-                Iterator it = map.values().iterator();
-                while (it.hasNext()) {
-                    doc = (Document) it.next();
-                    if (Document.FILE.equals(doc.getType())) {
-                        tmpFileName = doc.getContent().substring(doc.getContent().lastIndexOf(File.separator) + 1);
-                        archiver.addFile("published_" + supportedLanguages.get(i) + "/" + tmpFileName, adapter.readFile(new File(doc.getContent())));
+                //json = JsonWriter.objectToJson(map, args);
+                //archiver.addFileContent("published_"+supportedLanguages.get(i)+".json", json);
+                Iterator it=map.values().iterator();
+                while(it.hasNext()){
+                    doc=(Document)it.next();
+                    if(Document.FILE.equals(doc.getType())){
+                        tmpFileName=doc.getContent().substring(doc.getContent().lastIndexOf(File.separator)+1);
+                        archiver.addFile("published_"+supportedLanguages.get(i)+"/"+tmpFileName, adapter.readFile(new File(doc.getContent())));
+                        doc.setContent("published_"+supportedLanguages.get(i)+"/"+tmpFileName);
+                        map.put(doc.getUid(),doc);
                     }
                 }
+                json = JsonWriter.objectToJson(map, args);
+                archiver.addFileContent("published_"+supportedLanguages.get(i)+".json", json);
             }
             for (int i = 0; i < supportedLanguages.size(); i++) {
                 map = getAll("wip_" + supportedLanguages.get(i));
-                json = JsonWriter.objectToJson(map, args);
-                archiver.addFileContent("wip_" + supportedLanguages.get(i) + ".json", json);
-                Iterator it = map.values().iterator();
-                while (it.hasNext()) {
-                    doc = (Document) it.next();
-                    if (Document.FILE.equals(doc.getType())) {
-                        tmpFileName = doc.getContent().substring(doc.getContent().lastIndexOf(File.separator) + 1);
-                        archiver.addFile("wip_" + supportedLanguages.get(i) + "/" + tmpFileName, adapter.readFile(new File(doc.getContent())));
+                Iterator it=map.values().iterator();
+                while(it.hasNext()){
+                    doc=(Document)it.next();
+                    if(Document.FILE.equals(doc.getType())){
+                        tmpFileName=doc.getContent().substring(doc.getContent().lastIndexOf(File.separator)+1);
+                        archiver.addFile("wip_"+supportedLanguages.get(i)+"/"+tmpFileName, adapter.readFile(new File(doc.getContent())));
+                        doc.setContent("wip_"+supportedLanguages.get(i)+"/"+tmpFileName);
                     }
                 }
+                json = JsonWriter.objectToJson(map, args);
+                archiver.addFileContent("wip_"+supportedLanguages.get(i)+".json", json);
             }
             return archiver.getFile();
         } catch (KeyValueDBException | IOException ex) {
