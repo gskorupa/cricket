@@ -254,7 +254,7 @@ public class MicrositeEventRouter {
             User user = service.userAdapter.get(uid);
             service.gdprLogger.print("REGISTERED USER " + user.getNumber() + " " + user.getUid());
             long timeout = 1800 * 1000; //30 minut
-            service.authAdapter.createConfirmationToken(uid, user.getConfirmString(), timeout);
+            service.authAdapter.createConfirmationToken(user, user.getConfirmString(), timeout);
             service.emailSender.send(
                     user.getEmail(),
                     "Micrisite registration confirmation",

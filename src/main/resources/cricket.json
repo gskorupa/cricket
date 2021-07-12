@@ -301,8 +301,8 @@
                     "interfaceName": "AuthAdapterIface",
                     "className": "org.cricketmsf.microsite.out.auth.AuthEmbededAdapter",
                     "properties": {
-                        "helper-name": "AuthDB",
-                        "helper-name-2": "UserAdapter",
+                        "database-adapter-name": "AuthDB",
+                        "user-adapter-name": "UserAdapter",
                         "token-timeout": "1800"
                     }
                 },

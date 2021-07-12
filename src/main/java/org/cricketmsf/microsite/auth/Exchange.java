@@ -25,40 +25,39 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.cricketmsf.microsite.out.user.User;
+import org.cricketmsf.microsite.out.auth.Token;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Exchange extends HttpExchange {
+    private static final Logger logger = LoggerFactory.getLogger(Exchange.class);
 
     private HttpExchange httpExchange;
     private Map<String, List<String>> headers;
     private Map attributes;
-
-    public Exchange(HttpExchange httpExchange, User user, User issuer) {
+    
+    public Exchange(HttpExchange httpExchange, Token token) {
+        logger.debug("EXCHANGE TOKEN "+token.toString());
         this.httpExchange = httpExchange;
         attributes = new HashMap();
         attributes.put("parameters", httpExchange.getAttribute("parameters"));
         attributes.put("body", httpExchange.getAttribute("body"));
         headers = httpExchange.getRequestHeaders();
-        if (null != user) {
+        if (null != token) {
             ArrayList<String> al = new ArrayList<>();
-            al.add(user.getUid());
+            al.add(token.getUser().getUid());
             headers.put("X-user-id", al);
             List<String> roles = new ArrayList();
-            if (issuer != null) {
+            if (null!=token.getIssuer()) {
                 ArrayList<String> al2 = new ArrayList<>();
-                al2.add(issuer.getUid());
+                al2.add(token.getIssuer().getUid());
                 headers.put("X-issuer-id", al2);
                 roles.add("guest");
             } else {
-                try {
-                    roles = Arrays.asList(user.getRole().split(","));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                roles = token.getUser().getRoles();
             }
             headers.put("X-user-role", roles);
         }
@@ -92,9 +91,9 @@ public class Exchange extends HttpExchange {
     @Override
     public void close() {
         httpExchange.close();
-        //httpExchange = null;
-        headers=null;
-        attributes=null;
+        httpExchange = null;
+        headers = null;
+        attributes = null;
     }
 
     @Override

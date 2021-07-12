@@ -17,6 +17,7 @@ package org.cricketmsf.out.auth;
 
 import org.cricketmsf.microsite.out.auth.AuthException;
 import org.cricketmsf.microsite.out.auth.Token;
+import org.cricketmsf.microsite.out.auth.UserProxy;
 import org.cricketmsf.microsite.out.user.User;
 
 /**
@@ -32,21 +33,18 @@ public interface AuthAdapterIface {
     public boolean logout(String tokenID);
 
     public boolean refreshToken(String tokenID);
-    
 
     public void userAuthorize(String userId, String role) throws AuthException;
 
     public void cmsAuthorize(String docId, String role) throws AuthException;
 
-    public Token createToken(String userID) throws AuthException;
+    public Token createToken(UserProxy user) throws AuthException;
 
-    public Token createConfirmationToken(String userID, String token, long timeout) throws AuthException;
+    public Token createConfirmationToken(User user, String token, long timeout) throws AuthException;
 
-    public User getUser(String tokenID) throws AuthException;
+    public Token createPermanentToken(UserProxy user, UserProxy issuer, boolean neverExpires, String payload) throws AuthException;
 
-    public User getUser(String tokenID, boolean permanentToken) throws AuthException;
-
-    public Token createPermanentToken(String userID, String issuerID, boolean neverExpires, String payload) throws AuthException;
+    public Token getToken(String tokenID);
 
     /**
      * Removes permanent token from database
@@ -56,7 +54,4 @@ public interface AuthAdapterIface {
      */
     public void removePermanentToken(String tokenID) throws AuthException;
 
-    public boolean checkPermanentToken(String tokenID) throws AuthException;
-
-    public User getIssuer(String tokenID) throws AuthException;
 }

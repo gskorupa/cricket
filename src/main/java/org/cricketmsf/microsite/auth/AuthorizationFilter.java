@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Grzegorz Skorupa .
+ * Copyright 2017-2021 Grzegorz Skorupa .
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import java.util.Map;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.auth.AuthAdapterIface;
 import org.cricketmsf.microsite.out.auth.AuthException;
-import org.cricketmsf.microsite.out.user.User;
+import org.cricketmsf.microsite.out.auth.Token;
+import org.cricketmsf.microsite.out.auth.UserProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,14 +32,13 @@ import org.slf4j.LoggerFactory;
  * This is default filter used to check required request conditions. Does
  * nothing. Could be used as a starting point to implement required filter.
  *
- * @author Grzegorz Skorupa 
+ * @author Grzegorz Skorupa
  */
 public class AuthorizationFilter extends Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorizationFilter.class);
 
-    private static final String PERMANENT_TOKEN_PREFIX = "~~";
-
+    //private static final String PERMANENT_TOKEN_PREFIX = "~~";
     private String[] restrictedPost = null;
     private String[] restrictedPut = null;
     private String[] restrictedGet = null;
@@ -187,9 +187,7 @@ public class AuthorizationFilter extends Filter {
         }
         Map parameters = (Map) exchange.getAttribute("parameters");
         AuthorizationFilterResult result = new AuthorizationFilterResult();
-        result.user = null;
-        result.issuer = null;
-
+        result.token = null;
         if (authorizationNotRequired) {
             String inParamsToken = null;
             try {
@@ -199,9 +197,7 @@ public class AuthorizationFilter extends Filter {
                         if (inParamsToken.endsWith("/")) {
                             inParamsToken = inParamsToken.substring(0, inParamsToken.length() - 1);
                         }
-                        result.user = getUser(inParamsToken, true);
-                        result.issuer = getIssuer(inParamsToken);
-                        //Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "FOUND IP TOKEN " + inParamsToken + " FOR " + result.user.getUid() + " by " + result.issuer.getUid()));
+                        result.token = getToken(inParamsToken);
                     }
                 }
             } catch (NullPointerException e) {
@@ -218,18 +214,15 @@ public class AuthorizationFilter extends Filter {
         if (tokenHeader.length == 2) {
             switch (tokenHeader[0]) {
                 case "ApiKey":
-                    tokenID=tokenHeader[1];
+                    tokenID = tokenHeader[1];
                     break;
                 case "Bearer":
                     // OAuth not implemented
                     break;
             }
-        }else if(tokenHeader.length==1){
-            tokenID=tokenHeader[0]; // Deprecated
+        } else if (tokenHeader.length == 1) {
+            tokenID = tokenHeader[0]; // Deprecated
         }
-
-        User user = null;
-        User issuer = null;
         if (tokenID == null || tokenID.isEmpty()) {
             try {
                 if (null != parameters) {
@@ -257,10 +250,9 @@ public class AuthorizationFilter extends Filter {
             }
         }
         try {
-            user = getUser(tokenID, tokenID.startsWith(PERMANENT_TOKEN_PREFIX));
-            if ("public".equalsIgnoreCase(user.getUid())) {
-                issuer = getIssuer(tokenID);
-            }
+            result.token = getToken(tokenID);
+            result.code = 200;
+            return result;
         } catch (NullPointerException e) {
             result.code = 403;
             result.message = e.getMessage() + " - request blocked by security filter\r\n";
@@ -272,27 +264,14 @@ public class AuthorizationFilter extends Filter {
             return result;
         }
 
-        result.user = user;
-        result.issuer = issuer;
-        result.code = 200;
-
-        return result;
     }
 
-    private User getUser(String token, boolean permanentToken) throws AuthException {
+    private Token getToken(String tokenId) throws AuthException {
         AuthAdapterIface authAdapter = (AuthAdapterIface) Kernel.getInstance().getAuthAdapter();
         if (authAdapter != null) {
-            return authAdapter.getUser(token, permanentToken);
+            return authAdapter.getToken(tokenId);
         } else {
-            return null;
-        }
-    }
-
-    private User getIssuer(String token) throws AuthException {
-        AuthAdapterIface authAdapter = (AuthAdapterIface) Kernel.getInstance().getAuthAdapter();
-        if (authAdapter != null) {
-            return authAdapter.getIssuer(token);
-        } else {
+            logger.debug("NULL AUTH ADAPTER");
             return null;
         }
     }
@@ -304,6 +283,7 @@ public class AuthorizationFilter extends Filter {
         try {
             result = checkRequest(exchange);
         } catch (Exception e) {
+            e.printStackTrace();
             exchange.sendResponseHeaders(400, e.getMessage().length());
             exchange.getResponseBody().write(e.getMessage().getBytes());
             exchange.getResponseBody().close();
@@ -319,8 +299,9 @@ public class AuthorizationFilter extends Filter {
             exchange.close();
         } else {
             try {
-                if (result.user != null) {
-                    chain.doFilter(new Exchange(exchange, result.user, result.issuer));
+                if (result.token != null) {
+                    logger.debug("RESULT TOKEN: {}",result.token.getToken());
+                    chain.doFilter(new Exchange(exchange, result.token));
                 } else {
                     chain.doFilter(exchange);
                 }

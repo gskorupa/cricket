@@ -23,17 +23,18 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.microsite.out.auth.Token;
+import org.cricketmsf.microsite.out.auth.UserProxy;
 import org.cricketmsf.out.archiver.ZipArchiver;
 import org.cricketmsf.out.db.ComparatorIface;
 import org.cricketmsf.out.db.H2EmbededDB;
 import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.SqlDBIface;
-import org.cricketmsf.out.dispatcher.DispatcherIface;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -51,7 +52,7 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     @Override
     public void addTable(String tableName, int maxSize, boolean persistent) throws KeyValueDBException {
-        String query = "create table ?? (token varchar primary key, uid varchar, issuer varchar, payload varchar, tstamp timestamp, eoflife timestamp)";
+        String query = "create table ?? (token varchar primary key, uid varchar, issuer varchar, payload varchar, tstamp timestamp, eoflife timestamp, userrole varchar, issuerrole varchar)";
         query = query.replaceFirst("\\?\\?", tableName);
         try ( Connection conn = getConnection()) {
             PreparedStatement pst;
@@ -89,15 +90,25 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
     private void putToken(String tableName, String key, Token token) throws KeyValueDBException {
         try ( Connection conn = getConnection()) {
             conn.setAutoCommit(true);
-            String query = "merge into ?? (token, uid, issuer, payload, tstamp, eoflife) key (token) values (?,?,?,?,?,?)";
+            String query = "merge into ?? (token, uid, issuer, payload, tstamp, eoflife, userrole, issuerrole) key (token) values (?,?,?,?,?,?,?,?)";
             query = query.replaceFirst("\\?\\?", tableName);
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, token.getToken());
-            pstmt.setString(2, token.getUid());
-            pstmt.setString(3, token.getIssuer());
+            pstmt.setString(2, token.getUser().getUid());
+            if (null != token.getIssuer()) {
+                pstmt.setString(3, token.getIssuer().getUid());
+            } else {
+                pstmt.setNull(3, Types.NULL);
+            }
             pstmt.setString(4, token.getPayload());
             pstmt.setTimestamp(5, new Timestamp(token.getTimestamp()));
             pstmt.setTimestamp(6, new Timestamp(token.getEofLife()));
+            pstmt.setString(7, token.getUser().getRole());
+            if (null != token.getIssuer()) {
+                pstmt.setString(8, token.getIssuer().getRole());
+            } else {
+                pstmt.setNull(8, Types.NULL);
+            }
             int updated = pstmt.executeUpdate();
             conn.close();
             //TODO: check?
@@ -129,7 +140,7 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
         //TODO: do not use - replace with dedicated searches
         Token token = null;
         try ( Connection conn = getConnection()) {
-            String query = "select token, uid, issuer, payload, tstamp, eoflife from " + tableName;
+            String query = "select token, uid, issuer, payload, tstamp, eoflife, userrole, issuerrole from " + tableName;
             PreparedStatement pstmt = conn.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -197,35 +208,25 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
     @Override
     public List search(String tableName, ComparatorIface ci, Object o) throws KeyValueDBException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        /*
-        if (ci instanceof UserComparator) {
-            String path = ((Document) o).getPath();
-            String query = "select uid,author,type,title,summary,content,tags,language,mimetype,status,createdby,size,commentable,created,modified,published from ?? where path = ?";
-            query = query.replaceFirst("\\?\\?", tableName);
-            ArrayList list = new ArrayList();
-            try (Connection conn = getConnection()) {
-                PreparedStatement pstmt = conn.prepareStatement(query);
-                pstmt.setString(1, path);
-                ResultSet rs = pstmt.executeQuery();
-                while (rs.next()) {
-                    list.add(buildDocument(rs));
-                }
-                conn.close();
-            } catch (SQLException | CmsException e) {
-                throw new KeyValueDBException(KeyValueDBException.UNKNOWN, e.getMessage());
-            }
-            return list;
-        } else {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-         */
     }
 
     Token buildToken(ResultSet rs, boolean permanent) throws SQLException {
-        //token, uid, issuer, payload, tstamp, eoflife
-        Token t = new Token(rs.getString(2), 0, permanent);
+        //token, uid, issuer, payload, tstamp, eoflife, userRole, issuerRole
+        UserProxy user;
+        UserProxy issuer;
+        String issuerId;
+        String issuerRole;
+        Token t;
+        user = new UserProxy(rs.getString(2), rs.getString(7));
+        issuerId = rs.getString(3);
+        issuerRole = rs.getString(8);
+        if (null != issuerId) {
+            issuer = new UserProxy(issuerId, issuerRole);
+        } else {
+            issuer = null;
+        }
+        t = new Token(user, issuer, 0, permanent);
         t.setToken(rs.getString(1));
-        t.setIssuer(rs.getString(3));
         t.setPayload(rs.getString(4));
         t.setTimestamp(rs.getTimestamp(5).getTime());
         t.setEndOfLife(rs.getTimestamp(6).getTime());
@@ -235,7 +236,7 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
     private Object getToken(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         Token token = null;
         try ( Connection conn = getConnection()) {
-            String query = "select token, uid, issuer, payload, tstamp, eoflife from " + tableName + " where token=?";
+            String query = "select token, uid, issuer, payload, tstamp, eoflife, userrole, issuerrole from " + tableName + " where token=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
             ResultSet rs = pstmt.executeQuery();

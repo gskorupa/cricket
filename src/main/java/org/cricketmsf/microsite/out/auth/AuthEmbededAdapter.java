@@ -35,8 +35,10 @@ import org.slf4j.LoggerFactory;
 public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, AuthAdapterIface {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthEmbededAdapter.class);
-    private String helperAdapterName;
-    private String helperAdapterName2;
+    private static final String PERMANENT_TOKEN_PREFIX = "~~";
+
+    private String databaseAdapterName;
+    private String userAdapterName;
     private KeyValueDBIface database = null;
     private UserAdapterIface userAdapter = null;
     private short timeout = 900; // token default timeout ==  15min
@@ -44,9 +46,9 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
     private KeyValueDBIface getDatabase() throws KeyValueDBException {
         if (database == null) {
             try {
-                database = (KeyValueDBIface) Kernel.getInstance().getAdaptersMap().get(helperAdapterName);
+                database = (KeyValueDBIface) Kernel.getInstance().getAdaptersMap().get(databaseAdapterName);
             } catch (Exception e) {
-                throw new KeyValueDBException(KeyValueDBException.UNKNOWN, "helper adapter not available");
+                throw new KeyValueDBException(KeyValueDBException.UNKNOWN, "database adapter not available");
             }
         }
         return database;
@@ -55,9 +57,9 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
     private UserAdapterIface getUserAdapter() throws UserException {
         if (userAdapter == null) {
             try {
-                userAdapter = (UserAdapterIface) Kernel.getInstance().getAdaptersMap().get(helperAdapterName2);
+                userAdapter = (UserAdapterIface) Kernel.getInstance().getAdaptersMap().get(userAdapterName);
             } catch (Exception e) {
-                throw new UserException(UserException.HELPER_EXCEPTION, "helper adapter not available");
+                throw new UserException(UserException.HELPER_EXCEPTION, "user adapter not available");
             }
         }
         return userAdapter;
@@ -66,10 +68,10 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
         super.loadProperties(properties, adapterName);
-        helperAdapterName = properties.get("helper-name");
-        logger.info("\thelper-name: " + helperAdapterName);
-        helperAdapterName2 = properties.get("helper-name-2");
-        logger.info("\thelper-name-2: " + helperAdapterName2);
+        databaseAdapterName = properties.get("database-adapter-name");
+        logger.info("\tdatabase-adapter-name: " + databaseAdapterName);
+        userAdapterName = properties.get("user-adapter-name");
+        logger.info("\tuser-adapter-name: " + userAdapterName);
         try {
             timeout = Short.parseShort(properties.get("token-timeout"));
         } catch (NumberFormatException e) {
@@ -84,7 +86,7 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
             User user = getUserAdapter().get(userID);
             if (user != null && user.checkPassword(password) && user.getStatus() == User.IS_ACTIVE) {
                 try {
-                    return createToken(userID);
+                    return createToken(new UserProxy(user.getUid(), user.getRole()));
                 } catch (AuthException ex) {
                     logger.debug(ex.getMessage());
                     return null;
@@ -109,8 +111,8 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
     }
 
     @Override
-    public Token createToken(String userID) throws AuthException {
-        Token t = new Token(userID, 1000 * timeout, false);
+    public Token createToken(UserProxy user) throws AuthException {
+        Token t = new Token(user, 1000 * timeout, false);
         try {
             getDatabase().put("tokens", t.getToken(), t);
         } catch (KeyValueDBException ex) {
@@ -120,8 +122,9 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
     }
 
     @Override
-    public Token createConfirmationToken(String userID, String token, long timeout) throws AuthException {
-        Token t = new Token(userID, 1000 * timeout, false);
+    public Token createConfirmationToken(User user, String token, long timeout) throws AuthException {
+        UserProxy proxy=new UserProxy(user.getUid(), user.getRole());
+        Token t = new Token(proxy, 1000 * timeout, false);
         t.setToken(token);
         try {
             getDatabase().put("tokens", t.getToken(), t);
@@ -132,75 +135,14 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
     }
 
     @Override
-    public boolean checkToken(String tokenID) {
-        try {
-            Token t = null;
-            t = (Token) getDatabase().get("tokens", tokenID);
-            if (t == null) {
-                return false;
-            }
-            if (t.isValid()) {
-                return true;
-            } else {
-                return false;
-            }
-        } catch (KeyValueDBException ex) {
-            logger.debug(ex.getMessage());
-            return false;
-        }
-    }
-
-    @Override
-    public User getUser(String tokenID) throws AuthException {
-        return getUser(tokenID, false);
-    }
-
-    @Override
-    public User getUser(String tokenID, boolean permanentToken) throws AuthException {
-        try {
-            Token t = null;
-            if (permanentToken) {
-                t = (Token) getDatabase().get("ptokens", tokenID);
-            } else {
-                t = (Token) getDatabase().get("tokens", tokenID);
-            }
-            if (t != null) {
-                if (t.isValid()) {
-                    User user = getUserAdapter().get(t.getUid());
-                    return user;
-                } else {
-                    throw new AuthException(AuthException.EXPIRED, "token expired");
-                }
-            } else {
-                return null;
-            }
-        } catch (UserException | KeyValueDBException ex) {
-            throw new AuthException(AuthException.ACCESS_DENIED, ex.getMessage());
-        }
-    }
-
-    @Override
-    public boolean logout(String tokenID) {
-        try {
-            return getDatabase().remove("tokens", tokenID);
-        } catch (KeyValueDBException ex) {
-            logger.debug(ex.getMessage());
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            logger.debug(ex.getMessage());
-        }
-        return false;
-    }
-
-    @Override
-    public Token createPermanentToken(String userID, String issuerID, boolean neverExpires, String payload) throws AuthException {
+    public Token createPermanentToken(UserProxy user, UserProxy issuer, boolean neverExpires, String payload) throws AuthException {
         Token t;
         if (neverExpires) {
-            t = new Token(userID, -1, true);
+            t = new Token(user, -1, true);
         } else {
-            t = new Token(userID, 1000 * timeout, true);
+            t = new Token(user, 1000 * timeout, true);
         }
-        t.setIssuer(issuerID);
+        t.setIssuerId(issuer.getUid());
         t.setPayload(payload);
         try {
             getDatabase().put("ptokens", t.getToken(), t);
@@ -211,40 +153,37 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
     }
 
     @Override
-    public boolean checkPermanentToken(String tokenID) throws AuthException {
+    public boolean checkToken(String tokenID) {
+        Token t=getToken(tokenID);
+        return t != null && t.isValid();
+    }
+
+    @Override
+    public Token getToken(String tokenID) {
         try {
-            Token t = null;
-            t = (Token) getDatabase().get("ptokens", tokenID);
-            if (t == null) {
-                return false;
-            }
-            if (t.isValid()) {
-                return true;
+            Token t;
+            if (tokenID.startsWith(PERMANENT_TOKEN_PREFIX)) {
+                t = (Token) getDatabase().get("ptokens", tokenID);
             } else {
-                throw new AuthException(AuthException.EXPIRED);
+                t = (Token) getDatabase().get("tokens", tokenID);
             }
-        } catch (KeyValueDBException ex) {
-            throw new AuthException(AuthException.HELPER_EXCEPTION, ex.getMessage());
+            return t; 
+       } catch (KeyValueDBException ex) {
+            logger.error(ex.getMessage());
+            return null;
         }
     }
 
     @Override
-    public User getIssuer(String tokenID) throws AuthException {
+    public boolean logout(String tokenID) {
         try {
-            Token t = null;
-            t = (Token) getDatabase().get("ptokens", tokenID);
-            if (t != null) {
-                if (t.isValid()) {
-                    return getUserAdapter().get(t.getIssuer());
-                } else {
-                    throw new AuthException(AuthException.EXPIRED);
-                }
-            } else {
-                return null;
-            }
-        } catch (UserException | KeyValueDBException ex) {
-            throw new AuthException(AuthException.ACCESS_DENIED, ex.getMessage());
+            return getDatabase().remove("tokens", tokenID);
+        } catch (KeyValueDBException ex) {
+            logger.debug(ex.getMessage());
+        } catch (Exception ex) {
+            logger.debug(ex.getMessage());
         }
+        return false;
     }
 
     @Override

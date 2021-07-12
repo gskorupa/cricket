@@ -30,21 +30,58 @@ public class Token {
     private long timestamp;
     private long eofLife;
     private String token;
-    private String issuer;
+    private String issuerId;
     private String payload;
+    private UserProxy user;
+    private UserProxy issuer;
 
+    /*
     public Token(String userID, long lifetime, boolean permanent) {
         timestamp = System.currentTimeMillis();
         setLifetime(lifetime, permanent);
         uid = userID;
         //token = Base64.getEncoder().encodeToString((uid + ":" + timestamp).getBytes());
         token = Base64.getUrlEncoder().encodeToString((uid + ":" + timestamp).getBytes());
-        while(token.endsWith("=")){
-            token=token.substring(0, token.length()-1);
+        while (token.endsWith("=")) {
+            token = token.substring(0, token.length() - 1);
         }
         if (permanent) {
             token = PERMANENT_TOKEN_PREFIX + token;
         }
+    }
+    */
+
+    public Token(UserProxy user, long lifetime, boolean permanent) {
+        timestamp = System.currentTimeMillis();
+        setLifetime(lifetime, permanent);
+        uid = user.getUid();
+        token = Base64.getUrlEncoder().encodeToString((uid + ":" + timestamp).getBytes());
+        while (token.endsWith("=")) {
+            token = token.substring(0, token.length() - 1);
+        }
+        if (permanent) {
+            token = PERMANENT_TOKEN_PREFIX + token;
+        }
+        this.user = user;
+        this.issuer = null;
+    }
+
+    public Token(UserProxy user, UserProxy issuer, long lifetime, boolean permanent) {
+        timestamp = System.currentTimeMillis();
+        setLifetime(lifetime, permanent);
+        uid = user.getUid();
+        if(null!=issuer){
+            issuerId=issuer.getUid();
+        }
+        token = Base64.getUrlEncoder().encodeToString((uid + ":" + timestamp).getBytes());
+        while (token.endsWith("=")) {
+            token = token.substring(0, token.length() - 1);
+        }
+        if (permanent) {
+            token = PERMANENT_TOKEN_PREFIX + token;
+        }
+        this.user = user;
+        this.issuer = issuer;
     }
 
     public boolean isValid() {
@@ -95,17 +132,17 @@ public class Token {
     }
 
     /**
-     * @return the issuer
+     * @return the issuerId
      */
-    public String getIssuer() {
-        return issuer;
+    public String getIssuerId() {
+        return issuerId;
     }
 
     /**
-     * @param issuer the issuer to set
+     * @param issuerId the issuerId to set
      */
-    public void setIssuer(String issuer) {
-        this.issuer = issuer;
+    public void setIssuerId(String issuerId) {
+        this.issuerId = issuerId;
     }
 
     /**
@@ -127,9 +164,9 @@ public class Token {
             eofLife = timestamp + 315360000000L;
             //eofLife = -1;
         } else if (lifetime < 0) {
-            eofLife = timestamp + 180*1000; //3min
+            eofLife = timestamp + 180 * 1000; //3min
         } else {
-            eofLife = timestamp + lifetime*1000;
+            eofLife = timestamp + lifetime * 1000;
         }
     }
 
@@ -144,12 +181,46 @@ public class Token {
     public void refresh() {
         long lt = 600; //10 min
         setTimestamp(System.currentTimeMillis());
-        setLifetime(lt,false);
+        setLifetime(lt, false);
     }
-    
-    public String toString(){
+
+    public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getToken()).append(":").append(getUid()).append(":").append(getIssuer()).append(":").append(isValid());
+        sb.append(getToken())
+                .append(":")
+                .append(getUser())
+                .append(":")
+                .append(getIssuer())
+                .append(":")
+                .append(isValid());
         return sb.toString();
+    }
+
+    /**
+     * @return the user
+     */
+    public UserProxy getUser() {
+        return user;
+    }
+
+    /**
+     * @param user the user to set
+     */
+    public void setUser(UserProxy user) {
+        this.user = user;
+    }
+
+    /**
+     * @return the issuer
+     */
+    public UserProxy getIssuer() {
+        return issuer;
+    }
+
+    /**
+     * @param issuer the issuer to set
+     */
+    public void setIssuer(UserProxy issuer) {
+        this.issuer = issuer;
     }
 }

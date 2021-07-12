@@ -15,8 +15,6 @@
  */
 package org.cricketmsf.microsite.out.auth;
 
-import org.cricketmsf.microsite.out.user.*;
-
 /**
  *
  * @author greg

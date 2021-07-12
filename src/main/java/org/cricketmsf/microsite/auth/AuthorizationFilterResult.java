@@ -15,7 +15,7 @@
  */
 package org.cricketmsf.microsite.auth;
 
-import org.cricketmsf.microsite.out.user.User;
+import org.cricketmsf.microsite.out.auth.Token;
 
 /**
  *
@@ -24,6 +24,5 @@ import org.cricketmsf.microsite.out.user.User;
 public class AuthorizationFilterResult {
     public int code = 200;
     public String message = "";
-    public User user;
-    public User issuer;
+    public Token token;
 }
