@@ -54,6 +54,7 @@ public class PostgreSqlDB extends OutboundAdapter implements SqlDBIface, Adapter
     protected boolean autocommit;
     protected boolean ignorecase = false;
     private boolean skipUpdate = false;
+    private int maxStatements = 0;
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -88,6 +89,8 @@ public class PostgreSqlDB extends OutboundAdapter implements SqlDBIface, Adapter
         logger.info("\tignorecase=" + ignorecase);
         setSkipUpdate("true".equalsIgnoreCase(properties.getOrDefault("skip-update", "false")));
         logger.info("\tskip-update=" + isSkipUpdate());
+        setMaxStatements(properties.getOrDefault("max-statements","10"));
+        logger.info("\tmax-statements: {}" + maxStatements);
         try {
             start();
         } catch (KeyValueDBException ex) {
@@ -167,6 +170,8 @@ public class PostgreSqlDB extends OutboundAdapter implements SqlDBIface, Adapter
         cp.setUser(getUserName());
         cp.setPassword(getPassword());
         cp.setSsl(isEncrypted());
+        cp.setDefaultAutoCommit(autocommit);
+        cp.setPreparedStatementCacheQueries(maxStatements);
 
         Connection conn = null;
         try {
@@ -562,5 +567,32 @@ public class PostgreSqlDB extends OutboundAdapter implements SqlDBIface, Adapter
     @Override
     public File getBackupFile() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    /**
+     * @param value the maxStatements to set
+     */
+    public void setMaxStatements(String value) {
+        try{
+            this.maxStatements = Integer.parseInt(value);
+        }catch(NumberFormatException ex){
+            //default is 0
+        }
+    }
+
+    @Override
+    public long getSize(String tableName) throws KeyValueDBException {
+        long size = 0;
+        try {
+            Connection conn = getConnection();
+            ResultSet rs = conn.createStatement().executeQuery("select count(*) from " + tableName);
+            if (rs.next()) {
+                size = rs.getLong(1);
+            }
+            conn.close();
+        } catch (SQLException ex) {
+            logger.error(ex.getMessage());
+        }
+        return size;
     }
 }

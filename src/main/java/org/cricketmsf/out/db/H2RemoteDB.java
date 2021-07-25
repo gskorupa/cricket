@@ -18,8 +18,6 @@ package org.cricketmsf.out.db;
 import java.io.File;
 import java.util.HashMap;
 import org.cricketmsf.Adapter;
-import org.cricketmsf.event.Event;
-import org.cricketmsf.Kernel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +61,8 @@ public class H2RemoteDB extends H2EmbededDB implements SqlDBIface, Adapter {
         logger.info("\tignorecase=" + ignorecase);
         setSkipUpdate("true".equalsIgnoreCase(properties.getOrDefault("skip-update", "false")));
         logger.info("\tskip-update=" + skipUpdate);
+        setMaxConnections(properties.getOrDefault("max-connections","10"));
+        logger.info("\tmax-connections: {}", maxConnections);
         try {
             start();
         } catch (KeyValueDBException ex) {

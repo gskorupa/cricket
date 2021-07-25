@@ -30,6 +30,7 @@ public class KeyValueDBException extends DBException {
     public static int NOT_SUPPORTED = 6;
     public static int NOT_IMPLEMENTED = 7;
     public static int TABLE_EXISTS = 9;
+    public static int NOT_INITIALIZED = 10;
     
     private int code = UNKNOWN;
     private String message;

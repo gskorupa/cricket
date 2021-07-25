@@ -159,5 +159,13 @@ public interface KeyValueDBIface {
      * @throws KeyValueDBException TODO doc
      */
     public void clear(String tableName) throws KeyValueDBException;
+    
+    /**
+     * Returns number of the table elements (rows).
+     * @param tableName
+     * @return
+     * @throws KeyValueDBException 
+     */
+    public long getSize(String tableName) throws KeyValueDBException;
 
 }

@@ -147,7 +147,10 @@ public class HttpRequestWorker implements Runnable {
             } else {
                 exchange.sendResponseHeaders(result.getCode(), -1);
             }
-            logger.info("{} {} {} {} {}ms", requestObject.rootEventId, requestObject.method, requestObject.uri, result.getCode(), timer.time(TimeUnit.MILLISECONDS));
+            if (logger.isInfoEnabled()) {
+                long time=timer!=null?timer.time(TimeUnit.MILLISECONDS):-1;
+                logger.info("{} {} {} {} {}ms", requestObject.rootEventId, requestObject.method, requestObject.uri, result.getCode(), time);
+            }
             result = null;
         } catch (IOException e) {
             e.printStackTrace();

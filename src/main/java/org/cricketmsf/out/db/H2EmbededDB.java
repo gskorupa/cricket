@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author greg
  */
 public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter {
+
     private static final Logger logger = LoggerFactory.getLogger(H2EmbededDB.class);
     protected JdbcConnectionPool cp;
     protected String location;
@@ -52,6 +53,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     protected boolean autocommit;
     protected boolean ignorecase = false;
     protected boolean skipUpdate = false;
+    protected int maxConnections = 10;
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -79,6 +81,8 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         logger.info("\tignorecase=" + ignorecase);
         setSkipUpdate("true".equalsIgnoreCase(properties.getOrDefault("skip-update", "false")));
         logger.info("\tskip-update=" + skipUpdate);
+        setMaxConnections(properties.getOrDefault("max-connections", "10"));
+        logger.info("\tmax-connections: {}", maxConnections);
         try {
             start();
         } catch (KeyValueDBException ex) {
@@ -146,6 +150,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         } else {
             cp = JdbcConnectionPool.create(connectString, getUserName(), getPassword());
         }
+        cp.setMaxConnections(maxConnections);
         Connection conn = null;
         try {
             conn = cp.getConnection();
@@ -164,7 +169,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         }
         String version = getVersion();
         try {
-            if(!isSkipUpdate()) {
+            if (!isSkipUpdate()) {
                 updateStructure(cp.getConnection(), version, getSystemVersion());
             }
         } catch (SQLException e) {
@@ -180,7 +185,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     @Override
     public void deleteTable(String tableName) throws KeyValueDBException {
         String query = "drop if exists table ??";
-        try (Connection conn = cp.getConnection()) {
+        try ( Connection conn = cp.getConnection()) {
             query = query.replaceAll("\\?\\?", tableName);
             PreparedStatement pstmt = conn.prepareStatement(query);
             if (!pstmt.execute()) {
@@ -196,7 +201,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     public List<String> getTableNames() throws KeyValueDBException {
         String query = "show tables from public";
         ArrayList list = new ArrayList();
-        try (Connection conn = cp.getConnection()) {
+        try ( Connection conn = cp.getConnection()) {
             PreparedStatement pstmt = conn.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -212,7 +217,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     @Override
     public void clear(String tableName) throws KeyValueDBException {
         String query = "delete from ??";
-        try (Connection conn = cp.getConnection()) {
+        try ( Connection conn = cp.getConnection()) {
             query = query.replaceAll("\\?\\?", tableName);
             PreparedStatement pstmt = conn.prepareStatement(query);
             if (!pstmt.execute()) {
@@ -378,8 +383,8 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     public void backup(String fileLocation) throws KeyValueDBException {
         //String query = "backup to '" + fileLocation + "'";
         String query = "script to '" + fileLocation + "' compression ZIP";
-        try (Connection conn = cp.getConnection()) {
-            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try ( Connection conn = cp.getConnection()) {
+            try ( PreparedStatement pstmt = conn.prepareStatement(query)) {
                 pstmt.execute();
             }
             conn.close();
@@ -392,8 +397,8 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     public void restore(String fileLocation) throws KeyValueDBException {
         //String query = "backup to '" + fileLocation + "'";
         String query = "runscript from '" + fileLocation + "'";
-        try (Connection conn = cp.getConnection()) {
-            try (PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try ( Connection conn = cp.getConnection()) {
+            try ( PreparedStatement pstmt = conn.prepareStatement(query)) {
                 pstmt.executeUpdate();
             }
             conn.close();
@@ -485,7 +490,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     @Override
     public List execute(String query) throws SQLException {
         ArrayList<List> result = new ArrayList<>();
-        try (Connection conn = cp.getConnection()) {
+        try ( Connection conn = cp.getConnection()) {
             ArrayList row;
             Statement stmt = conn.createStatement();
             boolean browsable = stmt.execute(query);
@@ -495,14 +500,14 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
                 ResultSetMetaData rsm = rs.getMetaData();
                 int numberOfColumns = 1;
                 row = new ArrayList();
-                boolean end =false;
+                boolean end = false;
                 while (!end) {
                     try {
                         row.add(rsm.getColumnLabel(numberOfColumns));
                         types.add(rsm.getColumnType(numberOfColumns));
                         numberOfColumns++;
                     } catch (Exception e) {
-                        end=true;
+                        end = true;
                     }
                 }
                 result.add(row);
@@ -540,5 +545,33 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     @Override
     public File getBackupFile() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    /**
+     * @param value the maxConnections to set
+     */
+    public void setMaxConnections(String value) {
+        try {
+            this.maxConnections = Integer.parseInt(value);
+        } catch (NumberFormatException ex) {
+            //default is 10
+        }
+
+    }
+
+    @Override
+    public long getSize(String tableName) throws KeyValueDBException {
+        long size = 0;
+        try {
+            Connection conn = getConnection();
+            ResultSet rs = conn.createStatement().executeQuery("select count(*) from " + tableName);
+            if (rs.next()) {
+                size = rs.getLong(1);
+            }
+            conn.close();
+        } catch (SQLException ex) {
+            logger.error(ex.getMessage());
+        }
+        return size;
     }
 }

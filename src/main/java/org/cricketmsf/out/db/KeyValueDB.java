@@ -285,4 +285,16 @@ public class KeyValueDB extends OutboundAdapter implements KeyValueDBIface, Adap
 
         }
     }
+
+    @Override
+    public long getSize(String tableName) throws KeyValueDBException {
+        if(null==tables){
+            throw new KeyValueDBException(KeyValueDBException.NOT_INITIALIZED, "not configured");
+        }
+        try {
+            return tables.get(tableName).getSize();
+        } catch (NullPointerException e) {
+            throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unknown database table " + tableName);
+        }
+    }
 }

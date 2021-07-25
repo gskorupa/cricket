@@ -92,6 +92,10 @@ public class KeyValueTable {
     public Map getAll() {
         return (LimitedMap) cache.clone();
     }
+    
+    public long getSize() {
+        return cache.size();
+    }
 
     public List search(ComparatorIface comparator, Object pattern) {
         List result = new ArrayList();
