@@ -48,10 +48,6 @@ import org.cricketmsf.out.file.FileObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author greg
- */
 public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIface {
 
     private static final Logger logger = LoggerFactory.getLogger(CmsEmbededAdapter.class);
@@ -106,6 +102,7 @@ public class CmsEmbededAdapter extends OutboundAdapter implements Adapter, CmsIf
 
     /**
      * We want to use configured adapters so we must provide these adapters
+     * @throws CmsException exception
      */
     public void initDB() throws CmsException {
         //TODO: load languages from properties

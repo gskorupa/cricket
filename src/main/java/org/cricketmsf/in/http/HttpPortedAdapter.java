@@ -44,10 +44,6 @@ import org.cricketmsf.in.openapi.Operation;
 import org.cricketmsf.in.openapi.Parameter;
 import org.cricketmsf.in.openapi.ParameterLocation;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public abstract class HttpPortedAdapter
         extends InboundAdapter
         implements Adapter, HttpAdapterIface, HttpHandler, InboundAdapterIface/*, org.eclipse.jetty.server.Handler*/ {
@@ -285,8 +281,8 @@ public abstract class HttpPortedAdapter
     /**
      * Calculates response type based on the file type
      *
-     * @param acceptedResponseType
-     * @param fileExt
+     * @param acceptedResponseType accepted mime type
+     * @param fileExt file extension
      * @return response type
      */
     protected String setResponseType(String acceptedResponseType, String fileExt) {
@@ -500,7 +496,7 @@ public abstract class HttpPortedAdapter
     }
 
     /**
-     * @param paramValue
+     * @param paramValue value
      */
     public void setExtendedResponse(String paramValue) {
         this.extendedResponse = !("false".equalsIgnoreCase(paramValue));

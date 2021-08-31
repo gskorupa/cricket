@@ -38,7 +38,7 @@ public interface KeyValueDBIface {
 
     /**
      * Starts the database
-     * @throws KeyValueDBException
+     * @throws KeyValueDBException exception
      */
     public void start() throws KeyValueDBException;
 
@@ -50,16 +50,16 @@ public interface KeyValueDBIface {
     /**
      * Backups all database tables to the specified file on disk
      * 
-     * @param fileLocation
-     * @throws KeyValueDBException 
+     * @param fileLocation database file location
+     * @throws KeyValueDBException  exception
      */
     public void backup(String fileLocation) throws KeyValueDBException;
     
     /**
      * Restores all database tables from the specified file on disk
      * 
-     * @param fileLocation
-     * @throws KeyValueDBException 
+     * @param fileLocation database file location
+     * @throws KeyValueDBException exception
      */
     public void restore(String fileLocation) throws KeyValueDBException;
 
@@ -68,21 +68,21 @@ public interface KeyValueDBIface {
      * @param name table name
      * @param capacity maximal number of table records (objects)
      * @param persistent table persistency 
-     * @throws KeyValueDBException
+     * @throws KeyValueDBException exception
      */
     public void addTable(String name, int capacity, boolean persistent) throws KeyValueDBException;
 
     /**
      * Deletes table and its content from the database
      * @param name table name
-     * @throws KeyValueDBException
+     * @throws KeyValueDBException exception
      */
     public void deleteTable(String name) throws KeyValueDBException;
     
     /**
      * Returns list of the database table names
      * @return list of table names
-     * @throws KeyValueDBException
+     * @throws KeyValueDBException exception
      */
     public List<String> getTableNames() throws KeyValueDBException;
 
@@ -91,7 +91,7 @@ public interface KeyValueDBIface {
      * @param tableName the name of the database table
      * @param key object unique key
      * @param value object to put
-     * @throws KeyValueDBException
+     * @throws KeyValueDBException exception
      */
     public void put(String tableName, String key, Object value) throws KeyValueDBException;
 
@@ -118,7 +118,7 @@ public interface KeyValueDBIface {
      * Returns map of all objects stored in the table
      * @param tableName the table name
      * @return map of stored objects
-     * @throws KeyValueDBException 
+     * @throws KeyValueDBException exception 
      */
     public Map getAll(String tableName) throws KeyValueDBException;
 
@@ -129,7 +129,7 @@ public interface KeyValueDBIface {
      * @param comparator comparator object
      * @param pattern pattern object used by comparator
      * @return list of objects
-     * @throws KeyValueDBException 
+     * @throws KeyValueDBException  exception
      */
     public List search(String tableName, ComparatorIface comparator, Object pattern) throws KeyValueDBException;
     
@@ -140,7 +140,7 @@ public interface KeyValueDBIface {
      * @param tableName database table name
      * @param key a key to search for
      * @return true if the key is present, otherwise false
-     * @throws KeyValueDBException 
+     * @throws KeyValueDBException exception 
      */
     public boolean containsKey(String tableName, String key) throws KeyValueDBException;
 
@@ -149,14 +149,14 @@ public interface KeyValueDBIface {
      * @param tableName database table name
      * @param key the key that must be removed
      * @return true in case of successful removal, otherwise false
-     * @throws KeyValueDBException 
+     * @throws KeyValueDBException exception 
      */
     public boolean remove(String tableName, String key) throws KeyValueDBException;
 
     /**
      * Removes all object from database table
      * @param tableName database table name
-     * @throws KeyValueDBException 
+     * @throws KeyValueDBException  exception
      */
     public void clear(String tableName) throws KeyValueDBException;
 

@@ -19,10 +19,6 @@ import com.cedarsoftware.util.io.JsonWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class JsonFormatter {
 
     private static JsonFormatter instance = null;

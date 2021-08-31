@@ -26,10 +26,6 @@ import org.cricketmsf.in.openapi.Schema;
 import org.cricketmsf.in.openapi.SchemaFormat;
 import org.cricketmsf.in.openapi.SchemaType;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class EchoAdapter extends HttpPortedAdapter {
 
     public EchoAdapter() {

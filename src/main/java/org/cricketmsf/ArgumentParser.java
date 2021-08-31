@@ -19,10 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class ArgumentParser {
     
     private Map<String, Object> arguments;

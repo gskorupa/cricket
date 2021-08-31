@@ -21,10 +21,6 @@ import org.cricketmsf.Kernel;
 import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.HttpAdapterIface;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class AuthApi extends HttpAdapter implements HttpAdapterIface, Adapter {
     
     /**

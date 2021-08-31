@@ -19,10 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public interface Adapter {
     
     /**

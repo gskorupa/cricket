@@ -26,10 +26,6 @@ import org.cricketmsf.exception.QueueException;
 import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.queue.QueueClientIface;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class QueueDispatcher extends OutboundAdapter implements Adapter, DispatcherIface {
 
     private ConcurrentHashMap eventMap = new ConcurrentHashMap();

@@ -15,10 +15,6 @@
  */
 package org.cricketmsf.out.mqtt;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public interface MqttPublisherIface {
     
     public void publish(String clientID, int qos, String topic, String message) throws MqttPublisherException;

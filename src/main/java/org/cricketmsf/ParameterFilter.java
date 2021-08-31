@@ -39,7 +39,6 @@ import java.util.Scanner;
  * the parameters map which could be easily accessible within adapters or
  * service methods.
  *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  * Many thanks for Leonardo Marcelino https://leonardom.wordpress.com
  */
 public class ParameterFilter extends Filter {

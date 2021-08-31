@@ -22,8 +22,6 @@ import java.io.IOException;
 /**
  * This is default filter used to check required request conditions. 
  * It does nothing but could be used as a starting point to implement required filter.
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class SecurityFilter extends Filter {
 
@@ -39,7 +37,7 @@ public class SecurityFilter extends Filter {
      * Does request analysis
      *
      * @param exchange request object
-     * @return
+     * @return result
      */
     public SecurityFilterResult checkRequest(HttpExchange exchange) {
         SecurityFilterResult result = new SecurityFilterResult();

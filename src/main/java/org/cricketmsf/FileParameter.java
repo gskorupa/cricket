@@ -15,10 +15,6 @@
  */
 package org.cricketmsf;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class FileParameter {
     public String nextLine;
     public String fileLocation;

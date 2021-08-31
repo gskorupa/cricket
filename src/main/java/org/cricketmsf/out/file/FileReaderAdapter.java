@@ -67,8 +67,8 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
      *
      * @param file file object to read from
      * @return file content
-     * @throws FileNotFoundException
-     * @throws IOException
+     * @throws FileNotFoundException exception
+     * @throws IOException exception
      */
     @Override
     public byte[] readFile(File file) throws FileNotFoundException, IOException {
@@ -252,10 +252,10 @@ public class FileReaderAdapter extends OutboundAdapter implements Adapter, FileR
 
     /**
      *
-     * @param request
-     * @param cache
-     * @param tableName
-     * @return
+     * @param request request object
+     * @param cache cache database
+     * @param tableName database table name
+     * @return result
      */
     @Override
     public Result getFile(RequestObject request, KeyValueDBIface cache, String tableName) {

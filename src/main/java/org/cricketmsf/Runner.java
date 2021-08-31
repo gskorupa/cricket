@@ -40,7 +40,6 @@ import java.util.jar.Manifest;
  * command line arguments, reads config, then creates and runs the service
  * instance according to the configuration.
  *
- * @author greg
  */
 public class Runner {
 
@@ -149,7 +148,7 @@ public class Runner {
      * EchoService-help.txt
      *
      * @param serviceName the service class simple name
-     * @return
+     * @return help
      */
     public String getHelp(String serviceName) {
         String content = "Help file not found";

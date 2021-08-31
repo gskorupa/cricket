@@ -4,10 +4,6 @@ import com.cedarsoftware.util.io.JsonWriter;
 import org.cricketmsf.Event;
 import org.cricketmsf.JsonReader;
 
-/**
- *
- * @author greg
- */
 public class EventDecorator extends Event {
 
     protected Event originalEvent;
@@ -50,7 +46,7 @@ public class EventDecorator extends Event {
      * Must be implemented when event payload data are not stored in
      * originalEvent but there are dedicated method fields used for that.
      *
-     * @return
+     * @return serialized
      */
     public String serialize() {
         return JsonWriter.objectToJson(getData());
@@ -61,8 +57,7 @@ public class EventDecorator extends Event {
      * originalEvent.payload but there are dedicated method fields used for
      * that.
      *
-     * @param serialized
-     * @throws Exception
+     * @param jsonString string to serialize
      */
     public void deserialize(String jsonString) {
         setData(JsonReader.jsonToJava(jsonString));

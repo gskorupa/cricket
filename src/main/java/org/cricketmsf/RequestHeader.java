@@ -15,10 +15,6 @@
  */
 package org.cricketmsf;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class RequestHeader {
     public String name=null;
     public String value=null;

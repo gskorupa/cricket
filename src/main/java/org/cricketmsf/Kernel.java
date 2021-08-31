@@ -56,7 +56,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Microkernel.
  *
- * @author Grzegorz Skorupa
  */
 public abstract class Kernel {
 
@@ -213,6 +212,7 @@ public abstract class Kernel {
      * Invokes the service method annotated as dedicated to this event category
      *
      * @param event event object that should be processed
+     * @return resultobject
      */
     public Object getEventProcessingResult(Event event) {
         Object o = null;
@@ -547,8 +547,6 @@ public abstract class Kernel {
 
     /**
      * Called for each adapter being loaded.
-     *
-     * @param adapter
      */
     private void setEventDispatcher(Object adapter) {
         if (adapter != null) {
@@ -725,7 +723,7 @@ public abstract class Kernel {
     /**
      * Starts the service instance
      *
-     * @throws InterruptedException
+     * @throws InterruptedException interrupted
      */
     public void start() throws InterruptedException {
         getAdapters();
@@ -850,6 +848,8 @@ public abstract class Kernel {
      * Could be overriden in a service implementation to run required code at
      * the service start. As the last step of the service starting procedure
      * before HTTP service.
+     * 
+     * @throws InitException in case of error
      */
     protected void runInitTasks() throws InitException {
         if (null != getAutostartAdapter()) {

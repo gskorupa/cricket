@@ -15,10 +15,6 @@
  */
 package org.cricketmsf.in.http;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 @Deprecated(since="1.4.0", forRemoval=true)
 public interface EchoHttpAdapterIface {
     

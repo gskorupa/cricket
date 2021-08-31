@@ -17,10 +17,6 @@ package org.cricketmsf.microsite.cms;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- *
- * @author greg
- */
 @XmlRootElement
 public class Document {
 
@@ -57,16 +53,10 @@ public class Document {
 
     }
 
-    /**
-     * @return the uid
-     */
     public String getUid() {
         return uid;
     }
 
-    /**
-     * @param uid the uid to set
-     */
     public void setUid(String uid) throws CmsException {
         if (uid != null && !uid.isEmpty()) {
             this.uid=uid;
@@ -88,79 +78,46 @@ public class Document {
         return author;
     }
 
-    /**
-     * @param uid the uid to set
-     */
     public void setAuthor(String author) {
         this.author = author;
     }
 
-    /**
-     * @return the type
-     */
     public String getType() {
         return type;
     }
 
-    /**
-     * @param type the type to set
-     */
     public void setType(String type) {
         this.type = type;
     }
 
-    /**
-     * @return the name
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * @param name the name to set
-     */
     public void setName(String name) {
         this.name = name;
     }
 
-    /**
-     * @return the path
-     */
     public String getPath() {
         return path;
     }
 
-    /**
-     * @param path the path to set
-     */
     public void setPath(String path) {
         this.path = path;
     }
 
-    /**
-     * @return the title
-     */
     public String getTitle() {
         return title;
     }
 
-    /**
-     * @param title the title to set
-     */
     public void setTitle(String title) {
         this.title = title;
     }
 
-    /**
-     * @return the summary
-     */
     public String getSummary() {
         return summary;
     }
 
-    /**
-     * @param summary the summary to set
-     */
     public void setSummary(String summary) {
         this.summary = summary;
     }
@@ -169,9 +126,6 @@ public class Document {
         return content;
     }
 
-    /**
-     * @param content the content to set. Must be escaped
-     */
     public void setContent(String content) {
         this.content = content;
     }
@@ -187,9 +141,6 @@ public class Document {
         return tags;
     }
 
-    /**
-     * @param tags the tags to set
-     */
     public void setTags(String tags) {
         this.tags = tags;
         if (!this.tags.startsWith(",")) {
@@ -222,37 +173,22 @@ public class Document {
         return language;
     }
 
-    /**
-     * @param language the language to set
-     */
     public void setLanguage(String language) {
         this.language = language.toLowerCase();
     }
 
-    /**
-     * @return the commentable
-     */
     public boolean isCommentable() {
         return commentable;
     }
 
-    /**
-     * @param commentable the commentable to set
-     */
     public void setCommentable(boolean commentable) {
         this.commentable = commentable;
     }
 
-    /**
-     * @return the metadata
-     */
     public String getMimeType() {
         return mimeType;
     }
 
-    /**
-     * @param metadata the metadata to set
-     */
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
@@ -305,31 +241,19 @@ public class Document {
         this.createdBy = createdBy;
     }
 
-    /**
-     * @return the rights
-     */
     public String getRights() {
         return rights;
     }
 
-    /**
-     * @param rights the rights to set
-     */
     public Document setRights(String rights) {
         this.rights = rights;
         return this;
     }
 
-    /**
-     * @return the userDefined
-     */
     public String getExtra() {
         return extra;
     }
 
-    /**
-     * @param extra the userDefined to set
-     */
     public void setExtra(String extra) {
         this.extra = extra;
     }

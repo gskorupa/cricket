@@ -31,10 +31,6 @@ import org.cricketmsf.in.websocket.ClientList;
 import org.cricketmsf.in.websocket.WebsocketAdapter;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class WebsocketServer implements Runnable {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(WebsocketServer.class);
 

@@ -27,10 +27,6 @@ import org.cricketmsf.microsite.cms.CmsIface;
 import org.cricketmsf.microsite.cms.Document;
 import org.cricketmsf.microsite.cms.TranslatorIface;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class ContentRequestProcessor {
 
     private static String ADMIN = "admin";

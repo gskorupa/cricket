@@ -19,10 +19,6 @@ import org.cricketmsf.Adapter;
 import java.util.HashMap;
 import org.cricketmsf.Kernel;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class ScriptingAdapter extends HttpAdapter implements HttpAdapterIface, Adapter {
 
     private String responseType;

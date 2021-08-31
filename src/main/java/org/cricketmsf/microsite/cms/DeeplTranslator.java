@@ -19,10 +19,6 @@ import java.util.HashMap;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.http.OutboundHttpAdapter;
 
-/**
- *
- * @author greg
- */
 public class DeeplTranslator extends OutboundHttpAdapter implements TranslatorIface {
     
     @Override

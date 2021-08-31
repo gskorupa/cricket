@@ -24,10 +24,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author greg
- */
 public class ZipArchiver {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ZipArchiver.class);

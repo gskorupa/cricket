@@ -17,25 +17,16 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.bind.DatatypeConverter;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
-import org.cricketmsf.RequestObject;
 import org.cricketmsf.WebsocketServer;
-import org.cricketmsf.annotation.HttpAdapterHook;
 import org.cricketmsf.annotation.WebsocketAdapterHook;
 import org.cricketmsf.in.InboundAdapter;
 import org.cricketmsf.in.InboundAdapterIface;
-import org.cricketmsf.in.http.HttpAdapter;
-import static org.cricketmsf.in.http.HttpAdapter.SC_INTERNAL_SERVER_ERROR;
-import static org.cricketmsf.in.http.HttpAdapter.SC_METHOD_NOT_ALLOWED;
-import org.cricketmsf.in.http.Result;
-import org.cricketmsf.in.http.StandardResult;
 
 /**
  *

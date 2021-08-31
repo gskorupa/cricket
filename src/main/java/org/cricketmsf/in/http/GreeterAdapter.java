@@ -22,10 +22,6 @@ import org.cricketmsf.RequestObject;
 import org.cricketmsf.event.HttpEvent;
 import org.cricketmsf.event.ProcedureCall;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class GreeterAdapter
         extends HttpPortedAdapter /*implements Adapter, HttpAdapterIface, HttpHandler, InboundAdapterIface/*, org.eclipse.jetty.server.Handler*/ {
 

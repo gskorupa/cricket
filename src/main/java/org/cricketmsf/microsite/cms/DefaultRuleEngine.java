@@ -22,10 +22,6 @@ import org.cricketmsf.Adapter;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class DefaultRuleEngine extends OutboundAdapter implements Adapter, RuleEngineIface {
 
     public DefaultRuleEngine() {

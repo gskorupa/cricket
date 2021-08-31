@@ -20,22 +20,19 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public interface SqlDBIface extends KeyValueDBIface{
 
     /**
      * Creates database 
      * @param conn database connection
+     * @param version application database version
      */
     public void createDatabase(Connection conn, String version);
     
     /**
      * Gets new database connection from the connection pool
      * @return database connection
-     * @throws SQLException
+     * @throws SQLException exception
      */
     public Connection getConnection() throws SQLException;
     
@@ -51,16 +48,16 @@ public interface SqlDBIface extends KeyValueDBIface{
      * @param statement SQL prepared statement
      * @param parameters array of the statement parameters
      * @return list of objects matching the statement
-     * @throws KeyValueDBException
+     * @throws KeyValueDBException exception
      */
     public List search(String tableName, String statement, Object[] parameters) throws KeyValueDBException;
     
     /**
      * Executes database query
      * 
-     * @param query
+     * @param query query
      * @return query result
-     * @throws SQLException 
+     * @throws SQLException  exception
      */
     public List execute(String query) throws SQLException;
     

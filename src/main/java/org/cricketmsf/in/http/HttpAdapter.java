@@ -40,10 +40,6 @@ import org.cricketmsf.Stopwatch;
 import org.cricketmsf.in.InboundAdapterIface;
 import org.cricketmsf.in.openapi.Operation;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 @Deprecated(since="1.5.17", forRemoval=true)
 public class HttpAdapter
         extends InboundAdapter
@@ -286,8 +282,8 @@ public class HttpAdapter
     /**
      * Calculates response type based on the file type
      *
-     * @param acceptedResponseType
-     * @param fileExt
+     * @param acceptedResponseType accepted mime type
+     * @param fileExt file extension
      * @return response type
      */
     protected String setResponseType(String acceptedResponseType, String fileExt) {
@@ -500,7 +496,7 @@ public class HttpAdapter
     }
 
     /**
-     * @param paramValue
+     * @param paramValue value
      */
     public void setExtendedResponse(String paramValue) {
         this.extendedResponse = !("false".equalsIgnoreCase(paramValue));

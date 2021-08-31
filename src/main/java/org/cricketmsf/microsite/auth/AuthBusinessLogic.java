@@ -25,10 +25,6 @@ import org.cricketmsf.microsite.out.auth.AuthAdapterIface;
 import org.cricketmsf.microsite.out.auth.AuthException;
 import org.cricketmsf.microsite.out.auth.Token;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class AuthBusinessLogic {
 
     private static AuthBusinessLogic self;

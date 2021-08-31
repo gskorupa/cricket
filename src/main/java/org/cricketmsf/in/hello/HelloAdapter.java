@@ -32,10 +32,6 @@ import org.cricketmsf.in.openapi.SchemaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class HelloAdapter extends HttpPortedAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(HelloAdapter.class);

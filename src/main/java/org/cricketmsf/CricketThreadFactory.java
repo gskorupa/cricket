@@ -3,10 +3,6 @@ package org.cricketmsf;
 import java.util.HashMap;
 import java.util.concurrent.ThreadFactory;
 
-/**
- *
- * @author greg
- */
 public class CricketThreadFactory implements ThreadFactory {
 
     private int counter;

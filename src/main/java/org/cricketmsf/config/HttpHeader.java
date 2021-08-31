@@ -17,7 +17,6 @@ package org.cricketmsf.config;
 
 /**
  * Http header 
- * @author 
  */
 public class HttpHeader {
     public String name;

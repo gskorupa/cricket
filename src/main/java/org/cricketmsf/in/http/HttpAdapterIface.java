@@ -19,10 +19,6 @@ import java.util.Map;
 import org.cricketmsf.in.InboundAdapterIface;
 import org.cricketmsf.in.openapi.Operation;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public interface HttpAdapterIface extends InboundAdapterIface{
     public void defineApi();
     public void addOperationConfig(Operation operation);

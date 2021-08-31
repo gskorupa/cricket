@@ -15,10 +15,6 @@
  */
 package org.cricketmsf.microsite.cms;
 
-/**
- *
- * @author greg
- */
 public class CmsException extends Exception {
     
     public static int UNSUPPORTED_DB_ADAPTER = 0;

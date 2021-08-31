@@ -15,10 +15,6 @@
  */
 package org.cricketmsf.in.http;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public interface HtmlGenAdapterIface {
     
     public boolean useCache();

@@ -46,10 +46,6 @@ import org.cricketmsf.out.db.KeyValueDBIface;
 import org.cricketmsf.out.db.SqlDBIface;
 import org.cricketmsf.util.FileReader;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class SiteAdministrationModule {
 
     private static SiteAdministrationModule module;
@@ -229,9 +225,9 @@ public class SiteAdministrationModule {
     /**
      * Creates required database structure and default objects
      *
-     * @param database
-     * @param userDB
-     * @param authDB
+     * @param database database adapter
+     * @param userDB user database adapter
+     * @param authDB auth database adapter
      */
     public void initDatabases(
             KeyValueDBIface database,
@@ -355,6 +351,7 @@ public class SiteAdministrationModule {
 
     /**
      * Creates events that should be fired on the Service start.
+     * @param scheduler scheduleradapter
      */
     public void initScheduledTasks(SchedulerIface scheduler) {
         String initialTasks = scheduler.getProperty("init");
@@ -375,10 +372,11 @@ public class SiteAdministrationModule {
     /**
      * Runs backup for all databases
      *
-     * @param database
-     * @param userDB
-     * @param authDB
-     * @param cmsDB
+     * @param database database adapter
+     * @param userDB user database adapter
+     * @param authDB auth database adapter
+     * @param cmsDB content database adapter
+     * @param errorLevel error level
      */
     public void backupDatabases(
             KeyValueDBIface database,

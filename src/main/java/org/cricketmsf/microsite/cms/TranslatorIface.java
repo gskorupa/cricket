@@ -15,10 +15,6 @@
  */
 package org.cricketmsf.microsite.cms;
 
-/**
- *
- * @author greg
- */
 public interface TranslatorIface {
     
     public Document translate(Document doc, String targetLanguage) throws CmsException;

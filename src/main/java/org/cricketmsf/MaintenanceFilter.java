@@ -24,8 +24,6 @@ import org.cricketmsf.in.http.HttpAdapter;
 /**
  * This is default filter used to check required request conditions. It does
  * nothing but could be used as a starting point to implement required filter.
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 public class MaintenanceFilter extends Filter {
 

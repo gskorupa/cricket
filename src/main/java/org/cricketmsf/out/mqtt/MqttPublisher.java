@@ -21,10 +21,6 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class MqttPublisher {
 
     public static void publish(String brokerURL, String clientID, int qos, boolean debug, String topic, String payload) throws MqttPublisherException {

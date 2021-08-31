@@ -21,11 +21,6 @@ import java.security.NoSuchAlgorithmException;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 
-/**
- *
- * @author grzesk
- */
-
 
 public class HashMaker {
     

@@ -34,10 +34,6 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import org.cricketmsf.in.http.HttpPortedAdapter;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class CricketHttpd implements HttpdIface{
 
     public HttpServer server = null;

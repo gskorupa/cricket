@@ -21,10 +21,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.cricketmsf.Kernel;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, Adapter {
 
     private boolean useCache = false;
@@ -63,7 +59,7 @@ public class HtmlGenAdapter extends HttpAdapter implements HtmlGenAdapterIface, 
     /**
      * Formats response sent back by this adapter
      *
-     * @param type 
+     * @param type mime type
      * @param result received back from the service
      * @return the payload field of the result modified with parameters
      */

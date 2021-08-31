@@ -30,8 +30,6 @@ import org.cricketmsf.microsite.out.user.UserException;
 
 /**
  * Service providing business logic related to the user management
- * 
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
  */
 @BoundedContext(name="User Management")
 @Service
@@ -59,7 +57,7 @@ public class UserModule extends UserBusinessLogic {
      * 
      * @param event http request event
      * @param userAdapter port to ...
-     * @return 
+     * @return result
      */
     @Override
     public Object handleGetRequest(Event event, UserAdapterIface userAdapter) {

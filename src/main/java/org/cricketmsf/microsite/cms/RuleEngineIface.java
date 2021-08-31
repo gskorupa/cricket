@@ -17,10 +17,6 @@ package org.cricketmsf.microsite.cms;
 
 import java.util.List;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public interface RuleEngineIface {
     public Document processDocument(Document doc, List<String>roles);
     public List<Document> processDocumentsList(List<Document>documents, List<String>roles);

@@ -19,10 +19,6 @@ import org.cricketmsf.exception.DispatcherException;
 import org.cricketmsf.Event;
 import org.cricketmsf.event.EventDecorator;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public interface DispatcherIface {
     public void dispatch(Event event) throws DispatcherException;
     public void dispatch(EventDecorator event) throws DispatcherException;

@@ -20,10 +20,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
+
 public class XmlFormatter {
 
     private static XmlFormatter instance = null;
@@ -39,9 +36,9 @@ public class XmlFormatter {
 
     /**
      * 
-     * @param prettyPrint
+     * @param prettyPrint pretty or not
      * @param r response object (Result or Result.getData())
-     * @return 
+     * @return formatted response
      */
     public String format(boolean prettyPrint, Object r) {
         try {

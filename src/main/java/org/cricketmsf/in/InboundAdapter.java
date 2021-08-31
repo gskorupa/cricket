@@ -21,10 +21,6 @@ import org.cricketmsf.event.EventMaster;
 import org.cricketmsf.exception.EventException;
 import org.cricketmsf.out.dispatcher.DispatcherIface;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class InboundAdapter implements Runnable, InboundAdapterIface {
 
     protected HashMap<String, String> hookMethodNames;

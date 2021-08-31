@@ -419,14 +419,14 @@ public class PostgreSqlDB extends OutboundAdapter implements SqlDBIface, Adapter
     }
 
     /**
-     * @param autocommit the autocommit to set
+     * @param value true or false
      */
     public void setAutocommit(String value) {
         this.autocommit = Boolean.parseBoolean(value);
     }
 
     /**
-     * @param ignorecase the ignorecase to set
+     * @param ignorecase true or false
      */
     public void setIgnorecase(boolean ignorecase) {
         this.ignorecase = ignorecase;

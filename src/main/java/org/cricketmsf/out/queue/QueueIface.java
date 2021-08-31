@@ -31,9 +31,9 @@ public interface QueueIface {
     /**
      * Adds object to specified channel overwriting object with the same key (if exists)
      * @param channel channel name
-     * @param key
-     * @param value
-     * @throws QueueException 
+     * @param key key
+     * @param value value
+     * @throws QueueException exception
      */
     public void add(String channel, String key, Object value) throws QueueException;
     /**
@@ -58,14 +58,14 @@ public interface QueueIface {
      * Adds new object to the channel as the last element
      * @param channel channel name
      * @param value object to addd
-     * @throws QueueException 
+     * @throws QueueException exception
      */
     public void push(String channel, Object value) throws QueueException;
     /**
      * Get the first object from the channel but not remove it
      * @param channel channel name
      * @return first object on the channel's list of objects
-     * @throws QueueException 
+     * @throws QueueException exception
      */
     public Object show(String channel) throws QueueException;
     public Object pop(String channel) throws QueueException;

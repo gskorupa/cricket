@@ -17,10 +17,6 @@ package org.cricketmsf.microsite.cms;
 
 import java.util.Date;
 
-/**
- *
- * @author greg
- */
 public class Comment {
     String uid;
     String documentUid;

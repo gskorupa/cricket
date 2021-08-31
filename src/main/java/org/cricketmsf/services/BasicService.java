@@ -103,7 +103,7 @@ public class BasicService extends Kernel {
      * Process requests from simple web server implementation given by
      * HtmlGenAdapter access web web resources
      *
-     * @param event
+     * @param event event
      * @return ParameterMapResult with the file content as a byte array
      */
     @HttpAdapterHook(adapterName = "WwwService", requestMethod = "GET")

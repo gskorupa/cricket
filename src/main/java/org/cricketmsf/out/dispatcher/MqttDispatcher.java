@@ -26,10 +26,6 @@ import org.cricketmsf.out.OutboundAdapter;
 import org.cricketmsf.out.mqtt.MqttPublisher;
 import org.cricketmsf.out.mqtt.MqttPublisherException;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class MqttDispatcher extends OutboundAdapter implements Adapter, DispatcherIface{
 
     private String clientID;

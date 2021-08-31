@@ -20,7 +20,6 @@ import java.util.Base64;
 /**
  * Session token object
  *
- * @author grzesk
  */
 public class Token {
 

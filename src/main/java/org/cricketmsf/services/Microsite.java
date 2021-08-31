@@ -193,7 +193,7 @@ public class Microsite extends Kernel {
      * Process requests from simple web server implementation given by
      * HtmlGenAdapter access web web resources
      *
-     * @param event
+     * @param event event
      * @return ParameterMapResult with the file content as a byte array
      */
     @HttpAdapterHook(adapterName = "WwwService", requestMethod = "GET")
@@ -273,8 +273,8 @@ public class Microsite extends Kernel {
     /**
      * Return user data
      *
-     * @param event
-     * @return
+     * @param event event
+     * @return result
      */
     @HttpAdapterHook(adapterName = "UserService", requestMethod = "GET")
     public Object userGet(Event event) {
@@ -290,8 +290,8 @@ public class Microsite extends Kernel {
     /**
      * Modify user data or sends password reset link
      *
-     * @param event
-     * @return
+     * @param event event
+     * @return result
      */
     @HttpAdapterHook(adapterName = "UserService", requestMethod = "PUT")
     public Object userUpdate(Event event) {
@@ -307,8 +307,8 @@ public class Microsite extends Kernel {
     /**
      * Set user as waiting for removal
      *
-     * @param event
-     * @return
+     * @param event event
+     * @return result
      */
     @HttpAdapterHook(adapterName = "UserService", requestMethod = "DELETE")
     public Object userDelete(Event event) {

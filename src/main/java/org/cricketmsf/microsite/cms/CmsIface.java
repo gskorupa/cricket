@@ -22,10 +22,6 @@ import org.cricketmsf.RequestObject;
 import org.cricketmsf.in.http.Result;
 import org.cricketmsf.out.db.KeyValueDBIface;
 
-/**
- *
- * @author greg
- */
 public interface CmsIface {
     public void destroy() throws CmsException;
     

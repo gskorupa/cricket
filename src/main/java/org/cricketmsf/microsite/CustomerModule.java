@@ -28,10 +28,6 @@ import org.cricketmsf.microsite.out.auth.Token;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.microsite.out.user.UserException;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class CustomerModule {
 
     private static CustomerModule self;
@@ -47,9 +43,13 @@ public class CustomerModule {
      * Creates temporary token and sends e-mail including link to reset
      * password;
      *
-     * @param event
-     * @param userAdapter
-     * @return
+     * @param event event
+     * @param userAdapter user adapter
+     * @param userID user ID
+     * @param resetPassEmail email
+     * @param authAdapter auth adapter
+     * @param emailSender email sender adapter
+     * @return result
      */
     public Object handleResetRequest(
             Event event,

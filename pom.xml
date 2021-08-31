@@ -4,7 +4,40 @@
     <groupId>org.cricketmsf</groupId>
     <artifactId>cricket</artifactId>
     <version>1.5.53</version>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>Microservices framework for Java</description>
+    <url>https://cricketmsf.org</url>
     <packaging>jar</packaging>
+    <developers>
+        <developer>
+            <name>Grzegorz Skorupa</name>
+            <email>g.skorupa@gmail.com</email>
+            <organizationUrl>https://github.com/gskorupa/</organizationUrl>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:git://github.com/gskorupa/cricket.git</connection>
+        <developerConnection>scm:git:ssh://github.com:gskorupa/cricket.git</developerConnection>
+        <url>https://github.com/gskorupa/cricket/tree/master</url>
+    </scm>
+    
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>13</maven.compiler.source>
@@ -74,12 +107,31 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13</version>
+            <version>4.13.1</version>
         </dependency>
     </dependencies>
     <build>
         <finalName>cricket</finalName>
         <plugins>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId> 
+                <artifactId>replacer</artifactId> 
+                <version>1.5.3</version> 
+                <executions> 
+                    <execution> 
+                        <phase>prepare-package</phase> 
+                        <goals> 
+                            <goal>replace</goal> 
+                        </goals>
+                    </execution> 
+                </executions> 
+                <configuration> 
+                    <file>target/classes/cricket.json</file>
+                    <regex>false</regex>
+                    <token>$cricketversion$</token> 
+                    <value>${project.version}</value> 
+                </configuration> 
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -95,6 +147,33 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>2.4.3</version>
                 <executions>
@@ -104,6 +183,29 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/licenses/*.*</exclude>
+                                        <exclude>META-INF/maven/**</exclude>
+                                        <exclude>META-INF/NOTICE.txt</exclude>
+                                        <exclude>META-INF/LICENSE</exclude>
+                                        <exclude>META-INF/LICENSE.txt</exclude>
+                                        <exclude>checkstyle/**</exclude>
+                                        <exclude>findbugs/**</exclude>
+                                        <exclude>pmd/**</exclude>
+                                        <exclude>bundle.properties</exclude>
+                                        <exclude>about.html</exclude>
+                                        <exclude>.netbeans_automatic_build</exclude>
+                                        <exclude>com/zaxxer/**</exclude>
+                                        <exclude>org/quartz/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                             <artifactSet>
                                 <excludes>
                                     <exclude>org.postgresql:postgresql</exclude>
@@ -140,10 +242,4 @@
             </plugin>
         </plugins>
     </build>
-    <distributionManagement>
-        <repository>
-            <id>bintray-cricket-repo</id>
-            <url>https://api.bintray.com/maven/gskorupa/maven-repo/cricket/;publish=1</url>
-        </repository>
-    </distributionManagement>
 </project>

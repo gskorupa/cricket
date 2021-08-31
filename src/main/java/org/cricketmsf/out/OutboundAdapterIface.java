@@ -17,10 +17,6 @@ package org.cricketmsf.out;
 
 import java.util.Map;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public interface OutboundAdapterIface {
     public String getProperty(String name);
     public String setProperty(String name, String value);

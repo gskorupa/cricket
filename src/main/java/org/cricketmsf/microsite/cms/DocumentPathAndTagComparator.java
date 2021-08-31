@@ -20,10 +20,6 @@ import java.util.HashSet;
 import java.util.Set;
 import org.cricketmsf.out.db.ComparatorIface;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class DocumentPathAndTagComparator implements ComparatorIface {
 
     @Override

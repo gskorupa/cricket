@@ -46,7 +46,7 @@ public interface AuthAdapterIface {
     /**
      * Removes permanent token from database
      * @param tokenID token identifier
-     * @throws AuthException
+     * @throws AuthException authorization exception
      */
     public void removePermanentToken(String tokenID) throws AuthException;
     

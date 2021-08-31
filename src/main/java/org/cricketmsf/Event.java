@@ -27,8 +27,6 @@ import org.cricketmsf.exception.EventException;
 
 /**
  * Event
- *
- * @author Grzegorz Skorupa
  */
 public class Event implements EventIface {
 

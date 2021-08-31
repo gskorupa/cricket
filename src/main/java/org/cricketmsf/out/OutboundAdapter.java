@@ -19,10 +19,6 @@ import org.cricketmsf.out.dispatcher.DispatcherIface;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class OutboundAdapter implements OutboundAdapterIface {
 
     protected HashMap<String, Object> statusMap = null;

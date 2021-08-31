@@ -22,10 +22,6 @@ import org.cricketmsf.in.http.HttpAdapter;
 import org.cricketmsf.in.http.HttpAdapterIface;
 import org.cricketmsf.in.http.Result;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class ConfirmationApi extends HttpAdapter implements HttpAdapterIface, Adapter {
     
     /**

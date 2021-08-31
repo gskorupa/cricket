@@ -25,10 +25,6 @@ import org.cricketmsf.in.http.StandardResult;
 import org.cricketmsf.microsite.out.user.UserAdapterIface;
 import org.cricketmsf.microsite.out.user.UserException;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class UserBusinessLogic {
 
     private static UserBusinessLogic self;

@@ -20,10 +20,6 @@ import java.util.Map;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 
-/**
- *
- * @author Grzegorz Skorupa <g.skorupa at gmail.com>
- */
 public class TxtFormatter {
 
     private static TxtFormatter instance = null;

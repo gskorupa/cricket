@@ -44,10 +44,6 @@ import org.cricketmsf.out.db.KeyValueDBException;
 import org.cricketmsf.out.db.SqlDBIface;
 import org.cricketmsf.services.Microsite;
 
-/**
- *
- * @author greg
- */
 public class H2RemoteCmsDB extends H2RemoteDB implements SqlDBIface, Adapter {
 
     @Override

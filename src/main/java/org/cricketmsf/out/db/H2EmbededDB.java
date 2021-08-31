@@ -468,7 +468,7 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     }
 
     /**
-     * @param autocommit the autocommit to set
+     * @param value true or false
      */
     public void setAutocommit(String value) {
         this.autocommit = Boolean.parseBoolean(value);
