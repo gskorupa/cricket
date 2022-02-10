@@ -30,13 +30,17 @@ import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
 import org.cricketmsf.out.OutboundAdapter;
+import org.cricketmsf.out.file.FileReaderAdapter;
 import org.h2.jdbcx.JdbcConnectionPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author greg
  */
 public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter {
+    private static final Logger logger = LoggerFactory.getLogger(H2EmbededDB.class);
 
     protected JdbcConnectionPool cp;
     protected String location;
@@ -51,6 +55,15 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     protected boolean autocommit;
     protected boolean ignorecase = false;
     protected boolean skipUpdate = false;
+    protected Integer cacheSize = null;
+    
+    protected void setCacheSize(String size){
+        try{
+            cacheSize=Integer.parseInt(size);
+        }catch(NumberFormatException|NullPointerException ex){
+            logger.warn(ex.getMessage());
+        }
+    }
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -77,6 +90,8 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         setIgnorecase("true".equalsIgnoreCase(properties.getOrDefault("ignorecase", "false")));
         Kernel.getLogger().print("\tignorecase=" + ignorecase);
         setSkipUpdate("true".equalsIgnoreCase(properties.getOrDefault("skip-update", "false")));
+        Kernel.getLogger().print("\tskip-update=" + skipUpdate);
+        setCacheSize(properties.getOrDefault("cache-size", ""));
         Kernel.getLogger().print("\tskip-update=" + skipUpdate);
         try {
             start();
@@ -139,6 +154,9 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
         String connectString = "jdbc:h2:" + getLocation();
         if (true) {
             connectString = connectString.concat(";IGNORECASE=TRUE");
+        }
+        if(null!=cacheSize){
+            connectString=connectString.concat(";CACHE_SIZE="+cacheSize);
         }
         if (isEncrypted()) {
             cp = JdbcConnectionPool.create(connectString + ";CIPHER=AES", getUserName(), getFilePassword() + " " + getPassword());

@@ -735,7 +735,7 @@ public abstract class Kernel {
                 public void run() {
                     try {
                         shutdown();
-                        Thread.sleep(100);
+                        Thread.sleep(10);
                     } catch (InterruptedException e) {
                         System.out.println(e.getMessage());
                         //e.printStackTrace();

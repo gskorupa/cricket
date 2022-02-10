@@ -313,7 +313,7 @@ public class SiteAdministrationModule {
                 newUser.setEmail("");
                 newUser.setType(User.USER);
                 newUser.setRole("user");
-                newUser.setPassword(HashMaker.md5Java("cricket"));
+                newUser.setPassword(HashMaker.md5Java("signomix"));
                 newUser.setConfirmString("1234567890");
                 newUser.setConfirmed(true);
                 userDB.put("users", newUser.getUid(), newUser);

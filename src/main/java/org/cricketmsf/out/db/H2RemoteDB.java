@@ -61,6 +61,8 @@ public class H2RemoteDB extends H2EmbededDB implements SqlDBIface, Adapter {
         Kernel.getLogger().print("\tignorecase=" + ignorecase);
         setSkipUpdate("true".equalsIgnoreCase(properties.getOrDefault("skip-update", "false")));
         Kernel.getLogger().print("\tskip-update=" + skipUpdate);
+        setCacheSize(properties.getOrDefault("cache-size", ""));
+        Kernel.getLogger().print("\tskip-update=" + skipUpdate);
         try {
             start();
         } catch (KeyValueDBException ex) {
@@ -82,6 +84,10 @@ public class H2RemoteDB extends H2EmbededDB implements SqlDBIface, Adapter {
      * @param host the host to set
      */
     public void setHost(String host) {
-        this.host = host;
+        if (host.startsWith("$")) {
+            this.host = System.getenv(host.substring(1));
+        }else{
+            this.host = host;
+        }
     }
 }

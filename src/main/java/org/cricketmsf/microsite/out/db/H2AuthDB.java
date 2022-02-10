@@ -29,6 +29,7 @@ import java.util.Map;
 import org.cricketmsf.Adapter;
 import org.cricketmsf.Event;
 import org.cricketmsf.Kernel;
+import org.cricketmsf.microsite.out.auth.AuthDbIface;
 import org.cricketmsf.microsite.out.auth.Token;
 import org.cricketmsf.out.archiver.ZipArchiver;
 import org.cricketmsf.out.db.ComparatorIface;
@@ -40,7 +41,7 @@ import org.cricketmsf.out.db.SqlDBIface;
  *
  * @author greg
  */
-public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
+public class H2AuthDB extends H2EmbededDB implements AuthDbIface, SqlDBIface, Adapter {
 
     @Override
     public void loadProperties(HashMap<String, String> properties, String adapterName) {
@@ -49,18 +50,13 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     @Override
     public void addTable(String tableName, int maxSize, boolean persistent) throws KeyValueDBException {
+        if (!(tableName.equalsIgnoreCase("tokens") || tableName.equalsIgnoreCase("ptokens"))) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
         String query = "create table ?? (token varchar primary key, uid varchar, issuer varchar, payload varchar, tstamp timestamp, eoflife timestamp)";
-        query=query.replaceFirst("\\?\\?", tableName);
-        try (Connection conn = getConnection()) {
-            PreparedStatement pst;
-            if (tableName.equals("tokens")||tableName.equals("ptokens")) {
-                pst = conn.prepareStatement(query);
-            } else {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-            }
-            boolean updated = pst.executeUpdate()>0;
-            pst.close();
-            conn.close();
+        query = query.replaceFirst("\\?\\?", tableName);
+        try ( Connection conn = getConnection();PreparedStatement pst= conn.prepareStatement(query);) {
+            boolean updated = pst.executeUpdate() > 0;
             if (!updated) {
                 throw new KeyValueDBException(KeyValueDBException.CANNOT_CREATE, "unable to create table " + tableName);
             }
@@ -71,12 +67,20 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     @Override
     public void put(String tableName, String key, Object o) throws KeyValueDBException {
-        if (tableName.equals("tokens")||tableName.equals("ptokens")) {
+        if (tableName.equalsIgnoreCase("tokens")) {
             try {
-                putToken(tableName, key, (Token) o);
+                putToken((Token) o);
             } catch (ClassCastException e) {
                 throw new KeyValueDBException(KeyValueDBException.UNKNOWN, "object is not a User");
-            } catch (Exception e){
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (tableName.equalsIgnoreCase("ptokens")) {
+            try {
+                putPermanentToken((Token) o);
+            } catch (ClassCastException e) {
+                throw new KeyValueDBException(KeyValueDBException.UNKNOWN, "object is not a User");
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
@@ -84,8 +88,49 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
         }
     }
 
+    @Override
+    public void putToken(Token token) throws KeyValueDBException {
+        String query = "merge into tokens (token, uid, issuer, payload, tstamp, eoflife) key (token) values (?,?,?,?,?,?)";
+        try ( Connection conn = getConnection();  PreparedStatement pstmt = conn.prepareStatement(query);) {
+            //conn.setAutoCommit(true);
+            pstmt.setString(1, token.getToken());
+            pstmt.setString(2, token.getUid());
+            pstmt.setString(3, token.getIssuer());
+            pstmt.setString(4, token.getPayload());
+            pstmt.setTimestamp(5, new Timestamp(token.getTimestamp()));
+            pstmt.setTimestamp(6, new Timestamp(token.getEofLife()));
+            int updated = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new KeyValueDBException(KeyValueDBException.UNKNOWN, e.getMessage());
+        }
+    }
+
+    @Override
+    public void putPermanentToken(Token token) throws KeyValueDBException {
+        String query = "merge into ptokens (token, uid, issuer, payload, tstamp, eoflife) key (token) values (?,?,?,?,?,?)";
+        try ( Connection conn = getConnection();  PreparedStatement pstmt = conn.prepareStatement(query);) {
+            //conn.setAutoCommit(true);
+            pstmt.setString(1, token.getToken());
+            pstmt.setString(2, token.getUid());
+            pstmt.setString(3, token.getIssuer());
+            pstmt.setString(4, token.getPayload());
+            pstmt.setTimestamp(5, new Timestamp(token.getTimestamp()));
+            pstmt.setTimestamp(6, new Timestamp(token.getEofLife()));
+            int updated = pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new KeyValueDBException(KeyValueDBException.UNKNOWN, e.getMessage());
+        }
+    }
+
+    /*
     private void putToken(String tableName, String key, Token token) throws KeyValueDBException {
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             conn.setAutoCommit(true);
             String query = "merge into ?? (token, uid, issuer, payload, tstamp, eoflife) key (token) values (?,?,?,?,?,?)";
             query = query.replaceFirst("\\?\\?", tableName);
@@ -102,11 +147,11 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
         } catch (SQLException e) {
             //e.printStackTrace();
             throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
+    */
     @Override
     public Object get(String tableName, String key) throws KeyValueDBException {
         return get(tableName, key, null);
@@ -114,8 +159,10 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     @Override
     public Object get(String tableName, String key, Object o) throws KeyValueDBException {
-        if (tableName.equals("tokens")||tableName.equals("ptokens")) {
-            return getToken(tableName, key, o);
+        if (tableName.equalsIgnoreCase("tokens")) {
+            return getToken(key);
+        } else if (tableName.equalsIgnoreCase("ptokens")) {
+            return getPermanentToken(key);
         } else {
             return null;
         }
@@ -126,12 +173,11 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
         HashMap<String, Token> map = new HashMap<>();
         //TODO: do not use - replace with dedicated searches
         Token token = null;
-        try (Connection conn = getConnection()) {
             String query = "select token, uid, issuer, payload, tstamp, eoflife from " + tableName;
-            PreparedStatement pstmt = conn.prepareStatement(query);
+        try ( Connection conn = getConnection();  PreparedStatement pstmt = conn.prepareStatement(query);) {
             ResultSet rs = pstmt.executeQuery();
-            while(rs.next()) {
-                token = buildToken(rs, tableName.equals("ptokens"));
+            while (rs.next()) {
+                token = buildToken(rs, tableName.equalsIgnoreCase("ptokens"));
                 map.put(token.getToken(), token);
             }
         } catch (SQLException e) {
@@ -143,13 +189,12 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
     @Override
     public boolean containsKey(String tableName, String key) throws KeyValueDBException {
         String query;
-        if (tableName.equals("tokens")||tableName.equals("ptokens")) {
+        if (tableName.equalsIgnoreCase("tokens") || tableName.equalsIgnoreCase("ptokens")) {
             query = "select token from " + tableName + " where token=?";
         } else {
             throw new KeyValueDBException(KeyValueDBException.TABLE_NOT_EXISTS, "unsupported table " + tableName);
         }
-        try (Connection conn = getConnection()) {
-            PreparedStatement pstmt = conn.prepareStatement(query);
+        try ( Connection conn = getConnection();  PreparedStatement pstmt = conn.prepareStatement(query);) {
             pstmt.setString(1, key);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -165,22 +210,18 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
     public boolean remove(String tableName, String key) throws KeyValueDBException {
         String query = "delete from ?? where token = ?".replaceFirst("\\?\\?", tableName);
         boolean updated = false;
-        if (tableName.equals("tokens")||tableName.equals("ptokens")) {
+        if (tableName.equalsIgnoreCase("tokens") || tableName.equalsIgnoreCase("ptokens")) {
             //query
         } else {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
-        try (Connection conn = getConnection()) {
-            PreparedStatement pst;
-            pst = conn.prepareStatement(query);
+        try ( Connection conn = getConnection();  PreparedStatement pst = conn.prepareStatement(query);) {
             pst.setString(1, key);
-            updated = pst.executeUpdate()>0;
-            pst.close();
-            conn.close();
+            updated = pst.executeUpdate() > 0;
         } catch (SQLException e) {
             //e.printStackTrace();
             throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
-        } catch (Exception e){
+        } catch (Exception e) {
             //e.printStackTrace();
         }
         return updated;
@@ -230,15 +271,48 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
         return t;
     }
 
+    @Override
+    public Token getToken(String key) throws KeyValueDBException {
+        Token token = null;
+        String query = "select token, uid, issuer, payload, tstamp, eoflife from tokens where token=?";
+        try ( Connection conn = getConnection();  PreparedStatement pstmt = conn.prepareStatement(query);) {
+            pstmt.setString(1, key);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                token = buildToken(rs, false);
+            }
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+        return token;
+    }
+
+    @Override
+    public Token getPermanentToken(String key) throws KeyValueDBException {
+        Token token = null;
+        String query = "select token, uid, issuer, payload, tstamp, eoflife from ptokens where token=?";
+        try ( Connection conn = getConnection();  PreparedStatement pstmt = conn.prepareStatement(query);) {
+            pstmt.setString(1, key);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                token = buildToken(rs, false);
+            }
+        } catch (SQLException e) {
+            throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
+        }
+        return token;
+    }
+
+    /*
     private Object getToken(String tableName, String key, Object defaultResult) throws KeyValueDBException {
         Token token = null;
-        try (Connection conn = getConnection()) {
+        try ( Connection conn = getConnection()) {
             String query = "select token, uid, issuer, payload, tstamp, eoflife from " + tableName + " where token=?";
             PreparedStatement pstmt = conn.prepareStatement(query);
             pstmt.setString(1, key);
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                token = buildToken(rs, tableName.equals("ptokens"));
+                token = buildToken(rs, tableName.equalsIgnoreCase("ptokens"));
             }
         } catch (SQLException e) {
             throw new KeyValueDBException(e.getErrorCode(), e.getMessage());
@@ -249,7 +323,7 @@ public class H2AuthDB extends H2EmbededDB implements SqlDBIface, Adapter {
             return token;
         }
     }
-    
+*/
     @Override
     public File getBackupFile() {
         try {

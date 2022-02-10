@@ -123,7 +123,7 @@ public abstract class HttpPortedAdapter
     }
 
     @Override
-    public synchronized void handle(HttpExchange exchange) throws IOException {
+    public void handle(HttpExchange exchange) throws IOException {
         long rootEventId = Kernel.getEventId();
         try {
             Stopwatch timer = null;
