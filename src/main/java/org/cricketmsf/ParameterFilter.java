@@ -374,8 +374,12 @@ public class ParameterFilter extends Filter {
             return list;
         }
         String pairs[] = query.split("[&]");
+        int idx;
         for (String pair : pairs) {
-            String param[] = pair.split("[=]");
+            String param[] = {"",""}; //pair.split("[=]");
+            idx=pair.indexOf("=");
+            param[0]=pair.substring(0, idx);
+            param[1]=pair.substring(idx+1);
             String key;
             String value;
             if (param.length > 0) {
