@@ -147,6 +147,9 @@ public class ParameterFilter extends Filter {
                 StringBuilder sb = new StringBuilder();
                 while (sc.hasNext()) {
                     sb.append(sc.nextLine());
+                    if(sc.hasNext()){
+                        sb.append("\r\n");
+                    }
                 }
                 //parameters.put("data", sb.toString()); //TODO: remove "data" parameter
                 parameters.put("&&&data", sb.toString());
