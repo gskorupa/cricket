@@ -45,10 +45,6 @@ import org.cricketmsf.services.Microsite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- * @author greg
- */
 public class H2CmsDB extends H2EmbededDB implements SqlDBIface, Adapter {
 
     private static final Logger logger = LoggerFactory.getLogger(H2CmsDB.class);
