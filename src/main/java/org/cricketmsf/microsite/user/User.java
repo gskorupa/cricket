@@ -25,7 +25,7 @@ import java.util.List;
 public class User {
 
     public static final int USER = 0; // default type, normal user
-    public static final int OWNER = 1; // 
+    public static final int OWNER = 1; //
     public static final int APPLICATION = 2; // application
     public static final int DEMO = 3;
     public static final int FREE = 4;
@@ -50,12 +50,14 @@ public class User {
     private int authStatus;
     private long createdAt;
     private long number;
+    private long organization;
 
     public User() {
         confirmed = false;
         unregisterRequested = false;
         authStatus = IS_REGISTERING;
         createdAt = System.currentTimeMillis();
+        organization = 0L;
     }
 
     /**
@@ -155,12 +157,12 @@ public class User {
     public String getRole() {
         return role;
     }
-    
-    public List getRoles(){
+
+    public List getRoles() {
         return Arrays.asList(getRole().split(","));
     }
-    
-    public boolean hasRole(String role){
+
+    public boolean hasRole(String role) {
         return getRoles().contains(role);
     }
 
@@ -183,7 +185,7 @@ public class User {
      */
     public void setPassword(String password) {
         this.password = password;
-        //this.password = password;
+        // this.password = password;
     }
 
     public boolean checkPassword(String passToCheck) {
@@ -202,6 +204,14 @@ public class User {
      */
     public void setStatus(int status) {
         this.authStatus = status;
+    }
+
+    public long getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(long organization) {
+        this.organization = organization;
     }
 
     /**

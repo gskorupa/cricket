@@ -52,6 +52,7 @@ public class Exchange extends HttpExchange {
                 ArrayList<String> al2 = new ArrayList<>();
                 al2.add(issuer.getUid());
                 headers.put("X-issuer-id", al2);
+                headers.put("X-issuer-organization", Arrays.asList((""+issuer.getOrganization()).split(";")));
                 roles.add("guest");
             } else {
                 try {
@@ -61,6 +62,7 @@ public class Exchange extends HttpExchange {
                 }
             }
             headers.put("X-user-role", roles);
+            headers.put("X-user-organization", Arrays.asList((""+user.getOrganization()).split(";")));
         }
     }
 
