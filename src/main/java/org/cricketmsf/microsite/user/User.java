@@ -36,6 +36,7 @@ public class User {
     public static final int IS_ACTIVE = 1;
     public static final int IS_UNREGISTERING = 2;
     public static final int IS_LOCKED = 3;
+    public static final int IS_CREATED = 10;
 
     private int type = USER;
     private String uid;

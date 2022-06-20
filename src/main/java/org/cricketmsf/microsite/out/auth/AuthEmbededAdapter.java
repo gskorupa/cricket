@@ -79,7 +79,7 @@ public class AuthEmbededAdapter extends OutboundAdapter implements Adapter, Auth
     public Token login(String userID, String password) throws AuthException {
         try {
             User user = getUserAdapter().get(userID);
-            if (user != null && user.checkPassword(password) && user.getStatus() == User.IS_ACTIVE) {
+            if (user != null && user.checkPassword(password) && (user.getStatus() == User.IS_ACTIVE || user.getStatus()==User.IS_CREATED)) {
                 return createToken(userID);
             } else {
                 return null;
