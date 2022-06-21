@@ -48,11 +48,13 @@ public class Exchange extends HttpExchange {
             al.add(user.getUid());
             headers.put("X-user-id", al);
             List<String> roles = new ArrayList();
+            List<String> types = new ArrayList<>();
+            types.add("" + user.getType());
             if (issuer != null) {
                 ArrayList<String> al2 = new ArrayList<>();
                 al2.add(issuer.getUid());
                 headers.put("X-issuer-id", al2);
-                headers.put("X-issuer-organization", Arrays.asList((""+issuer.getOrganization()).split(";")));
+                headers.put("X-issuer-organization", Arrays.asList(("" + issuer.getOrganization()).split(";")));
                 roles.add("guest");
             } else {
                 try {
@@ -62,7 +64,8 @@ public class Exchange extends HttpExchange {
                 }
             }
             headers.put("X-user-role", roles);
-            headers.put("X-user-organization", Arrays.asList((""+user.getOrganization()).split(";")));
+            headers.put("X-user-type", types);
+            headers.put("X-user-organization", Arrays.asList(("" + user.getOrganization()).split(";")));
         }
     }
 
@@ -94,9 +97,9 @@ public class Exchange extends HttpExchange {
     @Override
     public void close() {
         httpExchange.close();
-        //httpExchange = null;
-        headers=null;
-        attributes=null;
+        // httpExchange = null;
+        headers = null;
+        attributes = null;
     }
 
     @Override
@@ -136,13 +139,13 @@ public class Exchange extends HttpExchange {
 
     @Override
     public Object getAttribute(String string) {
-        //return httpExchange.getAttribute(string);
+        // return httpExchange.getAttribute(string);
         return attributes.get(string);
     }
 
     @Override
     public void setAttribute(String string, Object o) {
-        //httpExchange.setAttribute(string, o);
+        // httpExchange.setAttribute(string, o);
         attributes.put(string, o);
     }
 
