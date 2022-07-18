@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cricketmsf</groupId>
     <artifactId>cricket</artifactId>
-    <version>1.6.2</version>
+    <version>1.6.4</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Microservices framework for Java</description>
     <url>https://cricketmsf.org</url>

@@ -58,7 +58,7 @@ public class SecurityFilter extends Filter {
             String tmpPath;
             String tmpMethod;
             for (String r1 : r) {
-                if(r1.isEmpty()){
+                if (r1.isEmpty()) {
                     continue;
                 }
                 String[] r2 = r1.split("\\@");
@@ -196,12 +196,16 @@ public class SecurityFilter extends Filter {
                         }
                         result.user = getUser(inParamsToken, true);
                         result.issuer = getIssuer(inParamsToken);
-                        //Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "FOUND IP TOKEN " + inParamsToken + " FOR " + result.user.getUid() + " by " + result.issuer.getUid()));
+                        result.tokenID = inParamsToken;
+                        // Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(),
+                        // "FOUND IP TOKEN " + inParamsToken + " FOR " + result.user.getUid() + " by " +
+                        // result.issuer.getUid()));
                     }
                 }
             } catch (NullPointerException e) {
             } catch (AuthException e) {
-                Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "AUTH PROBLEM " + e.getCode() + " " + e.getMessage())); // eg. expired token
+                Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(),
+                        "AUTH PROBLEM " + e.getCode() + " " + e.getMessage())); // eg. expired token
             }
             result.code = 200;
             result.message = "";
@@ -245,20 +249,21 @@ public class SecurityFilter extends Filter {
         } catch (Exception e) {
             result.code = 403;
             result.message = e.getMessage() + " - request blocked by security filter\r\n";
-            //Kernel.getInstance().dispatchEvent(Event.logFine(this.getClass().getSimpleName(), "not authorized " + path));
             return result;
         }
 
         result.user = user;
         result.issuer = issuer;
         result.code = 200;
+        result.tokenID = tokenID;
 
         return result;
     }
 
     private User getUser(String token, boolean permanentToken) throws AuthException {
-        //ask dedicated adapter
-        AuthAdapterIface authAdapter = (AuthAdapterIface) Kernel.getInstance().getAdaptersMap().getOrDefault("authAdapter", null);
+        // ask dedicated adapter
+        AuthAdapterIface authAdapter = (AuthAdapterIface) Kernel.getInstance().getAdaptersMap()
+                .getOrDefault("authAdapter", null);
         if (authAdapter != null) {
             return authAdapter.getUser(token, permanentToken);
         } else {
@@ -267,8 +272,9 @@ public class SecurityFilter extends Filter {
     }
 
     private User getIssuer(String token) throws AuthException {
-        //ask dedicated adapter
-        AuthAdapterIface authAdapter = (AuthAdapterIface) Kernel.getInstance().getAdaptersMap().getOrDefault("authAdapter", null);
+        // ask dedicated adapter
+        AuthAdapterIface authAdapter = (AuthAdapterIface) Kernel.getInstance().getAdaptersMap()
+                .getOrDefault("authAdapter", null);
         if (authAdapter != null) {
             return authAdapter.getIssuer(token);
         } else {

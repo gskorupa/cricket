@@ -26,4 +26,5 @@ public class SecurityFilterResult {
     public String message = "";
     public User user;
     public User issuer;
+    public String tokenID=null;
 }

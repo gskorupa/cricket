@@ -52,6 +52,7 @@ public class User {
     private long createdAt;
     private long number;
     private long organization;
+    private String sessionToken;
 
     public User() {
         confirmed = false;
@@ -59,6 +60,7 @@ public class User {
         authStatus = IS_REGISTERING;
         createdAt = System.currentTimeMillis();
         organization = 0L;
+        sessionToken = null;
     }
 
     /**
@@ -271,4 +273,11 @@ public class User {
         this.surname = surname;
     }
 
+    public void setSessionToken(String sessionToken) {
+        this.sessionToken = sessionToken;
+    }
+
+    public String getSessionToken() {
+        return sessionToken;
+    }
 }

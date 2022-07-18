@@ -49,7 +49,9 @@ public class Exchange extends HttpExchange {
             headers.put("X-user-id", al);
             List<String> roles = new ArrayList();
             List<String> types = new ArrayList<>();
+            List<String> tokens = new ArrayList<>();
             types.add("" + user.getType());
+            tokens.add(user.getSessionToken());
             if (issuer != null) {
                 ArrayList<String> al2 = new ArrayList<>();
                 al2.add(issuer.getUid());
@@ -66,6 +68,7 @@ public class Exchange extends HttpExchange {
             headers.put("X-user-role", roles);
             headers.put("X-user-type", types);
             headers.put("X-user-organization", Arrays.asList(("" + user.getOrganization()).split(";")));
+            headers.put("X-user-token",tokens);
         }
     }
 
