@@ -47,11 +47,14 @@ public class Exchange extends HttpExchange {
             ArrayList<String> al = new ArrayList<>();
             al.add(user.getUid());
             headers.put("X-user-id", al);
-            List<String> roles = new ArrayList();
+            List<String> roles = new ArrayList<>();
             List<String> types = new ArrayList<>();
             List<String> tokens = new ArrayList<>();
             types.add("" + user.getType());
-            tokens.add(user.getSessionToken());
+            String sessionToken=user.getSessionToken();
+            if(null!=sessionToken){
+                tokens.add(sessionToken);
+            }
             if (issuer != null) {
                 ArrayList<String> al2 = new ArrayList<>();
                 al2.add(issuer.getUid());
