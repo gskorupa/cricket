@@ -47,8 +47,8 @@ public class H2EmbededDB extends OutboundAdapter implements SqlDBIface, Adapter 
     private String path;
     private String fileName;
     private String testQuery;
-    private String userName;
-    private String password;
+    protected String userName;
+    protected String password;
     private String systemVersion;
     private boolean encrypted;
     private String filePassword;

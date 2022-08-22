@@ -90,4 +90,40 @@ public class H2RemoteDB extends H2EmbededDB implements SqlDBIface, Adapter {
             this.host = host;
         }
     }
+
+     /**
+     * @return the userName
+     */
+    public String getUserName() {
+        return userName;
+    }
+
+    /**
+     * @param userName the userName to set
+     */
+    public void setUserName(String userName) {
+        if (userName.startsWith("$")) {
+            this.userName = System.getenv(userName.substring(1));
+        }else{
+            this.userName = userName;
+        }
+    }
+
+    /**
+     * @return the password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * @param password the password to set
+     */
+    public void setPassword(String password) {
+        if (password.startsWith("$")) {
+            this.password = System.getenv(password.substring(1));
+        }else{
+            this.password = password;
+        }
+    }
 }
